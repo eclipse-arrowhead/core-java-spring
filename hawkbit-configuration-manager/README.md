@@ -1,4 +1,4 @@
-# Configuration Manager
+# HawkBit Configuration Manager
 ## Introduction
 We identified [Eclipse hawkBit](https://www.eclipse.org/hawkbit/) to be a very good fit for an integration with the Arrowhead framework.
 The wrapper code in this directory enables to integrate Eclipse hawkBit with the Arrowhead mandatory core systems and function as a configuration manager.
