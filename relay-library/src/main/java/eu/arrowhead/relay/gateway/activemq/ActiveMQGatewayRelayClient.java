@@ -288,7 +288,6 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 		logger.debug("handleCloseControlMessage started...");
 		
 		Assert.notNull(msg, "Message is null.");
-		Assert.notNull(session, "Session is null.");
 		
 		if (msg instanceof TextMessage) {
 			final TextMessage tmsg = (TextMessage) msg;
@@ -300,7 +299,9 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 					throw new AuthException("Unauthorized close command: " + tmsg.getText());
 				}
 
-				closeConnection(session);
+				if (session != null) {
+					closeConnection(session);					
+				}
 			} else {
 				throw new JMSException("Invalid destination class: " + tmsg.getJMSDestination().getClass().getSimpleName());
 			}
