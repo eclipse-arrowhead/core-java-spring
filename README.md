@@ -120,7 +120,7 @@ Please be aware, that versions starting from 4.1.3 are __NOT__ backwards compati
           * [Client](#choreographer_endpoints_client)
             * [Management](#choreographer_endpoints_mgmt)
     13. [Plant Description Engine](#plant-description-engine)
-    14. [Configuration Manager](#configuration_manager)
+    14. [HawkBit Configuration Manager](#hawkbit_configuration_manager)
 		
 <a name="quickstart" />
 
@@ -8408,8 +8408,8 @@ The PDE consumes the following services:
   
 
 
-# Configuration Manager
-<a name="configuration_manager" />
+# HawkBit Configuration Manager
+<a name="hawkbit_configuration_manager" />
 
-The configuration manager is responsible for managing software rollouts and configuration updates to the actual hardware devices.
-This implementation is based on [Eclipse HawkBit](https://www.eclipse.org/hawkbit/) and is explained in more detail [here](./configuration-manager/README.md).
+The HawkBit configuration manager is responsible for managing software rollouts and configuration updates to the actual hardware devices.
+This implementation is based on [Eclipse HawkBit](https://www.eclipse.org/hawkbit/) and is explained in more detail [here](./hawkbit-configuration-manager/README.md).
