@@ -281,7 +281,7 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 		
 		relayTestDBService.finishMeasurements(requesterCloud, relay);
 		
-		//Unsubscribe from the response (RESP-...) queue
+		//Unsubscribe from the request (REQ-...) queue
 		try {
 			relayClient.unsubscribeFromQueues(receiver, controlReceiver);
 		} catch (final JMSException ex) {
@@ -289,7 +289,7 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 			logger.debug("Stacktrace:", ex);
 		}
 		
-		//Destroy destinations (REQ-... queues) which this receiver side QoS writes on and the connection after		
+		//Destroy destinations (RESP-... queues) which this receiver side QoS writes on and the connection after		
 		boolean relayConnectionClosed = relayClient.isConnectionClosed(relaySession);
 		boolean requestQueuesClosed = false;
 		
