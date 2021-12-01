@@ -320,7 +320,6 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 				}
 			}			
 		}
-		relayClient.closeConnection(relaySession);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
