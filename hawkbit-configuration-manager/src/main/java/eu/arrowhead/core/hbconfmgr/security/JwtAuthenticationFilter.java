@@ -19,6 +19,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -48,14 +49,17 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    /**
+    private static final String RSA = "RSA";
+
+	/**
      * The value of the header "Authorization" must start with "Bearer " according to
      * <a href=https://tools.ietf.org/html/rfc6750>RFC6750</a>.
      */
     private static final String AUTHENTICATION_SCHEME_BEARER = "Bearer ";
 
     private final ArrowheadService arrowheadService;
-    private final PrivateKey configurationSystemPrivateKey;
+    private final PrivateKey hawkbitConfigurationSystemPrivateKey;
+    private PublicKey authorizationSystemPublicKey;
 
     /**
      * A filter for validation JWT.
@@ -63,44 +67,45 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * @param arrowheadService required to receive the public key for JWT validation
      * @param configurationSystemPrivateKey the private key for JWT encryption
      */
-    public JwtAuthenticationFilter(ArrowheadService arrowheadService, PrivateKey configurationSystemPrivateKey) {
+    public JwtAuthenticationFilter(final ArrowheadService arrowheadService, final PrivateKey configurationSystemPrivateKey) {
         this.arrowheadService = arrowheadService;
-        this.configurationSystemPrivateKey = configurationSystemPrivateKey;
+        this.hawkbitConfigurationSystemPrivateKey = configurationSystemPrivateKey;
+    }
+    
+    @PostConstruct
+    public void init() {
+    	try {
+    		final String authorizationSystemPublicKeyString = arrowheadService.receiveAuthorizationSystemPublicKey();
+    		this.authorizationSystemPublicKey = loadPublicKeyFromString(authorizationSystemPublicKeyString);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            log.error("Public key from JWT provider couldn't be loaded", e);
+        }
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
-        String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+    protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws IOException, ServletException {
+        final String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        if (authorizationHeader == null || !authorizationHeader.startsWith(AUTHENTICATION_SCHEME_BEARER)) {
+        if (this.authorizationSystemPublicKey == null || authorizationHeader == null || !authorizationHeader.startsWith(AUTHENTICATION_SCHEME_BEARER)) {
             log.debug("No bearer token found");
             chain.doFilter(request, response);
             return;
         }
-        String clientJwtString = authorizationHeader.replaceFirst(AUTHENTICATION_SCHEME_BEARER, "");
+        final String clientJwtString = authorizationHeader.replaceFirst(AUTHENTICATION_SCHEME_BEARER, "");
 
         try {
 
-            SecurityContext context = SecurityContextHolder.createEmptyContext();
-            String authorizationSystemPublicKeyString = arrowheadService.receiveAuthorizationSystemPublicKey();
-            PublicKey authorizationSystemPublicKey = loadPublicKeyFromString(authorizationSystemPublicKeyString);
-
-            JwtClaims clientJwtClaims = validateJwtAndRetrieveClaims(clientJwtString, authorizationSystemPublicKey,
-                    this.configurationSystemPrivateKey);
-            JwtAuthenticationToken authentication = new JwtAuthenticationToken(clientJwtClaims, true);
+            final SecurityContext context = SecurityContextHolder.createEmptyContext();
+            final JwtClaims clientJwtClaims = validateJwtAndRetrieveClaims(clientJwtString, this.authorizationSystemPublicKey, this.hawkbitConfigurationSystemPrivateKey);
+            final JwtAuthenticationToken authentication = new JwtAuthenticationToken(clientJwtClaims, true);
             context.setAuthentication(authentication);
 
             SecurityContextHolder.setContext(context);
-
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            log.error("Public key from JWT provider couldn't be loaded", e);
-        } catch (InvalidJwtException  e) {
-            log.info("The provided JWT is not valid", e);
+        } catch (final InvalidJwtException  e) {
+            log.error("The provided JWT is not valid", e);
         } finally {
             chain.doFilter(request, response);
         }
-
     }
 
     /**
@@ -112,9 +117,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * @return on success: all claims of the JWT
      * @throws InvalidJwtException if the JWT is not valid
      */
-    private JwtClaims validateJwtAndRetrieveClaims(String clientJwt, PublicKey publicKey, PrivateKey privateKey)
-            throws InvalidJwtException {
-        JwtConsumer jwtConsumer = new JwtConsumerBuilder()
+    private JwtClaims validateJwtAndRetrieveClaims(final String clientJwt, final PublicKey publicKey, final PrivateKey privateKey) throws InvalidJwtException {
+        final JwtConsumer jwtConsumer = new JwtConsumerBuilder()
                 .registerValidator(new CidValidator())
                 .setRequireJwtId()
                 .setRequireNotBefore()
@@ -132,14 +136,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         AlgorithmConstraints.ConstraintType.WHITELIST,
                         ContentEncryptionAlgorithmIdentifiers.AES_256_CBC_HMAC_SHA_512))
                 .build();
+        
         return jwtConsumer.processToClaims(clientJwt);
     }
 
-    private PublicKey loadPublicKeyFromString(String publicKeyString) throws NoSuchAlgorithmException,
-            InvalidKeySpecException {
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        byte[] keyBytes = Base64.getDecoder().decode(publicKeyString);
+    private PublicKey loadPublicKeyFromString(final String publicKeyString) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        final KeyFactory kf = KeyFactory.getInstance(RSA);
+        final byte[] keyBytes = Base64.getDecoder().decode(publicKeyString);
         return kf.generatePublic(new X509EncodedKeySpec(keyBytes));
     }
-
 }

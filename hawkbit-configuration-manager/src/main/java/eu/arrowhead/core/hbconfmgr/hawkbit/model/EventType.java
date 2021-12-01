@@ -20,7 +20,7 @@ public enum EventType {
 
     private final String stringValue;
 
-    EventType(String stringValue) {
+    private EventType(final String stringValue) {
         this.stringValue = stringValue;
     }
 
@@ -28,5 +28,4 @@ public enum EventType {
     public String toString() {
         return this.stringValue;
     }
-
 }

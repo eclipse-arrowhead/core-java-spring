@@ -21,14 +21,13 @@ import org.jose4j.jwt.consumer.JwtContext;
 public class CidValidator implements ErrorCodeValidator {
 
     @Override
-    public Error validate(JwtContext jwtContext) {
-        JwtClaims jwtClaims = jwtContext.getJwtClaims();
-        Object clientIdentifier = jwtClaims.getClaimValue(JwtAuthenticationToken.CLIENT_IDENTIFIER_CLAIM);
+    public Error validate(final JwtContext jwtContext) {
+        final JwtClaims jwtClaims = jwtContext.getJwtClaims();
+        final Object clientIdentifier = jwtClaims.getClaimValue(JwtAuthenticationToken.CLIENT_IDENTIFIER_CLAIM);
         if (clientIdentifier == null ) {
             return new Error(ErrorCodes.MISCELLANEOUS, "No client identifier (cid) claim is present.");
         }
 
         return null;
     }
-
 }

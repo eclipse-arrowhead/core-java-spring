@@ -27,5 +27,4 @@ public class UpdateActionRequestDTO {
     private Long softwareModuleId;
     private String actionStatus;
     private List<String> message;
-
 }

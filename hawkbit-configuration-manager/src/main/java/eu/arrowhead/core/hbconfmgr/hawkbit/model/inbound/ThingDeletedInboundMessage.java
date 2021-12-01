@@ -21,7 +21,6 @@ import lombok.Data;
 public class ThingDeletedInboundMessage implements InboundMessage {
     private Headers headers;
 
-
     @Builder
     @Data
     public static class Headers {

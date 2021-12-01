@@ -15,12 +15,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.socket.WebSocketSession;
+
+import eu.arrowhead.core.hbconfmgr.Constants;
 
 @Configuration
 public class WebSocketConfig {
     @Bean
+    @DependsOn(Constants.GUARD_BEAN)
     @Scope("singleton")
     public Map<String, WebSocketSession> getWebSocketSessionMap() {
         return new ConcurrentHashMap<>();

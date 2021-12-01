@@ -22,6 +22,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class CancelDownloadInboundMessage implements InboundMessage {
+	
     private Headers headers;
     private Body body;
     

@@ -16,6 +16,6 @@ RUN adduser --system --group spring
 USER spring:spring
 
 # Include the fat-jar and run it in the docker container
-ARG JAR_FILE=target/arrowhead-configuration-manager-4.3.0.jar
+ARG JAR_FILE=target/arrowhead-hawkbit-configuration-manager-4.4.0.jar
 COPY --chown=spring:spring ${JAR_FILE} /home/spring/app.jar
 ENTRYPOINT ["java","-jar","/home/spring/app.jar"]

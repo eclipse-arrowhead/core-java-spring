@@ -22,22 +22,22 @@ import lombok.Data;
 public class SystemProperties {
 
     /**
-     * This is the address of the configuration system itself, e.g. "https://192.168.1.1" or
-     * "https://subdomain.domain.tld".
+     * This is the address of the configuration system itself, e.g. "192.168.1.1" or
+     * "subdomain.domain.tld".
      * <p>It must be not blank (validated with {@link NotBlank @NotBlank}).
      */
     @NotBlank
     private String address;
 
     /**
-     * This is the port of the configuration system itself, e.g. 8445.
+     * This is the port of the configuration system itself, e.g. 8447.
      * <p>It must be not null (validated with {@link NotNull @NotNull}).
      */
     @NotNull
     private Integer port;
 
     /**
-     * This is the name of the configuration system itself, e.g. "conf-system".
+     * This is the name of the configuration system itself, e.g. "HAWKBITCONFIGURATIONSYSTEM".
      * <p>In the context of Arrowhead the system (provider) name and certificate common name must match.
      * <p>It must be not blank (validated with {@link NotBlank @NotBlank}).
      */
@@ -45,7 +45,7 @@ public class SystemProperties {
     private String name;
 
     /**
-     * This is the protocol of the provided service from the configuration system itself, e.g. "HTTPS-SECURE-JSON".
+     * This is the protocol of the provided service from the configuration system itself, e.g. "HTTP-SECURE-JSON".
      * <p>It must be not blank (validated with {@link NotBlank @NotBlank}).
      */
     @NotBlank
@@ -71,5 +71,4 @@ public class SystemProperties {
      */
     @NotNull
     private Integer providedServiceVersion;
-
 }

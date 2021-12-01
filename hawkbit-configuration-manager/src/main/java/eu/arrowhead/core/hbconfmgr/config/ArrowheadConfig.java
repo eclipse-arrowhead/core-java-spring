@@ -11,17 +11,24 @@
 package eu.arrowhead.core.hbconfmgr.config;
 
 import java.io.IOException;
+import java.util.ServiceConfigurationError;
 
+import javax.annotation.PostConstruct;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManagerFactory;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import eu.arrowhead.core.hbconfmgr.Constants;
 import eu.arrowhead.core.hbconfmgr.arrowhead.ArrowheadAuthorizationSystemClient;
 import eu.arrowhead.core.hbconfmgr.arrowhead.ArrowheadServiceRegistryClient;
+import eu.arrowhead.core.hbconfmgr.arrowhead.model.request.ServiceQueryFormDTO;
+import eu.arrowhead.core.hbconfmgr.arrowhead.model.response.ServiceQueryResultDTO;
+import eu.arrowhead.core.hbconfmgr.arrowhead.model.response.ServiceRegistryResponseDTO;
 import io.netty.handler.ssl.ClientAuth;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -33,44 +40,83 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @Configuration
 public class ArrowheadConfig {
-
-    @Value("${arrowheadAuthorizationSystem.protocol}")
-    private String authorizationSystemProtocol;
-
-    @Value("${arrowheadAuthorizationSystem.address}")
+	
+	private static final int RETRIES = 3;
+	private static final int PERIOD = 5000;
+	
+    @Value(Constants.SSL_ENABLED)
+    private boolean sslEnabled;
+    
+    @Autowired
+    private KeyManagerFactory keyManagerFactory;
+    
+    @Autowired
+    private TrustManagerFactory trustManagerFactory;
+    
+    private final String authorizationSystemProtocol = Constants.HTTPS + "://";
     private String authorizationSystemAddress;
-
-    @Value("${arrowheadAuthorizationSystem.port}")
-    private Integer authorizationSystemPort;
-
-    @Value("${arrowheadServiceRegistry.protocol}")
-    private String serviceRegistryProtocol;
-
-    @Value("${arrowheadServiceRegistry.address}")
+    private int authorizationSystemPort;
+    
+    private final String serviceRegistryProtocol = Constants.HTTPS + "://";;
+    
+    @Value(Constants.SERVICE_REGISTRY_ADDRESS)
     private String serviceRegistryAddress;
 
-    @Value("${arrowheadServiceRegistry.port}")
-    private String serviceRegistryPort;
+    @Value(Constants.SERVICE_REGISTRY_PORT)
+    private int serviceRegistryPort;
+
+    private SslContext sslContext;
+    
+    @PostConstruct
+    public void init() throws IOException, InterruptedException {
+    	final ArrowheadServiceRegistryClient srClient = arrowheadServiceRegistryClient();
+		for (int i = 0; i <= RETRIES; ++i) {
+			try {
+				final ServiceQueryFormDTO form = ServiceQueryFormDTO.builder()
+																	.serviceDefinitionRequirement(Constants.CORE_SERVICE_AUTH_PUBLIC_KEY)
+																	.build();
+				
+				final ServiceQueryResultDTO response = srClient.queryService(form);
+				
+				if (!response.getServiceQueryData().isEmpty()) {
+					final ServiceRegistryResponseDTO authResponse = response.getServiceQueryData().get(0);
+					this.authorizationSystemAddress = authResponse.getProvider().getAddress();
+					this.authorizationSystemPort = authResponse.getProvider().getPort();
+					return;
+				} else if (i >= RETRIES) {
+					log.error("Authorization system is not accessible.");
+					throw new ServiceConfigurationError("HawkBit Configuration Manager cannot work without the Authorization core system.");
+				} else {
+					log.info("Authorization system is unavailable at the moment, retrying in {} seconds...", PERIOD / 1000);
+					Thread.sleep(PERIOD);
+				}
+			} catch (final Exception e) {
+				if (i >= RETRIES) {
+					log.error("Service Registry is not accessible.", e);
+					throw e;
+				} else {
+					log.info("Service Registry is unavailable at the moment, retrying in {} seconds...", PERIOD / 1000);
+					Thread.sleep(PERIOD);
+				}
+			}
+		}
+    }
 
     @Bean
-    public ArrowheadAuthorizationSystemClient arrowheadAuthorizationSystemClient(
-            KeyManagerFactory keyManagerFactory,
-            TrustManagerFactory trustManagerFactory) throws IOException {
-        String baseUrl = this.authorizationSystemProtocol + this.authorizationSystemAddress + ":" + this.authorizationSystemPort;
+    public ArrowheadAuthorizationSystemClient arrowheadAuthorizationSystemClient() throws IOException {
+        final String baseUrl = this.authorizationSystemProtocol + this.authorizationSystemAddress + ":" + this.authorizationSystemPort;
         log.debug("Registering bean for ArrowheadAuthorizationSystemClient with baseUrl {} and custom ssl context", baseUrl);
 
-        SslContext sslContext = loadSslContext(keyManagerFactory, trustManagerFactory);
+        final SslContext sslContext = loadSslContext();
         return new ArrowheadAuthorizationSystemClient(baseUrl, sslContext);
     }
 
     @Bean
-    public ArrowheadServiceRegistryClient arrowheadServiceRegistryClient(
-            KeyManagerFactory keyManagerFactory,
-            TrustManagerFactory trustManagerFactory) throws IOException {
-        String baseUrl = this.serviceRegistryProtocol + this.serviceRegistryAddress + ":" + this.serviceRegistryPort;
+    public ArrowheadServiceRegistryClient arrowheadServiceRegistryClient() throws IOException {
+        final String baseUrl = this.serviceRegistryProtocol + this.serviceRegistryAddress + ":" + this.serviceRegistryPort;
         log.debug("Registering bean for ArrowheadServiceRegistryClient with baseUrl {} and custom ssl context", baseUrl);
 
-        SslContext sslContext = loadSslContext(keyManagerFactory, trustManagerFactory);
+        final SslContext sslContext = loadSslContext();
         return new ArrowheadServiceRegistryClient(baseUrl, sslContext);
     }
 
@@ -83,14 +129,16 @@ public class ArrowheadConfig {
      * @return a ssl context for a {@link reactor.netty.http.client.HttpClient HttpClient}
      * @throws SSLException if the ssl context could not be loaded correctly
      */
-    private SslContext loadSslContext(KeyManagerFactory keyManagerFactory, TrustManagerFactory trustManagerFactory)
-            throws IOException {
-        return SslContextBuilder
-                .forClient()
-                .clientAuth(ClientAuth.REQUIRE)
-                .keyManager(keyManagerFactory)
-                .trustManager(trustManagerFactory)
-                .build();
+    private SslContext loadSslContext() throws IOException {
+    	if (sslContext == null) {
+    		sslContext = SslContextBuilder
+    							.forClient()
+    							.clientAuth(ClientAuth.REQUIRE)
+    							.keyManager(keyManagerFactory)
+    							.trustManager(trustManagerFactory)
+    							.build();
+    	}
+    	
+        return sslContext; 
     }
-
 }

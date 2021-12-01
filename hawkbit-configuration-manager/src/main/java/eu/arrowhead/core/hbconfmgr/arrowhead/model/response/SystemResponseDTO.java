@@ -10,6 +10,8 @@
 
 package eu.arrowhead.core.hbconfmgr.arrowhead.model.response;
 
+import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,12 +23,12 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SystemResponseDTO {
 
-    private Long id;
+    private long id;
     private String systemName;
     private String address;
     private Integer port;
     private String authenticationInfo;
+    private Map<String,String> metadata;
     private String createdAt;
     private String updatedAt;
-
 }

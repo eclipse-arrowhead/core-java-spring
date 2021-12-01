@@ -74,12 +74,18 @@ public class UpdateActionStatusOutboundMessage {
         private String tenant;
 
         public Map<String, Object> asMap() throws ConstraintViolationException {
-            HashMap<String, Object> headers = new HashMap<>();
-            if (this.type != null) headers.put(MessageHeader.TYPE.toString(), this.type);
-            if (this.topic != null) headers.put(MessageHeader.TOPIC.toString(), this.topic);
-            if (this.tenant != null) headers.put(MessageHeader.TENANT.toString(), this.tenant);
+            final HashMap<String, Object> headers = new HashMap<>();
+            if (this.type != null) {
+            	headers.put(MessageHeader.TYPE.toString(), this.type);
+            }
+            if (this.topic != null) {
+            	headers.put(MessageHeader.TOPIC.toString(), this.topic);
+            }
+            if (this.tenant != null) {
+            	headers.put(MessageHeader.TENANT.toString(), this.tenant);
+            }
+            
             return headers;
         }
     }
-
 }

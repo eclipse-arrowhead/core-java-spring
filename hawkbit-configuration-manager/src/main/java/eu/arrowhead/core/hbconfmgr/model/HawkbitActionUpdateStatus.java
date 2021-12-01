@@ -31,5 +31,4 @@ public class HawkbitActionUpdateStatus {
     private Long softwareModuleId;
     private ActionStatus actionStatus;
     private List<String> message;
-
 }

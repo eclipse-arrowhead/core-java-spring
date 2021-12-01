@@ -61,7 +61,7 @@ public class HawkbitDmfConsumer extends DefaultConsumer {
      * @param channel used for communication with hawkBit
      */
     @Autowired
-    public HawkbitDmfConsumer(Channel channel, WebSocketService wsService) {
+    public HawkbitDmfConsumer(final Channel channel, final WebSocketService wsService) {
         super(channel);
         this.channel = channel;
         this.objectMapper = new ObjectMapper();
@@ -90,10 +90,8 @@ public class HawkbitDmfConsumer extends DefaultConsumer {
      */
     private void initializeQueueOnHawkbit() throws IOException {
         this.channel.queueDeclare(HawkbitDmfConstants.RECEIVING_QUEUE, true, false, false, null);
-        this.channel.exchangeDeclare(HawkbitDmfConstants.RECEIVING_EXCHANGE, BuiltinExchangeType.DIRECT, true, false,
-                null);
-        this.channel.queueBind(HawkbitDmfConstants.RECEIVING_QUEUE, HawkbitDmfConstants.RECEIVING_EXCHANGE,
-                HawkbitDmfConstants.RECEIVING_ROUTING_KEY);
+        this.channel.exchangeDeclare(HawkbitDmfConstants.RECEIVING_EXCHANGE, BuiltinExchangeType.DIRECT, true, false, null);
+        this.channel.queueBind(HawkbitDmfConstants.RECEIVING_QUEUE, HawkbitDmfConstants.RECEIVING_EXCHANGE, HawkbitDmfConstants.RECEIVING_ROUTING_KEY);
     }
 
     /**
@@ -111,14 +109,13 @@ public class HawkbitDmfConsumer extends DefaultConsumer {
      * with an implementation to handle hawkBit DMF API messages.
      */
     @Override
-    public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
+    public void handleDelivery(final String consumerTag, final Envelope envelope, final AMQP.BasicProperties properties, final byte[] body) {
         try {
-            log.info("Received message");
+            log.debug("Received message");
             handleMessage(envelope, properties, body);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.atError().withThrowable(e).log(
-                    "Handling of message delivery failed. Message has the " + "following properties: {} and body: {}",
-                    properties, body);
+                    "Handling of message delivery failed. Message has the following properties: {} and body: {}", properties, body);
         }
     }
 
@@ -131,14 +128,13 @@ public class HawkbitDmfConsumer extends DefaultConsumer {
      * @throws IOException if a problem occurs with the message itself, like a
      *                     missing header or a malformed body
      */
-    private void handleMessage(Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-        Map<String, Object> headers = properties.getHeaders();
+    private void handleMessage(final Envelope envelope, final AMQP.BasicProperties properties, final byte[] body) throws IOException {
+        final Map<String, Object> headers = properties.getHeaders();
         if (headers == null || !headers.containsKey(MessageHeader.TYPE.toString())) {
             throw new IOException("Message doesn't contain header " + MessageHeader.TYPE.toString());
         }
 
-        MessageTypeInbound messageType = MessageTypeInbound
-                .valueOf(String.valueOf(headers.get(MessageHeader.TYPE.toString())));
+        final MessageTypeInbound messageType = MessageTypeInbound.valueOf(String.valueOf(headers.get(MessageHeader.TYPE.toString())));
         switch (messageType) {
             case EVENT:
                 handleEvent(envelope, properties, body);
@@ -162,13 +158,13 @@ public class HawkbitDmfConsumer extends DefaultConsumer {
      * @throws IOException if a problem occurs with the message itself, like a
      *                     missing header or a malformed body
      */
-    private void handleEvent(Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-        Map<String, Object> headers = properties.getHeaders();
+    private void handleEvent(final Envelope envelope, final AMQP.BasicProperties properties, final byte[] body) throws IOException {
+        final Map<String, Object> headers = properties.getHeaders();
         if (headers == null || !headers.containsKey(MessageHeader.TOPIC.toString())) {
             throw new IOException("Message doesn't contain header " + MessageHeader.TOPIC.toString());
         }
 
-        EventType eventType = EventType.valueOf(String.valueOf(headers.get(MessageHeader.TOPIC.toString())));
+        final EventType eventType = EventType.valueOf(String.valueOf(headers.get(MessageHeader.TOPIC.toString())));
         switch (eventType) {
             case DOWNLOAD:
             case DOWNLOAD_AND_INSTALL:
@@ -195,8 +191,9 @@ public class HawkbitDmfConsumer extends DefaultConsumer {
      *                     {@link DownloadRequestInboundMessage.Body} with a json
      *                     object mapper
      */
-    private void handleEventWithTopicDownload(Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
-        Map<String, Object> headers = properties.getHeaders();
+    private void handleEventWithTopicDownload(final Envelope envelope, final AMQP.BasicProperties properties, final byte[] body) {
+        final Map<String, Object> headers = properties.getHeaders();
+        
         DownloadRequestInboundMessage message;
         try {
             message = DownloadRequestInboundMessage.builder()
@@ -211,13 +208,13 @@ public class HawkbitDmfConsumer extends DefaultConsumer {
             wsService.sendDownloadEventMessage(message);
 
             acknowledgeMessageDelivery(envelope.getDeliveryTag());
-        } catch (JsonParseException e) {
+        } catch (final JsonParseException e) {
             log.error("Could not parse inbound message: {}", e);
-        } catch (JsonMappingException e) {
+        } catch (final JsonMappingException e) {
             log.error("Could not map inbound message: {}", e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.error("Could not send message to device {}, as it was not reachable.", headers.get(MessageHeader.THING_ID.toString()).toString());
-        } catch (DeviceNotConnectedException e) {
+        } catch (final DeviceNotConnectedException e) {
             log.error("Device {} is currently not connected to HawkBit.", headers.get(MessageHeader.THING_ID.toString()).toString());
         }
     }
@@ -230,10 +227,10 @@ public class HawkbitDmfConsumer extends DefaultConsumer {
      * @param properties AMQP properties
      * @param body the actual amqp message payload
      */
-    private void handleEventWithTopicCancelDownload(Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
-        Map<String, Object> headers = properties.getHeaders();
+    private void handleEventWithTopicCancelDownload(final Envelope envelope, final AMQP.BasicProperties properties, final byte[] body) {
+        final Map<String, Object> headers = properties.getHeaders();
+ 
         CancelDownloadInboundMessage message;
-
         try {
             message = CancelDownloadInboundMessage.builder()
                 .headers(
@@ -249,13 +246,13 @@ public class HawkbitDmfConsumer extends DefaultConsumer {
             this.wsService.sendCancelDownloadMessage(message);
 
             acknowledgeMessageDelivery(envelope.getDeliveryTag());
-        } catch (JsonParseException e) {
+        } catch (final JsonParseException e) {
             log.error("Could not parse inbound message: {}", e);
-        } catch (JsonMappingException e) {
+        } catch (final JsonMappingException e) {
             log.error("Could not map inbound message: {}", e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.error("Could not send message to device {}, as it was not reachable.", headers.get(MessageHeader.THING_ID.toString()).toString());
-        } catch (DeviceNotConnectedException e) {
+        } catch (final DeviceNotConnectedException e) {
             log.error("Device {} is currently not connected to HawkBit.", headers.get(MessageHeader.THING_ID.toString()).toString());
         }
     }
@@ -268,11 +265,11 @@ public class HawkbitDmfConsumer extends DefaultConsumer {
      * @param properties AMQP properties
      * @param body the actual AMQP message payload
      */
-    private void handleThingDeleted(Envelope envelope, AMQP.BasicProperties properties) {
-        Map<String, Object> headers = properties.getHeaders();
+    private void handleThingDeleted(final Envelope envelope, final AMQP.BasicProperties properties) {
+        final Map<String, Object> headers = properties.getHeaders();
         
         ThingDeletedInboundMessage message;
-            try {
+        try {
             message = ThingDeletedInboundMessage.builder()
                 .headers(
                     ThingDeletedInboundMessage.Headers.builder()
@@ -284,13 +281,13 @@ public class HawkbitDmfConsumer extends DefaultConsumer {
             this.wsService.sendThingDeletedMessage(message);
 
             acknowledgeMessageDelivery(envelope.getDeliveryTag());
-        } catch (JsonParseException e) {
+        } catch (final JsonParseException e) {
             log.error("Could not parse inbound message: {}", e);
-        } catch (JsonMappingException e) {
+        } catch (final JsonMappingException e) {
             log.error("Could not map inbound message: {}", e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.error("Could not send message to device {}, as it was not reachable.", headers.get(MessageHeader.THING_ID.toString()).toString());
-        } catch (DeviceNotConnectedException e) {
+        } catch (final DeviceNotConnectedException e) {
             log.error("Device {} is currently not connected to HawkBit.", headers.get(MessageHeader.THING_ID.toString()).toString());
         }
     }
@@ -304,9 +301,9 @@ public class HawkbitDmfConsumer extends DefaultConsumer {
      * @param messageType message type of the AMQP message
      * @throws IOException if there is a connection problem with hawkBit
      */
-    private void handleUnsupportedMessageType(Envelope envelope, MessageTypeInbound messageType) throws IOException {
-        log.error("Message with unsupported message type {} was received, responding with negative " +
-                "acknowledgement and no requeuing", messageType.toString());
+    private void handleUnsupportedMessageType(final Envelope envelope, final MessageTypeInbound messageType) throws IOException {
+        log.error("Message with unsupported message type {} was received, responding with negative acknowledgement and no requeuing", messageType.toString());
+        
         super.getChannel().basicNack(envelope.getDeliveryTag(), false, false);
     }
 
@@ -318,18 +315,17 @@ public class HawkbitDmfConsumer extends DefaultConsumer {
      * @param eventType event type of the AMQP message
      * @throws IOException if there is a connection problem with hawkBit
      */
-    private void handleEventWithUnsupportedTopic(Envelope envelope, EventType eventType) throws IOException {
-        log.error("Message with message type {} and unsupported event topic {} was received, responding " +
-                "with negative acknowledgement and no requeuing", MessageTypeInbound.EVENT.toString(), eventType.toString());
+    private void handleEventWithUnsupportedTopic(final Envelope envelope, final EventType eventType) throws IOException {
+        log.error("Message with message type {} and unsupported event topic {} was received, responding with negative acknowledgement and no requeuing", MessageTypeInbound.EVENT.toString(), eventType.toString());
+        
         super.getChannel().basicNack(envelope.getDeliveryTag(), false, false);
     }
 
-    private void acknowledgeMessageDelivery(Long deliveryTag) {
+    private void acknowledgeMessageDelivery(final Long deliveryTag) {
         try {
             super.getChannel().basicAck(deliveryTag, false);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.error("Could not acknowledge message delivery to HawkBit.");
         }
     }
-
 }

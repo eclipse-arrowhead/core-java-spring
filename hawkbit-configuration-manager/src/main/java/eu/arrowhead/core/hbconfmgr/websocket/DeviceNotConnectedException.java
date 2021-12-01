@@ -24,7 +24,7 @@ public class DeviceNotConnectedException extends Exception {
     private static final long serialVersionUID = 7329483234L;
 
     public DeviceNotConnectedException() { super(); }
-    public DeviceNotConnectedException(String message) { super(message); }
-    public DeviceNotConnectedException(String message, Throwable cause) { super(message, cause); }
-    public DeviceNotConnectedException(Throwable cause) { super(cause); }
+    public DeviceNotConnectedException(final String message) { super(message); }
+    public DeviceNotConnectedException(final String message, final Throwable cause) { super(message, cause); }
+    public DeviceNotConnectedException(final Throwable cause) { super(cause); }
 }

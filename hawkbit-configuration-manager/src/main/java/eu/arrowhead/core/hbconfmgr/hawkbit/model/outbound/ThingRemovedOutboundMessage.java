@@ -38,10 +38,17 @@ public class ThingRemovedOutboundMessage {
         private String tenant;
 
         public Map<String, Object> asMap() {
-            HashMap<String, Object> headers = new HashMap<>();
-            if (this.type != null) headers.put(MessageHeader.TYPE.toString(), this.type);
-            if (this.thingId != null) headers.put(MessageHeader.THING_ID.toString(), this.thingId);
-            if (this.tenant != null) headers.put(MessageHeader.TENANT.toString(), this.tenant);
+            final HashMap<String, Object> headers = new HashMap<>();
+            if (this.type != null) {
+            	headers.put(MessageHeader.TYPE.toString(), this.type);
+            }
+            if (this.thingId != null) {
+            	headers.put(MessageHeader.THING_ID.toString(), this.thingId);
+            }
+            if (this.tenant != null) {
+            	headers.put(MessageHeader.TENANT.toString(), this.tenant);
+            }
+            
             return headers;
         }
     }

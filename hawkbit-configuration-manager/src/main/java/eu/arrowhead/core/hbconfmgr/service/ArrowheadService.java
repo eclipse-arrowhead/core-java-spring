@@ -24,9 +24,7 @@ public class ArrowheadService {
     private final ArrowheadAuthorizationSystemClient authorizationSystemClient;
 
     @Autowired
-    public ArrowheadService(
-            ArrowheadAuthorizationSystemClient arrowheadAuthorizationSystemClient
-    ) {
+    public ArrowheadService(final ArrowheadAuthorizationSystemClient arrowheadAuthorizationSystemClient) {
         this.authorizationSystemClient = arrowheadAuthorizationSystemClient;
     }
 
@@ -41,5 +39,4 @@ public class ArrowheadService {
     public String receiveAuthorizationSystemPublicKey() {
         return this.authorizationSystemClient.getPublicKey();
     }
-
 }

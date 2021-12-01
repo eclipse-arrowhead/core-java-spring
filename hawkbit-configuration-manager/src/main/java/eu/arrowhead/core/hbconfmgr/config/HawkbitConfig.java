@@ -13,15 +13,18 @@ package eu.arrowhead.core.hbconfmgr.config;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Scope;
+
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+
+import eu.arrowhead.core.hbconfmgr.Constants;
 
 /**
  * This class provides the clients for interaction with hawkBit via beans managed by the Spring container.
@@ -29,38 +32,42 @@ import org.springframework.context.annotation.Scope;
 @Configuration
 public class HawkbitConfig {
 
-    @Value("${hawkbit.host}")
+    @Value(Constants.HAWKBIT_HOST)
     private String host;
 
-    @Value("${hawkbit.port}")
-    private Integer port;
+    @Value(Constants.HAWKBIT_PORT)
+    private int port;
 
-    @Value("${hawkbit.username}")
+    @Value(Constants.HAWKBIT_USER)
     private String username;
 
-    @Value("${hawkbit.password}")
+    @Value(Constants.HAWKBIT_PASSWORD)
     private String password;
 
     @Bean
+    @DependsOn(Constants.GUARD_BEAN)
     public ConnectionFactory connectionFactory() {
-        ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setUsername(this.username);
-        connectionFactory.setPassword(this.password);
+        final ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost(this.host);
         connectionFactory.setPort(this.port);
+        connectionFactory.setUsername(this.username);
+        connectionFactory.setPassword(this.password);
         connectionFactory.setAutomaticRecoveryEnabled(true);
+        
         return connectionFactory;
     }
 
     @Bean
-    public Connection getConnection(ConnectionFactory connectionFactory) throws IOException, TimeoutException {
+    @DependsOn(Constants.GUARD_BEAN)
+    public Connection getConnection(final ConnectionFactory connectionFactory) throws IOException, TimeoutException {
         return connectionFactory.newConnection();
     }
 
     @Bean
+    @DependsOn(Constants.GUARD_BEAN)
     @Scope("prototype")
     @Autowired
-    public Channel createChannel(Connection connection) throws IOException {
+    public Channel createChannel(final Connection connection) throws IOException {
         return connection.createChannel();
     }
 }

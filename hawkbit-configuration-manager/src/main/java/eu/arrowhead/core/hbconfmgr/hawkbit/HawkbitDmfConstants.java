@@ -36,5 +36,4 @@ public class HawkbitDmfConstants {
      * The routing key for all messages sent from hawkBit to the configuration system. It can be modified.
      */
     public static final String RECEIVING_ROUTING_KEY = "";
-
 }

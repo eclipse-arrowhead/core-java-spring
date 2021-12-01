@@ -27,7 +27,7 @@ public enum ActionStatus {
 
     private final String stringValue;
 
-    ActionStatus(String stringValue) {
+    private ActionStatus(final String stringValue) {
         this.stringValue = stringValue;
     }
 
@@ -35,5 +35,4 @@ public enum ActionStatus {
     public String toString() {
         return this.stringValue;
     }
-
 }

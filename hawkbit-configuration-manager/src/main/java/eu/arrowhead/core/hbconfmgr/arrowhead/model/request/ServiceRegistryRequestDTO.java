@@ -54,9 +54,7 @@ public class ServiceRegistryRequestDTO {
     @NotEmpty
     private List<String> interfaces;
 
-
     public enum SecurityLevel {
-        UNSECURE, TOKEN, CERTIFICATE
+        NOT_SECURE, CERTIFICATE, TOKEN
     }
-
 }

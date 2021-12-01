@@ -21,9 +21,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ServiceDefinitionResponseDTO {
 
-    private Long id;
+    private long id;
     private String serviceDefinition;
     private String createdAt;
     private String updatedAt;
-
 }

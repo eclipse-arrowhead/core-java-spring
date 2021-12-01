@@ -15,6 +15,8 @@ import java.security.PublicKey;
 import java.util.Base64;
 import java.util.Collections;
 
+import javax.annotation.PreDestroy;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -37,13 +39,14 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @Component
 public class Initialization implements ApplicationRunner {
+
     private final HawkbitDmfConsumer hawkbitDmfConsumer;
     private final ArrowheadServiceRegistryClient arrowheadServiceRegistryClient;
     private final SystemProperties systemProperties;
     private final PublicKey publicKey;
 
     @Autowired
-    public Initialization(ArrowheadServiceRegistryClient arrowheadServiceRegistryClient, HawkbitDmfConsumer hawkbitDmfConsumer, SystemProperties systemProperties, PublicKey publicKey) {
+    public Initialization(final ArrowheadServiceRegistryClient arrowheadServiceRegistryClient, final HawkbitDmfConsumer hawkbitDmfConsumer, final SystemProperties systemProperties, final PublicKey publicKey) {
         this.arrowheadServiceRegistryClient = arrowheadServiceRegistryClient;
         this.hawkbitDmfConsumer = hawkbitDmfConsumer;
         this.systemProperties = systemProperties;
@@ -51,15 +54,25 @@ public class Initialization implements ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void run(final ApplicationArguments args) throws Exception {
         registerOwnSystemInArrowhead();
         connectToHawkBit();
     }
+    
+	@PreDestroy
+    public void destroy() {
+		try {
+			this.arrowheadServiceRegistryClient.unregisterService(this.systemProperties.getProvidedServiceDefinition(), this.systemProperties.getName(), this.systemProperties.getAddress(), this.systemProperties.getPort(),
+															      this.systemProperties.getProvidedServiceUri());
+		} catch (final WebClientResponseException e) {
+	        log.error("Error during unregistration of own system in Arrowhead", e);
+		}
+    }
 
     private void registerOwnSystemInArrowhead() {
-        String publicKeyString = Base64.getEncoder().encodeToString(this.publicKey.getEncoded());
+        final String publicKeyString = Base64.getEncoder().encodeToString(this.publicKey.getEncoded());
 
-        ServiceRegistryRequestDTO requestDTO = ServiceRegistryRequestDTO.builder()
+        final ServiceRegistryRequestDTO requestDTO = ServiceRegistryRequestDTO.builder()
                 .serviceDefinition(this.systemProperties.getProvidedServiceDefinition())
                 .providerSystem(SystemRequestDTO.builder()
                         .systemName(this.systemProperties.getName())
@@ -76,13 +89,16 @@ public class Initialization implements ApplicationRunner {
         try {
             log.info("Registering own system in Arrowhead");
             this.arrowheadServiceRegistryClient.registerService(requestDTO);
-        } catch (WebClientResponseException e) {
+        } catch (final WebClientResponseException e) {
             if (HttpStatus.BAD_REQUEST.equals(e.getStatusCode())) {
-                log.warn("Own system is already registered in Arrowhead");
+            	log.warn("Own system is already registered in Arrowhead");
+            	this.arrowheadServiceRegistryClient.unregisterService(this.systemProperties.getProvidedServiceDefinition(), this.systemProperties.getName(), this.systemProperties.getAddress(), this.systemProperties.getPort(),
+            														  this.systemProperties.getProvidedServiceUri());
+            	this.arrowheadServiceRegistryClient.registerService(requestDTO);
             } else {
                 log.error("Error during registration of own system in Arrowhead", e);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error during registration of own system in Arrowhead", e);
         }
     }
@@ -90,9 +106,8 @@ public class Initialization implements ApplicationRunner {
     private void connectToHawkBit() {
         try {
             this.hawkbitDmfConsumer.subscribeToDownloadEvents();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.error("Could not subscribe to Hawkbit DMF API");
         }
     }
-
 }

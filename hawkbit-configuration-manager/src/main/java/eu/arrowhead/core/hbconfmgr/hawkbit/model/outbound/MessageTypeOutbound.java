@@ -21,7 +21,7 @@ public enum MessageTypeOutbound {
 
     private final String stringValue;
 
-    MessageTypeOutbound(String stringValue) {
+    private MessageTypeOutbound(final String stringValue) {
         this.stringValue = stringValue;
     }
 
@@ -29,5 +29,4 @@ public enum MessageTypeOutbound {
     public String toString() {
         return this.stringValue;
     }
-
 }

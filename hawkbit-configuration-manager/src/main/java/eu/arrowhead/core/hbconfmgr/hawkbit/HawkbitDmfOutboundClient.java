@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 
+import eu.arrowhead.core.hbconfmgr.Constants;
 import eu.arrowhead.core.hbconfmgr.hawkbit.model.outbound.ThingCreatedOutboundMessage;
 import eu.arrowhead.core.hbconfmgr.hawkbit.model.outbound.ThingRemovedOutboundMessage;
 import eu.arrowhead.core.hbconfmgr.hawkbit.model.outbound.UpdateActionStatusOutboundMessage;
@@ -52,7 +53,7 @@ public class HawkbitDmfOutboundClient {
      * @param channel used for communication with hawkBit
      */
     @Autowired
-    public HawkbitDmfOutboundClient(Channel channel) {
+    public HawkbitDmfOutboundClient(final Channel channel) {
         this.channel = channel;
         this.objectMapper = new ObjectMapper();
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
@@ -67,22 +68,23 @@ public class HawkbitDmfOutboundClient {
      * @throws ConstraintViolationException if message is not valid
      * @throws IOException                  if there is a connection problem with hawkBit
      */
-    public void createThing(ThingCreatedOutboundMessage message) throws ConstraintViolationException, IOException {
+    public void createThing(final ThingCreatedOutboundMessage message) throws ConstraintViolationException, IOException {
         log.debug("Validating ThingCreatedOutboundMessage");
-        Set<ConstraintViolation<ThingCreatedOutboundMessage>> violations = validator.validate(message);
+        
+        final Set<ConstraintViolation<ThingCreatedOutboundMessage>> violations = validator.validate(message);
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
 
-        byte[] byteBody = this.objectMapper.writeValueAsBytes(message.getBody());
-        AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
-                .contentType("application/json")
+        final byte[] byteBody = this.objectMapper.writeValueAsBytes(message.getBody());
+        final AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
+                .contentType(Constants.APPLICATION_JSON)
                 .headers(message.getHeaders().asMap())
                 .replyTo(HawkbitDmfConstants.RECEIVING_EXCHANGE)
                 .build();
+        
         log.debug("Sending ThingCreatedOutboundMessage to exchange {}", HawkbitDmfConstants.SENDING_EXCHANGE);
-        this.channel.basicPublish(HawkbitDmfConstants.SENDING_EXCHANGE, HawkbitDmfConstants.SENDING_ROUTING_KEY,
-                properties, byteBody);
+        this.channel.basicPublish(HawkbitDmfConstants.SENDING_EXCHANGE, HawkbitDmfConstants.SENDING_ROUTING_KEY, properties, byteBody);
     }
 
     /**
@@ -94,21 +96,22 @@ public class HawkbitDmfOutboundClient {
      * @throws ConstraintViolationException if message is not valid
      * @throws IOException                  if there is a connection problem with hawkBit
      */
-    public void updateActionStatus(UpdateActionStatusOutboundMessage message) throws IOException {
+    public void updateActionStatus(final UpdateActionStatusOutboundMessage message) throws IOException {
         log.debug("Validating UpdateActionStatusOutboundMessage");
-        Set<ConstraintViolation<UpdateActionStatusOutboundMessage>> violations = validator.validate(message);
+        
+        final Set<ConstraintViolation<UpdateActionStatusOutboundMessage>> violations = validator.validate(message);
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
 
-        byte[] byteBody = this.objectMapper.writeValueAsBytes(message.getBody());
-        AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
-                .contentType("application/json")
+        final byte[] byteBody = this.objectMapper.writeValueAsBytes(message.getBody());
+        final AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
+                .contentType(Constants.APPLICATION_JSON)
                 .headers(message.getHeaders().asMap())
                 .build();
+        
         log.debug("Sending UpdateActionStatusOutboundMessage to exchange {}", HawkbitDmfConstants.SENDING_EXCHANGE);
-        this.channel.basicPublish(HawkbitDmfConstants.SENDING_EXCHANGE, HawkbitDmfConstants.SENDING_ROUTING_KEY,
-                properties, byteBody);
+        this.channel.basicPublish(HawkbitDmfConstants.SENDING_EXCHANGE, HawkbitDmfConstants.SENDING_ROUTING_KEY, properties, byteBody);
     }
 
     /**
@@ -118,20 +121,18 @@ public class HawkbitDmfOutboundClient {
      * @param message the actual message to be published
      * @throws IOException
      */
-    public void removeThing(ThingRemovedOutboundMessage message) throws IOException {
-        Set<ConstraintViolation<ThingRemovedOutboundMessage>> violations = validator.validate(message);
+    public void removeThing(final ThingRemovedOutboundMessage message) throws IOException {
+        final Set<ConstraintViolation<ThingRemovedOutboundMessage>> violations = validator.validate(message);
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
 
-        byte[] byteBody = "".getBytes();
-        AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
-                .contentType("application/json")
+        final byte[] byteBody = "".getBytes();
+        final AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
+                .contentType(Constants.APPLICATION_JSON)
                 .headers(message.getHeaders().asMap())
                 .build();
 
-        this.channel.basicPublish(HawkbitDmfConstants.SENDING_EXCHANGE, HawkbitDmfConstants.SENDING_ROUTING_KEY,
-                properties, byteBody);
+        this.channel.basicPublish(HawkbitDmfConstants.SENDING_EXCHANGE, HawkbitDmfConstants.SENDING_ROUTING_KEY, properties, byteBody);
     }
-
 }

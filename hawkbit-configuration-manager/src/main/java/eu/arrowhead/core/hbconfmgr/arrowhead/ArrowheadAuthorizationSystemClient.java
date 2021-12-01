@@ -14,6 +14,9 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.netty.handler.ssl.SslContext;
 import lombok.extern.log4j.Log4j2;
 import reactor.netty.http.client.HttpClient;
@@ -37,8 +40,9 @@ public class ArrowheadAuthorizationSystemClient {
      *
      * @param baseUrl specifies the base url where arrowhead is available
      */
-    public ArrowheadAuthorizationSystemClient(String baseUrl) {
+    public ArrowheadAuthorizationSystemClient(final String baseUrl) {
         log.debug("Initialize ArrowheadAuthorizationSystemClient with baseUrl {}", baseUrl);
+        
         this.webClient = WebClient.create(baseUrl);
         this.baseUrl = baseUrl;
     }
@@ -50,9 +54,10 @@ public class ArrowheadAuthorizationSystemClient {
      * @param baseUrl    specifies the base url where arrowhead is available
      * @param sslContext specifies the ssl context the web client should use
      */
-    public ArrowheadAuthorizationSystemClient(String baseUrl, SslContext sslContext) {
+    public ArrowheadAuthorizationSystemClient(final String baseUrl, final SslContext sslContext) {
         log.debug("Initialize ArrowheadAuthorizationSystemClient with baseUrl {} and customized sslContext", baseUrl);
-        HttpClient httpClient = HttpClient.create()
+        
+        final HttpClient httpClient = HttpClient.create()
                 .secure(sslContextSpec -> sslContextSpec.sslContext(sslContext));
         this.webClient = WebClient.builder()
                 .baseUrl(baseUrl)
@@ -65,7 +70,7 @@ public class ArrowheadAuthorizationSystemClient {
      * Returns the public key of the Authorization core service as a (Base64 encoded) text.
      * <p>This service is necessary for providers if they want to utilize the token based security.
      * A more detailed description of this REST endpoint can be found in Github under the
-     * <a href="https://github.com/arrowhead-f/core-java-spring#get-public-key">client endpoint description for
+     * <a href="https://github.com/eclipse-arrowhead/core-java-spring#get-public-key">client endpoint description for
      * getting the public key.</a>
      *
      * @return a string containing the (Base64 encoded) public key
@@ -73,13 +78,22 @@ public class ArrowheadAuthorizationSystemClient {
      */
     public String getPublicKey() throws WebClientResponseException {
         log.debug("Start HTTP GET request against {} on uri: {}", baseUrl, URI_PUBLIC_KEY);
-        return this.webClient
-                .get()
-                .uri(URI_PUBLIC_KEY)
-                .retrieve()
-                .bodyToMono(String.class)
-                .doOnNext(response -> log.debug("Finished HTTP GET request with response: {}", response))
-                .block();
-    }
+        
+        final String key = this.webClient
+                		 .get()
+                		 .uri(URI_PUBLIC_KEY)
+                		 .retrieve()
+                		 .bodyToMono(String.class)
+                		 .doOnNext(response -> log.debug("Finished HTTP GET request with response: {}", response))
+                		 .block();
 
+        try {
+        	final ObjectMapper mapper = new ObjectMapper();
+			return mapper.readValue(key, String.class);
+		} catch (final JsonProcessingException e) {
+			log.error("Invalid authorization public key", e);
+			
+			return null;
+		}
+    }
 }

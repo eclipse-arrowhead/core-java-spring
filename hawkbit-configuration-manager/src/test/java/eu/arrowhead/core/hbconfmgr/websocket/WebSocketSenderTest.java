@@ -25,11 +25,11 @@ import org.springframework.web.socket.WebSocketSession;
 import eu.arrowhead.core.hbconfmgr.hawkbit.model.inbound.MessageTypeInbound;
 import eu.arrowhead.core.hbconfmgr.hawkbit.model.inbound.ThingDeletedInboundMessage;
 import eu.arrowhead.core.hbconfmgr.websocket.DeviceNotConnectedException;
-import eu.arrowhead.core.hbconfmgr.websocket.WebsocketSender;
+import eu.arrowhead.core.hbconfmgr.websocket.WebSocketSender;
 import eu.arrowhead.core.hbconfmgr.websocket.model.DeviceMessage;
 
 public class WebSocketSenderTest {
-    WebsocketSender wsSender;
+    WebSocketSender wsSender;
 
     WebSocketSession wsSession;
 
@@ -40,7 +40,7 @@ public class WebSocketSenderTest {
         wsSession = mock(WebSocketSession.class);
         webSocketSessionMap.put("testIdX", wsSession);
 
-        wsSender = new WebsocketSender(webSocketSessionMap);
+        wsSender = new WebSocketSender(webSocketSessionMap);
     }
 
     @Test

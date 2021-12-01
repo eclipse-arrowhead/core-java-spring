@@ -16,9 +16,10 @@ import eu.arrowhead.core.hbconfmgr.model.HawkbitActionUpdateStatus;
 public class ActionUpdateStatusMapper {
 
     private ActionUpdateStatusMapper() {
+    	throw new UnsupportedOperationException();
     }
 
-    public static HawkbitActionUpdateStatus mapToActionUpdateStatus(UpdateActionRequestDTO input) throws IllegalArgumentException {
+    public static HawkbitActionUpdateStatus mapToActionUpdateStatus(final UpdateActionRequestDTO input) throws IllegalArgumentException {
         return HawkbitActionUpdateStatus.builder()
                 .actionId(input.getActionId())
                 .actionStatus(ActionStatus.valueOf(input.getActionStatus()))
@@ -26,5 +27,4 @@ public class ActionUpdateStatusMapper {
                 .softwareModuleId(input.getSoftwareModuleId())
                 .build();
     }
-
 }

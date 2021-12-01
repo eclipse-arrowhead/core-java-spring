@@ -17,6 +17,7 @@ import lombok.Data;
 @Builder
 @Data
 public class DeviceMessage {
-    private final String type;
+
+	private final String type;
     private InboundMessage message;
 }

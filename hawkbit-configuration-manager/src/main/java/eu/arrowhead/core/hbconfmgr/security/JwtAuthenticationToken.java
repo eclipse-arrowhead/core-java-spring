@@ -27,7 +27,7 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
      * @param jwtClaims the claims of the JWT itself
      * @param authenticated if the JWT is already validated and therefore authenticated
      */
-    public JwtAuthenticationToken(JwtClaims jwtClaims, boolean authenticated) {
+    public JwtAuthenticationToken(final JwtClaims jwtClaims, final boolean authenticated) {
         super(null);
         this.jwtClaims = jwtClaims;
         this.clientIdentifier = String.valueOf(jwtClaims.getClaimValue(CLIENT_IDENTIFIER_CLAIM));
@@ -52,5 +52,4 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
     public Object getCredentials() {
         return this.jwtClaims.toString();
     }
-
 }

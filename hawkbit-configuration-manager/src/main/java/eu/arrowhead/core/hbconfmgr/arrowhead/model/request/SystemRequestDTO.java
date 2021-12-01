@@ -10,6 +10,8 @@
 
 package eu.arrowhead.core.hbconfmgr.arrowhead.model.request;
 
+import java.util.Map;
+
 import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
@@ -34,5 +36,6 @@ public class SystemRequestDTO {
 
     @NotNull
     private String authenticationInfo;
-
+    
+    private Map<String,String> metadata;
 }

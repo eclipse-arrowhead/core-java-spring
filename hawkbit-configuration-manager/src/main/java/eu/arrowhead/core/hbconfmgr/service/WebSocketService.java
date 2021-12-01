@@ -20,7 +20,7 @@ import eu.arrowhead.core.hbconfmgr.hawkbit.model.inbound.DownloadRequestInboundM
 import eu.arrowhead.core.hbconfmgr.hawkbit.model.inbound.MessageTypeInbound;
 import eu.arrowhead.core.hbconfmgr.hawkbit.model.inbound.ThingDeletedInboundMessage;
 import eu.arrowhead.core.hbconfmgr.websocket.DeviceNotConnectedException;
-import eu.arrowhead.core.hbconfmgr.websocket.WebsocketSender;
+import eu.arrowhead.core.hbconfmgr.websocket.WebSocketSender;
 import eu.arrowhead.core.hbconfmgr.websocket.model.DeviceMessage;
 import lombok.extern.log4j.Log4j2;
 
@@ -31,19 +31,20 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @Service
 public class WebSocketService {
-    private final WebsocketSender wsSender;
+	
+    private final WebSocketSender wsSender;
 
     @Autowired
-    public WebSocketService(WebsocketSender wsSender) throws IOException {
+    public WebSocketService(final WebSocketSender wsSender) throws IOException {
         this.wsSender = wsSender;
     }
 
-    public void sendDownloadEventMessage(DownloadRequestInboundMessage message)
-            throws IOException, DeviceNotConnectedException {
-        log.info("Message {}", message);
-        String clientId = message.getHeaders().getThingId();
+    public void sendDownloadEventMessage(final DownloadRequestInboundMessage message) throws IOException, DeviceNotConnectedException {
+        log.debug("Message {}", message);
+        
+        final String clientId = message.getHeaders().getThingId();
 
-        DeviceMessage deviceMessage = DeviceMessage.builder()
+        final DeviceMessage deviceMessage = DeviceMessage.builder()
             .type(MessageTypeInbound.EVENT.toString())
             .message(message)
             .build();
@@ -51,12 +52,12 @@ public class WebSocketService {
         this.wsSender.sendMessage(clientId, deviceMessage);
     }
 
-    public void sendThingDeletedMessage(ThingDeletedInboundMessage message) throws IOException,
-            DeviceNotConnectedException {
-        log.info("Message {}", message);
-        String clientId = message.getHeaders().getThingId();
+    public void sendThingDeletedMessage(final ThingDeletedInboundMessage message) throws IOException, DeviceNotConnectedException {
+        log.debug("Message {}", message);
+        
+        final String clientId = message.getHeaders().getThingId();
 
-        DeviceMessage deviceMessage = DeviceMessage.builder()
+        final DeviceMessage deviceMessage = DeviceMessage.builder()
             .type(MessageTypeInbound.THING_DELETED.toString())
             .message(message)
             .build();
@@ -64,13 +65,12 @@ public class WebSocketService {
         this.wsSender.sendMessage(clientId, deviceMessage);
     }
 
-    public void sendCancelDownloadMessage(CancelDownloadInboundMessage message) throws IOException,
-            DeviceNotConnectedException {
-        log.info("Message {}", message);
+    public void sendCancelDownloadMessage(final CancelDownloadInboundMessage message) throws IOException, DeviceNotConnectedException {
+        log.debug("Message {}", message);
 
-        String clientId = message.getHeaders().getThingId();
+        final String clientId = message.getHeaders().getThingId();
 
-        DeviceMessage deviceMessage = DeviceMessage.builder()
+        final DeviceMessage deviceMessage = DeviceMessage.builder()
             .type(MessageTypeInbound.EVENT.toString())
             .message(message)
             .build();

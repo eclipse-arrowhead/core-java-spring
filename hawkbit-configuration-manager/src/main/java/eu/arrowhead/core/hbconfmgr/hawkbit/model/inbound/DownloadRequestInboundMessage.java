@@ -31,9 +31,7 @@ import lombok.NoArgsConstructor;
 public class DownloadRequestInboundMessage implements InboundMessage {
 
     private Body body;
-
     private Headers headers;
-
     private Long deliveryTag;
 
     @AllArgsConstructor
@@ -111,5 +109,4 @@ public class DownloadRequestInboundMessage implements InboundMessage {
         private String topic;
         private String tenant;
     }
-
 }

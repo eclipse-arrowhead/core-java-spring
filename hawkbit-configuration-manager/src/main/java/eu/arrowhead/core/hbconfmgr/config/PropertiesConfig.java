@@ -22,6 +22,8 @@ import eu.arrowhead.core.hbconfmgr.properties.SystemProperties;
  */
 @Configuration
 public class PropertiesConfig {
+	
+	private static final String SYSTEM = "system";
 
     /**
      * This makes use of Spring properties files (like application.yml), loads all properties under the
@@ -31,7 +33,7 @@ public class PropertiesConfig {
      * @return a populated and validated instance of {@link SystemProperties}
      */
     @Bean
-    @ConfigurationProperties(prefix = "system")
+    @ConfigurationProperties(prefix = SYSTEM)
     public SystemProperties systemProperties() {
         return new SystemProperties();
     }

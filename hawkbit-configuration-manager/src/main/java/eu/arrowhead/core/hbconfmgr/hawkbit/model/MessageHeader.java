@@ -23,7 +23,7 @@ public enum MessageHeader {
 
     private final String stringValue;
 
-    MessageHeader(String stringValue) {
+    private MessageHeader(final String stringValue) {
         this.stringValue = stringValue;
     }
 
@@ -31,5 +31,4 @@ public enum MessageHeader {
     public String toString() {
         return this.stringValue;
     }
-
 }

@@ -31,21 +31,22 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @Controller
 public class WebSocketController extends AbstractWebSocketHandler {
+	
     private final HawkbitService hawkbitService;
     private final ObjectMapper objectMapper;
     private final Map<String, WebSocketSession> webSocketSessionMap;
 
     @Autowired
-    public WebSocketController(HawkbitService hawkbitService, Map<String, WebSocketSession> webSocketSessionMap) {
+    public WebSocketController(final HawkbitService hawkbitService, final Map<String, WebSocketSession> webSocketSessionMap) {
         this.objectMapper = new ObjectMapper();
         this.hawkbitService = hawkbitService;
         this.webSocketSessionMap = webSocketSessionMap;
     }
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws IOException {
+    public void afterConnectionEstablished(final WebSocketSession session) throws IOException {
         if (session.getPrincipal() != null) {
-            String clientId = session.getPrincipal().getName();
+            final String clientId = session.getPrincipal().getName();
             this.hawkbitService.createDevice(clientId);
             this.webSocketSessionMap.put(clientId, session);
         } else {
@@ -54,20 +55,19 @@ public class WebSocketController extends AbstractWebSocketHandler {
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+    public void afterConnectionClosed(final WebSocketSession session, final CloseStatus status) {
         if (session.getPrincipal() != null) {
             this.webSocketSessionMap.remove(session.getPrincipal().getName());
         }
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+    protected void handleTextMessage(final WebSocketSession session, final TextMessage message) {
         try {
-            UpdateActionRequestDTO request = objectMapper.readValue(message.getPayload(), UpdateActionRequestDTO.class);
+            final UpdateActionRequestDTO request = objectMapper.readValue(message.getPayload(), UpdateActionRequestDTO.class);
             this.hawkbitService.updateActionStatus(ActionUpdateStatusMapper.mapToActionUpdateStatus(request));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Web socket text message could not be handled", e);
         }
     }
-
 }

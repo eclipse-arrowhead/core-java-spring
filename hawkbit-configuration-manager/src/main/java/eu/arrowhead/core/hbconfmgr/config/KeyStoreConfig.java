@@ -10,8 +10,6 @@
 
 package eu.arrowhead.core.hbconfmgr.config;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -23,9 +21,11 @@ import java.security.cert.CertificateException;
 
 import javax.net.ssl.KeyManagerFactory;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import eu.arrowhead.core.hbconfmgr.SSLProperties;
 
 /**
  * This class provides the key store of the configuration system in different formats via beans managed by the Spring
@@ -34,43 +34,44 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class KeyStoreConfig {
 
-    private static final String KEY_STORE_TYPE = "pkcs12";
-
-    @Value("${keyStore.path}")
-    private String keyStorePath;
-
-    @Value("${keyStore.password}")
-    private String keyStorePassword;
-
-    @Value("${keyStore.alias}")
-    private String keyStoreAlias;
+	@Autowired
+	private SSLProperties sslProps;
+	
+	private KeyStore keystore;
 
     @Bean
-    public KeyManagerFactory configurationSystemKeyManagerFactory() throws KeyStoreException, NoSuchAlgorithmException,
-            UnrecoverableKeyException, IOException, CertificateException {
-        KeyStore keyStore = loadKeyStore();
-        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        keyManagerFactory.init(keyStore, keyStorePassword.toCharArray());
-        return keyManagerFactory;
+    public KeyManagerFactory hawkbitConfigurationSystemKeyManagerFactory() throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException, IOException, CertificateException {
+		final KeyStore keyStore = loadKeyStore();
+		final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+		keyManagerFactory.init(keyStore, sslProps.getKeyStorePassword().toCharArray());
+		
+		return keyManagerFactory;
     }
 
     @Bean
-    public PrivateKey configurationSystemPrivateKey() throws UnrecoverableKeyException, NoSuchAlgorithmException,
-            KeyStoreException, IOException, CertificateException {
-        KeyStore keyStore = loadKeyStore();
-        return (PrivateKey) keyStore.getKey(keyStoreAlias, keyStorePassword.toCharArray());
+    public PrivateKey hawkbitConfigurationSystemPrivateKey() throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, IOException, CertificateException {
+		final KeyStore keyStore = loadKeyStore();
+		
+		return (PrivateKey) keyStore.getKey(sslProps.getKeyAlias(), sslProps.getKeyPassword().toCharArray());
     }
 
     @Bean
-    public PublicKey configurationSystemPublicKey() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
-        KeyStore keyStore = loadKeyStore();
-        return keyStore.getCertificate(keyStoreAlias).getPublicKey();
+    public PublicKey hawkbitConfigurationSystemPublicKey() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
+   		final KeyStore keyStore = loadKeyStore();
+   		
+   		return keyStore.getCertificate(sslProps.getKeyAlias()).getPublicKey();
     }
 
     private KeyStore loadKeyStore() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
-        KeyStore keyStore = KeyStore.getInstance(KEY_STORE_TYPE);
-        keyStore.load(new FileInputStream(new File(keyStorePath)), keyStorePassword.toCharArray());
-        return keyStore;
+    	if (sslProps.isSslEnabled()) {
+    		if (keystore == null) {
+    	        keystore = KeyStore.getInstance(sslProps.getKeyStoreType());
+    	        keystore.load(sslProps.getKeyStore().getInputStream(), sslProps.getKeyStorePassword().toCharArray());
+    		}
+    		
+    		return keystore;
+    	}
+    	
+    	return null;
     }
-
 }

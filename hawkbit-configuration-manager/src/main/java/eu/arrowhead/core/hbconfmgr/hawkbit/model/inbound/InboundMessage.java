@@ -14,6 +14,4 @@ package eu.arrowhead.core.hbconfmgr.hawkbit.model.inbound;
 /**
  * Interface for all incoming AMQP message types.
  */
-public interface InboundMessage {
-    
-}
+public interface InboundMessage {}

@@ -43,9 +43,7 @@ public class WebSocketSecurityConfig extends WebSecurityConfigurerAdapter implem
     private final WebSocketController webSocketController;
 
     @Autowired
-    public WebSocketSecurityConfig(ArrowheadService arrowheadService,
-                           PrivateKey privateKey,
-                           WebSocketController webSocketController) {
+    public WebSocketSecurityConfig(final ArrowheadService arrowheadService, final PrivateKey privateKey, final WebSocketController webSocketController) {
         this.arrowheadService = arrowheadService;
         this.privateKey = privateKey;
         this.webSocketController = webSocketController;
@@ -55,7 +53,7 @@ public class WebSocketSecurityConfig extends WebSecurityConfigurerAdapter implem
      * Registers the web socket controller as web socket handler.
      */
     @Override
-    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+    public void registerWebSocketHandlers(final WebSocketHandlerRegistry registry) {
         registry.addHandler(this.webSocketController, "/");
     }
 
@@ -65,7 +63,7 @@ public class WebSocketSecurityConfig extends WebSecurityConfigurerAdapter implem
      * system and don't support all default security settings.
      */
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    protected void configure(final HttpSecurity http) throws Exception {
         http
                 // Disable form login, as only non-interactive clients connect
                 .formLogin().disable()
@@ -76,8 +74,7 @@ public class WebSocketSecurityConfig extends WebSecurityConfigurerAdapter implem
                 // CSRF protection is not required,  as only non-interactive clients connect
                 .csrf(AbstractHttpConfigurer::disable)
                 // Register custom JWT authentication filter, so JWT authentication is supported
-                .addFilterBefore(new JwtAuthenticationFilter(this.arrowheadService, this.privateKey),
-                        BasicAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(this.arrowheadService, this.privateKey), BasicAuthenticationFilter.class)
                 // Disable Spring Sessions, as sessions should not be supported
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // Require full authentication on every request

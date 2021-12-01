@@ -21,7 +21,7 @@ public enum MessageTypeInbound {
 
     private final String stringValue;
 
-    MessageTypeInbound(String stringValue) {
+    private MessageTypeInbound(final String stringValue) {
         this.stringValue = stringValue;
     }
 
@@ -29,5 +29,4 @@ public enum MessageTypeInbound {
     public String toString() {
         return this.stringValue;
     }
-
 }
