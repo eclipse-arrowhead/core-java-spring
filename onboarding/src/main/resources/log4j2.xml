@@ -13,7 +13,7 @@
         <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
             <PatternLayout pattern="${LOG_PATTERN}"/>
         </Console>
-		<RollingFile name="FileAppender" fileName="${LOG_DIR}/onboarding.log" filePattern="${LOG_DIR}/onboarding-%d{yyyy-MM-dd}-%i.log">
+		<RollingFile name="FileAppender" fileName="${LOG_DIR}/onboardingcontroller.log" filePattern="${LOG_DIR}/onboardingcontroller-%d{yyyy-MM-dd}-%i.log">
 	    	<PatternLayout>
 	        	<Pattern>${LOG_PATTERN}</Pattern>
 	    	</PatternLayout>

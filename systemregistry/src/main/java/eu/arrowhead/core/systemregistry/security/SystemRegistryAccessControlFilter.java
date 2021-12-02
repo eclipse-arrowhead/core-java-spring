@@ -30,19 +30,28 @@ import org.springframework.stereotype.Component;
 public class SystemRegistryAccessControlFilter extends CoreSystemAccessControlFilter {
 
     //=================================================================================================
+	// members
+	
+	private final SecurityUtilities securityUtilities;
+
+    //=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@Autowired
+    public SystemRegistryAccessControlFilter(final SecurityUtilities securityUtilities) {
+		this.securityUtilities = securityUtilities;
+	}
+
+    //=================================================================================================
     // assistant methods
-    private final SecurityUtilities securityUtilities;
-
-    @Autowired
-    public SystemRegistryAccessControlFilter(final SecurityUtilities securityUtilities) {this.securityUtilities = securityUtilities;}
-
+    
     //-------------------------------------------------------------------------------------------------
     @Override
     protected void checkClientAuthorized(final String clientCN, final String method, final String requestTarget, final String requestJSON, final Map<String, String[]> queryParams) {
-
         if (requestTarget.endsWith(CommonConstants.ECHO_URI)
                 || requestTarget.contains(CommonConstants.ONBOARDING_URI)
-                || requestTarget.contains(CommonConstants.OP_SYSTEM_REGISTRY_UNREGISTER_URI)) {
+                || requestTarget.contains(CommonConstants.OP_SYSTEMREGISTRY_UNREGISTER_URI)) {
             // certificates will be verified individually on each method
             securityUtilities.authenticateCertificate(clientCN, requestTarget, CertificateType.AH_DEVICE);
             return;

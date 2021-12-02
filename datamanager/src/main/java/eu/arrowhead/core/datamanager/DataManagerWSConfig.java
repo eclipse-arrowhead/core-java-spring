@@ -17,24 +17,21 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import eu.arrowhead.common.SecurityUtilities;
-import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.core.datamanager.HistorianWSHandler;
-import eu.arrowhead.core.datamanager.security.DatamanagerACLFilter;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
-import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
-import javax.servlet.http.HttpServletRequest;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
+import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.server.HandshakeInterceptor;
+
+import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.SecurityUtilities;
 
  
 @Configuration
@@ -50,14 +47,11 @@ public class DataManagerWSConfig implements WebSocketConfigurer {
     private boolean websocketsEnabled;
 
     @Autowired
-    HistorianWSHandler historianWSHandler;
-
-    @Autowired
-    DatamanagerACLFilter dmACLFilter;
+    private HistorianWSHandler historianWSHandler;
 
     //-------------------------------------------------------------------------------------------------
     @Override
-    public void registerWebSocketHandlers(WebSocketHandlerRegistry webSocketHandlerRegistry) {
+    public void registerWebSocketHandlers(final WebSocketHandlerRegistry webSocketHandlerRegistry) {
 	    if (websocketsEnabled) {
             logger.info("WebSocket support enabled");
             webSocketHandlerRegistry.addHandler(historianWSHandler, CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN + "/ws/*/*").addInterceptors(auctionInterceptor());
@@ -70,8 +64,7 @@ public class DataManagerWSConfig implements WebSocketConfigurer {
     @Bean
     public HandshakeInterceptor auctionInterceptor() {
         return new HandshakeInterceptor() {
-            public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, 
-                WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
+            public boolean beforeHandshake(final ServerHttpRequest request, final ServerHttpResponse response, final WebSocketHandler wsHandler, final Map<String, Object> attributes) throws Exception {
 
                 String path = request.getURI().getPath();
                 final String serviceId = path.substring(path.lastIndexOf('/') + 1);
@@ -80,31 +73,29 @@ public class DataManagerWSConfig implements WebSocketConfigurer {
                 String CN = null;
 
                 // if running in secure mode, check authorization (ACL)
-                if(sslEnabled) {  
+                if (sslEnabled) {  
                     if (request instanceof org.springframework.http.server.ServletServerHttpRequest) {
-                        CN = SecurityUtilities.getCertificateCNFromServerRequest((ServletServerHttpRequest)request);
-                        if(CN == null) {
+                        CN = SecurityUtilities.getCertificateCNFromServerRequest((ServletServerHttpRequest) request);
+                        if (CN == null) {
                             logger.info("No valid client certificate found");
                             return false;
                         }
-                        attributes.put("CN", CN);
+                        attributes.put(WSConstants.COMMON_NAME, CN);
                     } else {
                         return false;
                     }
                 }
 
                 // Add to the websocket session
-                attributes.put("systemId", systemId);
-                attributes.put("serviceId", serviceId);
+                attributes.put(WSConstants.SYSTEM_ID, systemId);
+                attributes.put(WSConstants.SERVICE_ID, serviceId);
                 
                 return true;
             }
 
-            public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception exception) {
+            public void afterHandshake(final ServerHttpRequest request, final ServerHttpResponse response, final WebSocketHandler wsHandler, final Exception exception) {
                 // tbd
             }
-
         };
     }
 }
-

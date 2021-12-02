@@ -76,7 +76,7 @@ In SSL mode, ActiveMQ needs a certificate and a trust store. For testing purpose
 For relays we introduced a very similar certificate chain than we use in case of Arrowhead systems ([see README.md for details](https://github.com/arrowhead-f/core-java-spring#certificates)). It consists three levels:
 - Master certificate: `arrowhead.eu` (it's the Arrowhead master certificate)
 - Relay master certificate: `relay.arrowhead.eu` (it's basically the same than a cloud certificate in Arrowhead, but the CN has only 3 parts)
-- Relay certificate: `my_relay.relay.arrowhead.eu` (it's very similar to the Arrowhead system's certificates, but the C_N has only 4 parts)
+- Relay certificate: `my-relay.relay.arrowhead.eu` (it's very similar to the Arrowhead system's certificates, but the CN has only 4 parts)
 
 For creating these certificates, please consulting the previously linked README document. 
 You need a trust store as well. It is also similar to the one we use in case of Arrowhead systems, but you have to import the master certificate as trusted certificate instead of the cloud certificate.
@@ -93,11 +93,11 @@ After you have the necessary certificate and trust store you have to install the
     <sslContext keyStore="file:${activemq.base}/conf/relay1.p12"
                 keyStorePassword="123456"
                 keyStoreKeyPassword="123456"
-                trustStore="file:${activemq.base}/conf/relay1_truststore.p12"
+                trustStore="file:${activemq.base}/conf/relay1-truststore.p12"
                 trustStorePassword="123456" />
  </sslContext>
 ```
-- In the lines above we assume that the certificate file named `relay1.p12`, the trust store file named `relay1_truststore.p12` and all the passwords are `123456`. If this is not true, please adjust the settings accordingly.
+- In the lines above we assume that the certificate file named `relay1.p12`, the trust store file named `relay1-truststore.p12` and all the passwords are `123456`. If this is not true, please adjust the settings accordingly.
 
 #### 1.2.3 Configuring transport connector
 

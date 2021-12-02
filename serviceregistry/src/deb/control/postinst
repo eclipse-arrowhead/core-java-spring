@@ -7,7 +7,8 @@ set -e
 
 . /usr/share/debconf/confmodule
 
-SYSTEM_NAME="service_registry"
+SYSTEM_NAME="serviceregistry"
+MYSQL_USER="service_registry"
 PKG_NAME="arrowhead-serviceregistry"
 
 # summary of how this script can be called:
@@ -48,7 +49,7 @@ case "$1" in
     fi  
 
     echo "Configuring MySQL database..." >&2
-    ah_db_tables_and_user ${SYSTEM_NAME} ${SYSTEM_NAME}_privileges.sql ${system_passwd}
+    ah_db_tables_and_user ${MYSQL_USER} ${MYSQL_USER}_privileges.sql ${system_passwd}
 
     if [ ! -d "${SYSTEM_DIR}" ]; then
       mkdir -p ${SYSTEM_DIR}

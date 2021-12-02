@@ -13,13 +13,12 @@
  ********************************************************************************/
 package eu.arrowhead.core.datamanager;
 
-import eu.arrowhead.common.ApplicationInitListener;
-import eu.arrowhead.common.core.CoreSystemService;
+import java.util.Base64;
+
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import java.util.Base64;
-import java.util.List;
+import eu.arrowhead.common.ApplicationInitListener;
 
 @Component
 public class DataManagerApplicationInitListener extends ApplicationInitListener {

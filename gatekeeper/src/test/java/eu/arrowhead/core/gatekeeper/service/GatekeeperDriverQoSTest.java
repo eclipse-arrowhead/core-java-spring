@@ -204,11 +204,11 @@ public class GatekeeperDriverQoSTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testQueryQoSMonitorPublicKeyOk() {
-		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_KEY_URI);
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_KEY_URI);
 		
 		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
 		when(arrowheadContext.get(anyString())).thenReturn(uri);
-		when(httpService.sendRequest(uri, HttpMethod.GET, String.class)).thenReturn(new ResponseEntity<>("public key", HttpStatus.OK));
+		when(httpService.sendRequest(uri, HttpMethod.GET, String.class)).thenReturn(new ResponseEntity<>("\"public key\"", HttpStatus.OK));
 		
 		testingObject.queryQoSMonitorPublicKey();
 		

@@ -121,6 +121,12 @@ public class ServiceQueryFormDTO implements Serializable {
 		}
 		
 		//-------------------------------------------------------------------------------------------------
+		public Builder security(final List<ServiceSecurityType> securityRequirements) {
+			this.securityRequirements = securityRequirements;
+			return this;
+		}
+		
+		//-------------------------------------------------------------------------------------------------
 		public Builder metadata(final Map<String,String> metadataRequirements) {
 			this.metadataRequirements = metadataRequirements;
 			return this;

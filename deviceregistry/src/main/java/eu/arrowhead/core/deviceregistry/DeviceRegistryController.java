@@ -58,43 +58,45 @@ import javax.servlet.http.HttpServletRequest;
         allowedHeaders = {HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION}
 )
 @RestController
-@RequestMapping(CommonConstants.DEVICE_REGISTRY_URI)
+@RequestMapping(CommonConstants.DEVICEREGISTRY_URI)
 public class DeviceRegistryController {
 
-    private static final String DEVICE_REGISTRY_REGISTER_DESCRIPTION = "Registers a device";
-    private static final String DEVICE_REGISTRY_REGISTER_201_MESSAGE = "Device registered";
-    private static final String DEVICE_REGISTRY_REGISTER_400_MESSAGE = "Could not register device";
-    private static final String DEVICE_REGISTRY_UNREGISTER_DESCRIPTION = "Remove a registered device";
-    private static final String DEVICE_REGISTRY_UNREGISTER_200_MESSAGE = "Registered device removed";
-    private static final String DEVICE_REGISTRY_UNREGISTER_400_MESSAGE = "Could not remove device";
-    private static final String DEVICE_REGISTRY_QUERY_DESCRIPTION = "Return Device Registry data that fits the specification";
-    private static final String DEVICE_REGISTRY_QUERY_200_MESSAGE = "Device Registry data returned";
-    private static final String DEVICE_REGISTRY_QUERY_400_MESSAGE = "Could not query Device Registry";
-    private static final String DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_DESCRIPTION = "Return device by requested deviceId";
-    private static final String DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_200_MESSAGE = "Device data by deviceId returned";
-    private static final String DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_400_MESSAGE = "Could not query Device Registry by Consumer device deviceId";
-    private static final String DEVICE_REGISTRY_QUERY_BY_DEVICE_DTO_DESCRIPTION = "Return Device by requested dto";
-    private static final String DEVICE_REGISTRY_QUERY_BY_DEVICE_DTO_200_MESSAGE = "Consumer Device data by requestDTO returned";
-    private static final String DEVICE_REGISTRY_QUERY_BY_DEVICE_DTO_400_MESSAGE = "Could not query Device Registry by Consumer device requestDTO";
-    //=================================================================================================
-    // members
+	//=================================================================================================
+	// members
+	
+    private static final String DEVICEREGISTRY_REGISTER_DESCRIPTION = "Registers a device";
+    private static final String DEVICEREGISTRY_REGISTER_201_MESSAGE = "Device registered";
+    private static final String DEVICEREGISTRY_REGISTER_400_MESSAGE = "Could not register device";
+    private static final String DEVICEREGISTRY_UNREGISTER_DESCRIPTION = "Remove a registered device";
+    private static final String DEVICEREGISTRY_UNREGISTER_200_MESSAGE = "Registered device removed";
+    private static final String DEVICEREGISTRY_UNREGISTER_400_MESSAGE = "Could not remove device";
+    private static final String DEVICEREGISTRY_QUERY_DESCRIPTION = "Return Device Registry data that fits the specification";
+    private static final String DEVICEREGISTRY_QUERY_200_MESSAGE = "Device Registry data returned";
+    private static final String DEVICEREGISTRY_QUERY_400_MESSAGE = "Could not query Device Registry";
+    private static final String DEVICEREGISTRY_QUERY_BY_DEVICE_ID_DESCRIPTION = "Return device by requested deviceId";
+    private static final String DEVICEREGISTRY_QUERY_BY_DEVICE_ID_200_MESSAGE = "Device data by deviceId returned";
+    private static final String DEVICEREGISTRY_QUERY_BY_DEVICE_ID_400_MESSAGE = "Could not query Device Registry by Consumer device deviceId";
+    private static final String DEVICEREGISTRY_QUERY_BY_DEVICE_DTO_DESCRIPTION = "Return Device by requested dto";
+    private static final String DEVICEREGISTRY_QUERY_BY_DEVICE_DTO_200_MESSAGE = "Consumer Device data by requestDTO returned";
+    private static final String DEVICEREGISTRY_QUERY_BY_DEVICE_DTO_400_MESSAGE = "Could not query Device Registry by Consumer device requestDTO";
+    
     private final Logger logger = LogManager.getLogger(DeviceRegistryController.class);
     private final DeviceRegistryDBService deviceRegistryDBService;
     private final SecurityUtilities securityUtilities;
     private final Validation validation;
 
-    @Autowired
-    public DeviceRegistryController(final DeviceRegistryDBService deviceRegistryDBService,
-                                    final SecurityUtilities securityUtilities) {
-        this.deviceRegistryDBService = deviceRegistryDBService;
-        this.securityUtilities = securityUtilities;
-        this.validation = new Validation();
-    }
-
-
     //=================================================================================================
     // methods
 
+    //-------------------------------------------------------------------------------------------------
+    @Autowired
+    public DeviceRegistryController(final DeviceRegistryDBService deviceRegistryDBService,
+    		final SecurityUtilities securityUtilities) {
+    	this.deviceRegistryDBService = deviceRegistryDBService;
+    	this.securityUtilities = securityUtilities;
+    	this.validation = new Validation();
+    }
+    
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return an echo message with the purpose of testing the core device availability", response = String.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
     @ApiResponses(value = {
@@ -108,23 +110,22 @@ public class DeviceRegistryController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = DEVICE_REGISTRY_REGISTER_DESCRIPTION, response = DeviceRegistryResponseDTO.class, tags =
-            {CoreCommonConstants.SWAGGER_TAG_CLIENT})
+    @ApiOperation(value = DEVICEREGISTRY_REGISTER_DESCRIPTION, response = DeviceRegistryResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_CREATED, message = DEVICE_REGISTRY_REGISTER_201_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DEVICE_REGISTRY_REGISTER_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_CREATED, message = DEVICEREGISTRY_REGISTER_201_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DEVICEREGISTRY_REGISTER_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-    @PostMapping(path = {CommonConstants.OP_DEVICE_REGISTRY_REGISTER_URI, CoreCommonConstants.MGMT_URI},
+    @PostMapping(path = {CommonConstants.OP_DEVICEREGISTRY_REGISTER_URI, CoreCommonConstants.MGMT_URI},
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DeviceRegistryResponseDTO registerDevice(final HttpServletRequest httpServletRequest,
                                                     @RequestBody final DeviceRegistryRequestDTO request) {
         logger.debug("New device registration request received");
         securityUtilities.authenticateCertificate(httpServletRequest, CertificateType.AH_DEVICE);
-        validation.checkDeviceRegistryRequest(request, getOrigin(CommonConstants.OP_DEVICE_REGISTRY_REGISTER_URI));
+        validation.checkDeviceRegistryRequest(request, getOrigin(CommonConstants.OP_DEVICEREGISTRY_REGISTER_URI));
         final DeviceRegistryResponseDTO response = deviceRegistryDBService.registerDeviceRegistry(request);
         logger.debug("{} successfully registers its device {}", request.getDevice().getDeviceName(), request.getDevice());
 
@@ -132,17 +133,17 @@ public class DeviceRegistryController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = DEVICE_REGISTRY_UNREGISTER_DESCRIPTION, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
+    @ApiOperation(value = DEVICEREGISTRY_UNREGISTER_DESCRIPTION, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = DEVICE_REGISTRY_UNREGISTER_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DEVICE_REGISTRY_UNREGISTER_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = DEVICEREGISTRY_UNREGISTER_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DEVICEREGISTRY_UNREGISTER_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @DeleteMapping(path = CommonConstants.OP_DEVICE_REGISTRY_UNREGISTER_URI)
+    @DeleteMapping(path = CommonConstants.OP_DEVICEREGISTRY_UNREGISTER_URI)
     public void unregisterDevice(final HttpServletRequest httpServletRequest,
-                                 @RequestParam(CommonConstants.OP_DEVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_DEVICE_NAME) final String deviceName,
-                                 @RequestParam(CommonConstants.OP_DEVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_MAC_ADDRESS) final String macAddress) {
+                                 @RequestParam(CommonConstants.OP_DEVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_DEVICE_NAME) final String deviceName,
+                                 @RequestParam(CommonConstants.OP_DEVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_MAC_ADDRESS) final String macAddress) {
         logger.debug("Device removal request received");
         securityUtilities.authenticateCertificate(httpServletRequest, CertificateType.AH_ONBOARDING);
         validation.checkUnregisterDeviceParameters(deviceName, macAddress);
@@ -151,14 +152,14 @@ public class DeviceRegistryController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = DEVICE_REGISTRY_QUERY_DESCRIPTION, response = DeviceQueryResultDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
+    @ApiOperation(value = DEVICEREGISTRY_QUERY_DESCRIPTION, response = DeviceQueryResultDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = DEVICE_REGISTRY_QUERY_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DEVICE_REGISTRY_QUERY_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = DEVICEREGISTRY_QUERY_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DEVICEREGISTRY_QUERY_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PostMapping(path = CommonConstants.OP_DEVICE_REGISTRY_QUERY_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = CommonConstants.OP_DEVICEREGISTRY_QUERY_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DeviceQueryResultDTO queryRegistry(final HttpServletRequest httpServletRequest,
                                               @RequestBody final DeviceQueryFormDTO form) {
@@ -167,7 +168,7 @@ public class DeviceRegistryController {
 
         if (Utilities.isEmpty(form.getDeviceNameRequirements())) {
             throw new BadPayloadException("Device definition requirement is null or blank", HttpStatus.SC_BAD_REQUEST, getOrigin(
-                    CommonConstants.OP_DEVICE_REGISTRY_QUERY_URI));
+                    CommonConstants.OP_DEVICEREGISTRY_QUERY_URI));
         }
 
         final DeviceQueryResultDTO result = deviceRegistryDBService.queryRegistry(form);
@@ -177,20 +178,20 @@ public class DeviceRegistryController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_DESCRIPTION, response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_PRIVATE})
+    @ApiOperation(value = DEVICEREGISTRY_QUERY_BY_DEVICE_ID_DESCRIPTION, response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_PRIVATE})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = DEVICEREGISTRY_QUERY_BY_DEVICE_ID_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DEVICEREGISTRY_QUERY_BY_DEVICE_ID_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @GetMapping(path = CoreCommonConstants.OP_DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = CoreCommonConstants.OP_DEVICEREGISTRY_QUERY_BY_DEVICE_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DeviceResponseDTO queryRegistryByDeviceId(final HttpServletRequest httpServletRequest,
                                                      @PathVariable(value = Constants.PATH_VARIABLE_ID) final long deviceId) {
         logger.debug("Device query by device deviceId request received");
         securityUtilities.authenticateCertificate(httpServletRequest, CertificateType.AH_SYSTEM);
-        validation.checkId(deviceId, getOrigin(CoreCommonConstants.OP_DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_URI));
+        validation.checkId(deviceId, getOrigin(CoreCommonConstants.OP_DEVICEREGISTRY_QUERY_BY_DEVICE_ID_URI));
         final DeviceResponseDTO result = deviceRegistryDBService.getDeviceById(deviceId);
 
         logger.debug("Return device by deviceId: {}", deviceId);
@@ -198,20 +199,20 @@ public class DeviceRegistryController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = DEVICE_REGISTRY_QUERY_BY_DEVICE_DTO_DESCRIPTION, response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_PRIVATE})
+    @ApiOperation(value = DEVICEREGISTRY_QUERY_BY_DEVICE_DTO_DESCRIPTION, response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_PRIVATE})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = DEVICE_REGISTRY_QUERY_BY_DEVICE_DTO_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DEVICE_REGISTRY_QUERY_BY_DEVICE_DTO_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = DEVICEREGISTRY_QUERY_BY_DEVICE_DTO_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DEVICEREGISTRY_QUERY_BY_DEVICE_DTO_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PostMapping(path = CoreCommonConstants.OP_DEVICE_REGISTRY_QUERY_BY_DEVICE_DTO_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = CoreCommonConstants.OP_DEVICEREGISTRY_QUERY_BY_DEVICE_DTO_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DeviceResponseDTO queryRegistryByDeviceDTO(final HttpServletRequest httpServletRequest,
                                                       @RequestBody final DeviceRequestDTO request) {
         logger.debug("Device query by DeviceRequestDTO request received");
         securityUtilities.authenticateCertificate(httpServletRequest, CertificateType.AH_SYSTEM);
-        validation.checkDeviceRequest(request, getOrigin(CoreCommonConstants.OP_DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_URI));
+        validation.checkDeviceRequest(request, getOrigin(CoreCommonConstants.OP_DEVICEREGISTRY_QUERY_BY_DEVICE_ID_URI));
 
         final String deviceName = request.getDeviceName();
         final String macAddress = request.getMacAddress();
@@ -224,11 +225,14 @@ public class DeviceRegistryController {
 
     //=================================================================================================
     // assistant methods
-    private String getBaseOrigin() {
-        return CommonConstants.DEVICE_REGISTRY_URI;
+    
+    //-------------------------------------------------------------------------------------------------
+	private String getBaseOrigin() {
+        return CommonConstants.DEVICEREGISTRY_URI;
     }
 
-    private String getOrigin(final String postfix) {
+    //-------------------------------------------------------------------------------------------------
+	private String getOrigin(final String postfix) {
         Assert.notNull(postfix, "Internal error: Origin postfix not provided");
         return getBaseOrigin() + postfix;
     }

@@ -13,10 +13,9 @@
  ********************************************************************************/
 package eu.arrowhead.core.datamanager;
  
-import java.io.IOException;
 import java.util.List;
-import java.util.Vector;
 import java.util.Map;
+import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.logging.log4j.LogManager;
@@ -29,22 +28,20 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.core.datamanager.service.HistorianService;
-import eu.arrowhead.core.datamanager.security.DatamanagerACLFilter;
-import eu.arrowhead.common.Utilities;
-import eu.arrowhead.core.datamanager.service.DataManagerDriver;
-import eu.arrowhead.core.datamanager.security.DatamanagerACLFilter;
-import eu.arrowhead.common.dto.shared.SenML;
-
-import com.google.gson.*;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.dto.shared.SenML;
+import eu.arrowhead.core.datamanager.security.DatamanagerACLFilter;
+import eu.arrowhead.core.datamanager.service.DataManagerDriver;
+import eu.arrowhead.core.datamanager.service.HistorianService;
 
 @Component
 public class HistorianWSHandler extends TextWebSocketHandler {
  
     private final Logger logger = LogManager.getLogger(HistorianWSHandler.class);
-    private Gson gson = new Gson();
+    private final Gson gson = new Gson();
     
     private final List<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
  
@@ -58,63 +55,70 @@ public class HistorianWSHandler extends TextWebSocketHandler {
     private DataManagerDriver dataManagerDriver;
 
     @Autowired
-    DatamanagerACLFilter dataManagerACLFilter;
+    private DatamanagerACLFilter dataManagerACLFilter;
 
     //=================================================================================================
     // methods
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+    public void afterConnectionEstablished(final WebSocketSession session) throws Exception {
+    	logger.debug("afterConnectionEstablished started...");
+    	
         sessions.add(session);
         super.afterConnectionEstablished(session);
     }
  
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+    public void afterConnectionClosed(final WebSocketSession session, final CloseStatus status) throws Exception {
+    	logger.debug("afterConnectionClosed started...");
+    	
         sessions.remove(session);
         super.afterConnectionClosed(session, status);
     }
  
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    protected void handleTextMessage(final WebSocketSession session, final TextMessage message) throws Exception {
+    	logger.debug("handleTextMessage started...");
+    	
         super.handleTextMessage(session, message);
         
-        Map<String,Object> attributes = session.getAttributes();
+        final Map<String,Object> attributes = session.getAttributes();
 	    String systemName, serviceName, payload;
 
 	    try {
-		    systemName = (String)session.getAttributes().get("systemId");
-		    serviceName = (String)session.getAttributes().get("serviceId");
+		    systemName = (String) session.getAttributes().get(WSConstants.SYSTEM_ID);
+		    serviceName = (String) session.getAttributes().get(WSConstants.SERVICE_ID);
             String CN = systemName;
             if (sslEnabled ) {
-                CN = (String)attributes.get("CN");
+                CN = (String) attributes.get(WSConstants.COMMON_NAME);
             }
             
             payload = message.getPayload();
 
-		    //logger.debug("Got message for {}/{}", systemName, serviceName);
-            boolean authorized = dataManagerACLFilter.checkRequest(CN, "PUT", CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN + "/ws/" + attributes.get("systemId") + "/" + attributes.get("serviceId"));
-            if(authorized) {
-                Vector<SenML> sml = gson.fromJson(payload, new TypeToken<Vector<SenML>>(){}.getType());
+		    logger.debug("Got message for {}/{}", systemName, serviceName);
+            final boolean authorized = dataManagerACLFilter.checkRequest(CN, DatamanagerACLFilter.ACL_METHOD_PUT, CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN + "/ws/" + attributes.get(WSConstants.SYSTEM_ID) + "/" +
+            															 attributes.get(WSConstants.SERVICE_ID));
+            if (authorized) {
+                final Vector<SenML> sml = gson.fromJson(payload, new TypeToken<Vector<SenML>>(){}.getType());
 		        dataManagerDriver.validateSenMLMessage(systemName, serviceName, sml);
 
-		        SenML head = sml.firstElement();
-		        if(head.getBt() == null) {
+		        final SenML head = sml.firstElement();
+		        if (head.getBt() == null) {
 			        head.setBt((double)System.currentTimeMillis() / 1000);
 		        } else {
-                    double deltaTime = ((double)System.currentTimeMillis() / 1000) - head.getBt();
-                    deltaTime *= 1000.0;
-                    //logger.info("Message took {} ms ", String.format("%.3f", deltaTime));
+//                    double deltaTime = ((double)System.currentTimeMillis() / 1000) - head.getBt();
+//                    deltaTime *= 1000.0;
+		        	  //logger.info("Message took {} ms ", String.format("%.3f", deltaTime));
                 }
 
 		        dataManagerDriver.validateSenMLContent(sml);
                 historianService.createEndpoint(systemName, serviceName);
     		    historianService.updateEndpoint(systemName, serviceName, sml);
-
             } else {
 		        session.close();
             }
-	    } catch(Exception e) {
+	    } catch (final Exception ex) {
+	    	logger.debug(ex);
 		    session.close();
 		    return;
 
@@ -130,4 +134,3 @@ public class HistorianWSHandler extends TextWebSocketHandler {
         });*/
     }
 }
-

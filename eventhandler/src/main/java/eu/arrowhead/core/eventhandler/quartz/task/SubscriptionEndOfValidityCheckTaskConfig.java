@@ -43,10 +43,10 @@ public class SubscriptionEndOfValidityCheckTaskConfig {
 	@Autowired
     private ApplicationContext applicationContext; //NOSONAR
 	
-	@Value(CoreCommonConstants.$EVENT_HANDLER_TTL_SCHEDULED_WD)
+	@Value(CoreCommonConstants.$EVENTHANDLER_TTL_SCHEDULED_WD)
 	private boolean ttlScheduled;
 	
-	@Value(CoreCommonConstants.$EVENT_HANDLER_TTL_INTERVAL_WD)
+	@Value(CoreCommonConstants.$EVENTHANDLER_TTL_INTERVAL_WD)
 	private int ttlInterval;
 	
 	private static final int SCHEDULER_DELAY = 17;

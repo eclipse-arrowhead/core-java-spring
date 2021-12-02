@@ -17,6 +17,7 @@ package eu.arrowhead.common.quartz.uricrawler;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
@@ -72,6 +73,15 @@ public class UriCrawlerTask implements Job {
 	public void execute(final JobExecutionContext context) throws JobExecutionException {  
 		logger.debug("STARTED: URI crawler task");
 		
+		try {
+			if (uriCrawlerTaskScheduler.isShutdown()) {
+				return;
+			}
+		} catch (final SchedulerException ex) {
+			logger.error(ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+		}
+		
 		if (arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)) {
 			logger.debug("FINISHED: URI crawler task can not run if server is in standalone mode");
 			shutdown();
@@ -96,7 +106,7 @@ public class UriCrawlerTask implements Job {
 		
 		logger.debug("FINISHED: URI crawler task. Number of acquired URI: {}/{}", count, requiredServices.size());
 		
-		if (count == requiredServices.size()) {
+		if (count >= requiredServices.size()) {
 			shutdown();
 		}
 	}
@@ -105,11 +115,14 @@ public class UriCrawlerTask implements Job {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
+	@PreDestroy
 	private void shutdown() {
 		logger.debug("shutdown started...");
 		try {
-			uriCrawlerTaskScheduler.shutdown();
-			logger.debug("SHUTDOWN: URI crawler task.");
+			if (!uriCrawlerTaskScheduler.isShutdown()) {
+				uriCrawlerTaskScheduler.shutdown();
+				logger.debug("SHUTDOWN: URI crawler task.");
+			}
 		} catch (final SchedulerException ex) {
 			logger.error(ex.getMessage());
 			logger.debug("Stacktrace:", ex);
@@ -176,7 +189,7 @@ public class UriCrawlerTask implements Job {
 		logger.debug("createEchoUri started...");
 				
 		final String scheme = queryUri.getScheme();
-		final String echoUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.ECHO_URI;
+		final String echoUriStr = CommonConstants.SERVICEREGISTRY_URI + CommonConstants.ECHO_URI;
 		return Utilities.createURI(scheme, queryUri.getHost(), queryUri.getPort(), echoUriStr);
 	}
 	

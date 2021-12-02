@@ -17,8 +17,6 @@ package eu.arrowhead.common.dto.shared;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
 import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonInclude;

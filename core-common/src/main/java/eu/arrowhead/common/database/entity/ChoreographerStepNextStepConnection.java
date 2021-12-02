@@ -30,9 +30,6 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
 @Entity
 @Table (uniqueConstraints = @UniqueConstraint(columnNames = {"stepId", "nextStepId"}))
 public class ChoreographerStepNextStepConnection {

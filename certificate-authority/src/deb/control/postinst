@@ -7,7 +7,8 @@ set -e
 
 . /usr/share/debconf/confmodule
 
-SYSTEM_NAME="certificate_authority"
+SYSTEM_NAME="certificateauthority"
+MYSQL_USER="certificate_authority"
 PKG_NAME="arrowhead-certificate-authority"
 
 # summary of how this script can be called:
@@ -48,7 +49,7 @@ case "$1" in
     fi
 
     echo "Configuring MySQL database..." >&2
-    ah_db_tables_and_user ${SYSTEM_NAME} ${SYSTEM_NAME}_privileges.sql ${system_passwd}
+    ah_db_tables_and_user ${MYSQL_USER} ${MYSQL_USER}_privileges.sql ${system_passwd}
 
     if [ ! -d "${SYSTEM_DIR}" ]; then
       mkdir -p ${SYSTEM_DIR}
@@ -86,14 +87,14 @@ case "$1" in
       -e "\#^.*server\.ssl\.key-password=#s#.*\$#server.ssl.key-password=${AH_PASS_CERT}#" \
       -e "\#^.*server\.ssl\.trust-store=#s#.*\$#server.ssl.trust-store=file:${AH_CONF_DIR}/truststore.p12#" \
       -e "\#^.*server\.ssl\.trust-store-password=#s#.*\$#server.ssl.trust-store-password=${AH_PASS_CERT}#" \
-      -e "\#^.*cloud\.ssl\.key-store-password=#s#.*\$#cloud.ssl.key-store-password=${AH_PASS_CERT}#" \
+	  -e "\#^.*cloud\.ssl\.key-store-password=#s#.*\$#cloud.ssl.key-store-password=${AH_PASS_CERT}#" \
       -e "\#^.*cloud\.ssl\.key-password=#s#.*\$#cloud.ssl.key-password=${AH_PASS_CERT}#" \
       -e "\#^.*cloud\.ssl\.key-store=#s#.*\$#cloud.ssl.key-store=file:${SYSTEM_DIR}/${cloud_file_name}#" \
       > ${SYSTEM_DIR}/application.properties
 
     rm ${SYSTEM_DIR}/application.properties.orig
     chown arrowhead:arrowhead ${SYSTEM_DIR}/application.properties
-    chown arrowhead:arrowhead ${SYSTEM_DIR}/${cloud_file_name}
+	chown arrowhead:arrowhead ${SYSTEM_DIR}/${cloud_file_name}
     chmod 640 ${SYSTEM_DIR}/application.properties
 
     echo "Starting ${PKG_NAME}..." >&2
