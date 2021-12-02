@@ -35,24 +35,24 @@ public class TestConfig {
      */
     @Bean
     public TrustManager[] getTestTrustManager() {
-        TrustManager[] tm = {
+        final TrustManager[] tm = {
             new X509ExtendedTrustManager(){
                 @Override
-                public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) {
+                public void checkClientTrusted(final X509Certificate[] chain, final String authType, final Socket socket) {
                 }
         
                 @Override
-                public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) {
+                public void checkServerTrusted(final X509Certificate[] chain, final String authType, final Socket socket) {
                     log.info("Server authentication with the following certificate:");
                     log.error(chain[0]);
                 }
         
                 @Override
-                public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine) {
+                public void checkClientTrusted(final X509Certificate[] chain, final String authType, final SSLEngine engine) {
                 }
         
                 @Override
-                public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) {
+                public void checkServerTrusted(final X509Certificate[] chain, final String authType, final SSLEngine engine) {
                     log.info("Server authentication with the following certificate:");
                     log.error(chain[0]);
                 }
@@ -63,11 +63,11 @@ public class TestConfig {
                 }
         
                 @Override
-                public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                public void checkClientTrusted(final X509Certificate[] certs, final String authType) {
                 }
         
                 @Override
-                public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                public void checkServerTrusted(final X509Certificate[] certs, final String authType) {
                     log.info("Server authentication with the following certificate:");
                     log.error(certs[0]);
                 }
@@ -76,5 +76,4 @@ public class TestConfig {
 
         return tm;
     }
-    
 }

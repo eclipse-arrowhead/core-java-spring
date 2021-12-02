@@ -24,18 +24,16 @@ import org.springframework.web.socket.WebSocketSession;
 
 import eu.arrowhead.core.hbconfmgr.hawkbit.model.inbound.MessageTypeInbound;
 import eu.arrowhead.core.hbconfmgr.hawkbit.model.inbound.ThingDeletedInboundMessage;
-import eu.arrowhead.core.hbconfmgr.websocket.DeviceNotConnectedException;
-import eu.arrowhead.core.hbconfmgr.websocket.WebSocketSender;
 import eu.arrowhead.core.hbconfmgr.websocket.model.DeviceMessage;
 
 public class WebSocketSenderTest {
-    WebSocketSender wsSender;
-
-    WebSocketSession wsSession;
+    
+	private WebSocketSender wsSender;
+	private WebSocketSession wsSession;
 
     @BeforeEach
     public void init() {
-        ConcurrentHashMap<String, WebSocketSession> webSocketSessionMap = new ConcurrentHashMap<>();
+        final ConcurrentHashMap<String, WebSocketSession> webSocketSessionMap = new ConcurrentHashMap<>();
         
         wsSession = mock(WebSocketSession.class);
         webSocketSessionMap.put("testIdX", wsSession);
@@ -45,7 +43,7 @@ public class WebSocketSenderTest {
 
     @Test
     public void testSendMessageWithMissingSessionWebSocketSessionMap() throws IOException {
-        DeviceMessage deviceMessage = DeviceMessage.builder()
+        final DeviceMessage deviceMessage = DeviceMessage.builder()
             .type(MessageTypeInbound.EVENT.toString())
             .message(
                 ThingDeletedInboundMessage.builder()
@@ -66,7 +64,7 @@ public class WebSocketSenderTest {
     @Test
     public void testSendMessageWithExistingSession() throws IOException,
             DeviceNotConnectedException {
-        DeviceMessage deviceMessage = DeviceMessage.builder()
+        final DeviceMessage deviceMessage = DeviceMessage.builder()
             .type(MessageTypeInbound.EVENT.toString())
             .message(
                 ThingDeletedInboundMessage.builder()
@@ -79,7 +77,7 @@ public class WebSocketSenderTest {
             )
             .build();
         
-        String expectedBody = "{"
+        final String expectedBody = "{"
             + "\"type\":\"EVENT\","
             + "\"message\":{"
             +     "\"headers\":{"
@@ -88,7 +86,7 @@ public class WebSocketSenderTest {
             + "}"
         + "}";
 
-        TextMessage expectedWSMessage = new TextMessage(expectedBody);
+        final TextMessage expectedWSMessage = new TextMessage(expectedBody);
 
         wsSender.sendMessage("testIdX", deviceMessage);
 

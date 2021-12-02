@@ -25,11 +25,11 @@ import eu.arrowhead.core.hbconfmgr.hawkbit.HawkbitDmfOutboundClient;
 import eu.arrowhead.core.hbconfmgr.hawkbit.model.ActionStatus;
 import eu.arrowhead.core.hbconfmgr.hawkbit.model.outbound.UpdateActionStatusOutboundMessage;
 import eu.arrowhead.core.hbconfmgr.model.HawkbitActionUpdateStatus;
-import eu.arrowhead.core.hbconfmgr.service.HawkbitService;
 
 public class HawbitServiceTest {
-    HawkbitService hawkbitService;
-    HawkbitDmfOutboundClient mock_hawkbitDmfClient;
+    
+	private HawkbitService hawkbitService;
+    private HawkbitDmfOutboundClient mock_hawkbitDmfClient;
 
     @BeforeEach
     public void init() {
@@ -40,10 +40,10 @@ public class HawbitServiceTest {
 
     @Test
     public void testUpdateActionStatus() throws ConstraintViolationException, IOException {
-        ArrayList<String> messageList = new ArrayList<String>();
+        final ArrayList<String> messageList = new ArrayList<String>();
         messageList.add("test");
 
-        HawkbitActionUpdateStatus hActionUpdateStatus = HawkbitActionUpdateStatus
+        final HawkbitActionUpdateStatus hActionUpdateStatus = HawkbitActionUpdateStatus
             .builder()
             .actionId(123456789L)
             .actionStatus(ActionStatus.CANCELED)
@@ -51,7 +51,7 @@ public class HawbitServiceTest {
             .message(messageList)
             .build();
 
-        UpdateActionStatusOutboundMessage message = UpdateActionStatusOutboundMessage.builder()
+        final UpdateActionStatusOutboundMessage message = UpdateActionStatusOutboundMessage.builder()
             .body(
                 UpdateActionStatusOutboundMessage.UpdateActionStatusOutboundMessageBody.builder()
                     .actionId(123456789L)

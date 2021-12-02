@@ -13,31 +13,41 @@ package eu.arrowhead.core.hbconfmgr.config;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
+import java.util.List;
+
 import org.mockserver.configuration.ConfigurationProperties;
 import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.MediaType;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import eu.arrowhead.core.hbconfmgr.arrowhead.model.response.ServiceQueryResultDTO;
+import eu.arrowhead.core.hbconfmgr.arrowhead.model.response.ServiceRegistryResponseDTO;
+import eu.arrowhead.core.hbconfmgr.arrowhead.model.response.SystemResponseDTO;
 
 
 public class InitArrowheadMockServers {
 
-    ClientAndServer serviceRegistryMockServer;
-    ClientAndServer authorizationSystemMockServer;
+    private ClientAndServer serviceRegistryMockServer;
+    private ClientAndServer authorizationSystemMockServer;
 
-    public void setUp() {
+    public void setUp() throws JsonProcessingException {
         startServiceRegistryMockServer(true);
         startAuthorizationSystemMockServer(true);
     }
 
-    public void setUp(Boolean useCertificates) {
+    public void setUp(final Boolean useCertificates) throws JsonProcessingException {
         startServiceRegistryMockServer(useCertificates);
         startAuthorizationSystemMockServer(useCertificates);
     }
 
-    private void startServiceRegistryMockServer(Boolean useCertificates) {
-        if(useCertificates) {
-            String certificateAuthorityKeyPath = PropertiesExtractor.getProperty("mockserver.certificateAuthorityPrivateKey");
-            String certificateAuthorityCertificatePath = PropertiesExtractor.getProperty("mockserver.certificateAuthorityCertificate");
-            String serviceRegistryKeyPath = PropertiesExtractor.getProperty("mockserver.sreg.privateKeyPath");
-            String serviceRegistryCertPath = PropertiesExtractor.getProperty("mockserver.sreg.x509CertificatePath");
+    private void startServiceRegistryMockServer(final Boolean useCertificates) throws JsonProcessingException {
+        if (useCertificates) {
+            final String certificateAuthorityKeyPath = PropertiesExtractor.getProperty("mockserver.certificateAuthorityPrivateKey");
+            final String certificateAuthorityCertificatePath = PropertiesExtractor.getProperty("mockserver.certificateAuthorityCertificate");
+            final String serviceRegistryKeyPath = PropertiesExtractor.getProperty("mockserver.sreg.privateKeyPath");
+            final String serviceRegistryCertPath = PropertiesExtractor.getProperty("mockserver.sreg.x509CertificatePath");
 
             ConfigurationProperties.certificateAuthorityPrivateKey(certificateAuthorityKeyPath);
             ConfigurationProperties.certificateAuthorityCertificate(certificateAuthorityCertificatePath);
@@ -53,15 +63,33 @@ public class InitArrowheadMockServers {
         serviceRegistryMockServer = ClientAndServer.startClientAndServer(8443);
 
         serviceRegistryMockServer.when(request().withPath("/serviceregistry/register"))
-            .respond(response().withStatusCode(400));
+            .respond(response().withStatusCode(201));
+        serviceRegistryMockServer.when(request().withPath("/serviceregistry/unregister"))
+            .respond(response().withStatusCode(200));
+        final ServiceRegistryResponseDTO response = ServiceRegistryResponseDTO.builder()
+        																	  .provider(SystemResponseDTO.builder()
+        																			  					 .address("127.0.0.1")
+        																			  					 .port(8445)
+        																			  					 .build())
+        																	  .build();
+        final ServiceQueryResultDTO result = ServiceQueryResultDTO.builder()
+        														  .unfilteredHits(1)
+        														  .serviceQueryData(List.of(response))
+        														  .build();
+        final ObjectMapper mapper = new ObjectMapper();
+        serviceRegistryMockServer.when(request().withPath("/serviceregistry/query"))
+            .respond(response().withStatusCode(200)
+            				   .withContentType(MediaType.APPLICATION_JSON_UTF_8)
+            		           .withBody(mapper.writeValueAsString(result)));
+        
     }
 
-    private void startAuthorizationSystemMockServer(Boolean useCertificates) {
-        if(useCertificates) {
-            String certificateAuthorityKeyPath = PropertiesExtractor.getProperty("mockserver.certificateAuthorityPrivateKey");
-            String certificateAuthorityCertificatePath = PropertiesExtractor.getProperty("mockserver.certificateAuthorityCertificate");
-            String authorizationSystemKeyPath = PropertiesExtractor.getProperty("mockserver.auth.privateKeyPath");
-            String authorizationSystemCertPath = PropertiesExtractor.getProperty("mockserver.auth.x509CertificatePath");
+    private void startAuthorizationSystemMockServer(final Boolean useCertificates) {
+        if (useCertificates) {
+            final String certificateAuthorityKeyPath = PropertiesExtractor.getProperty("mockserver.certificateAuthorityPrivateKey");
+            final String certificateAuthorityCertificatePath = PropertiesExtractor.getProperty("mockserver.certificateAuthorityCertificate");
+            final String authorizationSystemKeyPath = PropertiesExtractor.getProperty("mockserver.auth.privateKeyPath");
+            final String authorizationSystemCertPath = PropertiesExtractor.getProperty("mockserver.auth.x509CertificatePath");
 
             ConfigurationProperties.certificateAuthorityPrivateKey(certificateAuthorityKeyPath);
             ConfigurationProperties.certificateAuthorityCertificate(certificateAuthorityCertificatePath);
@@ -69,7 +97,7 @@ public class InitArrowheadMockServers {
             ConfigurationProperties.x509CertificatePath(authorizationSystemCertPath);
         }
 
-        String authorizationSystemPubKey = PropertiesExtractor.getProperty("mockserver.auth.pubKeyResponse");
+        final String authorizationSystemPubKey = PropertiesExtractor.getProperty("mockserver.auth.pubKeyResponse");
 
         authorizationSystemMockServer = ClientAndServer.startClientAndServer(8445);
 
@@ -79,7 +107,7 @@ public class InitArrowheadMockServers {
         )
         .respond(
             response()
-                .withBody(authorizationSystemPubKey)
+                .withBody("\"" + authorizationSystemPubKey + "\"")
         );
     }
 

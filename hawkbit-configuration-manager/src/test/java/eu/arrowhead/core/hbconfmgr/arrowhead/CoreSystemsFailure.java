@@ -18,8 +18,6 @@ import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 
-import eu.arrowhead.core.hbconfmgr.arrowhead.ArrowheadAuthorizationSystemClient;
-import eu.arrowhead.core.hbconfmgr.arrowhead.ArrowheadServiceRegistryClient;
 import eu.arrowhead.core.hbconfmgr.arrowhead.model.request.ServiceRegistryRequestDTO;
 import eu.arrowhead.core.hbconfmgr.arrowhead.model.request.SystemRequestDTO;
 
@@ -27,9 +25,9 @@ import eu.arrowhead.core.hbconfmgr.arrowhead.model.request.SystemRequestDTO;
 public class CoreSystemsFailure {
     @Test
     public void testServiceRegistryFailure() {
-        ArrowheadServiceRegistryClient srClient = new ArrowheadServiceRegistryClient("https://localhost:8443");
+        final ArrowheadServiceRegistryClient srClient = new ArrowheadServiceRegistryClient("https://localhost:8443");
 
-        ServiceRegistryRequestDTO requestDTO = ServiceRegistryRequestDTO.builder()
+        final ServiceRegistryRequestDTO requestDTO = ServiceRegistryRequestDTO.builder()
             .serviceDefinition("definition3")
             .providerSystem(SystemRequestDTO.builder()
                 .systemName("conf-system")
@@ -40,10 +38,10 @@ public class CoreSystemsFailure {
             .serviceUri("/")
             .secure(ServiceRegistryRequestDTO.SecurityLevel.TOKEN)
             .version(1)
-            .interfaces(Collections.singletonList("HTTPS-SECURE-JSON"))
+            .interfaces(Collections.singletonList("HTTP-SECURE-JSON"))
             .build();
 
-        Exception exception = assertThrows(Exception.class, () -> {
+        final Exception exception = assertThrows(Exception.class, () -> {
             srClient.registerService(requestDTO);
         });
 
@@ -52,9 +50,9 @@ public class CoreSystemsFailure {
 
     @Test
     public void testAuthorizationSystemFailure() {
-        ArrowheadAuthorizationSystemClient authClient = new ArrowheadAuthorizationSystemClient("https://localhost:8443");
+        final ArrowheadAuthorizationSystemClient authClient = new ArrowheadAuthorizationSystemClient("https://localhost:8443");
 
-        Exception exception = assertThrows(Exception.class, () -> {
+        final Exception exception = assertThrows(Exception.class, () -> {
             authClient.getPublicKey();
         });
 

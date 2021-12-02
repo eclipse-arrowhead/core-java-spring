@@ -17,25 +17,25 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import com.github.fridujo.rabbitmq.mock.MockConnection;
 import com.github.fridujo.rabbitmq.mock.MockConnectionFactory;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Envelope;
 
-import eu.arrowhead.core.hbconfmgr.hawkbit.HawkbitDmfConsumer;
 import eu.arrowhead.core.hbconfmgr.hawkbit.model.inbound.CancelDownloadInboundMessage;
 import eu.arrowhead.core.hbconfmgr.hawkbit.model.inbound.DownloadRequestInboundMessage;
 import eu.arrowhead.core.hbconfmgr.hawkbit.model.inbound.ThingDeletedInboundMessage;
 import eu.arrowhead.core.hbconfmgr.service.WebSocketService;
 import eu.arrowhead.core.hbconfmgr.websocket.DeviceNotConnectedException;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 public class HawkbitDmfConsumerTest {
-    HawkbitDmfConsumer consumer;
-    MockConnection mockConnection;
-    WebSocketService mock_wsService;
+    
+	private HawkbitDmfConsumer consumer;
+    private MockConnection mockConnection;
+    private WebSocketService mock_wsService;
 
     @BeforeEach
     public void init() {
@@ -47,12 +47,12 @@ public class HawkbitDmfConsumerTest {
 
     @Test
     public void testDownloadRequestInboundGeneration() throws IOException, DeviceNotConnectedException {
-        AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder().contentType("application/json")
+        final AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder().contentType("application/json")
                 .headers(Map.ofEntries(Map.entry("type", "EVENT"), Map.entry("thingId", "device7"),
                         Map.entry("topic", "DOWNLOAD_AND_INSTALL"), Map.entry("tenant", "tenant1")))
                 .build();
 
-        String body = "{\n" + "    \"actionId\": 8,\n" + "    \"targetSecurityToken\": \"aslkhju4kjasdz9uas\",\n"
+        final String body = "{\n" + "    \"actionId\": 8,\n" + "    \"targetSecurityToken\": \"aslkhju4kjasdz9uas\",\n"
                 + "    \"softwareModules\": [{\n" + "            \"moduleId\": 1,\n"
                 + "            \"moduleType\": \"OS\",\n" + "            \"moduleVersion\": \"1.0\",\n"
                 + "            \"artifacts\": [{\n" + "                    \"filename\": \"os.zip\",\n"
@@ -69,7 +69,7 @@ public class HawkbitDmfConsumerTest {
                 + "                    \"value\": \"This is the new operating system\"\n" + "                }\n"
                 + "            ]\n" + "        }\n" + "    ]\n" + "}";
 
-        DownloadRequestInboundMessage.Body assertBody = DownloadRequestInboundMessage.Body.builder().actionId(8L)
+        final DownloadRequestInboundMessage.Body assertBody = DownloadRequestInboundMessage.Body.builder().actionId(8L)
                 .targetSecurityToken("aslkhju4kjasdz9uas")
                 .softwareModules(Collections.singletonList(DownloadRequestInboundMessage.Body.SoftwareModule.builder()
                         .moduleId(1L).moduleType("OS").moduleVersion("1.0")
@@ -86,10 +86,10 @@ public class HawkbitDmfConsumerTest {
                         .build()))
                 .build();
 
-        DownloadRequestInboundMessage.Headers assertHeaders = DownloadRequestInboundMessage.Headers.builder().type("EVENT")
+        final DownloadRequestInboundMessage.Headers assertHeaders = DownloadRequestInboundMessage.Headers.builder().type("EVENT")
                 .thingId("device7").topic("DOWNLOAD_AND_INSTALL").tenant("tenant1").build();
 
-        DownloadRequestInboundMessage assertMessage = DownloadRequestInboundMessage.builder().body(assertBody).deliveryTag(1l).headers(assertHeaders).build();
+        final DownloadRequestInboundMessage assertMessage = DownloadRequestInboundMessage.builder().body(assertBody).deliveryTag(1l).headers(assertHeaders).build();
 
         consumer.handleDelivery("tag", new Envelope(1L, false, "exchange", "routingKey"), properties, body.getBytes());
 
@@ -98,16 +98,16 @@ public class HawkbitDmfConsumerTest {
 
     @Test
     public void testCancelDownload() throws IOException, DeviceNotConnectedException {
-        AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder().contentType("application/json")
+        final AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder().contentType("application/json")
                 .headers(Map.ofEntries(Map.entry("type", "EVENT"), Map.entry("thingId", "device7"),
                         Map.entry("topic", "CANCEL_DOWNLOAD"), Map.entry("tenant", "tenant1")))
                 .build();
 
-        String rawMessage = "{"
+        final String rawMessage = "{"
             + "\"actionId\": 16"
         + "}";
 
-        CancelDownloadInboundMessage cancelDownloadInboundMessage = CancelDownloadInboundMessage.builder()
+        final CancelDownloadInboundMessage cancelDownloadInboundMessage = CancelDownloadInboundMessage.builder()
             .body(
                 CancelDownloadInboundMessage.Body.builder()
                     .actionId(16L)
@@ -130,12 +130,12 @@ public class HawkbitDmfConsumerTest {
 
     @Test
     public void testThingDeleted() throws IOException, DeviceNotConnectedException {
-        AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder().contentType("application/json")
+        final AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder().contentType("application/json")
                 .headers(Map.ofEntries(Map.entry("type", "THING_DELETED"), Map.entry("thingId", "device7"),
                         Map.entry("topic", "THING_DELETED"), Map.entry("tenant", "tenant1")))
                 .build();
 
-        ThingDeletedInboundMessage thingDeletedInboundMessage = ThingDeletedInboundMessage.builder()
+        final ThingDeletedInboundMessage thingDeletedInboundMessage = ThingDeletedInboundMessage.builder()
             .headers(
                 ThingDeletedInboundMessage.Headers.builder()
                     .thingId("device7")

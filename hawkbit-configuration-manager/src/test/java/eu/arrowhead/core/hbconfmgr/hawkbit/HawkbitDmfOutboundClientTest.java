@@ -12,22 +12,20 @@ package eu.arrowhead.core.hbconfmgr.hawkbit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
-
-import com.github.fridujo.rabbitmq.mock.MockConnection;
-import com.github.fridujo.rabbitmq.mock.MockConnectionFactory;
-import com.rabbitmq.client.AMQP;
 
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
-import eu.arrowhead.core.hbconfmgr.hawkbit.HawkbitDmfOutboundClient;
+import com.github.fridujo.rabbitmq.mock.MockConnection;
+import com.github.fridujo.rabbitmq.mock.MockConnectionFactory;
+import com.rabbitmq.client.AMQP;
+
 import eu.arrowhead.core.hbconfmgr.hawkbit.model.ActionStatus;
 import eu.arrowhead.core.hbconfmgr.hawkbit.model.outbound.ThingCreatedOutboundMessage;
 import eu.arrowhead.core.hbconfmgr.hawkbit.model.outbound.UpdateActionStatusOutboundMessage;
@@ -38,11 +36,11 @@ public class HawkbitDmfOutboundClientTest {
 
     @Test
     public void givenCorrectMessage_whenCreateThing_thenThingIsCreated() throws IOException, JSONException {
-        MockConnection mockConnection = new MockConnectionFactory().newConnection();
-        HawkbitDmfMockServer mockServer = new HawkbitDmfMockServer(mockConnection.createChannel());
-        HawkbitDmfOutboundClient client = new HawkbitDmfOutboundClient(mockConnection.createChannel());
+        final MockConnection mockConnection = new MockConnectionFactory().newConnection();
+        final HawkbitDmfMockServer mockServer = new HawkbitDmfMockServer(mockConnection.createChannel());
+        final HawkbitDmfOutboundClient client = new HawkbitDmfOutboundClient(mockConnection.createChannel());
 
-        ThingCreatedOutboundMessage message = ThingCreatedOutboundMessage.builder()
+        final ThingCreatedOutboundMessage message = ThingCreatedOutboundMessage.builder()
                 .body(ThingCreatedOutboundMessage.Body.builder()
                         .name("device3")
                         .build())
@@ -56,7 +54,7 @@ public class HawkbitDmfOutboundClientTest {
         client.createThing(message);
 
         await().until(() -> mockServer.getMessages().size() == 1);
-        Message receivedMessage = mockServer.getMessages().get(0);
+        final Message receivedMessage = mockServer.getMessages().get(0);
         assertThat(receivedMessage).isNotNull();
         assertThat(receivedMessage.getProperties()).isEqualTo(new AMQP.BasicProperties.Builder()
                 .headers(Map.ofEntries(
@@ -74,11 +72,11 @@ public class HawkbitDmfOutboundClientTest {
 
     @Test
     public void givenCorrectMessage_whenUpdateActionStatus_thenActionIsUpdated() throws IOException, JSONException {
-        MockConnection mockConnection = new MockConnectionFactory().newConnection();
-        HawkbitDmfMockServer mockServer = new HawkbitDmfMockServer(mockConnection.createChannel());
-        HawkbitDmfOutboundClient client = new HawkbitDmfOutboundClient(mockConnection.createChannel());
+        final MockConnection mockConnection = new MockConnectionFactory().newConnection();
+        final HawkbitDmfMockServer mockServer = new HawkbitDmfMockServer(mockConnection.createChannel());
+        final HawkbitDmfOutboundClient client = new HawkbitDmfOutboundClient(mockConnection.createChannel());
 
-        UpdateActionStatusOutboundMessage message = UpdateActionStatusOutboundMessage.builder()
+        final UpdateActionStatusOutboundMessage message = UpdateActionStatusOutboundMessage.builder()
                 .body(UpdateActionStatusOutboundMessage.UpdateActionStatusOutboundMessageBody.builder()
                         .actionId(7L)
                         .actionStatus(ActionStatus.FINISHED)
@@ -93,7 +91,7 @@ public class HawkbitDmfOutboundClientTest {
         client.updateActionStatus(message);
 
         await().until(() -> mockServer.getMessages().size() == 1);
-        Message receivedMessage = mockServer.getMessages().get(0);
+        final Message receivedMessage = mockServer.getMessages().get(0);
         assertThat(receivedMessage).isNotNull();
         assertThat(receivedMessage.getProperties()).isEqualTo(new AMQP.BasicProperties.Builder()
                 .headers(Map.ofEntries(
@@ -109,5 +107,4 @@ public class HawkbitDmfOutboundClientTest {
                 "    \"message\": [\"Successfully applied update on device\"]\n" +
                 "}", receivedMessage.getBody(), JSONCompareMode.NON_EXTENSIBLE);
     }
-
 }

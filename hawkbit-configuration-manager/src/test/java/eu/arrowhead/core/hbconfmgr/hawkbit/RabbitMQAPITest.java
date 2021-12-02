@@ -18,27 +18,24 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import com.github.fridujo.rabbitmq.mock.MockConnectionFactory;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Connection;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import eu.arrowhead.core.hbconfmgr.hawkbit.HawkbitDmfConsumer;
 import eu.arrowhead.core.hbconfmgr.hawkbit.model.inbound.DownloadRequestInboundMessage;
 import eu.arrowhead.core.hbconfmgr.hawkbit.util.HawkbitDmfMockServer;
 import eu.arrowhead.core.hbconfmgr.service.WebSocketService;
 import eu.arrowhead.core.hbconfmgr.websocket.DeviceNotConnectedException;
 
 public class RabbitMQAPITest {
-    HawkbitDmfConsumer consumer;
-
-    WebSocketService mock_wsService;
-
-    HawkbitDmfMockServer mockServer;
-
-    Connection mockConnection;
+    
+	private HawkbitDmfConsumer consumer;
+	private WebSocketService mock_wsService;
+	private HawkbitDmfMockServer mockServer;
+	private Connection mockConnection;
 
     @BeforeEach
     public void init() throws IOException {
@@ -55,7 +52,7 @@ public class RabbitMQAPITest {
             
         consumer.subscribeToDownloadEvents();
 
-        AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
+        final AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
             .contentType("application/json")
             .headers(Map.ofEntries(
                 Map.entry("type", "EVENT"),
@@ -64,7 +61,7 @@ public class RabbitMQAPITest {
                 Map.entry("tenant", "tenant1")
             ))
             .build();
-        String body = "{\n" +
+        final String body = "{\n" +
                 "    \"actionId\": 8,\n" +
                 "    \"targetSecurityToken\": \"aslkhju4kjasdz9uas\",\n" +
                 "    \"softwareModules\": [{\n" +
@@ -95,7 +92,7 @@ public class RabbitMQAPITest {
                 "}";
         mockServer.publish(properties, body);
 
-        DownloadRequestInboundMessage.Body assertBody = DownloadRequestInboundMessage.Body.builder().actionId(8L)
+        final DownloadRequestInboundMessage.Body assertBody = DownloadRequestInboundMessage.Body.builder().actionId(8L)
             .targetSecurityToken("aslkhju4kjasdz9uas")
             .softwareModules(Collections.singletonList(DownloadRequestInboundMessage.Body.SoftwareModule.builder()
                 .moduleId(1L).moduleType("OS").moduleVersion("1.0")
@@ -113,10 +110,10 @@ public class RabbitMQAPITest {
                 .build()))
             .build();
 
-        DownloadRequestInboundMessage.Headers assertHeaders = DownloadRequestInboundMessage.Headers.builder().type("EVENT")
+        final DownloadRequestInboundMessage.Headers assertHeaders = DownloadRequestInboundMessage.Headers.builder().type("EVENT")
             .thingId("device7").topic("DOWNLOAD_AND_INSTALL").tenant("tenant1").build();
 
-        DownloadRequestInboundMessage assertMessage = DownloadRequestInboundMessage.builder().body(assertBody).deliveryTag(1l).headers(assertHeaders).build();
+        final DownloadRequestInboundMessage assertMessage = DownloadRequestInboundMessage.builder().body(assertBody).deliveryTag(1l).headers(assertHeaders).build();
         
         verify(mock_wsService, timeout(1000)).sendDownloadEventMessage(assertMessage);
     }

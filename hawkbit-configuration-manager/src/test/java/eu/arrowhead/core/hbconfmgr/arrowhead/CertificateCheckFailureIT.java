@@ -10,73 +10,43 @@
 
 package eu.arrowhead.core.hbconfmgr.arrowhead;
 
-import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.nio.channels.ClosedChannelException;
-import java.util.Collections;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 
-import eu.arrowhead.core.hbconfmgr.arrowhead.ArrowheadAuthorizationSystemClient;
-import eu.arrowhead.core.hbconfmgr.arrowhead.ArrowheadServiceRegistryClient;
-import eu.arrowhead.core.hbconfmgr.arrowhead.model.request.ServiceRegistryRequestDTO;
-import eu.arrowhead.core.hbconfmgr.arrowhead.model.request.SystemRequestDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import eu.arrowhead.core.hbconfmgr.config.ArrowheadConfig;
 import eu.arrowhead.core.hbconfmgr.config.InitArrowheadMockServers;
 
 
-@SpringBootTest
 @ActiveProfiles("test")
 public class CertificateCheckFailureIT {
     private static InitArrowheadMockServers initMockServer;
-
-    @Autowired
-    ArrowheadAuthorizationSystemClient authClient;
-
-    @Autowired
-    ArrowheadServiceRegistryClient srClient;
+    
 
     @BeforeAll
-    public static void beforeAll() {
+    public static void beforeAll() throws JsonProcessingException {
         CertificateCheckFailureIT.initMockServer = new InitArrowheadMockServers();
         CertificateCheckFailureIT.initMockServer.setUp(false);
     }
 
     @Test
-    public void testMissingServerCertificatesAuthorizationSystem() {
-        Exception exception = assertThrows(Exception.class, () -> {
-            authClient.getPublicKey();
-        });
-
-        assertEquals(ClosedChannelException.class, exception.getCause().getClass());
-    }
-
-    @Test
     public void testMissingServerCertificatesServiceRegistry() {
-        ServiceRegistryRequestDTO requestDTO = ServiceRegistryRequestDTO.builder()
-            .serviceDefinition("definition3")
-            .providerSystem(SystemRequestDTO.builder()
-                .systemName("conf-system")
-                .address("192.168.1.1")
-                .port(1234)
-                .authenticationInfo("test")
-                .build())
-            .serviceUri("/")
-            .secure(ServiceRegistryRequestDTO.SecurityLevel.TOKEN)
-            .version(1)
-            .interfaces(Collections.singletonList("HTTPS-SECURE-JSON"))
-            .build();
-
-        Exception exception = assertThrows(Exception.class, () -> {
-            srClient.registerService(requestDTO);
-        });
-
-        assertEquals(ClosedChannelException.class, exception.getCause().getClass());
+    	try {
+    		ArrowheadConfig config = new ArrowheadConfig();
+    		ReflectionTestUtils.setField(config, "serviceRegistryAddress", "localhost");
+    		ReflectionTestUtils.setField(config, "serviceRegistryPort", 8443);
+    		config.init();
+    	} catch (final Exception e) {
+    		assertEquals(ClosedChannelException.class, e.getCause().getClass());
+    	}
     }
 
     @AfterAll

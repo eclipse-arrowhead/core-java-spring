@@ -15,17 +15,19 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 import java.util.Collections;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import javax.validation.ConstraintViolationException;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import eu.arrowhead.core.hbconfmgr.arrowhead.ArrowheadServiceRegistryClient;
 import eu.arrowhead.core.hbconfmgr.arrowhead.model.request.ServiceRegistryRequestDTO;
 import eu.arrowhead.core.hbconfmgr.arrowhead.model.request.SystemRequestDTO;
 import eu.arrowhead.core.hbconfmgr.arrowhead.model.response.ServiceDefinitionResponseDTO;
@@ -37,10 +39,23 @@ import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 
 public class ArrowheadServiceRegistryClientTest {
+	
+	 private static Locale defaultLocale;
+		
+	@BeforeAll
+	public static void setUp()  {
+		defaultLocale = Locale.getDefault();
+		Locale.setDefault(Locale.UK);
+	}
+	
+	@AfterAll
+	public static void tearDown() {
+		Locale.setDefault(defaultLocale);
+	}
 
     @Test
     public void givenServiceIsNotRegistered_whenRegisterService_thenServiceIsRegistered() throws Exception {
-        MockWebServer mockWebServer = new MockWebServer();
+        final MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.enqueue(new MockResponse()
                 .setResponseCode(201)
                 .addHeader("Content-Type", "application/json")
@@ -49,8 +64,8 @@ public class ArrowheadServiceRegistryClientTest {
                         "    \"serviceDefinition\": {\n" +
                         "        \"id\": 7,\n" +
                         "        \"serviceDefinition\": \"definition3\",\n" +
-                        "        \"createdAt\": \"2020-04-21 11:27:39\",\n" +
-                        "        \"updatedAt\": \"2020-04-21 11:27:39\"\n" +
+                        "        \"createdAt\": \"2020-04-21T11:27:39Z\",\n" +
+                        "        \"updatedAt\": \"2020-04-21T11:27:39Z\"\n" +
                         "    },\n" +
                         "    \"provider\": {\n" +
                         "        \"id\": 9,\n" +
@@ -58,27 +73,27 @@ public class ArrowheadServiceRegistryClientTest {
                         "        \"address\": \"192.168.1.1\",\n" +
                         "        \"port\": 1234,\n" +
                         "        \"authenticationInfo\": \"test\",\n" +
-                        "        \"createdAt\": \"2020-05-05 06:37:19\",\n" +
-                        "        \"updatedAt\": \"2020-05-05 06:37:19\"\n" +
+                        "        \"createdAt\": \"2020-05-05T06:37:19Z\",\n" +
+                        "        \"updatedAt\": \"2020-05-05T06:37:19Z\"\n" +
                         "    },\n" +
                         "    \"serviceUri\": \"/\",\n" +
                         "    \"secure\": \"TOKEN\",\n" +
                         "    \"version\": 1,\n" +
                         "    \"interfaces\": [{\n" +
                         "            \"id\": 3,\n" +
-                        "            \"interfaceName\": \"HTTPS-SECURE-JSON\",\n" +
-                        "            \"createdAt\": \"2020-04-21 11:27:39\",\n" +
-                        "            \"updatedAt\": \"2020-04-21 11:27:39\"\n" +
+                        "            \"interfaceName\": \"HTTP-SECURE-JSON\",\n" +
+                        "            \"createdAt\": \"2020-04-21T11:27:39Z\",\n" +
+                        "            \"updatedAt\": \"2020-04-21T11:27:39Z\"\n" +
                         "        }\n" +
                         "    ],\n" +
-                        "    \"createdAt\": \"2020-05-05 06:37:19\",\n" +
-                        "    \"updatedAt\": \"2020-05-05 06:37:19\"\n" +
+                        "    \"createdAt\": \"2020-05-05T06:37:19Z\",\n" +
+                        "    \"updatedAt\": \"2020-05-05T06:37:19Z\"\n" +
                         "}"));
         mockWebServer.start();
 
-        String baseUrl = mockWebServer.url("").toString();
-        ArrowheadServiceRegistryClient client = new ArrowheadServiceRegistryClient(baseUrl);
-        ServiceRegistryRequestDTO requestDTO = ServiceRegistryRequestDTO.builder()
+        final String baseUrl = mockWebServer.url("").toString();
+        final ArrowheadServiceRegistryClient client = new ArrowheadServiceRegistryClient(baseUrl);
+        final ServiceRegistryRequestDTO requestDTO = ServiceRegistryRequestDTO.builder()
                 .serviceDefinition("definition3")
                 .providerSystem(SystemRequestDTO.builder()
                         .systemName("conf-system")
@@ -89,11 +104,11 @@ public class ArrowheadServiceRegistryClientTest {
                 .serviceUri("/")
                 .secure(ServiceRegistryRequestDTO.SecurityLevel.TOKEN)
                 .version(1)
-                .interfaces(Collections.singletonList("HTTPS-SECURE-JSON"))
+                .interfaces(Collections.singletonList("HTTP-SECURE-JSON"))
                 .build();
-        ServiceRegistryResponseDTO responseDTO = client.registerService(requestDTO);
+        final ServiceRegistryResponseDTO responseDTO = client.registerService(requestDTO);
 
-        RecordedRequest recordedRequest = mockWebServer.takeRequest(10, TimeUnit.SECONDS);
+        final RecordedRequest recordedRequest = mockWebServer.takeRequest(10, TimeUnit.SECONDS);
         assertThat(recordedRequest).isNotNull();
         assertThat(recordedRequest.getMethod()).isEqualTo("POST");
         assertThat(recordedRequest.getPath()).isEqualTo("/serviceregistry/register");
@@ -103,14 +118,15 @@ public class ArrowheadServiceRegistryClientTest {
                 "        \"systemName\": \"conf-system\",\n" +
                 "        \"address\": \"192.168.1.1\",\n" +
                 "        \"port\": 1234,\n" +
-                "        \"authenticationInfo\": \"test\"\n" +
+                "        \"authenticationInfo\": \"test\",\n" +
+                "        \"metadata\": null\n" +
                 "    },\n" +
                 "    \"serviceUri\": \"/\",\n" +
                 "    \"endOfValidity\": null,\n" +
                 "    \"secure\": \"TOKEN\",\n" +
                 "    \"metadata\": null,\n" +
                 "    \"version\": 1,\n" +
-                "    \"interfaces\": [\"HTTPS-SECURE-JSON\"]\n" +
+                "    \"interfaces\": [\"HTTP-SECURE-JSON\"]\n" +
                 "}", recordedRequest.getBody().readUtf8(), JSONCompareMode.NON_EXTENSIBLE);
 
         assertThat(responseDTO).isEqualTo(ServiceRegistryResponseDTO.builder()
@@ -118,8 +134,8 @@ public class ArrowheadServiceRegistryClientTest {
                 .serviceDefinition(ServiceDefinitionResponseDTO.builder()
                         .id(7L)
                         .serviceDefinition("definition3")
-                        .createdAt("2020-04-21 11:27:39")
-                        .updatedAt("2020-04-21 11:27:39")
+                        .createdAt("2020-04-21T11:27:39Z")
+                        .updatedAt("2020-04-21T11:27:39Z")
                         .build())
                 .provider(SystemResponseDTO.builder()
                         .id(9L)
@@ -127,27 +143,27 @@ public class ArrowheadServiceRegistryClientTest {
                         .address("192.168.1.1")
                         .port(1234)
                         .authenticationInfo("test")
-                        .createdAt("2020-05-05 06:37:19")
-                        .updatedAt("2020-05-05 06:37:19")
+                        .createdAt("2020-05-05T06:37:19Z")
+                        .updatedAt("2020-05-05T06:37:19Z")
                         .build())
                 .serviceUri("/")
                 .secure("TOKEN")
                 .version(1)
                 .interfaces(Collections.singletonList(ServiceInterfaceResponseDTO.builder()
                         .id(3L)
-                        .interfaceName("HTTPS-SECURE-JSON")
-                        .createdAt("2020-04-21 11:27:39")
-                        .updatedAt("2020-04-21 11:27:39")
+                        .interfaceName("HTTP-SECURE-JSON")
+                        .createdAt("2020-04-21T11:27:39Z")
+                        .updatedAt("2020-04-21T11:27:39Z")
                         .build()))
-                .createdAt("2020-05-05 06:37:19")
-                .updatedAt("2020-05-05 06:37:19")
+                .createdAt("2020-05-05T06:37:19Z")
+                .updatedAt("2020-05-05T06:37:19Z")
                 .build());
         mockWebServer.close();
     }
 
     @Test
     public void givenServiceIsAlreadyRegistered_whenRegisterService_thenWebClientResponseExceptionIsThrown() throws Exception {
-        MockWebServer mockWebServer = new MockWebServer();
+        final MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.enqueue(new MockResponse()
                 .setResponseCode(400)
                 .addHeader("Content-Type", "application/json")
@@ -158,9 +174,9 @@ public class ArrowheadServiceRegistryClientTest {
                         "}"));
         mockWebServer.start();
 
-        String baseUrl = mockWebServer.url("").toString();
-        ArrowheadServiceRegistryClient client = new ArrowheadServiceRegistryClient(baseUrl);
-        ServiceRegistryRequestDTO requestDTO = ServiceRegistryRequestDTO.builder()
+        final String baseUrl = mockWebServer.url("").toString();
+        final ArrowheadServiceRegistryClient client = new ArrowheadServiceRegistryClient(baseUrl);
+        final ServiceRegistryRequestDTO requestDTO = ServiceRegistryRequestDTO.builder()
                 .serviceDefinition("definition3")
                 .providerSystem(SystemRequestDTO.builder()
                         .systemName("conf-system")
@@ -171,10 +187,10 @@ public class ArrowheadServiceRegistryClientTest {
                 .serviceUri("/")
                 .secure(ServiceRegistryRequestDTO.SecurityLevel.TOKEN)
                 .version(1)
-                .interfaces(Collections.singletonList("HTTPS-SECURE-JSON"))
+                .interfaces(Collections.singletonList("HTTP-SECURE-JSON"))
                 .build();
 
-        WebClientResponseException exception = catchThrowableOfType(() ->
+        final WebClientResponseException exception = catchThrowableOfType(() ->
                 client.registerService(requestDTO), WebClientResponseException.class);
 
         assertThat(exception).hasMessageContaining("400 Bad Request from POST");
@@ -185,12 +201,12 @@ public class ArrowheadServiceRegistryClientTest {
 
     @Test
     public void givenServiceRegistryRequestDTOIsInvalid_whenRegisterService_thenConstraintViolationExceptionIsThrown() throws Exception {
-        MockWebServer mockWebServer = new MockWebServer();
+        final MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.start();
 
-        String baseUrl = mockWebServer.url("").toString();
-        ArrowheadServiceRegistryClient client = new ArrowheadServiceRegistryClient(baseUrl);
-        ServiceRegistryRequestDTO requestDTO = ServiceRegistryRequestDTO.builder().build();
+        final String baseUrl = mockWebServer.url("").toString();
+        final ArrowheadServiceRegistryClient client = new ArrowheadServiceRegistryClient(baseUrl);
+        final ServiceRegistryRequestDTO requestDTO = ServiceRegistryRequestDTO.builder().build();
 
         assertThatThrownBy(() -> client.registerService(requestDTO))
                 .isInstanceOf(ConstraintViolationException.class)
@@ -205,18 +221,18 @@ public class ArrowheadServiceRegistryClientTest {
 
     @Test
     public void givenSystemRequestDTOIsInvalid_whenRegisterService_thenConstraintViolationExceptionIsThrown() throws Exception {
-        MockWebServer mockWebServer = new MockWebServer();
+        final MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.start();
 
-        String baseUrl = mockWebServer.url("").toString();
-        ArrowheadServiceRegistryClient client = new ArrowheadServiceRegistryClient(baseUrl);
-        ServiceRegistryRequestDTO requestDTO = ServiceRegistryRequestDTO.builder()
+        final String baseUrl = mockWebServer.url("").toString();
+        final ArrowheadServiceRegistryClient client = new ArrowheadServiceRegistryClient(baseUrl);
+        final ServiceRegistryRequestDTO requestDTO = ServiceRegistryRequestDTO.builder()
                 .serviceDefinition("definition3")
                 .providerSystem(SystemRequestDTO.builder().build())
                 .serviceUri("/")
                 .secure(ServiceRegistryRequestDTO.SecurityLevel.TOKEN)
                 .version(1)
-                .interfaces(Collections.singletonList("HTTPS-SECURE-JSON"))
+                .interfaces(Collections.singletonList("HTTP-SECURE-JSON"))
                 .build();
 
         assertThatThrownBy(() -> client.registerService(requestDTO))
@@ -229,5 +245,4 @@ public class ArrowheadServiceRegistryClientTest {
 
         mockWebServer.close();
     }
-
 }

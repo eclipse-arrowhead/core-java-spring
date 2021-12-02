@@ -14,29 +14,28 @@ import static org.junit.Assert.assertThrows;
 
 import java.io.IOException;
 
+import org.junit.jupiter.api.Test;
+
 import com.github.fridujo.rabbitmq.mock.MockConnection;
 import com.github.fridujo.rabbitmq.mock.MockConnectionFactory;
 
-import org.junit.jupiter.api.Test;
-
-import eu.arrowhead.core.hbconfmgr.hawkbit.HawkbitDmfOutboundClient;
 import eu.arrowhead.core.hbconfmgr.hawkbit.model.outbound.ThingCreatedOutboundMessage;
 import eu.arrowhead.core.hbconfmgr.hawkbit.util.HawkbitDmfMockServer;
 
 
 public class HawkbitFailureTest {
 
-    HawkbitDmfMockServer dmfMockServer;
+    private HawkbitDmfMockServer dmfMockServer;
 
     @Test
     public void testMissingExchange() throws IOException {
-        MockConnection mockConnection = new MockConnectionFactory().newConnection();
+        final MockConnection mockConnection = new MockConnectionFactory().newConnection();
 
-        HawkbitDmfOutboundClient hawkbitClient = new HawkbitDmfOutboundClient(mockConnection.createChannel());
+        final HawkbitDmfOutboundClient hawkbitClient = new HawkbitDmfOutboundClient(mockConnection.createChannel());
 
         dmfMockServer = new HawkbitDmfMockServer(mockConnection.createChannel());
         
-        ThingCreatedOutboundMessage message = ThingCreatedOutboundMessage.builder()
+        final ThingCreatedOutboundMessage message = ThingCreatedOutboundMessage.builder()
             .body(
                 ThingCreatedOutboundMessage.Body.builder()
                     .name("some.device")
@@ -58,6 +57,5 @@ public class HawkbitFailureTest {
         assertThrows(IllegalArgumentException.class, () -> {
             hawkbitClient.createThing(message);
         });
-
     }
 }

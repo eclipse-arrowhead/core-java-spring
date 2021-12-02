@@ -27,5 +27,4 @@ public class Message {
     private Envelope envelope;
     private AMQP.BasicProperties properties;
     private String body;
-
 }

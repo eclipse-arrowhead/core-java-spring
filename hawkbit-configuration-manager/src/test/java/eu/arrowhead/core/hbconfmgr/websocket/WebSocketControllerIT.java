@@ -32,6 +32,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.websocket.DeploymentException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Throwables;
 import com.rabbitmq.client.Connection;
 
@@ -66,29 +67,29 @@ import lombok.extern.log4j.Log4j2;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class WebSocketControllerIT {
-    @Value("${testParameters.token}")
-    String testToken;
+    
+	@Value("${testParameters.token}")
+    private String testToken;
 
     @Value("${testParameters.incorrectToken}")
-    String incorrectTestToken;
+    private String incorrectTestToken;
 
     @Autowired
-    Connection mockConnection;
+    private Connection mockConnection;
 
     @Autowired
-    TrustManager[] tm;
+    private TrustManager[] tm;
 
     @LocalServerPort
     private Integer port;
 
-    HawkbitDmfMockServer hawkbitMockServer;
-
-    StandardWebSocketClient wsClient;
+    private HawkbitDmfMockServer hawkbitMockServer;
+    private StandardWebSocketClient wsClient;
 
     private static InitArrowheadMockServers initMockServer;
 
     @BeforeAll
-    public static void beforeAll() {
+    public static void beforeAll() throws JsonProcessingException {
         WebSocketControllerIT.initMockServer = new InitArrowheadMockServers();
         WebSocketControllerIT.initMockServer.setUp();
     }
@@ -97,10 +98,10 @@ public class WebSocketControllerIT {
     public void init() throws NoSuchAlgorithmException, CertificateException, FileNotFoundException, IOException,
             KeyStoreException, UnrecoverableKeyException, KeyManagementException {
         wsClient = new StandardWebSocketClient();
-        Map<String, Object> userProperties = new HashMap<>();
-        SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(new TrustStrategy() {
+        final Map<String, Object> userProperties = new HashMap<>();
+        final SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(new TrustStrategy() {
             @Override
-            public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+            public boolean isTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
                 log.error(chain);
                 return true;
             }
@@ -119,14 +120,14 @@ public class WebSocketControllerIT {
     @Test
     public void testWebsocketWithCorrectTokenAndCorrectPayload()
             throws InterruptedException, ExecutionException, IOException, JSONException {
-        WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
+        final WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
         headers.setBearerAuth(testToken);
 
-        WebSocketSession session = wsClient.doHandshake(new TextWebSocketHandler() {
+        final WebSocketSession session = wsClient.doHandshake(new TextWebSocketHandler() {
 
         }, headers, URI.create("wss://localhost:" + port)).get();
 
-        String message = "{" 
+        final String message = "{" 
             + "\"actionId\": 11,"
             + "\"softwareModuleId\": 12,"
             + "\"actionStatus\": \"DOWNLOAD\","
@@ -149,20 +150,20 @@ public class WebSocketControllerIT {
             }
         });
 
-        List<Message> receivedMessages = hawkbitMockServer.getMessages();
-        Message receivedUpdateActionStatus = receivedMessages.get(1);
-        String receivedUpdateActionStatusBody = receivedUpdateActionStatus.getBody();
+        final List<Message> receivedMessages = hawkbitMockServer.getMessages();
+        final Message receivedUpdateActionStatus = receivedMessages.get(1);
+        final String receivedUpdateActionStatusBody = receivedUpdateActionStatus.getBody();
 
         JSONAssert.assertEquals(message, receivedUpdateActionStatusBody, true);
     }
 
     @Test
     public void testWebsocketWithIncorrectToken() throws IOException, InterruptedException, ExecutionException {
-        WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
+        final WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
         headers.setBearerAuth(incorrectTestToken);
 
         
-        Exception e = assertThrows(ExecutionException.class, () -> {
+        final Exception e = assertThrows(ExecutionException.class, () -> {
             wsClient.doHandshake(new TextWebSocketHandler(), headers, URI.create("wss://localhost:" + port)).get();
         });
         

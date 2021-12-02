@@ -33,7 +33,7 @@ public class HawkbitDmfMockServer {
     @Getter
     private final List<Message> messages;
 
-    public HawkbitDmfMockServer(Channel channel) throws IOException {
+    public HawkbitDmfMockServer(final Channel channel) throws IOException {
         this.channel = channel;
         this.messages = new ArrayList<>();
         this.initializeMockServer();
@@ -43,19 +43,19 @@ public class HawkbitDmfMockServer {
         messages.clear();
     }
 
-    public void publish(AMQP.BasicProperties properties, String body) throws IOException {
-        byte[] byteBody = body.getBytes(StandardCharsets.UTF_8);
+    public void publish(final AMQP.BasicProperties properties, final String body) throws IOException {
+        final byte[] byteBody = body.getBytes(StandardCharsets.UTF_8);
         this.channel.basicPublish("configuration_system.direct.exchange", "", properties, byteBody);
     }
 
     private void initializeMockServer() throws IOException {
-        String queueName = this.channel.queueDeclare().getQueue();
+        final String queueName = this.channel.queueDeclare().getQueue();
         this.channel.exchangeDeclare("dmf.exchange", BuiltinExchangeType.DIRECT);
         this.channel.queueBind(queueName, "dmf.exchange", "");
         this.channel.basicConsume(queueName, new DefaultConsumer(this.channel) {
             @Override
-            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
-                String bodyString = new String(body, StandardCharsets.UTF_8);
+            public void handleDelivery(final String consumerTag, final Envelope envelope, final AMQP.BasicProperties properties, final byte[] body) {
+                final String bodyString = new String(body, StandardCharsets.UTF_8);
                 log.debug("Received amqp message: consumerTag {}, envelope {}, properties {}, body {}",
                         consumerTag, envelope, properties, bodyString);
                 messages.add(new Message(envelope, properties, bodyString));
@@ -66,5 +66,4 @@ public class HawkbitDmfMockServer {
     public void stageFailure() throws IOException {
         this.channel.exchangeDelete("dmf.exchange", false);
     }
-
 }

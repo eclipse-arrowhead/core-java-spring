@@ -19,15 +19,15 @@ public class PropertiesExtractor {
     private static Properties properties;
     static {
         properties = new Properties();
-        URL url = PropertiesExtractor.class.getClassLoader().getResource("mockserver.properties");
+        final URL url = PropertiesExtractor.class.getClassLoader().getResource("mockserver.properties");
         try{
             properties.load(new FileInputStream(url.getPath()));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }
     
-    public static String getProperty(String key){
+    public static String getProperty(final String key){
         return properties.getProperty(key);
     }
 }

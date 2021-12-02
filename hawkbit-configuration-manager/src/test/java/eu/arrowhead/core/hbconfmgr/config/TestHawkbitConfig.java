@@ -27,7 +27,7 @@ public class TestHawkbitConfig {
     @Primary
     @Bean
     public ConnectionFactory hawkbitConnectionFactory() {
-        MockConnectionFactory mockConnectionFactory = new MockConnectionFactory();
+        final MockConnectionFactory mockConnectionFactory = new MockConnectionFactory();
         mockConnectionFactory.setAutomaticRecoveryEnabled(true);
 
         return mockConnectionFactory;
