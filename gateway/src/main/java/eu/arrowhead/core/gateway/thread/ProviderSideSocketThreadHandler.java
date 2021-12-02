@@ -166,7 +166,7 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 		
 		try {
 			if (isControlMessage(message)) {
-				relayClient.handleCloseControlMessage(message, relaySession);
+				relayClient.handleCloseControlMessage(message, null); // just verifying the control msg, but not close the connection
 				close();
 			} else {
 				Assert.notNull(currentThread.getOutputStream(), "Output stream is null.");

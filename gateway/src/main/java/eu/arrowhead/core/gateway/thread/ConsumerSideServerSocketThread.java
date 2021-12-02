@@ -180,7 +180,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 		Assert.notNull(outConsumer, "Output stream is null.");
 		try {
 			if (isControlMessage(message)) {
-				relayClient.handleCloseControlMessage(message, relaySession);
+				relayClient.handleCloseControlMessage(message, null); // just verifying the control msg, but not close the connection
 				closeAndInterrupt();
 			} else {
 				lastInteraction = ZonedDateTime.now();

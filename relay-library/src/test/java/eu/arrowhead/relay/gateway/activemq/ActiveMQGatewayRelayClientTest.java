@@ -852,20 +852,6 @@ public class ActiveMQGatewayRelayClientTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testHandleCloseControlMessageSessionNull() throws Exception {
-		final Message msg = Mockito.mock(Message.class);
-		
-		try {
-			testingObject.handleCloseControlMessage(msg, null);
-		} catch (final Exception ex) {
-			Assert.assertEquals("Session is null.", ex.getMessage());
-			
-			throw ex;
-		}
-	}
-
-	//-------------------------------------------------------------------------------------------------
 	@Test(expected = JMSException.class)
 	public void testHandleCloseControlMessageInvalidMessageClass() throws Exception {
 		final Message msg = Mockito.mock(Message.class);
