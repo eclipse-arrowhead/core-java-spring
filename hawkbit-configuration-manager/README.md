@@ -29,7 +29,7 @@ To generate new credentials you can use the `generate-certificates.sh` script in
 You will need to modify the following properties:
 - `CA_KEYSTORE` - the path to the keystore containing the cloud certificate/keys
 - `CA_KEYSTORE_PASS` - password for the keystore
-- `CLIENT_ID` - this is the ID/name of the core system (should comply with the Arrowhead CN naming conventions, e.g.: `configuration`)
+- `CLIENT_ID` - this is the ID/name of the core system (should comply with the Arrowhead CN naming conventions, e.g.: `hawkbitconfiguration`)
 - `CLOUD_DOMAIN` - the CN of the cloud certificate (results in the CN of the client certificate, when combined with the `CLIENT_ID`, e.g.: `example.corp.arrowhead.eu`)
 - `CLIENT_KEYSTORE_PASS` - the password of the keystore
 Also make sure to modify the `openssl.cnf` file and enter the correct subject alternative names in the `[alt_names]` section (e.g.: `IP.1 = 127.0.0.1` or `DNS.1 = example.com`).

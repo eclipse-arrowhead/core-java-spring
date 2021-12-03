@@ -8,8 +8,8 @@ spring:
 server:
     port: 8447
     ssl:
-        key-store: path/to/key-store.p12
-        key-store-password: password
+        key-store: certificates/hawkbitconfiguration.p12
+        key-store-password: 123456
         keyStoreType: PKCS12
 
 
@@ -17,16 +17,16 @@ server:
 # The properties are loaded into the class eu.arrowhead.core.confsys.properties.SystemProperties
 system:
     # This is the address of the HawkBit Configuration Manager itself, e.g. "192.168.1.1" or "subdomain.domain.tld"
-    address:
+    address: 127.0.0.1
     # This is the port of the HawkBit Configuration Manager itself, e.g. 8447
-    port:
+    port: 8447
     # This is the name of the HawkBit Configuration Manager itself, e.g. "conf-system". In the context of Arrowhead the system
     # (provider) name and certificate common name must match
-    name: configuration
+    name: hawkbitconfiguration
     # This is the protocol of the provided service from the HawkBit Configuration Manager itself, e.g. "HTTPS-SECURE-JSON"
     providedServiceInterface: HTTPS-SECURE-JSON
     # This is the definition of the provided service from the HawkBit Configuration Manager itself, e.g. "definition5"
-    providedServiceDefinition: 
+    providedServiceDefinition: definition
     # This is the uri of the provided service from the HawkBit Configuration Manager itself, e.g "/"
     providedServiceUri: /
     # This is the version of the provided service from the HawkBit Configuration Manager itself, e.g. 2
@@ -46,14 +46,14 @@ keyStore:
 # These are the connection parameters for the Arrowhead authorization system
 arrowheadAuthorizationSystem:
     protocol: https://
-    address: 127.0.0.1
-    port: 8080
+    address: 51.105.196.145
+    port: 3001
 
 # These are the connection parameters for the Arrowhead service registry
 arrowheadServiceRegistry:
     protocol: https://
-    address: 127.0.0.1
-    port: 8443
+    address: 51.105.196.145
+    port: 3000
 
 # These are the connection parameters for the hawkBit DMF API
 hawkbit:

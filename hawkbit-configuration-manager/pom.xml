@@ -14,7 +14,7 @@
 	<groupId>eu.arrowhead</groupId>
 	<version>4.3.0</version>
 
-	<artifactId>arrowhead-configuration-manager</artifactId>
+	<artifactId>arrowhead-hawkbit-configuration-manager</artifactId>
 	<packaging>jar</packaging>
 	<name>Arrowhead HawkBit Configuration Manager</name>
 	<description>An Arrowhead configuration manager system based on Eclipse HawkBit</description>
