@@ -1,0 +1,10 @@
+Package: arrowhead-hawkbit-configuration-manager
+Version: [[version]]
+Section: contrib/java
+Priority: optional
+Architecture: all
+Maintainer: Lukas Römer <Lukas.Roemer@bosch.io>
+Homepage: http://www.arrowhead.eu
+Description: Arrowhead HawkBit Configuration Manager System
+Distribution: development
+Depends: java-runtime-headless, arrowhead-core-common
