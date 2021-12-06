@@ -15,13 +15,18 @@ import java.io.IOException;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManagerFactory;
+import javax.servlet.ServletContextListener;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import eu.arrowhead.core.confmgr.CleanUp;
 import eu.arrowhead.core.confmgr.arrowhead.ArrowheadAuthorizationSystemClient;
 import eu.arrowhead.core.confmgr.arrowhead.ArrowheadServiceRegistryClient;
+import eu.arrowhead.core.confmgr.properties.SystemProperties;
 import io.netty.handler.ssl.ClientAuth;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -51,6 +56,9 @@ public class ArrowheadConfig {
 
     @Value("${arrowheadServiceRegistry.port}")
     private String serviceRegistryPort;
+
+    @Autowired
+    private SystemProperties systemProperties;
 
     @Bean
     public ArrowheadAuthorizationSystemClient arrowheadAuthorizationSystemClient(
@@ -93,4 +101,12 @@ public class ArrowheadConfig {
                 .build();
     }
 
+    @Bean
+    @Autowired
+    ServletListenerRegistrationBean<ServletContextListener> servletListener(ArrowheadServiceRegistryClient arrowheadServiceRegistryClient) {
+        ServletListenerRegistrationBean<ServletContextListener> srb
+        = new ServletListenerRegistrationBean<>();
+        srb.setListener(new CleanUp(arrowheadServiceRegistryClient, systemProperties));
+        return srb;
+    }
 }

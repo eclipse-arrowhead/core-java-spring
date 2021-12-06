@@ -18,6 +18,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -36,6 +37,7 @@ import reactor.netty.http.client.HttpClient;
 public class ArrowheadServiceRegistryClient {
 
     private static final String URI_REGISTER_SERVICE = "/serviceregistry/register";
+    private static final String URI_UNREGISTER_SERVICE = "/serviceregistry/unregister";
 
     private final WebClient webClient;
     private final String baseUrl;
@@ -101,6 +103,22 @@ public class ArrowheadServiceRegistryClient {
                 .bodyToMono(ServiceRegistryResponseDTO.class)
                 .doOnNext(response -> log.debug("Finished HTTP POST request with response: {}", response))
                 .block();
+    }
+
+    public void unregisterService(String address, int port, String serviceDefinition, String systemName) {
+        log.debug("Start HTTP DELETE request against {} on uri: {}", baseUrl, URI_REGISTER_SERVICE);
+        ResponseEntity<Void> result = this.webClient
+            .delete()
+            .uri(URI_UNREGISTER_SERVICE, uriBuilder -> uriBuilder
+                .queryParam("address", address)
+                .queryParam("port", port)
+                .queryParam("service_definition", serviceDefinition)
+                .queryParam("system_name", systemName)
+                .build())
+            .retrieve()
+            .toBodilessEntity()
+            .block();
+        log.debug(result);
     }
 
 }
