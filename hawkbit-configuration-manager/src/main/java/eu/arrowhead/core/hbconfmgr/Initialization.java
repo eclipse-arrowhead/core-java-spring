@@ -57,6 +57,7 @@ public class Initialization implements ApplicationRunner {
     public void run(final ApplicationArguments args) throws Exception {
         registerOwnSystemInArrowhead();
         connectToHawkBit();
+        log.info("Arrowhead HawkBit Configuration Manager initialization done.");
     }
     
 	@PreDestroy
