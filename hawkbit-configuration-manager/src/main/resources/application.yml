@@ -52,7 +52,7 @@ arrowheadAuthorizationSystem:
 # These are the connection parameters for the Arrowhead service registry
 arrowheadServiceRegistry:
     protocol: https://
-    address: 51.105.196.145
+    address: service.registry
     port: 3000
 
 # These are the connection parameters for the hawkBit DMF API
