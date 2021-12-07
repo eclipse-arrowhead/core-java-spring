@@ -22,9 +22,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import eu.arrowhead.core.confmgr.arrowhead.ArrowheadAuthorizationSystemClient;
 import eu.arrowhead.core.confmgr.arrowhead.ArrowheadServiceRegistryClient;
+import eu.arrowhead.core.confmgr.arrowhead.model.request.PublicKeyEndpointRequestDTO;
 import eu.arrowhead.core.confmgr.arrowhead.model.request.ServiceRegistryRequestDTO;
 import eu.arrowhead.core.confmgr.arrowhead.model.request.SystemRequestDTO;
+import eu.arrowhead.core.confmgr.arrowhead.model.response.PublicKeyEndpointResponseDTO;
+import eu.arrowhead.core.confmgr.arrowhead.model.response.ServiceRegistryResponseDTO;
 import eu.arrowhead.core.confmgr.hawkbit.HawkbitDmfConsumer;
 import eu.arrowhead.core.confmgr.properties.SystemProperties;
 import lombok.extern.log4j.Log4j2;
@@ -39,12 +43,14 @@ import lombok.extern.log4j.Log4j2;
 public class Initialization implements ApplicationRunner {
     private final HawkbitDmfConsumer hawkbitDmfConsumer;
     private final ArrowheadServiceRegistryClient arrowheadServiceRegistryClient;
+    private final ArrowheadAuthorizationSystemClient arrowheadAuthorizationSystemClient;
     private final SystemProperties systemProperties;
     private final PublicKey publicKey;
 
     @Autowired
-    public Initialization(ArrowheadServiceRegistryClient arrowheadServiceRegistryClient, HawkbitDmfConsumer hawkbitDmfConsumer, SystemProperties systemProperties, PublicKey publicKey) {
+    public Initialization(ArrowheadServiceRegistryClient arrowheadServiceRegistryClient, ArrowheadAuthorizationSystemClient arrowheadAuthorizationSystemClient, HawkbitDmfConsumer hawkbitDmfConsumer, SystemProperties systemProperties, PublicKey publicKey) {
         this.arrowheadServiceRegistryClient = arrowheadServiceRegistryClient;
+        this.arrowheadAuthorizationSystemClient = arrowheadAuthorizationSystemClient;
         this.hawkbitDmfConsumer = hawkbitDmfConsumer;
         this.systemProperties = systemProperties;
         this.publicKey = publicKey;
@@ -54,6 +60,18 @@ public class Initialization implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         registerOwnSystemInArrowhead();
         connectToHawkBit();
+        getAuthorizationSystemEndpoint();
+    }
+
+    private void getAuthorizationSystemEndpoint() {
+        PublicKeyEndpointRequestDTO publicKeyEndpointRequestDTO = new PublicKeyEndpointRequestDTO();
+
+        publicKeyEndpointRequestDTO.setServiceDefinitionRequirement("auth-public-key");
+
+        PublicKeyEndpointResponseDTO response = this.arrowheadServiceRegistryClient.getPublicKeyEndpoint();
+        ServiceRegistryResponseDTO authenticationSystemDetails = response.getServiceQueryData().get(0);
+
+        this.arrowheadAuthorizationSystemClient.initialize("https://" + authenticationSystemDetails.getProvider().getAddress() + ":" + authenticationSystemDetails.getProvider().getPort(), authenticationSystemDetails.getServiceUri());
     }
 
     private void registerOwnSystemInArrowhead() {

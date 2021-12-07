@@ -11,6 +11,8 @@ server:
         key-store: certificates/hawkbitconfiguration.p12
         key-store-password: 123456
         keyStoreType: PKCS12
+    shutdown:
+        grace-period: 30s
 
 
 # These are the properties of the HawkBit Configuration Manager itself
@@ -45,9 +47,7 @@ keyStore:
 
 # These are the connection parameters for the Arrowhead authorization system
 arrowheadAuthorizationSystem:
-    protocol: https://
-    address: 51.105.196.145
-    port: 3001
+    pubKeyServiceDefinition: auth-public-key
 
 # These are the connection parameters for the Arrowhead service registry
 arrowheadServiceRegistry:

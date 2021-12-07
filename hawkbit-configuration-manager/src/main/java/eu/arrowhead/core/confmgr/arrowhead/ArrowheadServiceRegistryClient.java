@@ -23,7 +23,9 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import eu.arrowhead.core.confmgr.arrowhead.model.request.PublicKeyEndpointRequestDTO;
 import eu.arrowhead.core.confmgr.arrowhead.model.request.ServiceRegistryRequestDTO;
+import eu.arrowhead.core.confmgr.arrowhead.model.response.PublicKeyEndpointResponseDTO;
 import eu.arrowhead.core.confmgr.arrowhead.model.response.ServiceRegistryResponseDTO;
 import io.netty.handler.ssl.SslContext;
 import lombok.extern.log4j.Log4j2;
@@ -38,9 +40,11 @@ public class ArrowheadServiceRegistryClient {
 
     private static final String URI_REGISTER_SERVICE = "/serviceregistry/register";
     private static final String URI_UNREGISTER_SERVICE = "/serviceregistry/unregister";
+    private static final String URI_QUERY = "/serviceregistry/query";
 
     private final WebClient webClient;
     private final String baseUrl;
+    private final String authorizationSystemPubKeyServiceDefinition;
 
     /**
      * Initializes a new rest client to communicate with the Arrowhead Service Registry.
@@ -48,10 +52,11 @@ public class ArrowheadServiceRegistryClient {
      *
      * @param baseUrl specifies the base url where arrowhead is available
      */
-    public ArrowheadServiceRegistryClient(String baseUrl) {
+    public ArrowheadServiceRegistryClient(String baseUrl, String authorizationSystemPubKeyServiceDefinition) {
         log.debug("Initialize ArrowheadServiceRegistryClient with baseUrl {}", baseUrl);
         this.webClient = WebClient.create(baseUrl);
         this.baseUrl = baseUrl;
+        this.authorizationSystemPubKeyServiceDefinition = authorizationSystemPubKeyServiceDefinition;
     }
 
     /**
@@ -61,7 +66,7 @@ public class ArrowheadServiceRegistryClient {
      * @param baseUrl    specifies the base url where arrowhead is available
      * @param sslContext specifies the ssl context the web client should use
      */
-    public ArrowheadServiceRegistryClient(String baseUrl, SslContext sslContext) {
+    public ArrowheadServiceRegistryClient(String baseUrl, String authorizationSystemPubKeyServiceDefinition, SslContext sslContext) {
         log.debug("Initialize ArrowheadServiceRegistryClient with baseUrl {} and customized sslContext", baseUrl);
         HttpClient httpClient = HttpClient.create()
                 .secure(sslContextSpec -> sslContextSpec.sslContext(sslContext));
@@ -70,6 +75,7 @@ public class ArrowheadServiceRegistryClient {
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
         this.baseUrl = baseUrl;
+        this.authorizationSystemPubKeyServiceDefinition = authorizationSystemPubKeyServiceDefinition;
     }
 
     /**
@@ -119,6 +125,21 @@ public class ArrowheadServiceRegistryClient {
             .toBodilessEntity()
             .block();
         log.debug(result);
+    }
+
+    public PublicKeyEndpointResponseDTO getPublicKeyEndpoint() {
+        PublicKeyEndpointRequestDTO publicKeyEndpointRequestDTO = new PublicKeyEndpointRequestDTO();
+        publicKeyEndpointRequestDTO.setServiceDefinitionRequirement(authorizationSystemPubKeyServiceDefinition);
+
+        return this.webClient
+                .post()
+                .uri(URI_QUERY)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(publicKeyEndpointRequestDTO)
+                .retrieve()
+                .bodyToMono(PublicKeyEndpointResponseDTO.class)
+                .doOnNext(response -> log.info("Finished HTTP POST request with response: {}", response))
+                .block();
     }
 
 }

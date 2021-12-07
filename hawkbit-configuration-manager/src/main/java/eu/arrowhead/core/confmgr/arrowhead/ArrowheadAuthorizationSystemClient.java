@@ -26,22 +26,11 @@ import reactor.netty.http.client.HttpClient;
 @Log4j2
 public class ArrowheadAuthorizationSystemClient {
 
-    private static final String URI_PUBLIC_KEY = "/authorization/publickey";
+    private String uriPublicKeyService;
 
-    private final WebClient webClient;
-    private final String baseUrl;
-
-    /**
-     * Initializes a new rest client to communicate with the Arrowhead Authorization System.
-     * Insecure (HTTP) and secure (HTTPS) communication is supported, depending on the baseUrl.
-     *
-     * @param baseUrl specifies the base url where arrowhead is available
-     */
-    public ArrowheadAuthorizationSystemClient(String baseUrl) {
-        log.debug("Initialize ArrowheadAuthorizationSystemClient with baseUrl {}", baseUrl);
-        this.webClient = WebClient.create(baseUrl);
-        this.baseUrl = baseUrl;
-    }
+    private WebClient webClient;
+    private String baseUrl;
+    private SslContext sslContext;
 
     /**
      * Initializes a new rest client to communicate with the Arrowhead Authorization System with customized SSL
@@ -50,15 +39,30 @@ public class ArrowheadAuthorizationSystemClient {
      * @param baseUrl    specifies the base url where arrowhead is available
      * @param sslContext specifies the ssl context the web client should use
      */
-    public ArrowheadAuthorizationSystemClient(String baseUrl, SslContext sslContext) {
+    public ArrowheadAuthorizationSystemClient(SslContext sslContext) {
+        this.sslContext = sslContext;
+    }
+
+    public ArrowheadAuthorizationSystemClient() {
+
+    }
+
+    public void initialize(String baseUrl, String uriPublicKeyService) {
         log.debug("Initialize ArrowheadAuthorizationSystemClient with baseUrl {} and customized sslContext", baseUrl);
-        HttpClient httpClient = HttpClient.create()
-                .secure(sslContextSpec -> sslContextSpec.sslContext(sslContext));
-        this.webClient = WebClient.builder()
-                .baseUrl(baseUrl)
-                .clientConnector(new ReactorClientHttpConnector(httpClient))
-                .build();
+
+        if(sslContext == null) {
+            this.webClient = WebClient.create(baseUrl);
+        } else {
+            HttpClient httpClient = HttpClient.create()
+                    .secure(sslContextSpec -> sslContextSpec.sslContext(sslContext));
+            this.webClient = WebClient.builder()
+                    .baseUrl(baseUrl)
+                    .clientConnector(new ReactorClientHttpConnector(httpClient))
+                    .build();
+        }
+
         this.baseUrl = baseUrl;
+        this.uriPublicKeyService = uriPublicKeyService;
     }
 
     /**
@@ -70,12 +74,16 @@ public class ArrowheadAuthorizationSystemClient {
      *
      * @return a string containing the (Base64 encoded) public key
      * @throws WebClientResponseException if the status code is 4xx or 5xx
+     * @throws AuthorizationSystemClientUninitializedException if the client was not initialized
      */
-    public String getPublicKey() throws WebClientResponseException {
-        log.debug("Start HTTP GET request against {} on uri: {}", baseUrl, URI_PUBLIC_KEY);
+    public String getPublicKey() throws WebClientResponseException, AuthorizationSystemClientUninitializedException {
+        if(webClient == null) {
+            throw new AuthorizationSystemClientUninitializedException();
+        }
+        log.debug("Start HTTP GET request against {} on uri: {}", baseUrl);
         return this.webClient
                 .get()
-                .uri(URI_PUBLIC_KEY)
+                .uri(this.uriPublicKeyService)
                 .retrieve()
                 .bodyToMono(String.class)
                 .doOnNext(response -> log.debug("Finished HTTP GET request with response: {}", response))

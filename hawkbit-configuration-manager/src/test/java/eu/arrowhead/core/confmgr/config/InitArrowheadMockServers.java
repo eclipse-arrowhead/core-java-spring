@@ -15,6 +15,7 @@ import static org.mockserver.model.HttpResponse.response;
 
 import org.mockserver.configuration.ConfigurationProperties;
 import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.MediaType;
 
 
 public class InitArrowheadMockServers {
@@ -52,6 +53,8 @@ public class InitArrowheadMockServers {
 
         serviceRegistryMockServer = ClientAndServer.startClientAndServer(8443);
 
+        serviceRegistryMockServer.when(request().withPath("/serviceregistry/query"))
+            .respond(response().withStatusCode(200).withContentType(MediaType.APPLICATION_JSON).withBody("{  \"serviceQueryData\": [    {      \"id\": 11,      \"serviceDefinition\": {        \"id\": 5,        \"serviceDefinition\": \"auth-public-key\",        \"createdAt\": \"2021-12-06 15:56:14\",        \"updatedAt\": \"2021-12-06 15:56:14\"      },      \"provider\": {        \"id\": 3,        \"systemName\": \"authorization\",        \"address\": \"localhost\",        \"port\": 8445,        \"authenticationInfo\": \"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtwYicVE/GaL0dp35sJ68IxspkRtpfe5ZNhYrdEXWKofyY7Vmnc3S8INSdUC7k699GN3szaFloRudiYG2G+RZrSqJHm5DZHBSMFg27ruG3PiwIpGIOr8AsfUmzNa8EM9MAd35QmVC2YjlQ6/UEOgY7wzHe1gLYn8QleLqHT0z/rRRMAY7FcVtAofTINzdFkJ4jWkwaDG10oldWV08LLzTs9V/FSaaqEWYodCwTMVf/x9pD1PLMIB0nWER8c/FOifswsVW9+a++HRxji+m05wDXb48OnbPMrpEk+FHXmxLyzvxu03kmtDzH6DNYzonXwGxeOaEPDN9j6P6TLuKwaEf8QIDAQAB\",        \"createdAt\": \"2021-12-06 15:56:13\",        \"updatedAt\": \"2021-12-06 15:56:13\"      },      \"serviceUri\": \"/authorization/publickey\",      \"secure\": \"CERTIFICATE\",      \"version\": 1,      \"interfaces\": [        {          \"id\": 1,          \"interfaceName\": \"HTTP-SECURE-JSON\",          \"createdAt\": \"2021-12-06 14:54:58\",          \"updatedAt\": \"2021-12-06 14:54:58\"        }      ],      \"createdAt\": \"2021-12-06 17:43:19\",      \"updatedAt\": \"2021-12-06 17:43:19\"    }  ],  \"unfilteredHits\": 1}"));
         serviceRegistryMockServer.when(request().withPath("/serviceregistry/register"))
             .respond(response().withStatusCode(400));
     }

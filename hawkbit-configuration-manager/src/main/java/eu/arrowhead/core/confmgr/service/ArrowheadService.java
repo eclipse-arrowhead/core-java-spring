@@ -12,8 +12,10 @@ package eu.arrowhead.core.confmgr.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import eu.arrowhead.core.confmgr.arrowhead.ArrowheadAuthorizationSystemClient;
+import eu.arrowhead.core.confmgr.arrowhead.AuthorizationSystemClientUninitializedException;
 
 /**
  * This is the Arrowhead service that implements business logic specifically for the HawkBit Configuration Manager.
@@ -37,8 +39,10 @@ public class ArrowheadService {
      * The result of this method is cached, the configuration for caching can be found in <i>resources/ehcache.xml</i>.
      *
      * @return public key of Arrowhead authorization system
+     * @throws AuthorizationSystemClientUninitializedException
+     * @throws WebClientResponseException
      */
-    public String receiveAuthorizationSystemPublicKey() {
+    public String receiveAuthorizationSystemPublicKey() throws WebClientResponseException, AuthorizationSystemClientUninitializedException {
         return this.authorizationSystemClient.getPublicKey();
     }
 

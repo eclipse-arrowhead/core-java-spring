@@ -39,14 +39,8 @@ import lombok.extern.log4j.Log4j2;
 @Configuration
 public class ArrowheadConfig {
 
-    @Value("${arrowheadAuthorizationSystem.protocol}")
-    private String authorizationSystemProtocol;
-
-    @Value("${arrowheadAuthorizationSystem.address}")
-    private String authorizationSystemAddress;
-
-    @Value("${arrowheadAuthorizationSystem.port}")
-    private Integer authorizationSystemPort;
+    @Value("${arrowheadAuthorizationSystem.pubKeyServiceDefinition}")
+    private String authorizationSystemPubKeyServiceDefinition;
 
     @Value("${arrowheadServiceRegistry.protocol}")
     private String serviceRegistryProtocol;
@@ -64,11 +58,8 @@ public class ArrowheadConfig {
     public ArrowheadAuthorizationSystemClient arrowheadAuthorizationSystemClient(
             KeyManagerFactory keyManagerFactory,
             TrustManagerFactory trustManagerFactory) throws IOException {
-        String baseUrl = this.authorizationSystemProtocol + this.authorizationSystemAddress + ":" + this.authorizationSystemPort;
-        log.debug("Registering bean for ArrowheadAuthorizationSystemClient with baseUrl {} and custom ssl context", baseUrl);
-
         SslContext sslContext = loadSslContext(keyManagerFactory, trustManagerFactory);
-        return new ArrowheadAuthorizationSystemClient(baseUrl, sslContext);
+        return new ArrowheadAuthorizationSystemClient(sslContext);
     }
 
     @Bean
@@ -79,7 +70,7 @@ public class ArrowheadConfig {
         log.debug("Registering bean for ArrowheadServiceRegistryClient with baseUrl {} and custom ssl context", baseUrl);
 
         SslContext sslContext = loadSslContext(keyManagerFactory, trustManagerFactory);
-        return new ArrowheadServiceRegistryClient(baseUrl, sslContext);
+        return new ArrowheadServiceRegistryClient(baseUrl, authorizationSystemPubKeyServiceDefinition, sslContext);
     }
 
     /**

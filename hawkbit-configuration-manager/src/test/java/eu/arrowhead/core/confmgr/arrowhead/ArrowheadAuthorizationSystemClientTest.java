@@ -11,7 +11,6 @@
 package eu.arrowhead.core.confmgr.arrowhead;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThat;
 
 import java.util.concurrent.TimeUnit;
 
@@ -24,7 +23,7 @@ import okhttp3.mockwebserver.RecordedRequest;
 public class ArrowheadAuthorizationSystemClientTest {
 
     @Test
-    public void givenPublicKeyIsAvailable_whenGetPublicKey_thenPublicKeyReceived() throws Exception {
+    public void givenPublicKeyIsAvailable_whenGetPublicKey_thenPublicKeyReceived() throws Exception, AuthorizationSystemClientUninitializedException {
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.enqueue(new MockResponse()
                 .setResponseCode(200)
@@ -33,7 +32,8 @@ public class ArrowheadAuthorizationSystemClientTest {
         mockWebServer.start();
 
         String baseUrl = mockWebServer.url("").toString();
-        ArrowheadAuthorizationSystemClient client = new ArrowheadAuthorizationSystemClient(baseUrl);
+        ArrowheadAuthorizationSystemClient client = new ArrowheadAuthorizationSystemClient();
+        client.initialize(baseUrl, "/authorization/publickey");
 
         String publicKey = client.getPublicKey();
 

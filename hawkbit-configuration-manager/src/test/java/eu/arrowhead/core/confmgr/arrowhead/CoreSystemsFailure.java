@@ -25,7 +25,7 @@ import eu.arrowhead.core.confmgr.arrowhead.model.request.SystemRequestDTO;
 public class CoreSystemsFailure {
     @Test
     public void testServiceRegistryFailure() {
-        ArrowheadServiceRegistryClient srClient = new ArrowheadServiceRegistryClient("https://localhost:8443");
+        ArrowheadServiceRegistryClient srClient = new ArrowheadServiceRegistryClient("https://localhost:8443", "auth-public-key");
 
         ServiceRegistryRequestDTO requestDTO = ServiceRegistryRequestDTO.builder()
             .serviceDefinition("definition3")
@@ -50,7 +50,8 @@ public class CoreSystemsFailure {
 
     @Test
     public void testAuthorizationSystemFailure() {
-        ArrowheadAuthorizationSystemClient authClient = new ArrowheadAuthorizationSystemClient("https://localhost:8443");
+        ArrowheadAuthorizationSystemClient authClient = new ArrowheadAuthorizationSystemClient();
+        authClient.initialize("https://localhost:8443", "/authorization/publickey");
 
         Exception exception = assertThrows(Exception.class, () -> {
             authClient.getPublicKey();

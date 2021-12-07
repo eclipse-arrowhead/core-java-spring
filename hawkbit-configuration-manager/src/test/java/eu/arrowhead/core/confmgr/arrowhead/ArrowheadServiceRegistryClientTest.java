@@ -92,7 +92,7 @@ public class ArrowheadServiceRegistryClientTest {
         mockWebServer.start();
 
         String baseUrl = mockWebServer.url("").toString();
-        ArrowheadServiceRegistryClient client = new ArrowheadServiceRegistryClient(baseUrl);
+        ArrowheadServiceRegistryClient client = new ArrowheadServiceRegistryClient(baseUrl, "auth-public-key");
         ServiceRegistryRequestDTO requestDTO = ServiceRegistryRequestDTO.builder()
                 .serviceDefinition("definition3")
                 .providerSystem(SystemRequestDTO.builder()
@@ -174,7 +174,7 @@ public class ArrowheadServiceRegistryClientTest {
         mockWebServer.start();
 
         String baseUrl = mockWebServer.url("").toString();
-        ArrowheadServiceRegistryClient client = new ArrowheadServiceRegistryClient(baseUrl);
+        ArrowheadServiceRegistryClient client = new ArrowheadServiceRegistryClient(baseUrl, "auth-public-key");
         ServiceRegistryRequestDTO requestDTO = ServiceRegistryRequestDTO.builder()
                 .serviceDefinition("definition3")
                 .providerSystem(SystemRequestDTO.builder()
@@ -204,7 +204,7 @@ public class ArrowheadServiceRegistryClientTest {
         mockWebServer.start();
 
         String baseUrl = mockWebServer.url("").toString();
-        ArrowheadServiceRegistryClient client = new ArrowheadServiceRegistryClient(baseUrl);
+        ArrowheadServiceRegistryClient client = new ArrowheadServiceRegistryClient(baseUrl, "auth-public-key");
         ServiceRegistryRequestDTO requestDTO = ServiceRegistryRequestDTO.builder().build();
 
         assertThatThrownBy(() -> client.registerService(requestDTO))
@@ -224,7 +224,7 @@ public class ArrowheadServiceRegistryClientTest {
         mockWebServer.start();
 
         String baseUrl = mockWebServer.url("").toString();
-        ArrowheadServiceRegistryClient client = new ArrowheadServiceRegistryClient(baseUrl);
+        ArrowheadServiceRegistryClient client = new ArrowheadServiceRegistryClient(baseUrl, "auth-public-key");
         ServiceRegistryRequestDTO requestDTO = ServiceRegistryRequestDTO.builder()
                 .serviceDefinition("definition3")
                 .providerSystem(SystemRequestDTO.builder().build())

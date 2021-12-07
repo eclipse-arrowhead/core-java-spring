@@ -36,7 +36,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import eu.arrowhead.core.confmgr.arrowhead.AuthorizationSystemClientUninitializedException;
 import eu.arrowhead.core.confmgr.service.ArrowheadService;
 import lombok.extern.log4j.Log4j2;
 
@@ -97,6 +99,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             log.error("Public key from JWT provider couldn't be loaded", e);
         } catch (InvalidJwtException  e) {
             log.info("The provided JWT is not valid", e);
+        } catch (WebClientResponseException e) {
+            e.printStackTrace();
+        } catch (AuthorizationSystemClientUninitializedException e) {
+            log.error("The Authorization System Client was not initialized correctly.");
         } finally {
             chain.doFilter(request, response);
         }
