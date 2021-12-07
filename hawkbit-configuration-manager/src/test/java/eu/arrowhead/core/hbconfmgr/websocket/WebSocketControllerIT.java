@@ -29,16 +29,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
 import javax.websocket.DeploymentException;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.base.Throwables;
-import com.rabbitmq.client.Connection;
-
-import eu.arrowhead.core.hbconfmgr.config.InitArrowheadMockServers;
-import eu.arrowhead.core.hbconfmgr.hawkbit.util.HawkbitDmfMockServer;
-import eu.arrowhead.core.hbconfmgr.hawkbit.util.Message;
 
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.ssl.TrustStrategy;
@@ -61,6 +52,14 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.base.Throwables;
+import com.rabbitmq.client.Connection;
+
+import eu.arrowhead.core.hbconfmgr.SSLProperties;
+import eu.arrowhead.core.hbconfmgr.config.InitArrowheadMockServers;
+import eu.arrowhead.core.hbconfmgr.hawkbit.util.HawkbitDmfMockServer;
+import eu.arrowhead.core.hbconfmgr.hawkbit.util.Message;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -77,9 +76,12 @@ public class WebSocketControllerIT {
     @Autowired
     private Connection mockConnection;
 
+//    @Autowired
+//    private TrustManager[] tm;
+    
     @Autowired
-    private TrustManager[] tm;
-
+    private SSLProperties sslProps;
+    
     @LocalServerPort
     private Integer port;
 
@@ -105,10 +107,11 @@ public class WebSocketControllerIT {
                 log.error(chain);
                 return true;
             }
-        }).build();
+        }).loadKeyMaterial(sslProps.getKeyStore().getURL(), sslProps.getKeyStorePassword().toCharArray(), sslProps.getKeyPassword().toCharArray())
+          .build();
         
 
-        sslContext.init(null, tm, new java.security.SecureRandom());
+//        sslContext.init(null, tm, new java.security.SecureRandom());
         userProperties.put(Constants.SSL_CONTEXT_PROPERTY, sslContext);
 
         wsClient.setUserProperties(userProperties);

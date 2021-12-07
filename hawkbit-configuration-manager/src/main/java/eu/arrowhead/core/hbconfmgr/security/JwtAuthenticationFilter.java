@@ -19,7 +19,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -70,10 +69,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public JwtAuthenticationFilter(final ArrowheadService arrowheadService, final PrivateKey configurationSystemPrivateKey) {
         this.arrowheadService = arrowheadService;
         this.hawkbitConfigurationSystemPrivateKey = configurationSystemPrivateKey;
+        init();
     }
     
-    @PostConstruct
-    public void init() {
+    private void init() {
     	try {
     		final String authorizationSystemPublicKeyString = arrowheadService.receiveAuthorizationSystemPublicKey();
     		this.authorizationSystemPublicKey = loadPublicKeyFromString(authorizationSystemPublicKeyString);
