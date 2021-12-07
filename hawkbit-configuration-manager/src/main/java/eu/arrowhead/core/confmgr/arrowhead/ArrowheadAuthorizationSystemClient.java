@@ -86,6 +86,7 @@ public class ArrowheadAuthorizationSystemClient {
                 .uri(this.uriPublicKeyService)
                 .retrieve()
                 .bodyToMono(String.class)
+                .map(response -> response.replace("\"", ""))
                 .doOnNext(response -> log.debug("Finished HTTP GET request with response: {}", response))
                 .block();
     }
