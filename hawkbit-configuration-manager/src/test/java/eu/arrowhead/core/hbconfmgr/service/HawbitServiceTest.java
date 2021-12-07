@@ -61,7 +61,7 @@ public class HawbitServiceTest {
             )
             .headers(
                 UpdateActionStatusOutboundMessage.UpdateActionStatusOutboundMessageHeaders.builder()
-                .tenant("DEFAULT")
+                .tenant("testTenant")
                 .build()
             )
             .build();
