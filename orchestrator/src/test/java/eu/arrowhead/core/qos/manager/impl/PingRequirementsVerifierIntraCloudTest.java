@@ -82,6 +82,13 @@ public class PingRequirementsVerifierIntraCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testVerifyParameterQosRequirementsIrrelevant() { // answer true
+		final boolean verified = verifier.verify(new QoSVerificationParameters(new SystemResponseDTO(), null, false, new HashMap<>(), Map.of("IRRELEVANT", "12"),  new HashMap<>(), new ArrayList<>()), false);
+		Assert.assertTrue(verified);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Test(expected = BadPayloadException.class)
 	public void testVerifyParameterInvalidSystemId() {
 		when(intraPingMeasurementCache.get(anyLong())).thenReturn(null);

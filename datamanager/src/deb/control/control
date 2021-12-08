@@ -3,7 +3,7 @@ Version: [[version]]
 Section: contrib/java
 Priority: optional
 Architecture: all
-Maintainer: Rajmund Bocsi <rbocsi@aitia.ai>
+Maintainer: Jens Eliasson <jens.eliasson@thingwave.eu>
 Homepage: http://www.arrowhead.eu
 Description: Arrowhead Datamanager System
 Distribution: development

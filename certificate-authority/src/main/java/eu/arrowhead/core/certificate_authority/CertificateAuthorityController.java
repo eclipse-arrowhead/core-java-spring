@@ -66,7 +66,7 @@ import io.swagger.annotations.ApiResponses;
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS, allowedHeaders = {
 		HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION })
 @RestController
-@RequestMapping(CommonConstants.CERTIFICATE_AUTHRORITY_URI)
+@RequestMapping(CommonConstants.CERTIFICATEAUTHRORITY_URI)
 public class CertificateAuthorityController {
 
 	// =================================================================================================
@@ -122,7 +122,7 @@ public class CertificateAuthorityController {
 	@PostMapping(path = CommonConstants.OP_CA_CHECK_CERTIFICATE_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public CertificateCheckResponseDTO checkCertificate(@Valid @RequestBody final CertificateCheckRequestDTO request,
-			BindingResult bindingResult) {
+			final BindingResult bindingResult) {
 		handleBindingResult(bindingResult);
 		return certificateAuthorityService.checkCertificate(request);
 	}
@@ -137,7 +137,7 @@ public class CertificateAuthorityController {
 	@PostMapping(path = CommonConstants.OP_CA_SIGN_CERTIFICATE_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public CertificateSigningResponseDTO signCertificate(@Valid @RequestBody final CertificateSigningRequestDTO request,
-			BindingResult bindingResult, HttpServletRequest httpServletRequest) {
+			final BindingResult bindingResult, final HttpServletRequest httpServletRequest) {
 		handleBindingResult(bindingResult);
 		final String requestedByCN = CertificateAuthorityUtils.getRequesterCommonName(httpServletRequest);
 		return certificateAuthorityService.signCertificate(request, requestedByCN);
@@ -166,7 +166,7 @@ public class CertificateAuthorityController {
 			if (page == null || size == null) {
 				throw new BadPayloadException("Only both or none of page and size may be defined.",
 						HttpStatus.SC_BAD_REQUEST,
-						CommonConstants.CERTIFICATE_AUTHRORITY_URI + OP_CA_MGMT_CERTIFICATES_URI);
+						CommonConstants.CERTIFICATEAUTHRORITY_URI + OP_CA_MGMT_CERTIFICATES_URI);
 			} else {
 				validatedPage = page;
 				validatedSize = size;
@@ -174,7 +174,7 @@ public class CertificateAuthorityController {
 		}
 
 		final Direction validatedDirection = CoreUtilities.calculateDirection(direction,
-				CommonConstants.CERTIFICATE_AUTHRORITY_URI + OP_CA_MGMT_CERTIFICATES_URI);
+				CommonConstants.CERTIFICATEAUTHRORITY_URI + OP_CA_MGMT_CERTIFICATES_URI);
 		return certificateAuthorityService.getCertificates(validatedPage, validatedSize, validatedDirection, sortField);
 	}
 
@@ -185,7 +185,7 @@ public class CertificateAuthorityController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })
 	@DeleteMapping(path = OP_CA_MGMT_CERTIFICATE_DELETE_URI)
-	public ResponseEntity<String> revokeCertificate(@PathVariable long id, HttpServletRequest httpServletRequest) {
+	public ResponseEntity<String> revokeCertificate(@PathVariable final long id, final HttpServletRequest httpServletRequest) {
 		final String requestedByCN = CertificateAuthorityUtils.getRequesterCommonName(httpServletRequest);
 		if (id <= 0) {
 			throw new BadPayloadException("Invalid id");
@@ -209,7 +209,7 @@ public class CertificateAuthorityController {
 	@PostMapping(path = CommonConstants.OP_CA_CHECK_TRUSTED_KEY_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public TrustedKeyCheckResponseDTO checkTrustedKey(@Valid @RequestBody final TrustedKeyCheckRequestDTO request,
-			BindingResult bindingResult) {
+			final BindingResult bindingResult) {
 		handleBindingResult(bindingResult);
 		return certificateAuthorityService.checkTrustedKey(request);
 	}
@@ -237,7 +237,7 @@ public class CertificateAuthorityController {
 			if (page == null || size == null) {
 				throw new BadPayloadException("Only both or none of page and size may be defined.",
 						HttpStatus.SC_BAD_REQUEST,
-						CommonConstants.CERTIFICATE_AUTHRORITY_URI + OP_CA_MGMT_TRUSTED_KEYS_URI);
+						CommonConstants.CERTIFICATEAUTHRORITY_URI + OP_CA_MGMT_TRUSTED_KEYS_URI);
 			} else {
 				validatedPage = page;
 				validatedSize = size;
@@ -245,7 +245,7 @@ public class CertificateAuthorityController {
 		}
 
 		final Direction validatedDirection = CoreUtilities.calculateDirection(direction,
-				CommonConstants.CERTIFICATE_AUTHRORITY_URI + OP_CA_MGMT_TRUSTED_KEYS_URI);
+				CommonConstants.CERTIFICATEAUTHRORITY_URI + OP_CA_MGMT_TRUSTED_KEYS_URI);
 		return certificateAuthorityService.getTrustedKeys(validatedPage, validatedSize, validatedDirection, sortField);
 	}
 
@@ -258,7 +258,7 @@ public class CertificateAuthorityController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })
 	@PutMapping(path = OP_CA_MGMT_TRUSTED_KEYS_URI)
 	public ResponseEntity<AddTrustedKeyResponseDTO> addTrustedKey(@Valid @RequestBody final AddTrustedKeyRequestDTO request,
-																  BindingResult bindingResult) {
+																  final BindingResult bindingResult) {
 		handleBindingResult(bindingResult);
 		final AddTrustedKeyResponseDTO response = certificateAuthorityService.addTrustedKey(request);
 		return new ResponseEntity<AddTrustedKeyResponseDTO>(response, org.springframework.http.HttpStatus.CREATED);
@@ -271,7 +271,7 @@ public class CertificateAuthorityController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE) })
 	@DeleteMapping(path = OP_CA_MGMT_TRUSTED_KEY_DELETE_URI)
-	public ResponseEntity<String> deleteTrustedKey(@PathVariable long id) {
+	public ResponseEntity<String> deleteTrustedKey(@PathVariable final long id) {
 		if (id <= 0) {
 			throw new BadPayloadException("Invalid id");
 		}
@@ -279,10 +279,10 @@ public class CertificateAuthorityController {
 		return new ResponseEntity<String>("OK", org.springframework.http.HttpStatus.NO_CONTENT);
 	}
 
-	private void handleBindingResult(BindingResult bindingResult) {
+	private void handleBindingResult(final BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
 			final List<ObjectError> allErrors = bindingResult.getAllErrors();
-			for (ObjectError error : allErrors) {
+			for (final ObjectError error : allErrors) {
 				logger.debug(error.toString());
 			}
 			throw new BadPayloadException(allErrors.get(0).getDefaultMessage());

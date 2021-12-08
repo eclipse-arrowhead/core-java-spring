@@ -14,12 +14,12 @@
 
 package eu.arrowhead.common.database.repository;
 
-import eu.arrowhead.common.database.entity.ChoreographerPlan;
-import eu.arrowhead.common.database.entity.ChoreographerRunningStep;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.stereotype.Repository;
+
+import eu.arrowhead.common.database.entity.ChoreographerRunningStep;
 
 @Repository
 public interface ChoreographerRunningStepRepository extends RefreshableRepository<ChoreographerRunningStep, Long> {

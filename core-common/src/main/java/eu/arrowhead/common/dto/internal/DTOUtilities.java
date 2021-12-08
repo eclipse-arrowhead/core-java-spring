@@ -94,6 +94,7 @@ public class DTOUtilities {
 		result.setAddress(orig.getAddress());
 		result.setPort(orig.getPort());
 		result.setAuthenticationInfo(orig.getAuthenticationInfo());
+		result.setMetadata(orig.getMetadata()); // no need of deep copy
 		
 		return result;
 	}

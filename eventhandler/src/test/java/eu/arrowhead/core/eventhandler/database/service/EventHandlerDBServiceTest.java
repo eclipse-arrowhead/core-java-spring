@@ -14,6 +14,7 @@
 
 package eu.arrowhead.core.eventhandler.database.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -814,7 +815,7 @@ public class EventHandlerDBServiceTest {
 		ReflectionTestUtils.setField(eventHandlerService, "timeStampTolerance", 120);
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setStartDate("1019-09-27 09:40:34");
+		request.setStartDate("1019-09-27T09:40:34Z");
 		
 		final System system = createSystemForDBMock("systemName");
 		final EventType eventType = createEventTypeForDBMock("eventType");
@@ -843,7 +844,7 @@ public class EventHandlerDBServiceTest {
 		ReflectionTestUtils.setField(eventHandlerService, "timeStampTolerance", 120);
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setEndDate("1019-09-27 09:40:34");
+		request.setEndDate("1019-09-27T09:40:34Z");
 		
 		final System system = createSystemForDBMock("systemName");
 		final EventType eventType = createEventTypeForDBMock("eventType");
@@ -872,8 +873,8 @@ public class EventHandlerDBServiceTest {
 		ReflectionTestUtils.setField(eventHandlerService, "timeStampTolerance", 120);
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setStartDate("3019-09-27 09:40:35");
-		request.setEndDate("3019-09-27 09:40:34");
+		request.setStartDate("3019-09-27T09:40:35Z");
+		request.setEndDate("3019-09-27T09:40:34Z");
 		
 		final System system = createSystemForDBMock("systemName");
 		final EventType eventType = createEventTypeForDBMock("eventType");
@@ -902,8 +903,8 @@ public class EventHandlerDBServiceTest {
 		ReflectionTestUtils.setField(eventHandlerService, "timeStampTolerance", 120);
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setStartDate("3019-09-27 09:40:34");
-		request.setEndDate("3019-09-27 09:40:34");
+		request.setStartDate("3019-09-27T09:40:34Z");
+		request.setEndDate("3019-09-27T09:40:34Z");
 		
 		final System system = createSystemForDBMock("systemName");
 		final EventType eventType = createEventTypeForDBMock("eventType");
@@ -1229,6 +1230,91 @@ public class EventHandlerDBServiceTest {
 		final Set<SubscriptionPublisherConnection> publisherConnections = valueCapture.getValue();
 		assertNotNull(publisherConnections);
 		assertTrue(publisherConnections.size() == 2);
+	}
+	
+	//=================================================================================================
+	// Tests of forceRegisterSubscription
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testForceRegisterSubscriptionRequestNull() {
+		try {
+			eventHandlerDBService.forceRegisterSubscription(null, Set.of());
+		} catch (final InvalidParameterException ex) {
+			assertEquals("SubscriptionRequestDTO is null", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testForceRegisterSubscriptionNew() {
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		final Set<SystemResponseDTO> authorizedPublishers = Set.of();
+		final Subscription subscription = createSubscriptionForDBMock(1, "eventType", "subscriberName");
+		final System system = createSystemForDBMock("systemName");
+		final EventType eventType = createEventTypeForDBMock("eventType");
+
+		when(subscriptionRepository.findByEventTypeAndSubscriberSystem(any(EventType.class), any(System.class))).thenReturn(Optional.empty());
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(system));
+		when(eventTypeRepository.findByEventTypeName(any())).thenReturn(Optional.ofNullable(eventType));
+		when(eventTypeRepository.saveAndFlush(any())).thenReturn(eventType);
+		when(subscriptionRepository.save(any())).thenReturn(subscription);
+		when(subscriptionPublisherConnectionRepository.saveAll(any())).thenReturn(List.of());
+		doNothing().when(subscriptionPublisherConnectionRepository).flush();
+		when(subscriptionRepository.saveAndFlush(any())).thenReturn(subscription);
+		
+		eventHandlerDBService.forceRegisterSubscription(request, authorizedPublishers);
+		
+		verify(subscriptionRepository, times(2)).findByEventTypeAndSubscriberSystem(any(EventType.class), any(System.class));
+		verify(subscriptionRepository, never()).delete(any(Subscription.class));
+		
+		verify(systemRepository, times(2)).findBySystemNameAndAddressAndPort(any(), any(), anyInt());
+		verify(eventTypeRepository, times(2)).findByEventTypeName(any());
+		verify(eventTypeRepository, never()).saveAndFlush(any());
+		verify(subscriptionRepository, times(1)).save(any());
+		verify(subscriptionPublisherConnectionRepository, times(1)).saveAll(any());
+		verify(subscriptionPublisherConnectionRepository, times(1)).flush();
+		verify(subscriptionRepository, times(1)).saveAndFlush(any());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testForceRegisterSubscriptionExisting() {
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		final Set<SystemResponseDTO> authorizedPublishers = Set.of();
+		final Subscription subscription = createSubscriptionForDBMock(1, "eventType", "subscriberName");
+		final System system = createSystemForDBMock("systemName");
+		final EventType eventType = createEventTypeForDBMock("eventType");
+
+		when(subscriptionRepository.findByEventTypeAndSubscriberSystem(any(EventType.class), any(System.class))).thenReturn(Optional.of(new Subscription()), Optional.empty());
+		when(subscriptionPublisherConnectionRepository.findBySubscriptionEntry(any(Subscription.class))).thenReturn(Set.of());
+		doNothing().when(subscriptionPublisherConnectionRepository).deleteAllInBatch();
+		doNothing().when(subscriptionRepository).refresh(any(Subscription.class));
+		doNothing().when(subscriptionRepository).delete(any(Subscription.class));
+		
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(system));
+		when(eventTypeRepository.findByEventTypeName(any())).thenReturn(Optional.ofNullable(eventType));
+		when(eventTypeRepository.saveAndFlush(any())).thenReturn(eventType);
+		when(subscriptionRepository.save(any())).thenReturn(subscription);
+		when(subscriptionPublisherConnectionRepository.saveAll(any())).thenReturn(List.of());
+		doNothing().when(subscriptionPublisherConnectionRepository).flush();
+		when(subscriptionRepository.saveAndFlush(any())).thenReturn(subscription);
+		
+		eventHandlerDBService.forceRegisterSubscription(request, authorizedPublishers);
+		
+		verify(subscriptionRepository, times(2)).findByEventTypeAndSubscriberSystem(any(EventType.class), any(System.class));
+		verify(subscriptionRepository, times(1)).delete(any(Subscription.class));
+		
+		verify(systemRepository, times(2)).findBySystemNameAndAddressAndPort(any(), any(), anyInt());
+		verify(eventTypeRepository, times(2)).findByEventTypeName(any());
+		verify(eventTypeRepository, never()).saveAndFlush(any());
+		verify(subscriptionRepository, times(1)).save(any());
+		verify(subscriptionPublisherConnectionRepository, times(1)).saveAll(any());
+		verify(subscriptionPublisherConnectionRepository, times(2)).flush();
+		verify(subscriptionRepository, times(1)).saveAndFlush(any());
 	}
 	
 	//=================================================================================================

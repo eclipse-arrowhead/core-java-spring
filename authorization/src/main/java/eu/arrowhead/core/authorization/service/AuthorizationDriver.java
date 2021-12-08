@@ -45,7 +45,7 @@ public class AuthorizationDriver {
 	//=================================================================================================
 	// members
 	
-	private static final String EVENT_HANDLER_AUTH_UPDATE_URI_KEY = CoreSystemService.EVENT_PUBLISH_AUTH_UPDATE_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String EVENTHANDLER_AUTH_UPDATE_URI_KEY = CoreSystemService.EVENT_PUBLISH_AUTH_UPDATE_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	
 	private static final Logger logger = LogManager.getLogger(AuthorizationDriver.class);
 	
@@ -129,14 +129,14 @@ public class AuthorizationDriver {
 	private UriComponents getEventHandlerAuthUpdateUri() {
 		logger.debug("getGatekeeperGSDUri started...");
 		
-		if (arrowheadContext.containsKey(EVENT_HANDLER_AUTH_UPDATE_URI_KEY)) {
+		if (arrowheadContext.containsKey(EVENTHANDLER_AUTH_UPDATE_URI_KEY)) {
 			try {
-				return (UriComponents) arrowheadContext.get(EVENT_HANDLER_AUTH_UPDATE_URI_KEY);
+				return (UriComponents) arrowheadContext.get(EVENTHANDLER_AUTH_UPDATE_URI_KEY);
 			} catch (final ClassCastException ex) {
-				throw new ArrowheadException("Authorization can't find eventhandler authorization_update URI.");
+				throw new ArrowheadException("Authorization can't find Event Handler's authorization_update URI.");
 			}
 		}
 		
-		throw new ArrowheadException("Authorization can't find eventhandler authorization_update URI.");
+		throw new ArrowheadException("Authorization can't find Event Handler's authorization_update URI.");
 	}
 }

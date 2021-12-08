@@ -1,0 +1,16 @@
+[Unit]
+Description=arrowhead-qos-monitor
+After=network.target mysql.target
+
+[Service]
+WorkingDirectory=/etc/arrowhead/systems/qosmonitor
+ExecStart=/usr/bin/java -Dlog4j.configurationFile=file:/etc/arrowhead/systems/qosmonitor/log4j2.xml -jar /usr/share/arrowhead/qosmonitor/arrowhead-qos-monitor.jar
+TimeoutStopSec=5
+Restart=on-failure
+RestartSec=20s
+Type=simple
+User=arrowhead
+Group=arrowhead
+
+[Install]
+WantedBy=default.target

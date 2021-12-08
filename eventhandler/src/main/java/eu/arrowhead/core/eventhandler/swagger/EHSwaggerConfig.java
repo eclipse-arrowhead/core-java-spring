@@ -31,7 +31,7 @@ public class EHSwaggerConfig extends DefaultSwaggerConfig {
 
 	//-------------------------------------------------------------------------------------------------
 	public EHSwaggerConfig() {
-		super(CommonConstants.CORE_SYSTEM_EVENT_HANDLER);
+		super(CommonConstants.CORE_SYSTEM_EVENTHANDLER);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

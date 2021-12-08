@@ -15,7 +15,9 @@
 package eu.arrowhead.core.orchestrator.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -64,6 +66,8 @@ import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
@@ -328,8 +332,8 @@ public class OrchestratorDriverTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testQueryServiceRegistryBySystemIdOk() {
-		final UriComponents queryBySystemIdUriBeforeExpand = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443, CommonConstants.SERVICE_REGISTRY_URI +
-																	 CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
+		final UriComponents queryBySystemIdUriBeforeExpand = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443, CommonConstants.SERVICEREGISTRY_URI +
+																	 CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_ID_URI);
 		final UriComponents queryBySystemIdUriForTestRequest = queryBySystemIdUriBeforeExpand.expand(Map.of(CoreCommonConstants.COMMON_FIELD_NAME_ID, String.valueOf(1)));
 		
 		final SystemResponseDTO responseDTO = new SystemResponseDTO();
@@ -370,8 +374,8 @@ public class OrchestratorDriverTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testQueryServiceRegistryBySystemRequestDTOOk() {
-		final UriComponents queryBySystemDTOUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443, CommonConstants.SERVICE_REGISTRY_URI +
-																	  CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI);
+		final UriComponents queryBySystemDTOUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443, CommonConstants.SERVICEREGISTRY_URI +
+																	  CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_DTO_URI);
 		
 		final SystemResponseDTO responseDTO = new SystemResponseDTO();
 		final SystemRequestDTO requestDTO = new SystemRequestDTO();
@@ -555,8 +559,8 @@ public class OrchestratorDriverTest {
 	@Test
 	public void testGetIntraPingMeasurementOk() {
 		final int systemId = 23;
-		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT + 
-				 									  CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT_SUFFIX).expand(systemId);
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTRA_PING_MEASUREMENT + 
+				 									  CommonConstants.OP_QOSMONITOR_INTRA_PING_MEASUREMENT_SUFFIX).expand(systemId);
 		Assert.assertTrue(uri.toString().contains("/measurements/intracloud/ping"));
 		
 		final QoSIntraPingMeasurementResponseDTO responseDTO = new QoSIntraPingMeasurementResponseDTO();
@@ -590,7 +594,7 @@ public class OrchestratorDriverTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetIntraPingMedianMeasurementOk() {
-		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT)
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTRA_PING_MEDIAN_MEASUREMENT)
 										   .expand(QoSMeasurementAttribute.MEAN_RESPONSE_TIME_WITHOUT_TIMEOUT.name());
 		Assert.assertTrue(uri.toString().contains("/measurements/intracloud/ping_median"));
 		
@@ -625,7 +629,7 @@ public class OrchestratorDriverTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetInterDirectPingMeasurementOk() {
-		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT);
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTER_DIRECT_PING_MEASUREMENT);
 		Assert.assertTrue(uri.toString().contains("/measurements/intercloud/ping"));
 		
 		final CloudSystemFormDTO requestDTO = new CloudSystemFormDTO();
@@ -661,7 +665,7 @@ public class OrchestratorDriverTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetInterRelayEchoMeasurementOk() {
-		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT);
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENT);
 		Assert.assertTrue(uri.toString().contains("/measurements/intercloud/relay_echo"));
 		
 		final CloudRequestDTO requestDTO = new CloudRequestDTO();
@@ -677,12 +681,75 @@ public class OrchestratorDriverTest {
 		Assert.assertTrue(result.getCount() == 1);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class) 
+	public void testMultiQueryServiceRegistryFormListNull() {
+		try {
+			orchestratorDriver.multiQueryServiceRegistry(null);
+		} catch (final IllegalArgumentException ex) {
+			Assert.assertEquals("Form list is null.", ex.getMessage());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class) 
+	public void testMultiQueryServiceRegistryFormListEmpty() {
+		try {
+			orchestratorDriver.multiQueryServiceRegistry(List.of());
+		} catch (final IllegalArgumentException ex) {
+			Assert.assertEquals("Form list is empty.", ex.getMessage());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class) 
+	public void testMultiQueryServiceRegistryURINotFound() {
+		when(arrowheadContext.containsKey(anyString())).thenReturn(false);
+		try {
+			orchestratorDriver.multiQueryServiceRegistry(List.of(new ServiceQueryFormDTO()));
+		} catch (final ArrowheadException ex) {
+			Assert.assertEquals("Orchestrator can't find Service Registry Multi Query URI.", ex.getMessage());
+			verify(arrowheadContext).containsKey(anyString());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class) 
+	public void testMultiQueryServiceRegistryURIWrongType() {
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		when(arrowheadContext.get(anyString())).thenReturn("invalid");
+		try {
+			orchestratorDriver.multiQueryServiceRegistry(List.of(new ServiceQueryFormDTO()));
+		} catch (final ArrowheadException ex) {
+			verify(arrowheadContext).containsKey(anyString());
+			verify(arrowheadContext).get(anyString());
+			Assert.assertEquals("Orchestrator can't find Service Registry Multi Query URI.", ex.getMessage());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMultiQueryServiceRegistryOk() {
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		when(arrowheadContext.get(anyString())).thenReturn(Utilities.createURI("http", "localhost", 1234, "/test"));
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(ServiceQueryResultListDTO.class), any(ServiceQueryFormListDTO.class))).thenReturn(new ResponseEntity<ServiceQueryResultListDTO>(new ServiceQueryResultListDTO(), HttpStatus.OK));
+
+		orchestratorDriver.multiQueryServiceRegistry(List.of(new ServiceQueryFormDTO()));
+		verify(arrowheadContext).containsKey(anyString());
+		verify(arrowheadContext).get(anyString());
+		verify(httpService).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(ServiceQueryResultListDTO.class), any(ServiceQueryFormListDTO.class));
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
 	private OrchestrationResultDTO getOrchestrationResultDTO(final int index) {
-		final SystemResponseDTO provider = new SystemResponseDTO(index, "system" + index, "127.0.0." + index, 1200 + index, null, null, null); 
+		final SystemResponseDTO provider = new SystemResponseDTO(index, "system" + index, "127.0.0." + index, 1200 + index, null, null, null, null); 
 		final ServiceDefinitionResponseDTO service = new ServiceDefinitionResponseDTO(index, "service" + index, null, null);
 		final List<ServiceInterfaceResponseDTO> intfs = new ArrayList<>(1);
 		intfs.add(new ServiceInterfaceResponseDTO(1, "HTTP-SECURE-JSON", null, null));
@@ -699,8 +766,8 @@ public class OrchestratorDriverTest {
 		final List<ServiceInterfaceResponseDTO> intfs2 = new ArrayList<>(1);
 		intfs2.add(interface1);
 		intfs2.add(new ServiceInterfaceResponseDTO(2, "HTTP-SECURE-XML", null, null));
-		final SystemResponseDTO provider1 = new SystemResponseDTO(1, "system1", "127.0.0.1", 1201, null, null, null); 
-		final SystemResponseDTO provider2 = new SystemResponseDTO(2, "system2", "127.0.0.2", 1202, null, null, null);
+		final SystemResponseDTO provider1 = new SystemResponseDTO(1, "system1", "127.0.0.1", 1201, null, null, null, null); 
+		final SystemResponseDTO provider2 = new SystemResponseDTO(2, "system2", "127.0.0.2", 1202, null, null, null, null);
 		
 		final ServiceRegistryResponseDTO dto1 = new ServiceRegistryResponseDTO();
 		dto1.setId(1);

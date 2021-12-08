@@ -30,6 +30,9 @@ import java.time.format.DateTimeParseException;
 import java.util.Objects;
 
 public class Validation {
+	
+	//=================================================================================================
+	// members
 
     private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0. ";
     private static final String DEVICE_NAME_NULL_ERROR_MESSAGE = " Device name must have value ";
@@ -37,8 +40,12 @@ public class Validation {
     private static final String DEVICE_MAC_ADDRESS_NULL_ERROR_MESSAGE = " Device MAC address must have value ";
 
     private final Logger logger = LogManager.getLogger();
+    
+    //=================================================================================================
+	// methods
 
-    Validation() { super(); }
+    //-------------------------------------------------------------------------------------------------
+	Validation() { super(); }
 
     //-------------------------------------------------------------------------------------------------
     void checkId(final Long id, final String origin) {
@@ -49,8 +56,8 @@ public class Validation {
         }
 
         if (id < 1) {
-            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI +
-                    CoreCommonConstants.OP_DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_URI);
+            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICEREGISTRY_URI +
+                    CoreCommonConstants.OP_DEVICEREGISTRY_QUERY_BY_DEVICE_ID_URI);
         }
     }
 
@@ -59,7 +66,7 @@ public class Validation {
         // parameters can't be null, but can be empty
         logger.debug("checkUnregisterDeviceParameters started...");
 
-        final String origin = CommonConstants.DEVICE_REGISTRY_URI + CommonConstants.OP_DEVICE_REGISTRY_UNREGISTER_URI;
+        final String origin = CommonConstants.DEVICEREGISTRY_URI + CommonConstants.OP_DEVICEREGISTRY_UNREGISTER_URI;
 
         if (Utilities.isEmpty(deviceName)) {
             throw new BadPayloadException("Name of the device is blank", HttpStatus.SC_BAD_REQUEST, origin);
@@ -168,7 +175,7 @@ public class Validation {
                 Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
             } catch (final DateTimeParseException ex) {
                 throw new BadPayloadException(
-                        "End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.",
+                        "End of validity is specified in the wrong format. Please provide UTC time using ISO-8601 format.",
                         HttpStatus.SC_BAD_REQUEST, origin);
             }
         }
@@ -220,5 +227,4 @@ public class Validation {
             throw new BadPayloadException("Patch request is empty.", HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
-
 }

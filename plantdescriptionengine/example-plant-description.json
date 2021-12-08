@@ -1,0 +1,87 @@
+{
+    "include": [],
+    "plantDescription": "ArrowHead core",
+    "active": true,
+    "systems": [
+        {
+            "systemName": "gatekeeper",
+            "systemId": "gatekeeper"
+        },
+        {
+            "systemName": "pde",
+            "systemId": "pde",
+            "ports": [
+                {
+                    "portName": "monitorable",
+                    "serviceDefinition": "monitorable",
+                    "consumer": true
+                }
+            ]
+        },
+        {
+            "systemName": "testsystem",
+            "systemId": "testsystem",
+            "ports": [
+                {
+                    "portName": "monitorable",
+                    "serviceDefinition": "monitorable",
+                    "consumer": false
+                }
+            ]
+        },
+        {
+            "systemName": "testsystem2",
+            "systemId": "testsystem2",
+            "ports": [
+                {
+                    "portName": "monitorable",
+                    "serviceDefinition": "monitorable",
+                    "consumer": false,
+                    "metadata": {
+                        "name": "testsystem2_1"
+                    }
+                },
+                {
+                    "portName": "monitorable2",
+                    "serviceDefinition": "monitorable",
+                    "consumer": false,
+                    "metadata": {
+                        "name": "testsystem2_2"
+                    }
+                }
+            ]
+        }
+    ],
+    "connections": [
+        {
+            "consumer": {
+                "systemId": "pde",
+                "portName": "monitorable"
+            },
+            "producer": {
+                "systemId": "testsystem",
+                "portName": "monitorable"
+            }
+        },
+        {
+            "consumer": {
+                "systemId": "pde",
+                "portName": "monitorable"
+            },
+            "producer": {
+                "systemId": "testsystem2",
+                "portName": "monitorable"
+            }
+        },
+        {
+            "consumer": {
+                "systemId": "pde",
+                "portName": "monitorable"
+            },
+            "producer": {
+                "systemId": "testsystem2",
+                "portName": "monitorable2"
+            }
+        }
+    ]
+}

@@ -124,7 +124,7 @@ public class AuthAccessControlFilterTest {
 		this.mockMvc.perform(get(AUTH_PUBLIC_KEY)
  				    .secure(true)
 					.with(x509("certificates/provider.pem"))
-					.accept(MediaType.TEXT_PLAIN))
+					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());
 	}
 	

@@ -7,7 +7,7 @@ set -e
 
 . /usr/share/debconf/confmodule
 
-SYSTEM_NAME="certificate_authority"
+SYSTEM_NAME="certificateauthority"
 
 # summary of how this script can be called:
 #        * <postrm> `remove'
@@ -33,7 +33,7 @@ case "$1" in
       /var/log/arrowhead/${SYSTEM_NAME}*.log \
       ${SYSTEM_DIR}/log4j2.xml \
       ${SYSTEM_DIR}/application.properties \
-      ${SYSTEM_DIR}/${SYSTEM_NAME}.p12 \
+      ${SYSTEM_DIR}/*.p12 \
       rmdir ${SYSTEM_DIR} 2>/dev/null || true
 
     db_purge

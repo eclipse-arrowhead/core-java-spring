@@ -86,7 +86,7 @@ public class AuthorizationControllerInterCloudTest {
 	@MockBean(name = "mockAuthorizationDBService")
 	private AuthorizationDBService authorizationDBService;
 	
-	private static final ZonedDateTime zdTime = Utilities.parseUTCStringToLocalZonedDateTime("2222-12-12 12:00:00");
+	private static final ZonedDateTime zdTime = Utilities.parseUTCStringToLocalZonedDateTime("2222-12-12T12:00:00Z");
 	
 	//-------------------------------------------------------------------------------------------------
 	@Before
@@ -461,7 +461,7 @@ public class AuthorizationControllerInterCloudTest {
 	private Page<AuthorizationInterCloud> createPageForMockingAuthorizationDBService(final int numberOfRequestedEntry) {
 		final List<AuthorizationInterCloud> entries = new ArrayList<>(numberOfRequestedEntry);
 		final Cloud cloud = getValidTestCloud();
-		final System provider = new System("testSystem", "testAddr", 2000, "TOKEN");
+		final System provider = new System("testSystem", "testAddr", 2000, "TOKEN", null);
 		for (int i = 1; i <= numberOfRequestedEntry; ++i) {
 			final ServiceDefinition serviceDefinition = new ServiceDefinition("testService" + i);
 			serviceDefinition.setId(i);

@@ -65,12 +65,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
+import org.springframework.http.server.ServletServerHttpRequest;
 
 @Component
 public class SecurityUtilities {
 
     //=================================================================================================
     // members
+	
     private final static String SIGNATURE_ALGORITHM = "SHA256WithRSA";
     private static final String X509_FORMAT = "X.509";
     private static final String PKCS8_FORMAT = "PKCS#8";
@@ -83,8 +85,10 @@ public class SecurityUtilities {
     private final SSLProperties sslProperties;
 
     //=================================================================================================
-    // constructors
-    @Autowired
+    // methods
+    
+    //-------------------------------------------------------------------------------------------------
+	@Autowired
     public SecurityUtilities(@Value("${security.key.algorithm:RSA}") final String keyFactoryAlgorithm,
                              @Value("${security.key.size:2048}") final Integer keySize,
                              final SSLProperties sslProperties) throws NoSuchAlgorithmException {
@@ -107,6 +111,14 @@ public class SecurityUtilities {
         }
 
         return null;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public static String getCertificateCNFromServerRequest(final ServletServerHttpRequest request) {
+        Assert.notNull(request, "request must not be null");
+        final HttpServletRequest servletRequest = request.getServletRequest();
+
+        return getCertificateCNFromRequest(servletRequest);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -285,8 +297,8 @@ public class SecurityUtilities {
         KeyPair keyPair;
 
         if (Objects.nonNull(keyPairDTO) &&
-                Objects.nonNull(keyPairDTO.getPublicKey()) &&
-                Objects.nonNull(keyPairDTO.getPrivateKey())) {
+            Objects.nonNull(keyPairDTO.getPublicKey()) &&
+            Objects.nonNull(keyPairDTO.getPrivateKey())) {
 
             final String encodedPublicKey = keyPairDTO.getPublicKey();
             final String encodedPrivateKey = keyPairDTO.getPrivateKey();
@@ -327,6 +339,9 @@ public class SecurityUtilities {
         if (Objects.nonNull(keyPair.getPrivate())) { dto.setPrivateKey(Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded())); }
         return dto;
     }
+    
+    //=================================================================================================
+	// assistant methods
 
     //-------------------------------------------------------------------------------------------------
     private KeyPair generateKeyPair() {
@@ -363,7 +378,8 @@ public class SecurityUtilities {
         return generateKeyPairFromSpec(privateKeySpec, publicKeySpec);
     }
 
-    private KeyPair generateKeyPairFromSpec(final EncodedKeySpec privateKeySpec, final EncodedKeySpec publicKeySpec) {
+    //-------------------------------------------------------------------------------------------------
+	private KeyPair generateKeyPairFromSpec(final EncodedKeySpec privateKeySpec, final EncodedKeySpec publicKeySpec) {
         final PublicKey publicKey;
         final PrivateKey privateKey;
 
@@ -385,11 +401,12 @@ public class SecurityUtilities {
         return new KeyPair(publicKey, privateKey);
     }
 
-    private byte[] convertPkcs1ToPkcs8(byte[] pkcs1Bytes) {
+    //-------------------------------------------------------------------------------------------------
+	private byte[] convertPkcs1ToPkcs8(final byte[] pkcs1Bytes) {
         // We can't use Java internal APIs to parse ASN.1 structures, so we build a PKCS#8 key Java can understand
-        int pkcs1Length = pkcs1Bytes.length;
-        int totalLength = pkcs1Length + 22;
-        byte[] pkcs8Header = new byte[]{
+        final int pkcs1Length = pkcs1Bytes.length;
+        final int totalLength = pkcs1Length + 22;
+        final byte[] pkcs8Header = new byte[]{
                 0x30, (byte) 0x82, (byte) ((totalLength >> 8) & 0xff), (byte) (totalLength & 0xff), // Sequence + total length
                 0x2, 0x1, 0x0, // Integer (0)
                 0x30, 0xD, 0x6, 0x9, 0x2A, (byte) 0x86, 0x48, (byte) 0x86, (byte) 0xF7, 0xD, 0x1, 0x1, 0x1, 0x5, 0x0, // Sequence: 1.2.840.113549.1.1.1, NULL
@@ -398,8 +415,9 @@ public class SecurityUtilities {
         return join(pkcs8Header, pkcs1Bytes);
     }
 
-    private byte[] join(byte[] byteArray1, byte[] byteArray2) {
-        byte[] bytes = new byte[byteArray1.length + byteArray2.length];
+    //-------------------------------------------------------------------------------------------------
+	private byte[] join(final byte[] byteArray1, final byte[] byteArray2) {
+        final byte[] bytes = new byte[byteArray1.length + byteArray2.length];
         System.arraycopy(byteArray1, 0, bytes, 0, byteArray1.length);
         System.arraycopy(byteArray2, 0, bytes, byteArray1.length, byteArray2.length);
         return bytes;

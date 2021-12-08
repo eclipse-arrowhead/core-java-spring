@@ -42,6 +42,9 @@ import java.util.stream.Collectors;
 
 @Component
 public class OnboardingApplicationInitListener extends ApplicationInitListener {
+	
+	//=================================================================================================
+	// members
 
     private static final long SLEEP_PERIOD = TimeUnit.SECONDS.toMillis(15);
     private static final int MAX_RETRIES = 10;
@@ -49,11 +52,18 @@ public class OnboardingApplicationInitListener extends ApplicationInitListener {
     private final Logger logger = LogManager.getLogger(OnboardingApplicationInitListener.class);
     private final DriverUtilities driver;
 
-    @Autowired
-    public OnboardingApplicationInitListener(final DriverUtilities driver) {this.driver = driver;}
 
     //=================================================================================================
-    // members
+    // methods
+    
+    //-------------------------------------------------------------------------------------------------
+	@Autowired
+    public OnboardingApplicationInitListener(final DriverUtilities driver) {
+		this.driver = driver;
+	}
+	
+	//=================================================================================================
+	// assistant methods
 
     //-------------------------------------------------------------------------------------------------
     @Override
@@ -79,8 +89,7 @@ public class OnboardingApplicationInitListener extends ApplicationInitListener {
 
 
         logger.info("Searching for own system entry");
-        final ServiceRegistryResponseDTO onboardingEntry =
-                driver.findByServiceRegistry(CoreSystemService.ONBOARDING_WITH_CERTIFICATE_AND_CSR_SERVICE, false);
+        final ServiceRegistryResponseDTO onboardingEntry = driver.findByServiceRegistry(CoreSystemService.ONBOARDING_WITH_CERTIFICATE_AND_CSR_SERVICE, false);
         final SystemResponseDTO onboardingSystem = onboardingEntry.getProvider();
 
         for (CoreSystemService coreSystemService : getRequiredCoreSystemServiceUris()) {
@@ -88,18 +97,20 @@ public class OnboardingApplicationInitListener extends ApplicationInitListener {
         }
     }
 
-    @Override
+    //-------------------------------------------------------------------------------------------------
+	@Override
     protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
-        return List.of(CoreSystemService.CERTIFICATE_AUTHORITY_SIGN_SERVICE,
+        return List.of(CoreSystemService.CERTIFICATEAUTHORITY_SIGN_SERVICE,
                        CoreSystemService.ORCHESTRATION_SERVICE,
-                       CoreSystemService.DEVICE_REGISTRY_ONBOARDING_WITH_NAME_SERVICE,
-                       CoreSystemService.DEVICE_REGISTRY_ONBOARDING_WITH_CSR_SERVICE,
-                       CoreSystemService.SYSTEM_REGISTRY_ONBOARDING_WITH_NAME_SERVICE,
-                       CoreSystemService.SYSTEM_REGISTRY_ONBOARDING_WITH_CSR_SERVICE,
-                       CoreSystemService.SERVICE_REGISTRY_REGISTER_SERVICE);
+                       CoreSystemService.DEVICEREGISTRY_ONBOARDING_WITH_NAME_SERVICE,
+                       CoreSystemService.DEVICEREGISTRY_ONBOARDING_WITH_CSR_SERVICE,
+                       CoreSystemService.SYSTEMREGISTRY_ONBOARDING_WITH_NAME_SERVICE,
+                       CoreSystemService.SYSTEMREGISTRY_ONBOARDING_WITH_CSR_SERVICE,
+                       CoreSystemService.SERVICEREGISTRY_REGISTER_SERVICE);
     }
 
-    private void lookupAndAuthorize(final UriComponents authMgmtUri,
+    //-------------------------------------------------------------------------------------------------
+	private void lookupAndAuthorize(final UriComponents authMgmtUri,
                                     final SystemResponseDTO consumer,
                                     final CoreSystemService service) {
         final ServiceRegistryResponseDTO serviceEntry = driver.findByServiceRegistry(service, false);
@@ -126,7 +137,8 @@ public class OnboardingApplicationInitListener extends ApplicationInitListener {
         }
     }
 
-    private void sleep() {
+    //-------------------------------------------------------------------------------------------------
+	private void sleep() {
         try {
             Thread.sleep(SLEEP_PERIOD);
         } catch (InterruptedException e) {

@@ -58,5 +58,15 @@
     "name": "qos_ping_measurement_cache_threshold",
     "type": "java.lang.Integer",
     "description": "A description for 'qos_ping_measurement_cache_threshold'"
+  },
+  {
+    "name": "use_flexible_store",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'use_flexible_store'"
+  },
+  {
+    "name": "use_strict_service_definition_verifier",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'use_strict_service_definition_verifier'"
   }
 ]}

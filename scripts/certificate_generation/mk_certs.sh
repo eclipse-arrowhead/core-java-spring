@@ -44,14 +44,15 @@ create_consumer_system_keystore() {
 }
 
 create_consumer_system_keystore "authorization"
-create_consumer_system_keystore "contract_proxy"
-create_consumer_system_keystore "data_consumer"
-create_consumer_system_keystore "event_handler"
+create_consumer_system_keystore "contractproxy"
+create_consumer_system_keystore "dataconsumer"
+create_consumer_system_keystore "eventhandler"
 create_consumer_system_keystore "datamanager"
 create_consumer_system_keystore "gatekeeper"
 create_consumer_system_keystore "gateway"
 create_consumer_system_keystore "orchestrator"
-create_consumer_system_keystore "service_registry"
+create_consumer_system_keystore "serviceregistry"
+create_consumer_system_keystore "plantdescriptionengine"
 
 create_sysop_keystore \
   "cloud-root/crypto/root.p12" "arrowhead.eu" \
@@ -80,14 +81,15 @@ create_producer_system_keystore() {
 }
 
 create_producer_system_keystore "authorization"
-create_producer_system_keystore "contract_proxy"
-create_producer_system_keystore "data_consumer"
-create_producer_system_keystore "event_handler"
+create_producer_system_keystore "contractproxy"
+create_producer_system_keystore "dataconsumer"
+create_producer_system_keystore "eventhandler"
 create_producer_system_keystore "datamanager"
 create_producer_system_keystore "gatekeeper"
 create_producer_system_keystore "gateway"
 create_producer_system_keystore "orchestrator"
-create_producer_system_keystore "service_registry"
+create_producer_system_keystore "serviceregistry"
+create_producer_system_keystore "plantdescriptionengine"
 
 create_sysop_keystore \
   "cloud-root/crypto/root.p12" "arrowhead.eu" \
