@@ -54,7 +54,7 @@ public class HistorianWSHandler extends TextWebSocketHandler {
     @Autowired
     private DataManagerDriver dataManagerDriver;
 
-    @Autowired
+    @Autowired(required = false)
     private DatamanagerACLFilter dataManagerACLFilter;
 
     //=================================================================================================
@@ -96,7 +96,9 @@ public class HistorianWSHandler extends TextWebSocketHandler {
             payload = message.getPayload();
 
 		    logger.debug("Got message for {}/{}", systemName, serviceName);
-            final boolean authorized = dataManagerACLFilter.checkRequest(CN, DatamanagerACLFilter.ACL_METHOD_PUT, CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN + "/ws/" + attributes.get(WSConstants.SYSTEM_ID) + "/" +
+            boolean authorized = true;
+            if (dataManagerACLFilter != null)
+                authorized = dataManagerACLFilter.checkRequest(CN, DatamanagerACLFilter.ACL_METHOD_PUT, CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN + "/ws/" + attributes.get(WSConstants.SYSTEM_ID) + "/" +
             															 attributes.get(WSConstants.SERVICE_ID));
             if (authorized) {
                 final Vector<SenML> sml = gson.fromJson(payload, new TypeToken<Vector<SenML>>(){}.getType());

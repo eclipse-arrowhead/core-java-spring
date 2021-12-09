@@ -334,7 +334,7 @@ public class DataManagerController {
 		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(value= CommonConstants.OP_DATAMANAGER_PROXY + "/{systemName}/{serviceName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public Vector<SenML> proxyServiceGet(@PathVariable(value="systemName", required=true) final String systemName,
+	@ResponseBody public List<SenML> proxyServiceGet(@PathVariable(value="systemName", required=true) final String systemName,
 													   @PathVariable(value="serviceName", required=true) final String serviceName) {
         if (Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
             throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY);

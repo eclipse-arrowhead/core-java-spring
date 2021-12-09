@@ -13,14 +13,14 @@
  ********************************************************************************/
 package eu.arrowhead.core.datamanager.service;
 
-import java.util.Vector;
+import java.util.List;
 import eu.arrowhead.common.dto.shared.SenML;
 
 public class ProxyElement {
 
   private String systemName = null;
   private String serviceName = null;
-  private Vector<SenML> message = null;
+  private List<SenML> message = null;
 
 
   public ProxyElement(final String systemName, final String serviceName) {
@@ -30,7 +30,7 @@ public class ProxyElement {
   }
 
 
-  public ProxyElement(final String systemName, final String serviceName, final Vector<SenML> message) {
+  public ProxyElement(final String systemName, final String serviceName, final List<SenML> message) {
     this.systemName = systemName;
     this.serviceName = serviceName;
     this.message = message;
@@ -42,8 +42,8 @@ public class ProxyElement {
   public String getServiceName() {return serviceName; };
   public void setServiceName(final String serviceName) {this.serviceName = serviceName; };
  
-  public Vector<SenML> getMessage() {return message; };
-  public void setMessage(final Vector<SenML> message) {this.message = message; };
+  public List<SenML> getMessage() {return message; };
+  public void setMessage(final List<SenML> message) {this.message = message; };
  
 }
 
