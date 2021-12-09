@@ -15,6 +15,8 @@
 package eu.arrowhead.core.systemregistry;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.internal.SystemRegistryListResponseDTO;
 import eu.arrowhead.common.dto.shared.DeviceRequestDTO;
 import eu.arrowhead.common.dto.shared.DeviceResponseDTO;
@@ -110,6 +112,9 @@ public class SystemRegistryControllerSystemRegistryTest {
 
     @MockBean(name = "mockSystemRegistryDBService")
     private SystemRegistryDBService systemRegistryDBService;
+    
+    @MockBean(name = "mockCommonDBService")
+    private CommonDBService commonDBService;
     
     @Spy
     private NetworkAddressVerifier networkAddressVerifier;

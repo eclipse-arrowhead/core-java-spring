@@ -33,7 +33,7 @@ import eu.arrowhead.common.dto.shared.ConfigurationResponseDTO;
 import eu.arrowhead.core.configuration.database.service.ConfigurationDBService;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = ConfigurationMain.class)
 @ContextConfiguration(classes = {ConfigurationTestContext.class})
 public class ConfigurationControllerSystemTest {
 

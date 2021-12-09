@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = TimeManagerMain.class)
 @ContextConfiguration(classes = {TimeManagerTestContext.class})
 public class TimeManagerControllerSystemTest {
 
