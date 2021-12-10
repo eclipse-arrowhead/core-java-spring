@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS `system_` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `system_name` varchar(255) NOT NULL,
   `address` varchar(255) NOT NULL,
+  `address_type` varchar(255) NULL,
   `port` int(11) NOT NULL,
   `authentication_info` varchar(2047) DEFAULT NULL,
   `metadata` mediumtext NULL,

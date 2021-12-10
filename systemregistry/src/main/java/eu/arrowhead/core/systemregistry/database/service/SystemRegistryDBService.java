@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
@@ -56,6 +57,7 @@ import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.DeviceListResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemRegistryListResponseDTO;
+import eu.arrowhead.common.dto.shared.AddressType;
 import eu.arrowhead.common.dto.shared.CertificateCreationRequestDTO;
 import eu.arrowhead.common.dto.shared.CertificateCreationResponseDTO;
 import eu.arrowhead.common.dto.shared.CertificateType;
@@ -75,6 +77,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
+import eu.arrowhead.common.processor.SpecialNetworkAddressTypeDetector;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 
@@ -99,6 +102,7 @@ public class SystemRegistryDBService {
     private final CertificateAuthorityDriver caDriver;
     private final CommonNamePartVerifier cnVerifier;
     private final NetworkAddressPreProcessor networkAddressPreProcessor;
+    private final SpecialNetworkAddressTypeDetector networkAddressTypeDetector;
     private final NetworkAddressVerifier networkAddressVerifier;
 
     @Value(CoreCommonConstants.$SYSTEMREGISTRY_PING_TIMEOUT_WD)
@@ -116,6 +120,7 @@ public class SystemRegistryDBService {
     							   final CertificateAuthorityDriver caDriver,
     							   final CommonNamePartVerifier cnVerifier,
     							   final NetworkAddressPreProcessor networkAddressPreProcessor,
+    							   final SpecialNetworkAddressTypeDetector networkAddressTypeDetector,
     							   final NetworkAddressVerifier networkAddressVerifier) {
     	this.systemRegistryRepository = systemRegistryRepository;
     	this.systemRepository = systemRepository;
@@ -124,6 +129,7 @@ public class SystemRegistryDBService {
     	this.caDriver = caDriver;
     	this.cnVerifier = cnVerifier;
     	this.networkAddressPreProcessor = networkAddressPreProcessor;
+    	this.networkAddressTypeDetector = networkAddressTypeDetector;
     	this.networkAddressVerifier = networkAddressVerifier;
     }
     
@@ -180,7 +186,7 @@ public class SystemRegistryDBService {
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
     public SystemResponseDTO updateSystemDto(final long systemId, final String systemName, final String address, final int port,
-                                             final String authenticationInfo, final Map<String,String> metadata) {
+                                             final String authenticationInfo, final Map<String,String> metadata) { 
         logger.debug("updateSystemResponse started...");
 
         return DTOConverter.convertSystemToSystemResponseDTO(updateSystem(systemId, systemName, address, port, authenticationInfo, metadata));
@@ -188,7 +194,7 @@ public class SystemRegistryDBService {
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public System updateSystem(final long systemId, final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) {
+    public System updateSystem(final long systemId, final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) { //TODO: unit tests
         logger.debug("updateSystem started...");
 
         final long validatedSystemId = validateId(systemId);
@@ -199,6 +205,7 @@ public class SystemRegistryDBService {
         }
         final String validatedAddress = networkAddressPreProcessor.normalize(address);
         networkAddressVerifier.verify(validatedAddress);
+        final AddressType addressType = networkAddressTypeDetector.detectAddressType(validatedAddress);
 
         try {
             final Optional<System> systemOptional = systemRepository.findById(validatedSystemId);
@@ -214,6 +221,7 @@ public class SystemRegistryDBService {
 
             system.setSystemName(validatedSystemName);
             system.setAddress(validatedAddress);
+            system.setAddressType(addressType);
             system.setPort(validatedPort);
             system.setAuthenticationInfo(authenticationInfo);
             system.setMetadata(Utilities.map2Text(metadata));
@@ -258,7 +266,7 @@ public class SystemRegistryDBService {
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public System mergeSystem(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo, final Map<String,String> metadata) {
+    public System mergeSystem(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo, final Map<String,String> metadata) { //TODO: unit tests
         logger.debug("mergeSystem started...");
 
         final long validatedSystemId = validateId(systemId);
@@ -271,6 +279,7 @@ public class SystemRegistryDBService {
         if (!Utilities.isEmpty(validatedAddress)) {
         	networkAddressVerifier.verify(validatedAddress);
 		}
+        final AddressType addressType = networkAddressTypeDetector.detectAddressType(validatedAddress);
 
         try {
             final Optional<System> systemOptional = systemRepository.findById(validatedSystemId);
@@ -292,6 +301,7 @@ public class SystemRegistryDBService {
 
             if (Utilities.notEmpty(validatedAddress)) {
                 system.setAddress(validatedAddress);
+                system.setAddressType(addressType);
             }
 
             if (validatedPort != null) {
@@ -606,7 +616,7 @@ public class SystemRegistryDBService {
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public SystemQueryResultDTO queryRegistry(final SystemQueryFormDTO form) {
+    public SystemQueryResultDTO queryRegistry(final SystemQueryFormDTO form) { //TODO: unit tests
         logger.debug("queryRegistry is started...");
         Assert.notNull(form, "Form is null.");
 
@@ -645,6 +655,12 @@ public class SystemRegistryDBService {
                 registryList.removeIf(e -> !devices.contains(e.getDevice()));
             }
 
+            // filter on address type
+            if (Objects.nonNull(form.getAddressTypeRequirements()) && !form.getAddressTypeRequirements().isEmpty()) {
+            	final List<AddressType> normalizedAddressTypeList = form.getAddressTypeRequirements().parallelStream().filter(Objects::nonNull).collect(Collectors.toList());
+            	registryList.removeIf(e -> e.getSystem().getAddressType() == null || !normalizedAddressTypeList.contains(e.getSystem().getAddressType()));
+            }
+            
             // filter on version
             if (Objects.nonNull(form.getVersionRequirement())) {
                 registryList.removeIf(e -> Objects.equals(form.getVersionRequirement(), e.getVersion()));
@@ -694,7 +710,7 @@ public class SystemRegistryDBService {
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public System createSystem(final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) {
+    public System createSystem(final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) { //TODO: unit tests
         logger.debug("createSystem started...");
 
         final System system = validateNonNullSystemParameters(systemName, address, port, authenticationInfo, metadata);
@@ -860,6 +876,7 @@ public class SystemRegistryDBService {
         final String normalizedAddress = networkAddressPreProcessor.normalize(address);
         
         validateNonNullParameters(systemName, normalizedAddress);
+        final AddressType addressType = networkAddressTypeDetector.detectAddressType(normalizedAddress);
         
         if (!cnVerifier.isValid(systemName)) {
         	throw new InvalidParameterException("System name" + INVALID_FORMAT_ERROR_MESSAGE);
@@ -874,7 +891,7 @@ public class SystemRegistryDBService {
 
         checkConstraintsOfSystemTable(validatedSystemName, validatedAddress, port);
 
-        return new System(validatedSystemName, validatedAddress, port, authenticationInfo, Utilities.map2Text(metadata));
+        return new System(validatedSystemName, validatedAddress, addressType, port, authenticationInfo, Utilities.map2Text(metadata));
     }
 
     //-------------------------------------------------------------------------------------------------

@@ -145,7 +145,7 @@ public class OrchestratorService {
 		
 		// Querying the Service Registry to get the list of Provider Systems
 		final OrchestrationFlags flags = request.getOrchestrationFlags();
-		final ServiceQueryResultDTO queryResult = orchestratorDriver.queryServiceRegistry(request.getRequestedService(), flags.get(Flag.METADATA_SEARCH), flags.get(Flag.PING_PROVIDERS));
+		final ServiceQueryResultDTO queryResult = orchestratorDriver.queryServiceRegistry(request.getRequestedService(), flags);
 		
 		List<ServiceRegistryResponseDTO> queryData = queryResult.getServiceQueryData();
 	    // If necessary, removing the non-preferred providers from the SR response. (If necessary, matchmaking is done after this at the request sender Cloud.)
@@ -319,7 +319,7 @@ public class OrchestratorService {
 		checkServiceRequestForm(request, isInterCloudOrchestrationPossible(flags));
 		
 		// Querying the Service Registry to get the list of Provider Systems
-		final ServiceQueryResultDTO queryResult = orchestratorDriver.queryServiceRegistry(request.getRequestedService(), flags.get(Flag.METADATA_SEARCH), flags.get(Flag.PING_PROVIDERS));
+		final ServiceQueryResultDTO queryResult = orchestratorDriver.queryServiceRegistry(request.getRequestedService(), flags);
 		List<ServiceRegistryResponseDTO> queryData = queryResult.getServiceQueryData();
 		if (queryData.isEmpty()) {
 			if (isInterCloudOrchestrationPossible(flags)) {
@@ -810,7 +810,7 @@ public class OrchestratorService {
 		    final List<String> interfaceRequirements = serviceDefinitionIdInterfaceMap.get(entry.getKey());
 		    serviceQueryFormDTO.setInterfaceRequirements(interfaceRequirements);
 		    
-		    final ServiceQueryResultDTO queryResult = orchestratorDriver.queryServiceRegistry(serviceQueryFormDTO, flags.get(Flag.METADATA_SEARCH), flags.get(Flag.PING_PROVIDERS));
+		    final ServiceQueryResultDTO queryResult = orchestratorDriver.queryServiceRegistry(serviceQueryFormDTO, flags);
 		    final List<ServiceRegistryResponseDTO> filteredQueryResultByInterfaces = filterQueryResultByInterfaces(providerIdInterfaceMap, queryResult);	
 		    final List<ServiceRegistryResponseDTO> filteredQueryResultByAuthorization = orchestratorDriver.queryAuthorization(consumerSystem, filteredQueryResultByInterfaces);	
 		    
@@ -843,7 +843,7 @@ public class OrchestratorService {
     	final ServiceQueryFormDTO serviceQueryFormDTO = orchestrationFormRequestDTO.getRequestedService();
     	serviceQueryFormDTO.setInterfaceRequirements(List.of(orchestrationFormRequestDTO.getRequestedService().getInterfaceRequirements().get(0)));
     	final OrchestrationFlags flags = orchestrationFormRequestDTO.getOrchestrationFlags();
-		final ServiceQueryResultDTO serviceQueryResultDTO = orchestratorDriver.queryServiceRegistry(serviceQueryFormDTO,  flags.get(Flag.METADATA_SEARCH), flags.get(Flag.PING_PROVIDERS)); 
+		final ServiceQueryResultDTO serviceQueryResultDTO = orchestratorDriver.queryServiceRegistry(serviceQueryFormDTO, flags); 
 		
 		return orchestratorDriver.queryAuthorization(orchestrationFormRequestDTO.getRequesterSystem(), serviceQueryResultDTO.getServiceQueryData());
 	}

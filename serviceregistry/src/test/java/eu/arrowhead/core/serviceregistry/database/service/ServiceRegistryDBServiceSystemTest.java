@@ -49,9 +49,11 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.SystemRepository;
+import eu.arrowhead.common.dto.shared.AddressType;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
+import eu.arrowhead.common.processor.SpecialNetworkAddressTypeDetector;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 
@@ -72,6 +74,9 @@ public class ServiceRegistryDBServiceSystemTest {
 	
 	@Spy
 	private NetworkAddressPreProcessor networkAddressPreProcessor;
+	
+	@Spy
+	private SpecialNetworkAddressTypeDetector networkAddressTypeDetector;
 	
 	@Spy
 	private NetworkAddressVerifier networkAddressVerifier;
@@ -119,7 +124,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = 0;
 		final String authenticationInfo0 = null;
 		
-		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
+		final System system = new System(systemName0, address0, AddressType.HOSTNAME, port0, authenticationInfo0, "systemkey=systemvalue");
 		
 		final List<System> systemsList = new ArrayList<>();
 		systemsList.add(system);
@@ -149,7 +154,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = 0;
 		final String authenticationInfo0 = null;
 		
-		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
+		final System system = new System(systemName0, address0, AddressType.HOSTNAME, port0, authenticationInfo0, "systemkey=systemvalue");
 		
 		final List<System> systemsList = new ArrayList<>();
 		systemsList.add(system);
@@ -213,7 +218,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final String systemName = "alreadyexiststest";
 		final String address = "alreadyexiststest";
 		final int port = 1;
-		final Optional<System> system = Optional.of(new System(systemName, address, port, null, "systemkey=systemvalue"));
+		final Optional<System> system = Optional.of(new System(systemName, address, AddressType.HOSTNAME, port, null, "systemkey=systemvalue"));
 		
 		when(systemRepository.findBySystemNameAndAddressAndPort(eq(systemName), eq(address), eq(port))).thenReturn(system);
 		
@@ -226,7 +231,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final String systemName = "alreadyexiststest";
 		final String address = "alreadyexiststest";
 		final int port = 1;
-		final Optional<System> system = Optional.of(new System(systemName, address, port, null, "systemkey=systemvalue"));
+		final Optional<System> system = Optional.of(new System(systemName, address, AddressType.HOSTNAME, port, null, "systemkey=systemvalue"));
 		
 		when(systemRepository.findBySystemNameAndAddressAndPort(eq(systemName), eq(address), eq(port))).thenReturn(system);
 		
@@ -239,7 +244,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final String systemName = "alreadyexiststest";
 		final String address = "alreadyexiststest";
 		final int port = 1;
-		final Optional<System> system = Optional.of(new System(systemName, address, port, null, "systemkey=systemvalue"));
+		final Optional<System> system = Optional.of(new System(systemName, address, AddressType.HOSTNAME, port, null, "systemkey=systemvalue"));
 
 		when(systemRepository.findBySystemNameAndAddressAndPort(eq(systemName), eq(address), eq(port))).thenReturn(system);
 		
@@ -398,7 +403,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final Integer port0 = null;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, 1, authenticationInfo0, "systemkey=systemvalue");
+		final System system = new System(systemName0, address0, AddressType.HOSTNAME, 1, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
@@ -419,7 +424,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = CommonConstants.SYSTEM_PORT_RANGE_MAX - 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
+		final System system = new System(systemName0, address0, AddressType.HOSTNAME, port0, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
@@ -440,7 +445,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
+		final System system = new System(systemName0, address0, AddressType.HOSTNAME, port0, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
@@ -479,7 +484,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = CommonConstants.SYSTEM_PORT_RANGE_MAX - 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
+		final System system = new System(systemName0, address0, null, port0, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
@@ -500,7 +505,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
+		final System system = new System(systemName0, address0, null, port0, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
@@ -521,7 +526,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
+		final System system = new System(systemName0, address0, AddressType.HOSTNAME, port0, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
@@ -545,7 +550,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
+		final System system = new System(systemName0, address0, AddressType.HOSTNAME, port0, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
@@ -566,7 +571,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
+		final System system = new System(systemName0, address0, AddressType.HOSTNAME, port0, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
@@ -587,7 +592,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
+		final System system = new System(systemName0, address0, AddressType.HOSTNAME, port0, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
@@ -608,7 +613,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
+		final System system = new System(systemName0, address0, AddressType.HOSTNAME, port0, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
@@ -629,7 +634,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
+		final System system = new System(systemName0, address0, AddressType.HOSTNAME, port0, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
@@ -651,7 +656,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int port0 = 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
-		final System system = new System(systemName0, address0, port0, authenticationInfo0, "systemkey=systemvalue");
+		final System system = new System(systemName0, address0, AddressType.HOSTNAME, port0, authenticationInfo0, "systemkey=systemvalue");
 		final Optional<System> systemOptional = Optional.of(system);
 
 		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
@@ -679,7 +684,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final String name = "consumer" ;
 		final String address = "address";
 		final int port = 5550;
-		final System entity = new System(name, address, port, null, null);
+		final System entity = new System(name, address, AddressType.HOSTNAME, port, null, null);
 		entity.setId(id);
 		
 		final ArgumentCaptor<String> strCaptor = ArgumentCaptor.forClass(String.class);

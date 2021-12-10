@@ -251,6 +251,9 @@ public class CommonConstants {
 	public static final String ORCHESTRATION_FLAG_EXTERNAL_SERVICE_REQUEST = "externalServiceRequest";
 	public static final String ORCHESTRATION_FLAG_ENABLE_INTER_CLOUD = "enableInterCloud";
 	public static final String ORCHESTRATION_FLAG_ENABLE_QOS = "enableQoS";
+	public static final String ORCHESTRATION_FLAG_ONLY_IP_ADDRESS_RESPONSE = "onlyIPAddressResponse";
+	public static final String ORCHESTRATION_FLAG_ONLY_IPV4_ADDRESS_RESPONSE = "onlyIPv4AddressResponse";
+	public static final String ORCHESTRATION_FLAG_ONLY_IPV6_ADDRESS_RESPONSE = "onlyIPv6AddressResponse";
 	
 	public static final String GATEKEEPER_URI = "/gatekeeper";
 	public static final String OP_GATEKEEPER_GSD_SERVICE = "/init_gsd";

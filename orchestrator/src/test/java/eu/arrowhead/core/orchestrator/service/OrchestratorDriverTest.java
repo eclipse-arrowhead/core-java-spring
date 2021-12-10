@@ -61,6 +61,7 @@ import eu.arrowhead.common.dto.internal.TokenDataDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationFlags;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
@@ -96,7 +97,7 @@ public class OrchestratorDriverTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testQueryServiceReqistryFormNull() {
-		orchestratorDriver.queryServiceRegistry(null, false, false);
+		orchestratorDriver.queryServiceRegistry(null, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -104,7 +105,7 @@ public class OrchestratorDriverTest {
 	public void testQueryServiceReqistryQueryUriNotFound() {
 		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
 		
-		orchestratorDriver.queryServiceRegistry(new ServiceQueryFormDTO(), false, false);
+		orchestratorDriver.queryServiceRegistry(new ServiceQueryFormDTO(), new OrchestrationFlags());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -113,7 +114,7 @@ public class OrchestratorDriverTest {
 		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
 		when(arrowheadContext.get(any(String.class))).thenReturn("invalid");
 		
-		orchestratorDriver.queryServiceRegistry(new ServiceQueryFormDTO(), false, false);
+		orchestratorDriver.queryServiceRegistry(new ServiceQueryFormDTO(), new OrchestrationFlags());
 	}
 	
 	//-------------------------------------------------------------------------------------------------

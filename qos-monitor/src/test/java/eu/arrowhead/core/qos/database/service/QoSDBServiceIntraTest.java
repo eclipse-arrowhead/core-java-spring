@@ -58,6 +58,7 @@ import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogDetails
 import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.shared.AddressType;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -1661,6 +1662,7 @@ public class QoSDBServiceIntraTest {
 		final System system = new System(
 				"testSystem",
 				"address",
+				AddressType.HOSTNAME,
 				12345,
 				"authenticationInfo",
 				"");

@@ -16,9 +16,11 @@ package eu.arrowhead.core.orchestrator.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -57,7 +59,10 @@ import eu.arrowhead.common.dto.internal.TokenDataDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationProviderDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationResponseDTO;
+import eu.arrowhead.common.dto.shared.AddressType;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationFlags;
+import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
@@ -116,15 +121,21 @@ public class OrchestratorDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	// The two boolean parameters override the corresponding settings in the form
-	public ServiceQueryResultDTO queryServiceRegistry(final ServiceQueryFormDTO form, final boolean metadataSearch, final boolean pingProviders) {
+	// The flags can override the corresponding settings in the form
+	public ServiceQueryResultDTO queryServiceRegistry(final ServiceQueryFormDTO form, final OrchestrationFlags flags) { //TODO: unit tests
 		logger.debug("queryServiceRegistry started...");
 		Assert.notNull(form, "Form is null.");
+		Assert.notNull(flags, "Flags is null.");
 		
 		// overriding settings
-		form.setPingProviders(pingProviders);
-		if (!metadataSearch) {
+		form.setPingProviders(flags.get(Flag.PING_PROVIDERS));
+		if (!flags.get(Flag.METADATA_SEARCH)) {
 			form.setMetadataRequirements(null);
+		}
+		
+		final List<AddressType> providerAddressTypeRequirements = calculateAddressTypeRequirements(flags);
+		if (!Utilities.isEmpty(providerAddressTypeRequirements)) {
+			form.setProviderAddressTypeRequirements(providerAddressTypeRequirements);
 		}
 		
 		final UriComponents queryUri = getQueryUri();
@@ -132,7 +143,7 @@ public class OrchestratorDriver {
 		
 		return response.getBody();
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public ServiceQueryResultListDTO multiQueryServiceRegistry(final List<ServiceQueryFormDTO> forms) { 
 		logger.debug("multiQueryServiceRegistry started...");
@@ -616,6 +627,27 @@ public class OrchestratorDriver {
 
 		return authorizedProviderIdsWithInterfaceIds.stream().collect(Collectors.toMap(e -> e.getId(), 
 																					   e -> e.getIdList()));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<AddressType> calculateAddressTypeRequirements(final OrchestrationFlags flags) {
+		logger.debug("calculateAddressTypeRequirements started...");
+		
+		final Set<AddressType> result = new HashSet<>();
+		if (flags.get(Flag.ONLY_IPV4_ADDRESS_RESPONSE)) {
+			result.add(AddressType.IPV4);
+		}
+		
+		if (flags.get(Flag.ONLY_IPV6_ADDRESS_RESPONSE)) {
+			result.add(AddressType.IPV6);
+		}
+		
+		if (flags.get(Flag.ONLY_IP_ADDRESS_RESPONSE)) {
+			result.add(AddressType.IPV4);
+			result.add(AddressType.IPV6);
+		}
+
+		return result.isEmpty() ? null : new ArrayList<>(result);
 	}
 	
 	//=================================================================================================

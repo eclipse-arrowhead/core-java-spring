@@ -30,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
+import eu.arrowhead.common.dto.shared.AddressType;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 
 public class RegistryUtils {
@@ -182,6 +183,34 @@ public class RegistryUtils {
 		}
 		
 		providedServices.removeIf(sr -> !pingService(sr.getSystem().getAddress(), sr.getSystem().getPort(), timeout));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static List<AddressType> normalizeAddressTypes(final List<AddressType> addressTypes) { //TODO: unit tests
+		logger.debug("normalizeAddressTypes started...");
+		if (addressTypes == null) {
+			return List.of();
+		}
+		
+		return addressTypes.parallelStream().filter(Objects::nonNull).collect(Collectors.toList());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// This method may CHANGE the content of providedServices
+	public static void filterOnProviderAddressType(final List<ServiceRegistry> providedServices, final List<AddressType> addressTypes) { //TODO: unit test
+		logger.debug("filterOnSecurityType started...");
+		if (providedServices == null || providedServices.isEmpty() || addressTypes == null || addressTypes.isEmpty()) {
+			return;
+		}
+		
+		final List<ServiceRegistry> toBeRemoved = new ArrayList<>();
+		for (final ServiceRegistry srEntry : providedServices) {
+			if (srEntry.getSystem().getAddressType() == null || !addressTypes.contains(srEntry.getSystem().getAddressType())) {
+				toBeRemoved.add(srEntry);
+			}
+		}
+		
+		providedServices.removeAll(toBeRemoved);
 	}
 
 	//=================================================================================================

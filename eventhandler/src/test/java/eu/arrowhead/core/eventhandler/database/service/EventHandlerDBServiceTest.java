@@ -41,6 +41,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -65,6 +66,7 @@ import eu.arrowhead.common.dto.shared.SubscriptionResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.processor.SpecialNetworkAddressTypeDetector;
 import eu.arrowhead.core.eventhandler.service.EventHandlerDriver;
 import eu.arrowhead.core.eventhandler.service.EventHandlerService;
 
@@ -94,6 +96,9 @@ public class EventHandlerDBServiceTest {
 	
 	@Mock
 	private SystemRepository systemRepository;
+	
+	@Spy
+	private SpecialNetworkAddressTypeDetector networkAddressTypeDetector;
 
 	//=================================================================================================
 	// methods
