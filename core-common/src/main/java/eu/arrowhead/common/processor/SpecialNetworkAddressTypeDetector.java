@@ -31,6 +31,7 @@ public class SpecialNetworkAddressTypeDetector { //TODO: unit tests
 	private final Logger logger = LogManager.getLogger(SpecialNetworkAddressTypeDetector.class);
 	
 	private static final String DOT = ".";
+	private static final String DOT_REGEXP = "\\.";
 	private static final String COLON = ":";
 	
 	private static final int IPV6_SIZE = 8;
@@ -57,7 +58,7 @@ public class SpecialNetworkAddressTypeDetector { //TODO: unit tests
 		
 		// Possible IPv6
 		} else if (!address.contains(DOT) && address.contains(COLON)) {
-			return isNormalizedIPv6(address) ? AddressType.IPV4 : null;
+			return isNormalizedIPv6(address) ? AddressType.IPV6 : null;
 		}
 
 		// Unknown format
@@ -71,7 +72,7 @@ public class SpecialNetworkAddressTypeDetector { //TODO: unit tests
 	private boolean isIPv4(final String address) {
 		logger.debug("isIPv4 started...");
 
-		final String[] parts = address.split(DOT);
+		final String[] parts = address.split(DOT_REGEXP, -1);
 		
 		if (parts.length != IPV4_SIZE) {
 			return false;
@@ -95,7 +96,7 @@ public class SpecialNetworkAddressTypeDetector { //TODO: unit tests
 	private boolean isNormalizedIPv6(final String address) {
 		logger.debug("isNormalizedIPv6 started...");
 
-		final String[] parts = address.split(COLON);
+		final String[] parts = address.split(COLON, -1);
 		
 		if (parts.length != IPV6_SIZE) {
 			return false;
@@ -103,8 +104,8 @@ public class SpecialNetworkAddressTypeDetector { //TODO: unit tests
 		
 		for (int i = 0; i < IPV6_SIZE; ++i) {
 			try {
-				final int octet = Integer.parseInt(parts[i], 16);
-				if (octet > 65535 || octet < 0) {
+				final int numValue = Integer.parseInt(parts[i], 16);
+				if (numValue > 65535 || numValue < 0) {
 					return false;
 				}
 			} catch (final NumberFormatException ex) {
