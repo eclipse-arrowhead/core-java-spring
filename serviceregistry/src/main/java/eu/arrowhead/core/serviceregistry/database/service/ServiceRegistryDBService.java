@@ -171,7 +171,7 @@ public class ServiceRegistryDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public System createSystem(final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) {	//TODO: unit tests	
+	public System createSystem(final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) {		
 		logger.debug("createSystem started...");
 
 		final System system = validateNonNullSystemParameters(systemName, address, port, authenticationInfo, metadata);
@@ -202,7 +202,7 @@ public class ServiceRegistryDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public System updateSystem(final long systemId, final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) { //TODO: unit tests	
+	public System updateSystem(final long systemId, final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) { 	
 		logger.debug("updateSystem started...");
 
 		final long validatedSystemId = validateSystemId(systemId);
@@ -304,7 +304,7 @@ public class ServiceRegistryDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public System mergeSystem(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo, final Map<String,String> metadata) { //TODO: unit tests		
+	public System mergeSystem(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo, final Map<String,String> metadata) { 	
 		logger.debug("mergeSystem started...");
 
 		final long validatedSystemId = validateSystemId(systemId);
@@ -367,7 +367,7 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public void calculateSystemAddressTypeIfNecessary() { //TODO: unit tests
+	public void calculateSystemAddressTypeIfNecessary() {
 		try {
 			final List<System> systems = systemRepository.findByAddressTypeIsNull();
 			for (final System system : systems) {

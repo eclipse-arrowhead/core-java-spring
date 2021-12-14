@@ -23,7 +23,7 @@ import eu.arrowhead.common.dto.shared.AddressType;
 
 /** This class is only works if the input string is a result of NetworkAddressPreProcessor. */
 @Component
-public class SpecialNetworkAddressTypeDetector { //TODO: unit tests
+public class SpecialNetworkAddressTypeDetector { 
 
 	//=================================================================================================
 	// members

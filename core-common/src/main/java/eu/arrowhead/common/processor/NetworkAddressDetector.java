@@ -58,7 +58,7 @@ public class NetworkAddressDetector {
 	private final Logger logger = LogManager.getLogger(NetworkAddressDetector.class);
 	
 	//-------------------------------------------------------------------------------------------------
-	public AddressDetectionResult detect(final HttpServletRequest servletRequest) { // TODO junit
+	public AddressDetectionResult detect(final HttpServletRequest servletRequest) {
 		logger.debug("detect started...");
 		final AddressDetectionResult result = new AddressDetectionResult();
 		

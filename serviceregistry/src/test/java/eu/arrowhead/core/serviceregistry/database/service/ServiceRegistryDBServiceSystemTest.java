@@ -16,6 +16,7 @@ package eu.arrowhead.core.serviceregistry.database.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -222,7 +223,13 @@ public class ServiceRegistryDBServiceSystemTest {
 		
 		when(systemRepository.findBySystemNameAndAddressAndPort(eq(systemName), eq(address), eq(port))).thenReturn(system);
 		
-		serviceRegistryDBService.createSystem(systemName, address, port, null, Map.of("systemkey", "systemvalue"));
+		try {
+			serviceRegistryDBService.createSystem(systemName, address, port, null, Map.of("systemkey", "systemvalue"));
+		} catch (final Exception ex) {
+			verify(networkAddressTypeDetector, times(1)).detectAddressType("alreadyexiststest");
+			
+			throw ex;
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -235,7 +242,13 @@ public class ServiceRegistryDBServiceSystemTest {
 		
 		when(systemRepository.findBySystemNameAndAddressAndPort(eq(systemName), eq(address), eq(port))).thenReturn(system);
 		
-		serviceRegistryDBService.createSystem(" "+systemName+" ", " "+address+" ", port, null, Map.of("systemkey", "systemvalue"));
+		try {
+			serviceRegistryDBService.createSystem(" "+systemName+" ", " "+address+" ", port, null, Map.of("systemkey", "systemvalue"));
+		} catch (final Exception ex) {
+			verify(networkAddressTypeDetector, times(1)).detectAddressType("alreadyexiststest");
+			
+			throw ex;
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -248,7 +261,13 @@ public class ServiceRegistryDBServiceSystemTest {
 
 		when(systemRepository.findBySystemNameAndAddressAndPort(eq(systemName), eq(address), eq(port))).thenReturn(system);
 		
-		serviceRegistryDBService.createSystem(systemName.toUpperCase(), address.toUpperCase(), port, null, Map.of("systemkey", "systemvalue"));
+		try {
+			serviceRegistryDBService.createSystem(systemName.toUpperCase(), address.toUpperCase(), port, null, Map.of("systemkey", "systemvalue"));
+		} catch (final Exception ex) {
+			verify(networkAddressTypeDetector, times(1)).detectAddressType("alreadyexiststest");
+			
+			throw ex;
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -355,6 +374,34 @@ public class ServiceRegistryDBServiceSystemTest {
 		} catch (final InvalidParameterException ex) {
 			verify(networkAddressPreProcessor, times(1)).normalize("              ");
 			verify(networkAddressVerifier, times(1)).verify("");
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void updateSystemByIdUniqueConstraintViolationTest() {
+		
+		final String systemName0 = "testSystem0";
+		final String address0 = "abc";
+		final int port0 = 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+
+		final System oldSystem = new System(systemName0, address0, null, 1234, authenticationInfo0, null);
+		
+		when(systemRepository.findById(1L)).thenReturn(Optional.of(oldSystem));
+		when(systemRepository.findBySystemNameAndAddressAndPort("testsystem0", "abc", 1)).thenReturn(Optional.of(new System()));
+		
+		try {
+			serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0, Map.of("systemkey", "systemvalue"));			
+		} catch (final InvalidParameterException ex) {
+			verify(networkAddressPreProcessor, times(1)).normalize("abc");
+			verify(networkAddressVerifier, times(1)).verify("abc");
+			verify(networkAddressTypeDetector, times(1)).detectAddressType("abc");
+			verify(systemRepository, times(1)).findById(1L);
+			verify(systemRepository, times(1)).findBySystemNameAndAddressAndPort("testsystem0", "abc", 1);
+			
 			throw ex;
 		}
 	}
@@ -540,6 +587,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		
 		verify(networkAddressPreProcessor, times(1)).normalize(eq("address"));
 		verify(networkAddressVerifier, times(1)).verify(eq("address"));
+		verify(networkAddressTypeDetector, times(1)).detectAddressType("address");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -561,6 +609,8 @@ public class ServiceRegistryDBServiceSystemTest {
 		} catch (final IllegalArgumentException ex) {
 			fail();
 		}
+		
+		verify(networkAddressTypeDetector, never()).detectAddressType("address");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -582,6 +632,9 @@ public class ServiceRegistryDBServiceSystemTest {
 		} catch (final IllegalArgumentException ex) {
 			fail();
 		}
+		
+		verify(networkAddressTypeDetector, times(1)).detectAddressType("mergetestaddress");
+
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -603,6 +656,8 @@ public class ServiceRegistryDBServiceSystemTest {
 		} catch (final IllegalArgumentException ex) {
 			fail();
 		}
+		
+		verify(networkAddressTypeDetector, never()).detectAddressType("address");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -624,6 +679,8 @@ public class ServiceRegistryDBServiceSystemTest {
 		} catch (final IllegalArgumentException ex) {
 			fail();
 		}
+		
+		verify(networkAddressTypeDetector, never()).detectAddressType("address");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -645,6 +702,8 @@ public class ServiceRegistryDBServiceSystemTest {
 		} catch (final IllegalArgumentException ex) {
 			fail();
 		}
+		
+		verify(networkAddressTypeDetector, never()).detectAddressType("address");
 	}
 
 	
@@ -667,6 +726,8 @@ public class ServiceRegistryDBServiceSystemTest {
 		} catch (final IllegalArgumentException ex) {
 			fail();
 		}
+		
+		verify(networkAddressTypeDetector, never()).detectAddressType("address");
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
@@ -755,5 +816,42 @@ public class ServiceRegistryDBServiceSystemTest {
 			verify(systemRepository, never()).flush();
 			throw ex;
 		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCalculateSystemAddressTypeIfNecessaryOk() {
+		final System system1 = new System();
+		system1.setAddress("address");
+		final System system2 = new System();
+		system2.setAddress("address");
+		
+		when(systemRepository.findByAddressTypeIsNull()).thenReturn(List.of(system1, system2));
+		when(systemRepository.saveAll(anyList())).thenReturn(List.of(system1, system2));
+		doNothing().when(systemRepository).flush();
+		
+		serviceRegistryDBService.calculateSystemAddressTypeIfNecessary();
+		
+		verify(systemRepository, times(1)).findByAddressTypeIsNull();
+		verify(networkAddressTypeDetector, times(2)).detectAddressType("address");
+		verify(systemRepository, times(1)).saveAll(anyList());
+		verify(systemRepository, times(1)).flush();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testCalculateSystemAddressTypeIfNecessaryDbProblem() {
+		when(systemRepository.findByAddressTypeIsNull()).thenThrow(new RuntimeException("test"));
+
+		try {
+			serviceRegistryDBService.calculateSystemAddressTypeIfNecessary();
+		} catch (final Exception ex) {
+			Assert.assertEquals("Database operation exception", ex.getMessage());
+			
+			verify(systemRepository, times(1)).findByAddressTypeIsNull();
+			verify(networkAddressTypeDetector, never()).detectAddressType("address");
+			
+			throw ex;
+		}
 	}
 }

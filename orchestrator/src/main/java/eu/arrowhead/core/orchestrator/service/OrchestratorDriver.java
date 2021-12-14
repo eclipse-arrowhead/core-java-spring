@@ -122,7 +122,7 @@ public class OrchestratorDriver {
 
 	//-------------------------------------------------------------------------------------------------
 	// The flags can override the corresponding settings in the form
-	public ServiceQueryResultDTO queryServiceRegistry(final ServiceQueryFormDTO form, final OrchestrationFlags flags) { //TODO: unit tests
+	public ServiceQueryResultDTO queryServiceRegistry(final ServiceQueryFormDTO form, final OrchestrationFlags flags) { 
 		logger.debug("queryServiceRegistry started...");
 		Assert.notNull(form, "Form is null.");
 		Assert.notNull(flags, "Flags is null.");

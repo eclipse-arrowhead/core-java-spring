@@ -186,7 +186,7 @@ public class RegistryUtils {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static List<AddressType> normalizeAddressTypes(final List<AddressType> addressTypes) { //TODO: unit tests
+	public static List<AddressType> normalizeAddressTypes(final List<AddressType> addressTypes) { 
 		logger.debug("normalizeAddressTypes started...");
 		if (addressTypes == null) {
 			return List.of();
@@ -197,7 +197,7 @@ public class RegistryUtils {
 	
 	//-------------------------------------------------------------------------------------------------
 	// This method may CHANGE the content of providedServices
-	public static void filterOnProviderAddressType(final List<ServiceRegistry> providedServices, final List<AddressType> addressTypes) { //TODO: unit test
+	public static void filterOnProviderAddressType(final List<ServiceRegistry> providedServices, final List<AddressType> addressTypes) { 
 		logger.debug("filterOnSecurityType started...");
 		if (providedServices == null || providedServices.isEmpty() || addressTypes == null || addressTypes.isEmpty()) {
 			return;

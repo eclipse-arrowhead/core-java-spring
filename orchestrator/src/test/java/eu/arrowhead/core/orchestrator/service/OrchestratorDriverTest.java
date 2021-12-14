@@ -60,8 +60,10 @@ import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
 import eu.arrowhead.common.dto.internal.TokenDataDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationResponseDTO;
+import eu.arrowhead.common.dto.shared.AddressType;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags;
+import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
@@ -98,6 +100,155 @@ public class OrchestratorDriverTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testQueryServiceReqistryFormNull() {
 		orchestratorDriver.queryServiceRegistry(null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testQueryServiceReqistryFlagsNull() {
+		try {
+			orchestratorDriver.queryServiceRegistry(new ServiceQueryFormDTO(), null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Flags is null.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryServiceReqistryNoAddressTypeFlagSetNoPreviousFormSetting() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false); // just to make sure the method stops without actual HTTP request
+		
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		final OrchestrationFlags flags = new OrchestrationFlags();
+		
+		try {
+			orchestratorDriver.queryServiceRegistry(form, flags);
+		} catch (final Exception ex) {
+			Assert.assertNull(form.getProviderAddressTypeRequirements());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryServiceReqistryNoAddressTypeFlagSetFormSettingPreserved() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false); // just to make sure the method stops without actual HTTP request
+		
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		form.setProviderAddressTypeRequirements(List.of(AddressType.HOSTNAME));
+		final OrchestrationFlags flags = new OrchestrationFlags();
+		
+		try {
+			orchestratorDriver.queryServiceRegistry(form, flags);
+		} catch (final Exception ex) {
+			Assert.assertEquals(1, form.getProviderAddressTypeRequirements().size());
+			Assert.assertEquals(AddressType.HOSTNAME, form.getProviderAddressTypeRequirements().get(0));
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryServiceReqistryOnlyIPv4Set() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false); // just to make sure the method stops without actual HTTP request
+		
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		final OrchestrationFlags flags = new OrchestrationFlags();
+		flags.put(Flag.ONLY_IPV4_ADDRESS_RESPONSE, true);
+		
+		try {
+			orchestratorDriver.queryServiceRegistry(form, flags);
+		} catch (final Exception ex) {
+			Assert.assertEquals(1, form.getProviderAddressTypeRequirements().size());
+			Assert.assertEquals(AddressType.IPV4, form.getProviderAddressTypeRequirements().get(0));
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryServiceReqistryOnlyIPv6Set() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false); // just to make sure the method stops without actual HTTP request
+		
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		final OrchestrationFlags flags = new OrchestrationFlags();
+		flags.put(Flag.ONLY_IPV6_ADDRESS_RESPONSE, true);
+		
+		try {
+			orchestratorDriver.queryServiceRegistry(form, flags);
+		} catch (final Exception ex) {
+			Assert.assertEquals(1, form.getProviderAddressTypeRequirements().size());
+			Assert.assertEquals(AddressType.IPV6, form.getProviderAddressTypeRequirements().get(0));
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryServiceReqistryOnlyIPSet() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false); // just to make sure the method stops without actual HTTP request
+		
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		final OrchestrationFlags flags = new OrchestrationFlags();
+		flags.put(Flag.ONLY_IP_ADDRESS_RESPONSE, true);
+		
+		try {
+			orchestratorDriver.queryServiceRegistry(form, flags);
+		} catch (final Exception ex) {
+			Assert.assertEquals(2, form.getProviderAddressTypeRequirements().size());
+			Assert.assertTrue(form.getProviderAddressTypeRequirements().contains(AddressType.IPV6));
+			Assert.assertTrue(form.getProviderAddressTypeRequirements().contains(AddressType.IPV4));
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryServiceReqistryBothIPv4AndIPv6Set() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false); // just to make sure the method stops without actual HTTP request
+		
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		final OrchestrationFlags flags = new OrchestrationFlags();
+		flags.put(Flag.ONLY_IPV4_ADDRESS_RESPONSE, true);
+		flags.put(Flag.ONLY_IPV6_ADDRESS_RESPONSE, true);
+		
+		try {
+			orchestratorDriver.queryServiceRegistry(form, flags);
+		} catch (final Exception ex) {
+			Assert.assertEquals(2, form.getProviderAddressTypeRequirements().size());
+			Assert.assertTrue(form.getProviderAddressTypeRequirements().contains(AddressType.IPV6));
+			Assert.assertTrue(form.getProviderAddressTypeRequirements().contains(AddressType.IPV4));
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryServiceReqistryAllIPRelatedFlagSet() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false); // just to make sure the method stops without actual HTTP request
+		
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		final OrchestrationFlags flags = new OrchestrationFlags();
+		flags.put(Flag.ONLY_IPV4_ADDRESS_RESPONSE, true);
+		flags.put(Flag.ONLY_IPV6_ADDRESS_RESPONSE, true);
+		flags.put(Flag.ONLY_IP_ADDRESS_RESPONSE, true);
+		
+		try {
+			orchestratorDriver.queryServiceRegistry(form, flags);
+		} catch (final Exception ex) {
+			Assert.assertEquals(2, form.getProviderAddressTypeRequirements().size());
+			Assert.assertTrue(form.getProviderAddressTypeRequirements().contains(AddressType.IPV6));
+			Assert.assertTrue(form.getProviderAddressTypeRequirements().contains(AddressType.IPV4));
+			
+			throw ex;
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
