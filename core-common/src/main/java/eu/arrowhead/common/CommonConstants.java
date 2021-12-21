@@ -131,6 +131,9 @@ public class CommonConstants {
     public static final String CORE_SERVICE_TRANSLATOR_FIWARE = "translation-fiware-service";
     public static final String CORE_SERVICE_TRANSLATOR_PLUGIN = "translation-plugin-service";
 
+	public static final String CORE_SERVICE_GAMS_SERVICE = "gams-service";
+	public static final String CORE_SERVICE_GAMS_SENSOR_SERVICE = "gams-sensor-service";
+
 	public static final String COMMON_FIELD_NAME_ID = "id";
 	
 	public static final String ARROWHEAD_CONTEXT = "arrowheadContext";
@@ -295,6 +298,9 @@ public class CommonConstants {
     public static final String OP_TRANSLATOR_FIWARE_URI = "/v2";
     public static final String OP_TRANSLATOR_PLUGIN_URI = "/plugin";
 
+	public static final String OP_GAMS_SERVICE_URI = "";
+	public static final String OP_GAMS_SENSOR_SERVICE_URI = "/{gams_uid}/sensor";
+
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
 	public static final String SWAGGER_HTTP_200_MESSAGE = "Core service is available";
@@ -307,10 +313,11 @@ public class CommonConstants {
 	
 	public static final String ECHO_URI = "/echo";
 
-	public static final List<CoreSystemService> PUBLIC_CORE_SYSTEM_SERVICES = List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.AUTH_PUBLIC_KEY_SERVICE,
-  			  																		  CoreSystemService.EVENT_PUBLISH_SERVICE, CoreSystemService.EVENT_SUBSCRIBE_SERVICE, CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE,
+	public static final List<CoreSystemService> PUBLIC_CORE_SYSTEM_SERVICES = List.of(CoreSystemService.ORCHESTRATION_SERVICE,
+																					  CoreSystemService.AUTH_PUBLIC_KEY_SERVICE,
+																					  CoreSystemService.EVENT_PUBLISH_SERVICE, CoreSystemService.EVENT_SUBSCRIBE_SERVICE, CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE,
 																					  CoreSystemService.PROXY_SERVICE, CoreSystemService.HISTORIAN_SERVICE, CoreSystemService.CHOREOGRAPHER_SERVICE, CoreSystemService.TRANSLATOR_SERVICE,
-	       																			  CoreSystemService.CONFIGURATION_SERVICE, CoreSystemService.CONFIGURATION_RAW_SERVICE, CoreSystemService.TIME_SERVICE);
+																					  CoreSystemService.CONFIGURATION_SERVICE, CoreSystemService.CONFIGURATION_RAW_SERVICE, CoreSystemService.TIME_SERVICE);
 
 	
 	public static final String HTTP_CLIENT_CONNECTION_TIMEOUT = "http.client.connection.timeout";

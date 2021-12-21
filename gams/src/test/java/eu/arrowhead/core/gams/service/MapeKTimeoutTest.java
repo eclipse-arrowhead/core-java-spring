@@ -14,6 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,7 @@ public class MapeKTimeoutTest {
     }
 
     @After
+    @Ignore
     public void tearDown() {
         timeoutService.deleteTimeoutGuard(timeoutGuard);
         eventRepository.deleteAll();

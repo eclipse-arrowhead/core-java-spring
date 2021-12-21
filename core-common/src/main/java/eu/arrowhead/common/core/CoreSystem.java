@@ -111,10 +111,10 @@ public enum CoreSystem {
 	TRANSLATOR(Defaults.DEFAULT_TRANSLATOR_PORT, List.of(CoreSystemService.TRANSLATOR_SERVICE,
 												   CoreSystemService.TRANSLATOR_FIWARE_SERVICE,
 												   CoreSystemService.TRANSLATOR_PLUGIN_SERVICE)),
-												   CoreSystemService.TRANSLATOR_PLUGIN_SERVICE)),
 
 
-	GAMS(Defaults.DEFAULT_GENERIC_AUTONOMIC_MANAGEMENT_PORT, List.of()),
+	GAMS(Defaults.DEFAULT_GENERIC_AUTONOMIC_MANAGEMENT_PORT, List.of(CoreSystemService.GAMS_SERVICE,
+																	 CoreSystemService.GAMS_SENSOR_SERVICE)),
 	PLANTDESCRIPTIONENGINE(Defaults.DEFAULT_PLANT_DESCRIPTION_ENGINE_PORT, List.of());
 //TODO add PDE services
 
