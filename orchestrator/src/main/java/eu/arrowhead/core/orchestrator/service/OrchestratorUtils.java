@@ -57,6 +57,7 @@ public class OrchestratorUtils {
 			
 			calculatedTime = exclusivityTime;
 		}
+		
 		return calculatedTime;
 	}
 }

@@ -48,48 +48,48 @@ import javax.servlet.http.HttpServletRequest;
         allowedHeaders = {HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION}
 )
 @RestController
-@RequestMapping(CommonConstants.SYSTEM_REGISTRY_URI + CommonConstants.ONBOARDING_URI)
+@RequestMapping(CommonConstants.SYSTEMREGISTRY_URI + CommonConstants.ONBOARDING_URI)
 public class SystemRegistryOnboardingController {
 
     //=================================================================================================
     // members
 
-    private static final String SYSTEM_REGISTRY_REGISTER_DESCRIPTION = "Registers a system";
-    private static final String SYSTEM_REGISTRY_REGISTER_201_MESSAGE = "System registered";
-    private static final String SYSTEM_REGISTRY_REGISTER_400_MESSAGE = "Could not register system";
+    private static final String SYSTEMREGISTRY_REGISTER_DESCRIPTION = "Registers a system";
+    private static final String SYSTEMREGISTRY_REGISTER_201_MESSAGE = "System registered";
+    private static final String SYSTEMREGISTRY_REGISTER_400_MESSAGE = "Could not register system";
 
     private final Logger logger = LogManager.getLogger(SystemRegistryOnboardingController.class);
 
     private final SystemRegistryDBService systemRegistryDBService;
     private final Validation validation;
 
-    @Autowired
-    public SystemRegistryOnboardingController(final SystemRegistryDBService systemRegistryDBService) {
-        this.systemRegistryDBService = systemRegistryDBService;
-        this.validation = new Validation();
-    }
-
-
     //=================================================================================================
     // methods
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = SYSTEM_REGISTRY_REGISTER_DESCRIPTION, response = SystemRegistryOnboardingWithNameResponseDTO.class, tags =
+    @Autowired
+    public SystemRegistryOnboardingController(final SystemRegistryDBService systemRegistryDBService) {
+    	this.systemRegistryDBService = systemRegistryDBService;
+    	this.validation = new Validation();
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = SYSTEMREGISTRY_REGISTER_DESCRIPTION, response = SystemRegistryOnboardingWithNameResponseDTO.class, tags =
             {CoreCommonConstants.SWAGGER_TAG_CLIENT, CoreCommonConstants.SWAGGER_TAG_ONBOARDING})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_CREATED, message = SYSTEM_REGISTRY_REGISTER_201_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_REGISTER_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_CREATED, message = SYSTEMREGISTRY_REGISTER_201_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEMREGISTRY_REGISTER_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-    @PostMapping(path = CommonConstants.OP_SYSTEM_REGISTRY_ONBOARDING_WITH_NAME_URI,
+    @PostMapping(path = CommonConstants.OP_SYSTEMREGISTRY_ONBOARDING_WITH_NAME_URI,
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public SystemRegistryOnboardingWithNameResponseDTO onboardDevice(final HttpServletRequest httpServletRequest,
                                                                      @RequestBody final SystemRegistryOnboardingWithNameRequestDTO request) {
         logger.debug("New onboarding with name and system registration request received");
-        validation.checkOnboardingRequest(request, getOrigin(CommonConstants.OP_SYSTEM_REGISTRY_ONBOARDING_WITH_NAME_URI));
+        validation.checkOnboardingRequest(request, getOrigin(CommonConstants.OP_SYSTEMREGISTRY_ONBOARDING_WITH_NAME_URI));
 
         final String host = httpServletRequest.getRemoteHost();
         final String address = httpServletRequest.getRemoteAddr();
@@ -100,21 +100,21 @@ public class SystemRegistryOnboardingController {
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = SYSTEM_REGISTRY_REGISTER_DESCRIPTION, response = SystemRegistryOnboardingWithCsrResponseDTO.class, tags =
+    @ApiOperation(value = SYSTEMREGISTRY_REGISTER_DESCRIPTION, response = SystemRegistryOnboardingWithCsrResponseDTO.class, tags =
             {CoreCommonConstants.SWAGGER_TAG_CLIENT, CoreCommonConstants.SWAGGER_TAG_ONBOARDING})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_CREATED, message = SYSTEM_REGISTRY_REGISTER_201_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_REGISTER_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_CREATED, message = SYSTEMREGISTRY_REGISTER_201_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEMREGISTRY_REGISTER_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-    @PostMapping(path = CommonConstants.OP_SYSTEM_REGISTRY_ONBOARDING_WITH_CSR_URI,
+    @PostMapping(path = CommonConstants.OP_SYSTEMREGISTRY_ONBOARDING_WITH_CSR_URI,
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public SystemRegistryOnboardingWithCsrResponseDTO onboardDevice(@RequestBody final SystemRegistryOnboardingWithCsrRequestDTO request) {
         logger.debug("New onboarding with csr and system registration request received");
-        validation.checkOnboardingRequest(request, getOrigin(CommonConstants.OP_SYSTEM_REGISTRY_ONBOARDING_WITH_CSR_URI));
+        validation.checkOnboardingRequest(request, getOrigin(CommonConstants.OP_SYSTEMREGISTRY_ONBOARDING_WITH_CSR_URI));
 
         final var response = systemRegistryDBService.onboardAndRegisterSystemRegistry(request);
         logger.debug("{} successfully registers its system {}", request.getSystem().getSystemName(), request.getSystem());
@@ -125,16 +125,14 @@ public class SystemRegistryOnboardingController {
     //=================================================================================================
     // assistant methods
 
-
-    //=================================================================================================
-    // assistant methods
-    private String getBaseOrigin() {
-        return CommonConstants.SYSTEM_REGISTRY_URI + CommonConstants.ONBOARDING_URI;
+    //-------------------------------------------------------------------------------------------------
+	private String getBaseOrigin() {
+        return CommonConstants.SYSTEMREGISTRY_URI + CommonConstants.ONBOARDING_URI;
     }
 
-    private String getOrigin(final String postfix) {
+    //-------------------------------------------------------------------------------------------------
+	private String getOrigin(final String postfix) {
         Assert.notNull(postfix, "Internal error: Origin postfix not provided");
         return getBaseOrigin() + postfix;
     }
-
 }

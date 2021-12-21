@@ -58,7 +58,7 @@ public class Subscription {
 	@JoinColumn( name = "systemId", referencedColumnName = "id", nullable = false)
 	private System subscriberSystem;
 	
-	@Column(nullable = true, columnDefinition = "TEXT")
+	@Column(nullable = true, columnDefinition = "MEDIUMTEXT")
 	private String filterMetaData;
 	
 	@Column(nullable = false, columnDefinition = "TEXT")

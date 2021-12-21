@@ -24,3 +24,5 @@ curl -O https://raw.githubusercontent.com/eclipse-arrowhead/core-java-spring/mas
 curl -O https://raw.githubusercontent.com/eclipse-arrowhead/core-java-spring/master/scripts/system_registry_privileges.sql
 curl -O https://raw.githubusercontent.com/eclipse-arrowhead/core-java-spring/master/scripts/translator_privileges.sql
 curl -O https://raw.githubusercontent.com/eclipse-arrowhead/core-java-spring/master/scripts/datamanager_privileges.sql
+curl -O https://raw.githubusercontent.com/eclipse-arrowhead/core-java-spring/master/scripts/configuration_privileges.sql
+curl -O https://raw.githubusercontent.com/eclipse-arrowhead/core-java-spring/master/scripts/plant_description_engine_privileges.sql

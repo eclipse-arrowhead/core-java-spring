@@ -358,7 +358,8 @@ public class CertificateAuthorityControllerCertificatesTest {
     }
 
     // -------------------------------------------------------------------------------------------------
-    private CaCertificate createCertificateInfoForDBMocking() {
+    @SuppressWarnings("unused")
+	private CaCertificate createCertificateInfoForDBMocking() {
         final ZonedDateTime timeStamp = ZonedDateTime.now();
         final CaCertificate cert = new CaCertificate();
         cert.setId(1);

@@ -131,7 +131,7 @@ public class GatewayController {
 	public String getPublicKey() {
 		logger.debug("New public key GET request received...");
 		
-		return acquireAndConvertPublicKey();
+		return "\"" + acquireAndConvertPublicKey() + "\"";
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -440,7 +440,8 @@ public class GatewayController {
 	private ZonedDateTime createZonedDateTimeFromStringDateTime(final String dateTime) {
 		logger.debug("createZonedDateTimeFromStringDateTime started...");
 		
-		final String[] dateTimeSplit = dateTime.split(" ");
+		final String _dateTime = dateTime.substring(0, dateTime.length() - 1); // remove Z
+		final String[] dateTimeSplit = _dateTime.split("T");
 		final String[] date = dateTimeSplit[0].split("-");
 		final String[] time = dateTimeSplit[1].split(":");
 		return ZonedDateTime.of(Integer.valueOf(date[0]), Integer.valueOf(date[1]), Integer.valueOf(date[2]), Integer.valueOf(time[0]), Integer.valueOf(time[1]), Integer.valueOf(time[2]), 0,

@@ -61,7 +61,7 @@ import io.swagger.annotations.ApiResponses;
 			 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
 @RestController
-@RequestMapping(CommonConstants.EVENT_HANDLER_URI)
+@RequestMapping(CommonConstants.EVENTHANDLER_URI)
 public class EventHandlerController {
 	
 	//=================================================================================================
@@ -69,40 +69,40 @@ public class EventHandlerController {
 	
 	private static final String PATH_VARIABLE_ID = "id";
 
-	private static final String EVENT_HANDLER_MGMT_URI =  CoreCommonConstants.MGMT_URI + "/subscriptions";
-	private static final String EVENTHANLER_BY_ID_MGMT_URI = EVENT_HANDLER_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
+	private static final String EVENTHANDLER_MGMT_URI =  CoreCommonConstants.MGMT_URI + "/subscriptions";
+	private static final String EVENTHANDLER_BY_ID_MGMT_URI = EVENTHANDLER_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
 	
-	private static final String GET_EVENT_HANDLER_MGMT_DESCRIPTION = "Return requested Subscription entries by the given parameters";
-	private static final String GET_EVENT_HANDLER_MGMT_HTTP_200_MESSAGE = "Subscription entries returned";
-	private static final String GET_EVENT_HANDLER_MGMT_HTTP_400_MESSAGE = "Could not retrieve Subscription entries";
+	private static final String GET_EVENTHANDLER_MGMT_DESCRIPTION = "Return requested Subscription entries by the given parameters";
+	private static final String GET_EVENTHANDLER_MGMT_HTTP_200_MESSAGE = "Subscription entries returned";
+	private static final String GET_EVENTHANDLER_MGMT_HTTP_400_MESSAGE = "Could not retrieve Subscription entries";
 	
-	private static final String GET_EVENT_HANDLER_BY_ID_MGMT_DESCRIPTION = "Return requested Subscription entry by the given id";
-	private static final String GET_EVENT_HANDLER_BY_ID_MGMT_HTTP_200_MESSAGE = "Subscription entriy returned";
-	private static final String GET_EVENT_HANDLER_BY_ID_MGMT_HTTP_400_MESSAGE = "Could not retrieve Subscription entry";
+	private static final String GET_EVENTHANDLER_BY_ID_MGMT_DESCRIPTION = "Return requested Subscription entry by the given id";
+	private static final String GET_EVENTHANDLER_BY_ID_MGMT_HTTP_200_MESSAGE = "Subscription entriy returned";
+	private static final String GET_EVENTHANDLER_BY_ID_MGMT_HTTP_400_MESSAGE = "Could not retrieve Subscription entry";
 	
-	private static final String DELETE_EVENT_HANDLER_MGMT_DESCRIPTION = "Delete requested Subscription entry by the given id";
-	private static final String DELETE_EVENT_HANDLER_MGMT_HTTP_200_MESSAGE = "Subscription entriy deleted";
-	private static final String DELETE_EVENT_HANDLER_MGMT_HTTP_400_MESSAGE = "Could not delete Subscription entry";
+	private static final String DELETE_EVENTHANDLER_MGMT_DESCRIPTION = "Delete requested Subscription entry by the given id";
+	private static final String DELETE_EVENTHANDLER_MGMT_HTTP_200_MESSAGE = "Subscription entriy deleted";
+	private static final String DELETE_EVENTHANDLER_MGMT_HTTP_400_MESSAGE = "Could not delete Subscription entry";
 	
-	private static final String PUT_EVENT_HANDLER_MGMT_DESCRIPTION = "Update requested Subscription entry by the given id and parameters";
-	private static final String PUT_EVENT_HANDLER_MGMT_HTTP_200_MESSAGE = "Updated Subscription entry returned";
-	private static final String PUT_EVENT_HANDLER_MGMT_HTTP_400_MESSAGE = "Could not update Subscription entry";	
+	private static final String PUT_EVENTHANDLER_MGMT_DESCRIPTION = "Update requested Subscription entry by the given id and parameters";
+	private static final String PUT_EVENTHANDLER_MGMT_HTTP_200_MESSAGE = "Updated Subscription entry returned";
+	private static final String PUT_EVENTHANDLER_MGMT_HTTP_400_MESSAGE = "Could not update Subscription entry";	
 	
-	private static final String POST_EVENT_HANDLER_SUBSCRIPTION_DESCRIPTION = "Subscription to the events specified in requested Subscription ";
-	private static final String POST_EVENT_HANDLER_SUBSCRIPTION_HTTP_200_MESSAGE = "Successful subscription.";
-	private static final String POST_EVENT_HANDLER_SUBSCRIPTION_HTTP_400_MESSAGE = "Unsuccessful subscription.";
+	private static final String POST_EVENTHANDLER_SUBSCRIPTION_DESCRIPTION = "Subscription to the events specified in requested Subscription ";
+	private static final String POST_EVENTHANDLER_SUBSCRIPTION_HTTP_200_MESSAGE = "Successful subscription.";
+	private static final String POST_EVENTHANDLER_SUBSCRIPTION_HTTP_400_MESSAGE = "Unsuccessful subscription.";
 	
-	private static final String DELETE_EVENT_HANDLER_SUBSCRIPTION_DESCRIPTION = "Unsubscription from the events specified in requested Subscription ";
-	private static final String DELETE_EVENT_HANDLER_SUBSCRIPTION_HTTP_200_MESSAGE = "Successful unsubscription.";
-	private static final String DELETE_EVENT_HANDLER_SUBSCRIPTION_HTTP_400_MESSAGE = "Unsuccessful unsubscription.";
+	private static final String DELETE_EVENTHANDLER_SUBSCRIPTION_DESCRIPTION = "Unsubscription from the events specified in requested Subscription ";
+	private static final String DELETE_EVENTHANDLER_SUBSCRIPTION_HTTP_200_MESSAGE = "Successful unsubscription.";
+	private static final String DELETE_EVENTHANDLER_SUBSCRIPTION_HTTP_400_MESSAGE = "Unsuccessful unsubscription.";
 	
-	private static final String POST_EVENT_HANDLER_PUBLISH_DESCRIPTION = "Publish event"; 
-	private static final String POST_EVENT_HANDLER_PUBLISH_HTTP_200_MESSAGE = "Publish event success"; 
-	private static final String POST_EVENT_HANDLER_PUBLISH_HTTP_400_MESSAGE = "Publish event not success"; 
+	private static final String POST_EVENTHANDLER_PUBLISH_DESCRIPTION = "Publish event"; 
+	private static final String POST_EVENTHANDLER_PUBLISH_HTTP_200_MESSAGE = "Publish event success"; 
+	private static final String POST_EVENTHANDLER_PUBLISH_HTTP_400_MESSAGE = "Publish event not success"; 
 
-	private static final String POST_EVENT_HANDLER_PUBLISH_AUTH_UPDATE_DESCRIPTION = "Publish authorization change event "; 
-	private static final String POST_EVENT_HANDLER_PUBLISH_AUTH_UPDATE_HTTP_200_MESSAGE = "Publish authorization change event success"; 
-	private static final String POST_EVENT_HANDLER_PUBLISH_AUTH_UPDATE_HTTP_400_MESSAGE = "Publish authorization change event not success"; 
+	private static final String POST_EVENTHANDLER_PUBLISH_AUTH_UPDATE_DESCRIPTION = "Publish authorization change event "; 
+	private static final String POST_EVENTHANDLER_PUBLISH_AUTH_UPDATE_HTTP_200_MESSAGE = "Publish authorization change event success"; 
+	private static final String POST_EVENTHANDLER_PUBLISH_AUTH_UPDATE_HTTP_400_MESSAGE = "Publish authorization change event not success"; 
 	
 	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
@@ -138,14 +138,14 @@ public class EventHandlerController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = GET_EVENT_HANDLER_MGMT_DESCRIPTION, response = SubscriptionListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = GET_EVENTHANDLER_MGMT_DESCRIPTION, response = SubscriptionListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_EVENT_HANDLER_MGMT_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_EVENT_HANDLER_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_EVENTHANDLER_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_EVENTHANDLER_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = EVENT_HANDLER_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = EVENTHANDLER_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public SubscriptionListResponseDTO getSubscriptions(
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
@@ -153,7 +153,7 @@ public class EventHandlerController {
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
 		logger.debug("New getSubscriptions get request recieved with page: {} and item_per page: {}", page, size);
 				
-		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.EVENT_HANDLER_URI + EVENT_HANDLER_MGMT_URI);
+		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.EVENTHANDLER_URI + EVENTHANDLER_MGMT_URI);
 		final SubscriptionListResponseDTO subscriptionsResponse = eventHandlerDBService.getSubscriptionsResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
 																												 validParameters.getValidatedDirection(),
 																												 sortField);
@@ -163,18 +163,18 @@ public class EventHandlerController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = GET_EVENT_HANDLER_BY_ID_MGMT_DESCRIPTION, response = SubscriptionResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = GET_EVENTHANDLER_BY_ID_MGMT_DESCRIPTION, response = SubscriptionResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_EVENT_HANDLER_BY_ID_MGMT_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_EVENT_HANDLER_BY_ID_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_EVENTHANDLER_BY_ID_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_EVENTHANDLER_BY_ID_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = EVENTHANLER_BY_ID_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = EVENTHANDLER_BY_ID_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public SubscriptionResponseDTO getSubscriptionById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
 		logger.debug("New getSubscriptionById get request recieved with id: {}", id);
 		
-		final String origin = CommonConstants.EVENT_HANDLER_URI + EVENTHANLER_BY_ID_MGMT_URI;
+		final String origin = CommonConstants.EVENTHANDLER_URI + EVENTHANDLER_BY_ID_MGMT_URI;
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
@@ -186,18 +186,18 @@ public class EventHandlerController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = DELETE_EVENT_HANDLER_MGMT_DESCRIPTION, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = DELETE_EVENTHANDLER_MGMT_DESCRIPTION, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_EVENT_HANDLER_MGMT_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_EVENT_HANDLER_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_EVENTHANDLER_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_EVENTHANDLER_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@DeleteMapping(path = EVENTHANLER_BY_ID_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping(path = EVENTHANDLER_BY_ID_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public void deleteSubscription(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
 		logger.debug("New deleteSubscription delete request recieved with id: {}", id);
 		
-		final String origin = CommonConstants.EVENT_HANDLER_URI + EVENTHANLER_BY_ID_MGMT_URI;
+		final String origin = CommonConstants.EVENTHANDLER_URI + EVENTHANDLER_BY_ID_MGMT_URI;
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
@@ -208,18 +208,18 @@ public class EventHandlerController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = PUT_EVENT_HANDLER_MGMT_DESCRIPTION, response = SubscriptionResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = PUT_EVENTHANDLER_MGMT_DESCRIPTION, response = SubscriptionResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = PUT_EVENT_HANDLER_MGMT_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_EVENT_HANDLER_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = PUT_EVENTHANDLER_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_EVENTHANDLER_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PutMapping(path = EVENTHANLER_BY_ID_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(path = EVENTHANDLER_BY_ID_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public SubscriptionResponseDTO updateSubscription(@PathVariable(value = PATH_VARIABLE_ID) final long id, @RequestBody final SubscriptionRequestDTO request) {
 		logger.debug("New updateSubscription put request recieved with id: {}", id);
 		
-		final String origin = CommonConstants.EVENT_HANDLER_URI + EVENTHANLER_BY_ID_MGMT_URI;
+		final String origin = CommonConstants.EVENTHANDLER_URI + EVENTHANDLER_BY_ID_MGMT_URI;
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
@@ -232,58 +232,58 @@ public class EventHandlerController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = POST_EVENT_HANDLER_SUBSCRIPTION_DESCRIPTION, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = POST_EVENTHANDLER_SUBSCRIPTION_DESCRIPTION, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = POST_EVENT_HANDLER_SUBSCRIPTION_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_EVENT_HANDLER_SUBSCRIPTION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_EVENTHANDLER_SUBSCRIPTION_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_EVENTHANDLER_SUBSCRIPTION_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = CommonConstants.OP_EVENTHANDLER_SUBSCRIBE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public void subscribe(@RequestBody final SubscriptionRequestDTO request) {
 		logger.debug("subscription started ...");
 		
-		final String origin = CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE;
+		final String origin = CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE;
 		checkSubscriptionRequestDTO(request, origin);
 		
 	    eventHandlerService.subscribe(request);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = DELETE_EVENT_HANDLER_SUBSCRIPTION_DESCRIPTION,  tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = DELETE_EVENTHANDLER_SUBSCRIPTION_DESCRIPTION,  tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_EVENT_HANDLER_SUBSCRIPTION_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_EVENT_HANDLER_SUBSCRIPTION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_EVENTHANDLER_SUBSCRIPTION_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_EVENTHANDLER_SUBSCRIPTION_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@DeleteMapping(path = CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE)
+	@DeleteMapping(path = CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE)
 	@ResponseBody public void unsubscribe(
-			@RequestParam(CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE) final String eventType,
-			@RequestParam(CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME) final String subscriberName,
-			@RequestParam(CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS) final String subscriberAddress,
-			@RequestParam(CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT) final int subscriberPort) {
+			@RequestParam(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE) final String eventType,
+			@RequestParam(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME) final String subscriberName,
+			@RequestParam(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS) final String subscriberAddress,
+			@RequestParam(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT) final int subscriberPort) {
 		logger.debug("unSubscription started ...");
 		
-		final String origin = CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE;
+		final String origin = CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE;
 		checkUnsubscribeParameters(eventType, subscriberName, subscriberAddress, subscriberPort, origin);
 		
 	    eventHandlerService.unsubscribe(eventType, subscriberName, subscriberAddress, subscriberPort);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = POST_EVENT_HANDLER_PUBLISH_DESCRIPTION, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = POST_EVENTHANDLER_PUBLISH_DESCRIPTION, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = POST_EVENT_HANDLER_PUBLISH_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_EVENT_HANDLER_PUBLISH_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_EVENTHANDLER_PUBLISH_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_EVENTHANDLER_PUBLISH_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = CommonConstants.OP_EVENT_HANDLER_PUBLISH, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = CommonConstants.OP_EVENTHANDLER_PUBLISH, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public void publish(@RequestBody final EventPublishRequestDTO request) {
 		logger.debug("publish started ...");
 		
-		final String origin = CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH;
+		final String origin = CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_PUBLISH;
 		checkEventPublishRequestDTO(request, origin);
 		validateTimeStamp(request, origin);
 		
@@ -291,18 +291,18 @@ public class EventHandlerController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = POST_EVENT_HANDLER_PUBLISH_AUTH_UPDATE_DESCRIPTION, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiOperation(value = POST_EVENTHANDLER_PUBLISH_AUTH_UPDATE_DESCRIPTION, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = POST_EVENT_HANDLER_PUBLISH_AUTH_UPDATE_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_EVENT_HANDLER_PUBLISH_AUTH_UPDATE_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_EVENTHANDLER_PUBLISH_AUTH_UPDATE_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_EVENTHANDLER_PUBLISH_AUTH_UPDATE_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = CommonConstants.OP_EVENTHANDLER_PUBLISH_AUTH_UPDATE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public void publishSubscriberAuthorizationUpdate(@RequestBody final EventPublishRequestDTO request) {
 		logger.debug("publishSubscriberAuthorizationUpdate started ...");
 		
-		final String origin = CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE;
+		final String origin = CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_PUBLISH_AUTH_UPDATE;
 		checkEventPublishRequestDTO(request, origin);
 		validateTimeStamp(request, origin);
 		

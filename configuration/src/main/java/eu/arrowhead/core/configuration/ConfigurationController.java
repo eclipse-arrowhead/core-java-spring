@@ -13,54 +13,37 @@
  ********************************************************************************/
 package eu.arrowhead.core.configuration;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Vector;
-import java.util.Iterator;
 import java.util.Base64;
-import java.security.MessageDigest;
 
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpHeaders;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
-import eu.arrowhead.common.CoreDefaults;
-import eu.arrowhead.common.CoreUtilities;
-import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.shared.ConfigurationListResponseDTO;
 import eu.arrowhead.common.dto.shared.ConfigurationRequestDTO;
 import eu.arrowhead.common.dto.shared.ConfigurationResponseDTO;
-import eu.arrowhead.common.dto.shared.ConfigurationListResponseDTO;
-import eu.arrowhead.common.dto.shared.ConfigurationSystemsListResponseDTO;
-import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.core.configuration.database.service.ConfigurationDBService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -70,7 +53,7 @@ import io.swagger.annotations.ApiResponses;
 
 @Api(tags = { CoreCommonConstants.SWAGGER_TAG_ALL })
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS, 
-allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
+			 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
 @RestController
 @RequestMapping(CommonConstants.CONFIGURATION_URI)
@@ -81,10 +64,11 @@ public class ConfigurationController {
 	private static final String PATH_VARIABLE_NAME = "systemName";
 
 	private static final String PUT_CONFIG_MGMT_HTTP_200_MESSAGE = "Configuration updated";
-	private static final String PUT_CONFIG_MGMT_HTTP_400_MESSAGE = "Could not store configration data";
+	private static final String PUT_CONFIG_MGMT_HTTP_400_MESSAGE = "Could not store configuration data";
 	
 	private static final String OP_NOT_VALID_ERROR_MESSAGE = " Illegal operation. ";
 	private static final String NOT_FOUND_ERROR_MESSAGE = " Resource not found. ";
+	private static final String SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE = "System name has invalid format. System names only contain letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).";
 
 	private static final String CONFIG_MGMT_URI =  CoreCommonConstants.MGMT_URI + "/config";
 	private static final String CONFIG_BY_NAME_MGMT_URI = CONFIG_MGMT_URI + "/{" + PATH_VARIABLE_NAME + "}";
@@ -93,6 +77,9 @@ public class ConfigurationController {
 
 	@Autowired
 	private ConfigurationDBService configurationDBService;
+	
+	@Autowired
+	private CommonNamePartVerifier cnVerifier;
 	
 	//=================================================================================================
 	// methods
@@ -117,25 +104,22 @@ public class ConfigurationController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path= CommonConstants.OP_CONFIGURATION_RAWCONF + "/{systemName}")
-	@ResponseBody public ResponseEntity<byte[]> rawconfGet(
-			@PathVariable(value="systemName", required=true) String systemName
-			) {
-
-			if(Utilities.isEmpty(systemName)) {
-				throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_CONFIGURATION_RAWCONF);
-			}
-			systemName = systemName.toLowerCase().trim();
-			
-			ConfigurationResponseDTO ret = configurationDBService.getConfigForSystem(systemName);
-			if(ret == null) {
-				throw new DataNotFoundException(NOT_FOUND_ERROR_MESSAGE, HttpStatus.SC_NOT_FOUND, CommonConstants.OP_CONFIGURATION_RAWCONF + "/" + systemName);
-			}
-			HttpHeaders headers = new HttpHeaders();
-			headers.set("Content-Type", ret.getContentType());
-			headers.set("Content-Disposition", "attachment; filename=" + ret.getFileName());
+	@ResponseBody public ResponseEntity<byte[]> rawconfGet(@PathVariable(value="systemName", required = true) String systemName) {
+		if (Utilities.isEmpty(systemName)) {
+			throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_CONFIGURATION_RAWCONF);
+		}
+		systemName = systemName.toLowerCase().trim();
 		
-			final ResponseEntity<byte[]> responseEntity = new ResponseEntity<>(Base64.getDecoder().decode(ret.getData()), headers, org.springframework.http.HttpStatus.OK);	
-    		return responseEntity;
+		final ConfigurationResponseDTO ret = configurationDBService.getConfigForSystem(systemName);
+		if (ret == null) {
+			throw new DataNotFoundException(NOT_FOUND_ERROR_MESSAGE, HttpStatus.SC_NOT_FOUND, CommonConstants.OP_CONFIGURATION_RAWCONF + "/" + systemName);
+		}
+		final HttpHeaders headers = new HttpHeaders();
+		headers.set("Content-Type", ret.getContentType());
+		headers.set("Content-Disposition", "attachment; filename=" + ret.getFileName());
+	
+		final ResponseEntity<byte[]> responseEntity = new ResponseEntity<>(Base64.getDecoder().decode(ret.getData()), headers, org.springframework.http.HttpStatus.OK);	
+		return responseEntity;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -147,21 +131,18 @@ public class ConfigurationController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path= CommonConstants.OP_CONFIGURATION_CONF + "/{systemName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public ConfigurationResponseDTO confGet(
-			@PathVariable(value="systemName", required=true) String systemName
-			) {
-
-			if(Utilities.isEmpty(systemName)) {
-				throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_CONFIGURATION_CONF);
-			}
-			systemName = systemName.toLowerCase().trim();
-			
-			ConfigurationResponseDTO ret = configurationDBService.getConfigForSystem(systemName);
-			if(ret == null) {
-				throw new DataNotFoundException(NOT_FOUND_ERROR_MESSAGE, HttpStatus.SC_NOT_FOUND, CommonConstants.OP_CONFIGURATION_CONF + "/" + systemName);
-			}
-			
-			return ret;
+	@ResponseBody public ConfigurationResponseDTO confGet(@PathVariable(value="systemName", required = true) String systemName) {
+		if (Utilities.isEmpty(systemName)) {
+			throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_CONFIGURATION_CONF);
+		}
+		systemName = systemName.toLowerCase().trim();
+		
+		final ConfigurationResponseDTO ret = configurationDBService.getConfigForSystem(systemName);
+		if (ret == null) {
+			throw new DataNotFoundException(NOT_FOUND_ERROR_MESSAGE, HttpStatus.SC_NOT_FOUND, CommonConstants.OP_CONFIGURATION_CONF + "/" + systemName);
+		}
+		
+		return ret;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -172,13 +153,11 @@ public class ConfigurationController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path=CONFIG_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public ConfigurationListResponseDTO confListGet(
-			) {
+	@ResponseBody public ConfigurationListResponseDTO confListGet() {
+		final ConfigurationListResponseDTO ret = configurationDBService.getAllConfigurations();
 
-				final ConfigurationListResponseDTO ret = configurationDBService.getAllConfigurations();
-
-				return ret;
-			}
+		return ret;
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Store new configuration", response = ConfigurationResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
@@ -190,11 +169,11 @@ public class ConfigurationController {
 	})
 	@PutMapping(path = CONFIG_BY_NAME_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public ConfigurationResponseDTO storeConfigurationForSystem(@PathVariable(value = PATH_VARIABLE_NAME) final String systemName, @RequestBody final ConfigurationRequestDTO config) {
-		logger.debug("New configurationStore put request recieved with name: {}", systemName);
+		logger.debug("New configurationStore put request received with name: {}", systemName);
 		final String origin = CommonConstants.CONFIGURATION_URI + CONFIG_BY_NAME_MGMT_URI;	
 		
-		if(Utilities.isEmpty(systemName)) {
-			throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CONFIG_BY_NAME_MGMT_URI);
+		if (Utilities.isEmpty(systemName)) {
+			throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 
 		validateConfigRequestDTO(systemName.toLowerCase().trim(), config, origin);
@@ -213,11 +192,11 @@ public class ConfigurationController {
 	})
 	@DeleteMapping(path = CONFIG_BY_NAME_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public ConfigurationResponseDTO deleteConfigurationForSystem(@PathVariable(value = PATH_VARIABLE_NAME) final String systemName) {
-		logger.debug("New configurationStore delete request recieved with name: {}", systemName);
+		logger.debug("New configurationStore delete request received with name: {}", systemName);
 		final String origin = CommonConstants.CONFIGURATION_URI + CONFIG_BY_NAME_MGMT_URI;	
 		
-		if(Utilities.isEmpty(systemName)) {
-			throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CONFIG_BY_NAME_MGMT_URI);
+		if (Utilities.isEmpty(systemName)) {
+			throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 
 		final ConfigurationResponseDTO configResponse = configurationDBService.deleteConfigForSystem(systemName.toLowerCase().trim());
@@ -228,6 +207,7 @@ public class ConfigurationController {
 	//=================================================================================================
 	// assistant methods
 
+	//-------------------------------------------------------------------------------------------------
 	private void validateConfigRequestDTO(final String systemName, final ConfigurationRequestDTO dto, final String origin) {
 		logger.debug("validateConfigRequestDTO started...");
 
@@ -244,10 +224,11 @@ public class ConfigurationController {
 			Assert.isTrue(!Utilities.isEmpty(dto.getContentType()), "contentTyupe is empty.");
 			Assert.isTrue(!Utilities.isEmpty(dto.getData()), "data is empty.");
 
-			Assert.isTrue(systemName.equals(dto.getSystemName()), "request and parameter systemName mismatch");
-		} catch(Exception e){
+			Assert.isTrue(systemName.equals(dto.getSystemName().toLowerCase().trim()), "request and parameter systemName mismatch");
+			
+			Assert.isTrue(cnVerifier.isValid(systemName), SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE);
+		} catch (final Exception e) {
 			throw new BadPayloadException("Bad payload: " + e.getMessage());
 		}
 	}
-	
 }

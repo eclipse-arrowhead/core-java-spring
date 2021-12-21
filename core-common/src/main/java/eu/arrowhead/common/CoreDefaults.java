@@ -25,26 +25,32 @@ public class CoreDefaults {
 	
 	public static final boolean DEFAULT_LOG_ALL_REQUEST_AND_RESPONSE = false;
 	public static final boolean DEFAULT_USE_STRICT_SERVICE_INTF_NAME_VERIFIER = false;
+	public static final boolean DEFAULT_USE_STRICT_SERVICE_DEFINITION_VERIFIER = false;
+	public static final boolean DEFAULT_USE_NETWORK_ADDRESS_DETECTOR = false;
+	public static final String DEFAULT_FILTER_PROXY_ADDRESSES = "";
+	public static final boolean DEFAULT_ALLOW_SELF_ADDRESSING = false;
+	public static final boolean DEFAULT_ALLOW_NON_ROUTABLE_ADDRESSING = false;	
 	public static final int DEFAULT_URI_CRAWLER_INTERVAL = 30;
 	public static final int DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES = -1; // never expires
 	public static final int DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES_WITH_QOS_ENABLED = 60; // when QoS enabled, we want to make sure that tokens expires eventually
 	
-	public static final boolean DEFAULT_SERVICE_REGISTRY_PING_SCHEDULED = false;
-	public static final int DEFAULT_SERVICE_REGISTRY_PING_INTERVAL_MINUTES = 60;
-	public static final int DEFAULT_SERVICE_REGISTRY_PING_TIMEOUT_MILLISECONDS = 5000;
-	public static final boolean DEFAULT_SERVICE_REGISTRY_TTL_SCHEDULED = false;
-	public static final int DEFAULT_SERVICE_REGISTRY_TTL_INTERVAL_MINUTES = 13;
+	public static final boolean DEFAULT_SERVICEREGISTRY_PING_SCHEDULED = false;
+	public static final int DEFAULT_SERVICEREGISTRY_PING_INTERVAL_MINUTES = 60;
+	public static final int DEFAULT_SERVICEREGISTRY_PING_TIMEOUT_MILLISECONDS = 5000;
+	public static final boolean DEFAULT_SERVICEREGISTRY_TTL_SCHEDULED = false;
+	public static final int DEFAULT_SERVICEREGISTRY_TTL_INTERVAL_MINUTES = 13;
 
-	public static final int DEFAULT_SYSTEM_REGISTRY_PING_INTERVAL_MINUTES = 60;
-	public static final int DEFAULT_SYSTEM_REGISTRY_PING_TIMEOUT_MILLISECONDS = 5000;
+	public static final int DEFAULT_SYSTEMREGISTRY_PING_INTERVAL_MINUTES = 60;
+	public static final int DEFAULT_SYSTEMREGISTRY_PING_TIMEOUT_MILLISECONDS = 5000;
 
-	public static final String DEFAULT_OWN_CLOUD_OPERATOR = "default_operator";
-	public static final String DEFAULT_OWN_CLOUD_NAME = "default_insecure_cloud";
+	public static final String DEFAULT_OWN_CLOUD_OPERATOR = "default-operator";
+	public static final String DEFAULT_OWN_CLOUD_NAME = "default-insecure-cloud";
 	
 	public static final String DEFAULT_REQUEST_PARAM_DIRECTION_VALUE = CoreCommonConstants.SORT_ORDER_ASCENDING;
 	
 	public static final boolean DEFAULT_AUTHORIZATION_IS_EVENTHANDLER_PRESENT = false;
 	
+	public static final boolean DEFAULT_ORCHESTRATOR_USE_FLEXIBLE_STORE = false;
 	public static final boolean DEFAULT_ORCHESTRATOR_IS_GATEKEEPER_PRESENT = false;
 
 	public static final int DEFAULT_RELAY_CHECK_INTERVAL = 9;
@@ -58,13 +64,13 @@ public class CoreDefaults {
 	public static final int DEFAULT_GATEWAY_MAX_PORT = 8100;
 	public static final int DEFAULT_GATEWAY_PROVIDER_SIDE_MAX_REQUEST_PER_SOCKET = 50;
 	
-	public static final boolean DEFAULT_EVENT_HANDLER_TTL_SCHEDULED = false;
-	public static final int DEFAULT_EVENT_HANDLER_TTL_INTERVAL_MINUTES = 17;
-	public static final int DEFAULT_EVENT_HANDLER_MAX_RETRY_CONNECT_AUTH = 3;
-	public static final int DEFAULT_EVENT_HANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC = 10;
+	public static final boolean DEFAULT_EVENTHANDLER_TTL_SCHEDULED = false;
+	public static final int DEFAULT_EVENTHANDLER_TTL_INTERVAL_MINUTES = 17;
+	public static final int DEFAULT_EVENTHANDLER_MAX_RETRY_CONNECT_AUTH = 3;
+	public static final int DEFAULT_EVENTHANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC = 10;
 	
 	public static final long DEFAULT_TIME_STAMP_TOLERANCE_SECONDS = 120;
-	public static final int DEFAULT_EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS = 10;
+	public static final int DEFAULT_EVENTHANDLER_MAX_EXPRESS_SUBSCRIBERS = 10;
 	
 	public static final int DEFAULT_PING_TTL_INTERVAL_MINUTES = 10;	
 	public static final int DEFAULT_CLOUD_PING_TTL_INTERVAL_MINUTES = 10;
@@ -83,7 +89,13 @@ public class CoreDefaults {
 	public static final int DEFAULT_QOS_DEFAULT_REFERENCE_LOST_PER_MEASUREMENT_PERCENT = 0;
 	public static final boolean DEFAULT_QOS_ENABLED_RELAY_TASK = false;
 	public static final boolean DEFAULT_QOS_IS_GATEKEEPER_PRESENT = false;
-	
+	public static final String DEFAULT_QOS_MONITOR_PROVIDER_TYPE = "defaultexternal";
+	public static final String DEFAULT_QOS_MONITOR_PROVIDER_NAME = "qosmeasurer";
+	public static final String DEFAULT_QOS_MONITOR_PROVIDER_ADDRESS = "127.0.0.1";
+	public static final int DEFAULT_QOS_MONITOR_PROVIDER_PORT = 8888;
+	public static final String DEFAULT_QOS_MONITOR_PROVIDER_PATH = "/ping-icmp";
+	public static final boolean DEFAULT_QOS_MONITOR_PROVIDER_SECURE = true;
+
 	public static final int DEFAULT_RELAY_TEST_BAD_GATEWAY_RETRY_MIN = 30; //in minutes
 	public static final byte DEFAULT_RELAY_TEST_TIME_TO_REPEAT = 35;
 	public static final int DEFAULT_RELAY_TEST_TIMEOUT = 5000; // in milliseconds

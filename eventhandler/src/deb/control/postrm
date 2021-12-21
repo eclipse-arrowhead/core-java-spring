@@ -7,7 +7,7 @@ set -e
 
 . /usr/share/debconf/confmodule
 
-SYSTEM_NAME="event_handler"
+SYSTEM_NAME="eventhandler"
 
 # summary of how this script can be called:
 #        * <postrm> `remove'

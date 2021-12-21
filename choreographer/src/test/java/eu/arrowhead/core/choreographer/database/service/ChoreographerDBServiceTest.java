@@ -14,34 +14,32 @@
 
 package eu.arrowhead.core.choreographer.database.service;
 
-import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.database.entity.ChoreographerAction;
-import eu.arrowhead.common.database.entity.ChoreographerPlan;
-import eu.arrowhead.common.database.repository.ChoreographerActionRepository;
-import eu.arrowhead.common.database.repository.ChoreographerPlanRepository;
-import eu.arrowhead.common.database.repository.ChoreographerStepRepository;
-import eu.arrowhead.common.dto.internal.ChoreographerActionRequestDTO;
-import eu.arrowhead.common.dto.internal.ChoreographerStepRequestDTO;
-import eu.arrowhead.common.exception.InvalidParameterException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
-
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.data.domain.Sort.Direction;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.ChoreographerAction;
+import eu.arrowhead.common.database.entity.ChoreographerPlan;
+import eu.arrowhead.common.database.repository.ChoreographerPlanRepository;
+import eu.arrowhead.common.dto.internal.ChoreographerActionRequestDTO;
+import eu.arrowhead.common.dto.internal.ChoreographerStepRequestDTO;
+import eu.arrowhead.common.exception.InvalidParameterException;
 
 @RunWith(SpringRunner.class)
 public class ChoreographerDBServiceTest {
@@ -197,11 +195,11 @@ public class ChoreographerDBServiceTest {
 
     //-------------------------------------------------------------------------------------------------
 	private ZonedDateTime getUpdatedAtForTest() {
-        return Utilities.parseUTCStringToLocalZonedDateTime("2019-08-13 12:49:30");
+        return Utilities.parseUTCStringToLocalZonedDateTime("2019-08-13T12:49:30Z");
     }
 
     //-------------------------------------------------------------------------------------------------
 	private ZonedDateTime getCreatedAtForTest() {
-        return Utilities.parseUTCStringToLocalZonedDateTime("2019-08-13 14:43:19");
+        return Utilities.parseUTCStringToLocalZonedDateTime("2019-08-13T14:43:19Z");
     }
 }

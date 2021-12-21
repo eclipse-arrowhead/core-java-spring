@@ -32,8 +32,8 @@ public class GatekeeperAccessControlFilter extends CoreSystemAccessControlFilter
 	// members
 	
 	private static final CoreSystem[] allowedCoreSystemsForOrchestrationTasks = { CoreSystem.ORCHESTRATOR };
-	private static final CoreSystem[] allowedCoreSystemsForQoSTasks = { CoreSystem.QOS_MONITOR };
-	private static final CoreSystem[] allowedCoreSystemsForGeneralTasks = { CoreSystem.ORCHESTRATOR, CoreSystem.QOS_MONITOR };
+	private static final CoreSystem[] allowedCoreSystemsForQoSTasks = { CoreSystem.QOSMONITOR };
+	private static final CoreSystem[] allowedCoreSystemsForGeneralTasks = { CoreSystem.ORCHESTRATOR, CoreSystem.QOSMONITOR };
 	
 	//=================================================================================================
 	// assistant methods

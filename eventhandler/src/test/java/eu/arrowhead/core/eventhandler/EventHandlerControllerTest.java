@@ -82,7 +82,7 @@ public class EventHandlerControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void echoTest() throws Exception {
-		this.mockMvc.perform(get(CommonConstants.EVENT_HANDLER_URI + CommonConstants.ECHO_URI)
+		this.mockMvc.perform(get(CommonConstants.EVENTHANDLER_URI + CommonConstants.ECHO_URI)
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());		
 	}
@@ -95,7 +95,7 @@ public class EventHandlerControllerTest {
 	public void subscriptionTest() throws Exception {
 		doNothing().when(eventHandlerService).subscribe(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(getSubscriptionRequestDTOForTest()))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -109,7 +109,7 @@ public class EventHandlerControllerTest {
 	public void subscriptionWithNullEventTypeTest() throws Exception {
 		doNothing().when(eventHandlerService).subscribe(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(getSubscriptionRequestDTOWithNullEventTypeForTest()))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -124,7 +124,7 @@ public class EventHandlerControllerTest {
 	public void subscriptionWithEmptyEventTypeTest() throws Exception {
 		doNothing().when(eventHandlerService).subscribe(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(getSubscriptionRequestDTOWithEmptyEventTypeForTest()))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -142,7 +142,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(request))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -160,7 +160,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(request))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -178,7 +178,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(request))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -196,7 +196,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(request))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -214,7 +214,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(request))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -232,7 +232,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(request))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -250,7 +250,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(request))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -268,7 +268,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(request))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -286,7 +286,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(request))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -305,7 +305,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(request))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -324,7 +324,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(request))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -342,7 +342,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(request))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -359,7 +359,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(request))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -376,7 +376,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE)
 											.contentType(MediaType.APPLICATION_JSON)
 											.content(objectMapper.writeValueAsBytes(request))
 											.accept(MediaType.APPLICATION_JSON))
@@ -395,7 +395,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIBE)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(request))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -421,7 +421,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).publishResponse(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_PUBLISH)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(request))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -438,7 +438,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).publishResponse(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_PUBLISH)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(request))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -456,7 +456,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).publishResponse(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_PUBLISH)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(request))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -474,7 +474,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).publishResponse(any());
 		
-		this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
+		this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_PUBLISH)
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(request))
 					.accept(MediaType.APPLICATION_JSON))
@@ -489,7 +489,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).publishResponse(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_PUBLISH)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(request))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -508,7 +508,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).publishResponse(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_PUBLISH)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(request))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -526,7 +526,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).publishResponse(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_PUBLISH)
 										 	 .contentType(MediaType.APPLICATION_JSON)
 										 	 .content(objectMapper.writeValueAsBytes(request))
 										 	 .accept(MediaType.APPLICATION_JSON))
@@ -544,7 +544,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).publishResponse(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_PUBLISH)
 											 .contentType(MediaType.APPLICATION_JSON)
 											 .content(objectMapper.writeValueAsBytes(request))
 											 .accept(MediaType.APPLICATION_JSON))
@@ -621,19 +621,19 @@ public class EventHandlerControllerTest {
 		final StringBuilder sb = new StringBuilder();
 		
 		if (eventType != null) {
-			sb.append(CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE).append("=").append( eventType ).append("&");
+			sb.append(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE).append("=").append( eventType ).append("&");
 		}                               
 		                                
 		if (subscriberName != null) {      
-			sb.append(CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME).append("=").append( subscriberName ).append("&");
+			sb.append(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME).append("=").append( subscriberName ).append("&");
 		}                                
 		                                 
 		if (subscriberAddress != null) {   
-			sb.append(CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS).append("=").append( subscriberAddress ).append("&");
+			sb.append(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS).append("=").append( subscriberAddress ).append("&");
 		}                                
 		                                 
 		if (subscriberPort != null) {      
-			sb.append(CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT).append("=").append( subscriberPort.intValue()).append("&");
+			sb.append(CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT).append("=").append( subscriberPort.intValue()).append("&");
 		}
 		
 		return sb.length() > 0 ? sb.substring(0, sb.length() - 1) : "";
@@ -642,7 +642,7 @@ public class EventHandlerControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	private MvcResult deleteSubscription(final String queryStr, final ResultMatcher matcher) throws Exception {
 		final String validatedQueryStr = Utilities.isEmpty(queryStr) ? "" : "?" + queryStr.trim();
-		return this.mockMvc.perform(delete(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE + validatedQueryStr)
+		return this.mockMvc.perform(delete(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_UNSUBSCRIBE + validatedQueryStr)
 						   .accept(MediaType.APPLICATION_JSON))
 						   .andExpect(matcher)
 						   .andReturn();

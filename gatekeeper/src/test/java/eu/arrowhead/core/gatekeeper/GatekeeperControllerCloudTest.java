@@ -298,6 +298,26 @@ public class GatekeeperControllerCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void testRegisterCloudsWithWrongOperator() throws Exception {
+		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
+		cloudRequestDTO.setOperator("wrong_operator");
+		cloudRequestDTO.setName("testName");
+		cloudRequestDTO.setSecure(true);
+		cloudRequestDTO.setNeighbor(true);
+		cloudRequestDTO.setAuthenticationInfo("testAuthenticationInfo");
+		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
+		cloudRequestDTO.setGatewayRelayIds(List.of(1L));
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
+		
+		this.mockMvc.perform(post(CLOUDS_MGMT_URI)
+					.content(objectMapper.writeValueAsBytes(dtoList))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testRegisterCloudsWithNullName() throws Exception {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("testOperator");
@@ -322,6 +342,26 @@ public class GatekeeperControllerCloudTest {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("testOperator");
 		cloudRequestDTO.setName("   ");
+		cloudRequestDTO.setSecure(true);
+		cloudRequestDTO.setNeighbor(true);
+		cloudRequestDTO.setAuthenticationInfo("testAuthenticationInfo");
+		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
+		cloudRequestDTO.setGatewayRelayIds(List.of(1L));
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
+		
+		this.mockMvc.perform(post(CLOUDS_MGMT_URI)
+					.content(objectMapper.writeValueAsBytes(dtoList))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRegisterCloudsWithWrongName() throws Exception {
+		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
+		cloudRequestDTO.setOperator("testOperator");
+		cloudRequestDTO.setName("wrong.name");
 		cloudRequestDTO.setSecure(true);
 		cloudRequestDTO.setNeighbor(true);
 		cloudRequestDTO.setAuthenticationInfo("testAuthenticationInfo");
@@ -427,6 +467,25 @@ public class GatekeeperControllerCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void testUpdateCloudByIdWithWrongOperator() throws Exception {
+		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
+		cloudRequestDTO.setOperator("wrong-operator-");
+		cloudRequestDTO.setName("testName");
+		cloudRequestDTO.setSecure(true);
+		cloudRequestDTO.setNeighbor(true);
+		cloudRequestDTO.setAuthenticationInfo("testAuthenticationInfo");
+		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
+		cloudRequestDTO.setGatewayRelayIds(List.of(1L));		
+		
+		this.mockMvc.perform(put(CLOUDS_MGMT_URI + "/1")
+					.content(objectMapper.writeValueAsBytes(cloudRequestDTO))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testUpdateCloudByIdWithNullName() throws Exception {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("testOperator");
@@ -450,6 +509,25 @@ public class GatekeeperControllerCloudTest {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("testOperator");
 		cloudRequestDTO.setName("   ");
+		cloudRequestDTO.setSecure(true);
+		cloudRequestDTO.setNeighbor(true);
+		cloudRequestDTO.setAuthenticationInfo("testAuthenticationInfo");
+		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
+		cloudRequestDTO.setGatewayRelayIds(List.of(1L));
+				
+		this.mockMvc.perform(put(CLOUDS_MGMT_URI + "/1")
+					.content(objectMapper.writeValueAsBytes(cloudRequestDTO))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUpdateCloudByIdWithWrongName() throws Exception {
+		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
+		cloudRequestDTO.setOperator("testOperator");
+		cloudRequestDTO.setName("wrong name");
 		cloudRequestDTO.setSecure(true);
 		cloudRequestDTO.setNeighbor(true);
 		cloudRequestDTO.setAuthenticationInfo("testAuthenticationInfo");

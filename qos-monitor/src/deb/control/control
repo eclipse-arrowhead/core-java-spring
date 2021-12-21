@@ -1,0 +1,10 @@
+Package: arrowhead-qos-monitor
+Version: [[version]]
+Section: contrib/java
+Priority: optional
+Architecture: all
+Maintainer: Svetlin Tanyi <szvetlin@aitia.ai>
+Homepage: http://www.arrowhead.eu
+Description: Arrowhead QoS Monitor System
+Distribution: development
+Depends: java-runtime-headless, virtual-mysql-server, arrowhead-core-common

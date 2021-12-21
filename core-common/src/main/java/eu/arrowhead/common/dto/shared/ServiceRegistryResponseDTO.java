@@ -17,6 +17,7 @@ package eu.arrowhead.common.dto.shared;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -87,5 +88,35 @@ public class ServiceRegistryResponseDTO implements Serializable {
 				.add("createdAt='" + createdAt + "'")
 				.add("updatedAt='" + updatedAt + "'")
 				.toString();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(id);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		
+		if (obj == null) {
+			return false;
+		}
+		
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		
+		final ServiceRegistryResponseDTO other = (ServiceRegistryResponseDTO) obj;
+		
+		if (id != other.id) {
+			return false;
+		}
+		
+		return true;
 	}
 }
