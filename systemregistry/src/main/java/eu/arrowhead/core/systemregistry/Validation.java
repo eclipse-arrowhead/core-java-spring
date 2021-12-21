@@ -14,6 +14,13 @@
 
 package eu.arrowhead.core.systemregistry;
 
+import java.time.format.DateTimeParseException;
+import java.util.Objects;
+
+import org.apache.http.HttpStatus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;
@@ -23,14 +30,7 @@ import eu.arrowhead.common.dto.shared.SystemRegistryOnboardingWithNameRequestDTO
 import eu.arrowhead.common.dto.shared.SystemRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
-import org.apache.http.HttpStatus;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
-
-import java.time.format.DateTimeParseException;
-import java.util.Objects;
+import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 
 public class Validation {
 
@@ -38,12 +38,15 @@ public class Validation {
     private static final String SYSTEM_NAME_NULL_ERROR_MESSAGE = " System name must have value ";
     private static final String SYSTEM_ADDRESS_NULL_ERROR_MESSAGE = " System address must have value ";
     private static final String SYSTEM_PORT_NULL_ERROR_MESSAGE = " System port must have value ";
+	private static final String SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE = "System name has invalid format. System names only contain letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).";
+
 
     private static final String DEVICE_NAME_NULL_ERROR_MESSAGE = " Device name must have value ";
     private static final String DEVICE_ADDRESS_NULL_ERROR_MESSAGE = " Device address must have value ";
     private static final String DEVICE_MAC_ADDRESS_NULL_ERROR_MESSAGE = " Device MAC address must have value ";
 
     private final Logger logger = LogManager.getLogger();
+    private final CommonNamePartVerifier cnVerifier = new CommonNamePartVerifier(); 
 
     public Validation() { super(); }
 
@@ -76,9 +79,13 @@ public class Validation {
             needChange = true;
         }
 
-
         if (!Utilities.isEmpty(request.getSystemName())) {
             needChange = true;
+            
+            if (!cnVerifier.isValid(request.getSystemName())) {
+            	throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+            }
+            
             for (final CoreSystem coreSysteam : CoreSystem.values()) {
                 if (coreSysteam.name().equalsIgnoreCase(request.getSystemName().trim())) {
                     throw new BadPayloadException("System name '" + request.getSystemName() + "' is a reserved arrowhead core system name.",
@@ -101,6 +108,10 @@ public class Validation {
 
         if (request.getAuthenticationInfo() != null) {
             needChange = true;
+        }
+        
+        if (request.getMetadata() != null) {
+        	needChange = true;
         }
 
         if (!needChange) {
@@ -157,6 +168,10 @@ public class Validation {
 
         if (Utilities.isEmpty(request.getSystemName())) {
             throw new BadPayloadException(SYSTEM_NAME_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+        
+        if (!cnVerifier.isValid(request.getSystemName())) {
+        	throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
 
         if (checkReservedCoreSystemNames) {
@@ -220,7 +235,7 @@ public class Validation {
                 Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
             } catch (final DateTimeParseException ex) {
                 throw new BadPayloadException(
-                        "End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.",
+                        "End of validity is specified in the wrong format. Please provide UTC time using ISO-8601 format.",
                         HttpStatus.SC_BAD_REQUEST, origin);
             }
         }
@@ -231,6 +246,11 @@ public class Validation {
         if (Utilities.isEmpty(systemName)) {
             throw new BadPayloadException("Name of the system is blank", HttpStatus.SC_BAD_REQUEST, origin);
         }
+        
+        if (!cnVerifier.isValid(systemName)) {
+        	throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+
     }
 
 
@@ -265,7 +285,7 @@ public class Validation {
     }
 
     //-------------------------------------------------------------------------------------------------
-    void validateDevice(@RequestBody final DeviceRequestDTO deviceRequestDto, final String origin) {
+    void validateDevice(final DeviceRequestDTO deviceRequestDto, final String origin) {
         if (Utilities.isEmpty(deviceRequestDto.getDeviceName())) {
             throw new BadPayloadException("Device name is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
         }
@@ -295,6 +315,10 @@ public class Validation {
 
             if (!Utilities.isEmpty(system.getSystemName())) {
                 needChange = true;
+                
+                if (!cnVerifier.isValid(request.getSystem().getSystemName())) {
+                	throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+                }
             } else if (!Utilities.isEmpty(system.getAddress())) {
                 needChange = true;
             } else if (Objects.nonNull(system.getPort())) {
@@ -309,9 +333,10 @@ public class Validation {
                 needChange = true;
             } else if (Objects.nonNull(system.getAuthenticationInfo())) {
                 needChange = true;
+            } else if (Objects.nonNull(system.getMetadata())) {
+            	needChange = true;
             }
         }
-
 
         if (request.getEndOfValidity() != null) {
             needChange = true;

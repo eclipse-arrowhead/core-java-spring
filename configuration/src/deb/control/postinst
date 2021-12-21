@@ -26,9 +26,18 @@ case "$1" in
   configure)
     . /usr/share/arrowhead/conf/ahconf.sh
     SYSTEM_DIR="${AH_SYSTEMS_DIR}/${SYSTEM_NAME}"
+	
+	systems="$(ah_get_conf_prop systems)"
+    if [[ "${systems}" != *"${SYSTEM_NAME}"* ]]; then
+      systems="${systems}${SYSTEM_NAME} "
+    fi
+    if [[ "${systems}" != *"sysop"* ]]; then
+      systems="${systems}sysop "
+    fi
+    ah_set_conf_prop systems "${systems}"
 
-    db_get arrowhead-core-common/mysql_password_configuration; system_passwd=$RET || true
-    db_unregister arrowhead-core-common/mysql_password_configuration
+    db_get arrowhead-core-common/mysql_password_cs; system_passwd=$RET || true
+    db_unregister arrowhead-core-common/mysql_password_cs
 
     # Generate password (if required)
     if [ -z "${system_passwd}" ]; then
@@ -40,6 +49,11 @@ case "$1" in
 
     if [ ! -d "${SYSTEM_DIR}" ]; then
       mkdir -p ${SYSTEM_DIR}
+    fi
+	
+    domain_name=${AH_DOMAIN_NAME}
+    if [ -z ${domain_name} ]; then
+      domain_name=${OWN_IP}
     fi
 
     ah_cert_signed_system ${SYSTEM_NAME}
@@ -60,7 +74,7 @@ case "$1" in
     cat ${SYSTEM_DIR}/application.properties.orig | \
       sed -r -e "\#^.*spring\.datasource\.url=#s#.*\$#spring.datasource.url=jdbc:mysql://"${db_host}":3306/arrowhead?serverTimezone=Europe/Budapest#"  \
       -e "\#^.*spring\.datasource\.password=#s#.*\$#spring.datasource.password=${system_passwd}#" \
-      -e "\#^.*server\.address=#s#.*\$#server.address=${OWN_IP}#" \
+	  -e "\#^.*domain\.name=#s#.*\$#domain.name=${domain_name}#" \
       -e "\#^.*sr_address=#s#.*\$#sr_address=${sr_host}#" \
       -e "\#^.*server\.ssl\.key-store=#s#.*\$#server.ssl.key-store=file:${SYSTEM_DIR}/${SYSTEM_NAME}.p12#" \
       -e "\#^.*server\.ssl\.key-store-password=#s#.*\$#server.ssl.key-store-password=${AH_PASS_CERT}#" \

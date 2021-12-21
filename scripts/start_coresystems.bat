@@ -1,6 +1,6 @@
 @ECHO OFF
 
-SET version="4.3.0"
+SET version="4.4.0"
 SET parent_path=%~dp0
 cd %parent_path%
 
@@ -29,6 +29,10 @@ cd ..\..\datamanager\target
 START "" /B "cmd /c javaw -jar arrowhead-datamanager-%version%.jar > sout_datamanager.log 2>&1"
 echo DataManager started
 
+cd ..\..\timemanager\target
+START "" /B "cmd /c javaw -jar arrowhead-timemanager-%version%.jar > sout_timemanager.log 2>&1"
+echo TimeManager started
+
 cd ..\..\gatekeeper\target
 START "" /B "cmd /c javaw -jar arrowhead-gatekeeper-%version%.jar > sout_gk.log 2>&1"
 echo Gatekeeper started
@@ -42,12 +46,28 @@ START "" /B "cmd /c javaw -jar arrowhead-choreographer-%version%.jar > sout_chor
 echo Choreographer started
 
 cd ..\..\configuration\target
-START "" /B "cmd /c javaw -jar arrowhead-configuration-4.2.0.jar > sout_configuration.log 2>&1"
+START "" /B "cmd /c javaw -jar arrowhead-configuration-%version%.jar > sout_configuration.log 2>&1"
 echo Configuration started
 
 cd ..\..\certificate-authority\target
 START "" /B "cmd /c javaw -jar arrowhead-certificate-authority-%version%.jar > sout_ca.log 2>&1"
 echo Certificate Authority started
+
+cd ..\..\deviceregistry\target
+START "" /B "cmd /c javaw -jar arrowhead-deviceregistry-%version%.jar > sout_deviceregistry.log 2>&1"
+echo Device Registry started
+
+cd ..\..\systemregistry\target
+START "" /B "cmd /c javaw -jar arrowhead-systemregistry-%version%.jar > sout_systemregistry.log 2>&1"
+echo System Registry started
+
+cd ..\..\onboarding\target
+START "" /B "cmd /c javaw -jar arrowhead-onboarding-%version%.jar > sout_onboarding.log 2>&1"
+echo Onboarding Controller started
+
+cd ..\..\plantdescriptionengine\target
+START "" /B "cmd /c javaw -jar arrowhead-plantdescriptionengine-%version%.jar > sout_plantdescriptionengine.log 2>&1"
+echo Plant Description Engine started
 
 cd %parent_path%
 

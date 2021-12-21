@@ -29,8 +29,9 @@ public class CAAccessControlFilter extends CoreSystemAccessControlFilter {
 
 	// =================================================================================================
 	// members
-	private static final CoreSystem[] allowedCoreSystemsForTrustedKeyHandling = { CoreSystem.ONBOARDING_CONTROLLER, CoreSystem.DEVICE_REGISTRY, CoreSystem.SYSTEM_REGISTRY };
-	private static final CoreSystem[] allowedCoreSystemsForCertificateHandling = { CoreSystem.ONBOARDING_CONTROLLER, CoreSystem.DEVICE_REGISTRY, CoreSystem.SYSTEM_REGISTRY };
+	
+	private static final CoreSystem[] allowedCoreSystemsForTrustedKeyHandling = { CoreSystem.ONBOARDINGCONTROLLER, CoreSystem.DEVICEREGISTRY, CoreSystem.SYSTEMREGISTRY };
+	private static final CoreSystem[] allowedCoreSystemsForCertificateHandling = { CoreSystem.ONBOARDINGCONTROLLER, CoreSystem.DEVICEREGISTRY, CoreSystem.SYSTEMREGISTRY };
 
 	// =================================================================================================
 	// assistant methods
@@ -60,10 +61,11 @@ public class CAAccessControlFilter extends CoreSystemAccessControlFilter {
 		}
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	private void checkIfClientIsAnAllowedCoreSystemOrSysop(final String clientCN, final String cloudCN,
 			final CoreSystem[] allowedCoreSystems, final String requestTarget) {
 
-		boolean result = checkIfClientIsAnAllowedCoreSystemNoException(clientCN, cloudCN,
+		final boolean result = checkIfClientIsAnAllowedCoreSystemNoException(clientCN, cloudCN,
 				allowedCoreSystems, requestTarget);
 
 

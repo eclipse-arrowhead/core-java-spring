@@ -62,7 +62,9 @@ import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultListDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
@@ -81,10 +83,10 @@ public class OrchestratorDriver {
 	private static final String GATEKEEPER_INIT_GSD_URI_KEY = CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_INIT_ICN_URI_KEY = CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_GET_CLOUD_URI_KEY = CoreSystemService.GATEKEEPER_GET_CLOUD_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
-	private static final String QOS_MONITOR_INTRA_PING_MEASUREMENT_URI_KEY = CoreSystemService.QOS_MONITOR_INTRA_PING_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
-	private static final String QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_URI_KEY = CoreSystemService.QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
-	private static final String QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_URI_KEY = CoreSystemService.QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
-	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_URI_KEY = CoreSystemService.QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String QOSMONITOR_INTRA_PING_MEASUREMENT_URI_KEY = CoreSystemService.QOSMONITOR_INTRA_PING_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String QOSMONITOR_INTRA_PING_MEDIAN_MEASUREMENT_URI_KEY = CoreSystemService.QOSMONITOR_INTRA_PING_MEDIAN_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String QOSMONITOR_INTER_DIRECT_PING_MEASUREMENT_URI_KEY = CoreSystemService.QOSMONITOR_INTER_DIRECT_PING_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENT_URI_KEY = CoreSystemService.QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	
 	public static final String KEY_CALCULATED_SERVICE_TIME_FRAME = "QoSCalculatedServiceTimeFrame";
 	
@@ -132,6 +134,18 @@ public class OrchestratorDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public ServiceQueryResultListDTO multiQueryServiceRegistry(final List<ServiceQueryFormDTO> forms) { 
+		logger.debug("multiQueryServiceRegistry started...");
+		Assert.notNull(forms, "Form list is null.");
+		Assert.isTrue(!forms.isEmpty(), "Form list is empty.");
+		
+		final UriComponents queryUri = getMultiQueryUri();
+		final ResponseEntity<ServiceQueryResultListDTO> response = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultListDTO.class, new ServiceQueryFormListDTO(forms));
+		
+		return response.getBody();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public SystemResponseDTO queryServiceRegistryBySystemId(final long consumerSystemId) {
 		logger.debug("queryByIdServiceRegistry started...");
 		Assert.isTrue(consumerSystemId > 0, "ConsumerSystemId is less than 1.");
@@ -152,6 +166,7 @@ public class OrchestratorDriver {
 		
 		return response.getBody();
 	}
+	
 	//-------------------------------------------------------------------------------------------------
 	public List<OrchestrationResultDTO> generateAuthTokens(final OrchestrationFormRequestDTO request, final List<OrchestrationResultDTO> orList) {
 		logger.debug("generateAuthTokens started...");
@@ -291,6 +306,21 @@ public class OrchestratorDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private UriComponents getMultiQueryUri() {
+		logger.debug("getMultiQueryUri started...");
+		
+		if (arrowheadContext.containsKey(CoreCommonConstants.SR_MULTI_QUERY_URI)) {
+			try {
+				return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_MULTI_QUERY_URI);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Orchestrator can't find Service Registry Multi Query URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Orchestrator can't find Service Registry Multi Query URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private UriComponents getQueryBySystemIdUri() {
 		logger.debug("getQueryByIdUri started...");
 		
@@ -400,9 +430,9 @@ public class OrchestratorDriver {
 	private UriComponents getQosMonitorIntraPingMeasurementUri(final long id) {
 		logger.debug("getQosMonitorIntraPingMeasurementUri started...");
 		
-		if (arrowheadContext.containsKey(QOS_MONITOR_INTRA_PING_MEASUREMENT_URI_KEY)) {
+		if (arrowheadContext.containsKey(QOSMONITOR_INTRA_PING_MEASUREMENT_URI_KEY)) {
 			try {
-				final UriComponents uri = (UriComponents) arrowheadContext.get(QOS_MONITOR_INTRA_PING_MEASUREMENT_URI_KEY);
+				final UriComponents uri = (UriComponents) arrowheadContext.get(QOSMONITOR_INTRA_PING_MEASUREMENT_URI_KEY);
 				return uri.expand(id);
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("Orchestrator can't find QoS Monitor ping/measurement URI.");
@@ -416,9 +446,9 @@ public class OrchestratorDriver {
 	private UriComponents getQosMonitorIntraMedianPingMeasurementUri(final String attribute) {
 		logger.debug("getQosMonitorIntraMedianPingMeasurementUri started...");
 		
-		if (arrowheadContext.containsKey(QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_URI_KEY)) {
+		if (arrowheadContext.containsKey(QOSMONITOR_INTRA_PING_MEDIAN_MEASUREMENT_URI_KEY)) {
 			try {
-				final UriComponents uri = (UriComponents) arrowheadContext.get(QOS_MONITOR_INTRA_PING_MEDIAN_MEASUREMENT_URI_KEY);
+				final UriComponents uri = (UriComponents) arrowheadContext.get(QOSMONITOR_INTRA_PING_MEDIAN_MEASUREMENT_URI_KEY);
 				return uri.expand(attribute);
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("Orchestrator can't find QoS Monitor intra ping median URI.");
@@ -432,9 +462,9 @@ public class OrchestratorDriver {
 	private UriComponents getQosMonitorInterDirectPingMeasurementUri() {
 		logger.debug("getQosMonitorInterDirectPingMeasurementUri started...");
 		
-		if (arrowheadContext.containsKey(QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_URI_KEY)) {
+		if (arrowheadContext.containsKey(QOSMONITOR_INTER_DIRECT_PING_MEASUREMENT_URI_KEY)) {
 			try {
-				return (UriComponents) arrowheadContext.get(QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_URI_KEY);
+				return (UriComponents) arrowheadContext.get(QOSMONITOR_INTER_DIRECT_PING_MEASUREMENT_URI_KEY);
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("Orchestrator can't find QoS Monitor inter direct ping URI.");
 			}
@@ -447,9 +477,9 @@ public class OrchestratorDriver {
 	private UriComponents getQosMonitorInterRelayEchoMeasurementUri() {
 		logger.debug("getQosMonitorInterRelayEchoMeasurementUri started...");
 		
-		if (arrowheadContext.containsKey(QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_URI_KEY)) {
+		if (arrowheadContext.containsKey(QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENT_URI_KEY)) {
 			try {
-				return (UriComponents) arrowheadContext.get(QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_URI_KEY);
+				return (UriComponents) arrowheadContext.get(QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENT_URI_KEY);
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("Orchestrator can't find QoS Monitor inter relay echo URI.");
 			}

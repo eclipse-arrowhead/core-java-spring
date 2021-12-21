@@ -5,5 +5,5 @@ $SYS: gpPd@$SYS/*
 sysop: gpPd@*/*
 
 # specific example
-#service_registry.testcloud2.aitia.arrowhead.eu: gpd@examplesys1/temperature, g@examplesys2/temperature,
+#serviceregistry.testcloud2.aitia.arrowhead.eu: gpd@examplesys1/temperature, g@examplesys2/temperature,
 

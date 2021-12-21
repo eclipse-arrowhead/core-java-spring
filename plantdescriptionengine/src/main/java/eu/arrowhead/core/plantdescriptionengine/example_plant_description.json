@@ -1,0 +1,100 @@
+{
+  "include": [],
+  "plantDescription": "ArrowHead core",
+  "active": true,
+  "systems": [
+    {
+      "systemName": "pde",
+      "systemId": "pde",
+      "ports": [
+        {
+          "portName": "monitorable",
+          "serviceDefinition": "monitorable",
+          "consumer": true
+        }
+      ]
+    },
+    {
+      "systemName": "echo",
+      "systemId": "echo",
+      "ports": [
+        {
+          "portName": "monitorable_1",
+          "serviceDefinition": "monitorable",
+          "consumer": false,
+          "metadata": {
+            "name": "echo",
+            "serviceUri": "/monitor-1-1"
+          }
+        },
+        {
+          "portName": "monitorable_2",
+          "serviceDefinition": "monitorable",
+          "consumer": false
+        }
+      ]
+    },
+    {
+      "systemName": "echo2",
+      "systemId": "echo2",
+      "ports": [
+        {
+          "portName": "monitorable_1",
+          "serviceDefinition": "monitorable",
+          "consumer": false,
+          "metadata": {
+            "name": "echo2",
+            "serviceUri": "/monitor-2-1"
+          }
+        },
+        {
+          "portName": "monitorable_2",
+          "serviceDefinition": "monitorable",
+          "consumer": false
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "consumer": {
+        "systemId": "pde",
+        "portName": "monitorable"
+      },
+      "producer": {
+        "systemId": "echo",
+        "portName": "monitorable_1"
+      }
+    },
+    {
+      "consumer": {
+        "systemId": "pde",
+        "portName": "monitorable"
+      },
+      "producer": {
+        "systemId": "echo",
+        "portName": "monitorable_2"
+      }
+    },
+    {
+      "consumer": {
+        "systemId": "pde",
+        "portName": "monitorable"
+      },
+      "producer": {
+        "systemId": "echo2",
+        "portName": "monitorable_1"
+      }
+    },
+    {
+      "consumer": {
+        "systemId": "pde",
+        "portName": "monitorable"
+      },
+      "producer": {
+        "systemId": "echo2",
+        "portName": "monitorable_2"
+      }
+    }
+  ]
+}

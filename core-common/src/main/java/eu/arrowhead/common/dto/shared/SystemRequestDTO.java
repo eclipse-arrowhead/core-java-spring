@@ -15,6 +15,7 @@
 package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -23,25 +24,27 @@ public class SystemRequestDTO implements Serializable {
 	//=================================================================================================
 	// members
 	
-	private static final long serialVersionUID = 3919207845374510215L;
-
+	private static final long serialVersionUID = -4501767622271052194L;
+	
 	private String systemName;
 	private String address;
 	private Integer port;
 	private String authenticationInfo;
+	private Map<String,String> metadata;
 	
 	//=================================================================================================
 	// methods
 
+	//-------------------------------------------------------------------------------------------------
+	public SystemRequestDTO() {}
 
-	public SystemRequestDTO() {
-	}
-
-	public SystemRequestDTO(final String systemName, final String address, final Integer port, final String authenticationInfo) {
+	//-------------------------------------------------------------------------------------------------
+	public SystemRequestDTO(final String systemName, final String address, final Integer port, final String authenticationInfo, final Map<String,String> metadata) {
 		this.systemName = systemName;
 		this.address = address;
 		this.port = port;
 		this.authenticationInfo = authenticationInfo;
+		this.metadata = metadata;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -49,12 +52,14 @@ public class SystemRequestDTO implements Serializable {
 	public String getAddress() { return address; }
 	public Integer getPort() { return port;	}
 	public String getAuthenticationInfo() {	return authenticationInfo; }
+	public Map<String,String> getMetadata() { return metadata; }
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setSystemName(final String systemName) { this.systemName = systemName; }
 	public void setAddress(final String address) { this.address = address; }
 	public void setPort(final Integer port) { this.port = port; }
 	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
+	public void setMetadata(final Map<String,String> metadata) { this.metadata = metadata; }
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override
@@ -82,6 +87,7 @@ public class SystemRequestDTO implements Serializable {
 		return Objects.equals(address, other.address) && Objects.equals(port, other.port) && Objects.equals(systemName, other.systemName);
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
 		return new StringJoiner(", ", SystemRequestDTO.class.getSimpleName() + "[", "]")
@@ -89,6 +95,7 @@ public class SystemRequestDTO implements Serializable {
 				.add("address='" + address + "'")
 				.add("port=" + port)
 				.add("authenticationInfo='" + authenticationInfo + "'")
+				.add("metadata=" + metadata)
 				.toString();
 	}
 }

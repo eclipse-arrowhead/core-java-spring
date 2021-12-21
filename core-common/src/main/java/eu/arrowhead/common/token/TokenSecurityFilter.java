@@ -17,7 +17,6 @@ package eu.arrowhead.common.token;
 import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.cert.X509Certificate;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -25,10 +24,10 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import eu.arrowhead.common.SecurityUtilities;
 import org.springframework.lang.Nullable;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.SecurityUtilities;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;

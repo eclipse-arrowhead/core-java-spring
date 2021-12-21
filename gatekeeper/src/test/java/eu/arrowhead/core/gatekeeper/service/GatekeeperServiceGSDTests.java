@@ -363,7 +363,7 @@ public class GatekeeperServiceGSDTests {
 		final ServiceRegistryResponseDTO serviceRegistryResponseDTO = new ServiceRegistryResponseDTO();
 		serviceRegistryResponseDTO.setId(1);
 		serviceRegistryResponseDTO.setServiceDefinition(new ServiceDefinitionResponseDTO(1L, "test-service", "", ""));
-		serviceRegistryResponseDTO.setProvider(new SystemResponseDTO(1L, "test-provider-operator", "1.1.1.1", 1000, "test-provider-auth-info", "", ""));
+		serviceRegistryResponseDTO.setProvider(new SystemResponseDTO(1L, "test-provider-operator", "1.1.1.1", 1000, "test-provider-auth-info", null, "", ""));
 		serviceRegistryResponseDTO.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1L, "HTTP-SECURE-JSON", "", "")));
 		
 		final ServiceQueryResultDTO srQueryResult = new ServiceQueryResultDTO();
@@ -396,13 +396,13 @@ public class GatekeeperServiceGSDTests {
 		final ServiceRegistryResponseDTO serviceRegistryResponseDTO1 = new ServiceRegistryResponseDTO();
 		serviceRegistryResponseDTO1.setId(1);
 		serviceRegistryResponseDTO1.setServiceDefinition(new ServiceDefinitionResponseDTO(1L, "test-service", "", ""));
-		serviceRegistryResponseDTO1.setProvider(new SystemResponseDTO(1L, "test-provider-operator-1", "1.1.1.1", 1000, "test-provider-auth-info-2", "", ""));
+		serviceRegistryResponseDTO1.setProvider(new SystemResponseDTO(1L, "test-provider-operator-1", "1.1.1.1", 1000, "test-provider-auth-info-2", null, "", ""));
 		serviceRegistryResponseDTO1.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1L, "HTTP-SECURE-JSON", "", "")));
 		
 		final ServiceRegistryResponseDTO serviceRegistryResponseDTO2 = new ServiceRegistryResponseDTO();
 		serviceRegistryResponseDTO2.setId(2);
 		serviceRegistryResponseDTO2.setServiceDefinition(new ServiceDefinitionResponseDTO(1L, "test-service", "", ""));
-		serviceRegistryResponseDTO2.setProvider(new SystemResponseDTO(2L, "test-provider-operator-2", "2.2.2.2", 2000, "test-provider-auth-info-2", "", ""));
+		serviceRegistryResponseDTO2.setProvider(new SystemResponseDTO(2L, "test-provider-operator-2", "2.2.2.2", 2000, "test-provider-auth-info-2", null, "", ""));
 		serviceRegistryResponseDTO2.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1L, "HTTP-SECURE-JSON", "", ""), new ServiceInterfaceResponseDTO(2L, "XML", "", "")));
 		
 		final ServiceQueryResultDTO srQueryResult = new ServiceQueryResultDTO();
@@ -458,13 +458,13 @@ public class GatekeeperServiceGSDTests {
 		final ServiceRegistryResponseDTO serviceRegistryResponseDTO1 = new ServiceRegistryResponseDTO();
 		serviceRegistryResponseDTO1.setId(1);
 		serviceRegistryResponseDTO1.setServiceDefinition(new ServiceDefinitionResponseDTO(1L, "test-service", "", ""));
-		serviceRegistryResponseDTO1.setProvider(new SystemResponseDTO(1L, "test-provider-operator-1", "1.1.1.1", 1000, "test-provider-auth-info-2", "", ""));
+		serviceRegistryResponseDTO1.setProvider(new SystemResponseDTO(1L, "test-provider-operator-1", "1.1.1.1", 1000, "test-provider-auth-info-2", null, "", ""));
 		serviceRegistryResponseDTO1.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1L, "HTTP-SECURE-JSON", "", "")));
 		
 		final ServiceRegistryResponseDTO serviceRegistryResponseDTO2 = new ServiceRegistryResponseDTO();
 		serviceRegistryResponseDTO2.setId(2);
 		serviceRegistryResponseDTO2.setServiceDefinition(new ServiceDefinitionResponseDTO(1L, "test-service", "", ""));
-		serviceRegistryResponseDTO2.setProvider(new SystemResponseDTO(2L, "test-provider-operator-2", "2.2.2.2", 2000, "test-provider-auth-info-2", "", ""));
+		serviceRegistryResponseDTO2.setProvider(new SystemResponseDTO(2L, "test-provider-operator-2", "2.2.2.2", 2000, "test-provider-auth-info-2", null, "", ""));
 		serviceRegistryResponseDTO2.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1L, "HTTP-SECURE-JSON", "", ""), new ServiceInterfaceResponseDTO(2L, "XML", "", "")));
 		
 		final QoSReservationResponseDTO reservationResponseDTO = new QoSReservationResponseDTO();
@@ -508,13 +508,13 @@ public class GatekeeperServiceGSDTests {
 		final ServiceRegistryResponseDTO serviceRegistryResponseDTO1 = new ServiceRegistryResponseDTO();
 		serviceRegistryResponseDTO1.setId(1);
 		serviceRegistryResponseDTO1.setServiceDefinition(new ServiceDefinitionResponseDTO(1L, "test-service", "", ""));
-		serviceRegistryResponseDTO1.setProvider(new SystemResponseDTO(1L, "test-provider-operator-1", "1.1.1.1", 1000, "test-provider-auth-info-2", "", ""));
+		serviceRegistryResponseDTO1.setProvider(new SystemResponseDTO(1L, "test-provider-operator-1", "1.1.1.1", 1000, "test-provider-auth-info-2", null, "", ""));
 		serviceRegistryResponseDTO1.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1L, "HTTP-SECURE-JSON", "", "")));
 		
 		final ServiceRegistryResponseDTO serviceRegistryResponseDTO2 = new ServiceRegistryResponseDTO();
 		serviceRegistryResponseDTO2.setId(2);
 		serviceRegistryResponseDTO2.setServiceDefinition(new ServiceDefinitionResponseDTO(1L, "test-service", "", ""));
-		serviceRegistryResponseDTO2.setProvider(new SystemResponseDTO(2L, "test-provider-operator-2", "2.2.2.2", 2000, "test-provider-auth-info-2", "", ""));
+		serviceRegistryResponseDTO2.setProvider(new SystemResponseDTO(2L, "test-provider-operator-2", "2.2.2.2", 2000, "test-provider-auth-info-2", null, "", ""));
 		serviceRegistryResponseDTO2.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1L, "HTTP-SECURE-JSON", "", ""), new ServiceInterfaceResponseDTO(2L, "XML", "", "")));
 		
 		final QoSReservationResponseDTO reservationResponseDTO = new QoSReservationResponseDTO();
@@ -566,13 +566,13 @@ public class GatekeeperServiceGSDTests {
 		final ServiceRegistryResponseDTO serviceRegistryResponseDTO1 = new ServiceRegistryResponseDTO();
 		serviceRegistryResponseDTO1.setId(1);
 		serviceRegistryResponseDTO1.setServiceDefinition(new ServiceDefinitionResponseDTO(1L, "test-service", "", ""));
-		serviceRegistryResponseDTO1.setProvider(new SystemResponseDTO(1L, "test-provider-operator-1", "1.1.1.1", 1000, "test-provider-auth-info-2", "", ""));
+		serviceRegistryResponseDTO1.setProvider(new SystemResponseDTO(1L, "test-provider-operator-1", "1.1.1.1", 1000, "test-provider-auth-info-2", null, "", ""));
 		serviceRegistryResponseDTO1.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1L, "HTTP-SECURE-JSON", "", "")));
 		
 		final ServiceRegistryResponseDTO serviceRegistryResponseDTO2 = new ServiceRegistryResponseDTO();
 		serviceRegistryResponseDTO2.setId(2);
 		serviceRegistryResponseDTO2.setServiceDefinition(new ServiceDefinitionResponseDTO(1L, "test-service", "", ""));
-		serviceRegistryResponseDTO2.setProvider(new SystemResponseDTO(2L, "test-provider-operator-2", "2.2.2.2", 2000, "test-provider-auth-info-2", "", ""));
+		serviceRegistryResponseDTO2.setProvider(new SystemResponseDTO(2L, "test-provider-operator-2", "2.2.2.2", 2000, "test-provider-auth-info-2", null, "", ""));
 		serviceRegistryResponseDTO2.setInterfaces(List.of(new ServiceInterfaceResponseDTO(1L, "HTTP-SECURE-JSON", "", ""), new ServiceInterfaceResponseDTO(2L, "XML", "", "")));
 		
 		final QoSIntraPingMeasurementResponseDTO measurementResponseDTO = new QoSIntraPingMeasurementResponseDTO();

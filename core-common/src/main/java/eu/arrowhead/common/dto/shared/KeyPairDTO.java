@@ -20,7 +20,9 @@ import java.util.StringJoiner;
 
 public class KeyPairDTO implements Serializable {
 
-    private String keyAlgorithm;
+	private static final long serialVersionUID = 4141153476434846717L;
+	
+	private String keyAlgorithm;
     private String keyFormat;
     private String publicKey;
     private String privateKey;

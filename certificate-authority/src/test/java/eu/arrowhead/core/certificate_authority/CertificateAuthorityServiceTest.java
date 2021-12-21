@@ -14,7 +14,44 @@
 
 package eu.arrowhead.core.certificate_authority;
 
-import eu.arrowhead.common.SSLProperties;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.file.Files;
+import java.security.Security;
+import java.security.cert.X509Certificate;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.domain.Sort;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
+
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.CaCertificate;
 import eu.arrowhead.common.dto.internal.AddTrustedKeyRequestDTO;
@@ -34,43 +71,6 @@ import eu.arrowhead.core.certificate_authority.database.CACertificateDBService;
 import eu.arrowhead.core.certificate_authority.database.CACertificateDBServiceTestContext;
 import eu.arrowhead.core.certificate_authority.database.CATrustedKeyDBService;
 import eu.arrowhead.core.certificate_authority.database.CATrustedKeyDBServiceTestContext;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.data.domain.Sort;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.file.Files;
-import java.security.Security;
-import java.security.cert.X509Certificate;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {CACertificateDBServiceTestContext.class, CATrustedKeyDBServiceTestContext.class})
@@ -111,8 +111,8 @@ public class CertificateAuthorityServiceTest {
         Security.addProvider(new BouncyCastleProvider());
     }
 
-    private static String getResourceContent(String resourcePath) throws IOException {
-        File resource = new ClassPathResource(resourcePath).getFile();
+    private static String getResourceContent(final String resourcePath) throws IOException {
+        final File resource = new ClassPathResource(resourcePath).getFile();
         return new String(Files.readAllBytes(resource.toPath())).trim();
     }
 
@@ -194,7 +194,7 @@ public class CertificateAuthorityServiceTest {
 
         when(caCertificateDBService.isCertificateValidNow(any())).thenThrow(DataNotFoundException.class);
 
-        CertificateCheckResponseDTO response = service.checkCertificate(request);
+        final CertificateCheckResponseDTO response = service.checkCertificate(request);
 
         verify(caCertificateDBService, times(1)).isCertificateValidNow(any());
         assertEquals(response.getCommonName(), SYSOP_CN);
@@ -216,7 +216,7 @@ public class CertificateAuthorityServiceTest {
 
         when(caCertificateDBService.isCertificateValidNow(any())).thenReturn(responseDTO);
 
-        CertificateCheckResponseDTO response = service.checkCertificate(request);
+        final CertificateCheckResponseDTO response = service.checkCertificate(request);
 
         verify(caCertificateDBService, times(1)).isCertificateValidNow(any());
         assertEquals(response.getCommonName(), SYSOP_CN);
@@ -263,7 +263,8 @@ public class CertificateAuthorityServiceTest {
     public void testSignCertificateValidBase64DerCsr() throws IOException {
         final CertificateSigningRequestDTO request = buildRequest("certificates/consumer.csr");
 
-        final CertificateSigningResponseDTO response = service.signCertificate(request, SIGN_REQUESTER_VALID);
+        @SuppressWarnings("unused")
+		final CertificateSigningResponseDTO response = service.signCertificate(request, SIGN_REQUESTER_VALID);
 
         verify(caCertificateDBService).saveCertificateInfo(eq(CONSUMER_CN), any(), eq(SIGN_REQUESTER_VALID), any(), any());
     }
@@ -308,7 +309,7 @@ public class CertificateAuthorityServiceTest {
         verify(caCertificateDBService, never()).saveCertificateInfo(anyString(), any(), anyString(), any(), any());
     }
 
-    private X509Certificate verifyCertSigningResponse(CertificateSigningResponseDTO response, String commonName) {
+    private X509Certificate verifyCertSigningResponse(final CertificateSigningResponseDTO response, final String commonName) {
         assertNotNull(response);
         assertNotNull(commonName);
         assertEquals(response.getId(), CA_CERT_ID);

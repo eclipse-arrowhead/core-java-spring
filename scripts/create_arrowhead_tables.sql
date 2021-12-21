@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS `system_` (
   `address` varchar(255) NOT NULL,
   `port` int(11) NOT NULL,
   `authentication_info` varchar(2047) DEFAULT NULL,
+  `metadata` mediumtext NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -138,15 +139,15 @@ CREATE TABLE IF NOT EXISTS `service_registry` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `service_id` bigint(20) NOT NULL,
   `system_id` bigint(20) NOT NULL,
-  `service_uri` varchar(255) DEFAULT NULL,
+  `service_uri` varchar(255) NOT NULL DEFAULT '',
   `end_of_validity` timestamp NULL DEFAULT NULL,
   `secure` varchar(255) NOT NULL DEFAULT 'NOT_SECURE',
-  `metadata` text,
+  `metadata` mediumtext,
   `version` int(11) DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `service_registry_pair` (`service_id`,`system_id`),
+  UNIQUE KEY `service_registry_triplet` (`service_id`,`system_id`, `service_uri`),
   KEY `service_registry_system` (`system_id`),
   CONSTRAINT `service_registry_service` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
   CONSTRAINT `service_registry_system` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
@@ -252,11 +253,27 @@ CREATE TABLE IF NOT EXISTS `foreign_system` (
   `address` varchar(255) NOT NULL,
   `port` int(11) NOT NULL,
   `authentication_info` varchar(2047) DEFAULT NULL,
+  `metadata` mediumtext,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `triple` (`system_name`,`address`,`port`),
   CONSTRAINT `foreign_cloud` FOREIGN KEY (`provider_cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `orchestrator_store_flexible` (
+`id` bigint(20) NOT NULL AUTO_INCREMENT,
+`consumer_system_name` varchar(255),
+`provider_system_name` varchar(255),
+`consumer_system_metadata` mediumtext,
+`provider_system_metadata` mediumtext,
+`service_metadata` mediumtext,
+`service_interface_name` varchar(255),
+`service_definition_name` varchar(255) NOT NULL,
+`priority` int(11) NOT NULL DEFAULT 2147483647,
+`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Logs
@@ -286,7 +303,7 @@ CREATE TABLE IF NOT EXISTS `subscription` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `system_id` bigint(20) NOT NULL,
   `event_type_id` bigint(20) NOT NULL,
-  `filter_meta_data` text,
+  `filter_meta_data` mediumtext,
   `match_meta_data` int(1) NOT NULL DEFAULT 0,
   `only_predefined_publishers` int(1) NOT NULL DEFAULT 0,
   `notify_uri` text NOT NULL,
@@ -350,6 +367,8 @@ CREATE TABLE IF NOT EXISTS `dmhist_entries` (
   CONSTRAINT `service_id_fk` FOREIGN KEY(`sid`) REFERENCES `dmhist_services`(`id`) ON DELETE CASCADE,
   CONSTRAINT `message_id_fk` FOREIGN KEY(`mid`) REFERENCES `dmhist_messages`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- TimeManager
 
 -- Choreographer
 
@@ -978,3 +997,15 @@ CREATE TABLE IF NOT EXISTS `MSCV_QRTZ_LOCKS`
     PRIMARY KEY (`SCHED_NAME`, `LOCK_NAME`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
+
+-- Plant Description Engine
+
+CREATE TABLE IF NOT EXISTS `pde_rule` (
+  `id` bigint(20) PRIMARY KEY,
+  `plant_description_id` bigint(20) NOT NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `plant_description` (
+  `id` bigint(20) PRIMARY KEY,
+  `plant_description` mediumtext NOT NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;

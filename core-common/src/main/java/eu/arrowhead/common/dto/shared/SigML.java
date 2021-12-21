@@ -1,18 +1,17 @@
 package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
-import eu.arrowhead.common.CommonConstants;
 
 
 public class SigML implements Serializable {
 
-  //=================================================================================================
-  // members
-  private Integer x;
-  private String xs;
+	//=================================================================================================
+	// members
+	
+	private static final long serialVersionUID = 7792814405188244770L;
+	
+	private Integer x;
+	private String xs;
 
   //=================================================================================================
   // methods

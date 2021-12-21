@@ -1,12 +1,16 @@
 package eu.arrowhead.core.configuration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.arrowhead.common.dto.shared.ConfigurationRequestDTO;
-import eu.arrowhead.common.dto.shared.ConfigurationResponseDTO;
-import eu.arrowhead.common.dto.shared.ConfigurationListResponseDTO;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.core.configuration.database.service.ConfigurationDBService;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,24 +25,12 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import eu.arrowhead.common.dto.shared.ConfigurationListResponseDTO;
+import eu.arrowhead.common.dto.shared.ConfigurationRequestDTO;
+import eu.arrowhead.common.dto.shared.ConfigurationResponseDTO;
+import eu.arrowhead.core.configuration.database.service.ConfigurationDBService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -90,10 +82,8 @@ public class ConfigurationControllerSystemTest {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
     }
 
-    //=================================================================================================
-    // Tests of Echo service
-
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void echoConfiguration() throws Exception {
         final MvcResult response = this.mockMvc.perform(get(CONFIGURATION_ECHO_URI)
                                                .accept(MediaType.APPLICATION_JSON))
@@ -102,7 +92,8 @@ public class ConfigurationControllerSystemTest {
         assertEquals("Got it!", response.getResponse().getContentAsString());
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void getConfigurationEntry() throws Exception {
         when(configurationDBService.getConfigForSystem(VALID_SYSTEM_NAME)).thenReturn(VALID_CONF);
 
@@ -115,7 +106,8 @@ public class ConfigurationControllerSystemTest {
         assertEquals(1, responseBody.getId());
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void getRawConfigurationEntry() throws Exception {
         when(configurationDBService.getConfigForSystem(VALID_SYSTEM_NAME)).thenReturn(VALID_CONF);
 
@@ -128,7 +120,8 @@ public class ConfigurationControllerSystemTest {
         assertEquals(VALID_RAWDATA, responseText);
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void listConfigurations() throws Exception {
         when(configurationDBService.getAllConfigurations()).thenReturn(EMPTY_CONF_RESP);
 
@@ -141,13 +134,24 @@ public class ConfigurationControllerSystemTest {
         assertEquals(responseBody.getCount(), 0);
         assertEquals(responseBody.getData().size(), 0);
     }
+	
+    //-------------------------------------------------------------------------------------------------
+	@Test
+    public void storeConfigurationForSystemWrongSystemName() throws Exception {
+		final ConfigurationRequestDTO dto = new ConfigurationRequestDTO("wrong_system", "wrong_system.txt", "plain/text", "abcd");
 
-
-    //=================================================================================================
-    // Tests of Configuration system
-
-    private <T> T readResponse(final MvcResult result, final Class<T> clz) throws IOException {
-        return objectMapper.readValue(result.getResponse().getContentAsString(), clz);
+        this.mockMvc.perform(put("/configuration/mgmt/config/" + "wrong_system")
+                    .accept(MediaType.APPLICATION_JSON_VALUE)
+                    .contentType(MediaType.APPLICATION_JSON_VALUE)
+                    .content(objectMapper.writeValueAsBytes(dto)))
+                    .andExpect(status().isBadRequest());
     }
 
+    //=================================================================================================
+    // assistant methods
+
+    //-------------------------------------------------------------------------------------------------
+	private <T> T readResponse(final MvcResult result, final Class<T> clz) throws IOException {
+        return objectMapper.readValue(result.getResponse().getContentAsString(), clz);
+    }
 }
