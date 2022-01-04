@@ -215,13 +215,6 @@
 				<artifactId>gson</artifactId>
 				<version>${google.gson.version}</version>
 		</dependency>
-
-		<dependency>
-			<groupId>org.eclipse.paho</groupId>
-			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-			<version>${paho.version}</version>
-		</dependency>
-
 		<dependency>
 			<groupId>commons-net</groupId>
 			<artifactId>commons-net</artifactId>
