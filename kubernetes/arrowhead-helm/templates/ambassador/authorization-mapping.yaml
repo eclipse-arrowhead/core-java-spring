@@ -1,0 +1,7 @@
+apiVersion: getambassador.io/v3alpha1
+kind: TCPMapping
+metadata:
+  name: authorization-mapping
+spec:
+  port: 3001
+  service: {{ printf "%s:%v" .Values.authorization.address .Values.authorization.port }}
