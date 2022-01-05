@@ -619,6 +619,48 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 			Assert.assertEquals(i + 1, result.getServiceQueryData().get(i).getId());
 		}
 	}
+
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQueryRegistryAddressTypeFilterRemovesAll() {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		form.setServiceDefinitionRequirement("testService");
+		form.setProviderAddressTypeRequirements(List.of(AddressType.IPV6));
+		final ServiceDefinition serviceDefinition = new ServiceDefinition("testservice");
+		
+		when(serviceDefinitionRepository.findByServiceDefinition("testservice")).thenReturn(Optional.of(serviceDefinition)); // also tests case insensitivity
+		when(serviceRegistryRepository.findByServiceDefinition(any(ServiceDefinition.class))).thenReturn(getTestProviders(serviceDefinition));
+		
+		final ServiceQueryResultDTO result = serviceRegistryDBService.queryRegistry(form);
+		
+		Assert.assertEquals(6, result.getUnfilteredHits());
+		Assert.assertEquals(0, result.getServiceQueryData().size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQueryRegistryAddressTypeFilterRemovesOne() {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		form.setServiceDefinitionRequirement("testService");
+		form.setProviderAddressTypeRequirements(List.of(AddressType.IPV4));
+		final ServiceDefinition serviceDefinition = new ServiceDefinition("testservice");
+		
+		final System otherProvider = new System("test_system", "localhost", AddressType.HOSTNAME, 1234, null, "systemkey=systemvalue");
+		final List<ServiceRegistry> providers = getTestProviders(serviceDefinition);
+		providers.get(providers.size() - 1).setSystem(otherProvider);
+
+		when(serviceDefinitionRepository.findByServiceDefinition("testservice")).thenReturn(Optional.of(serviceDefinition)); // also tests case insensitivity
+		when(serviceRegistryRepository.findByServiceDefinition(any(ServiceDefinition.class))).thenReturn(providers);
+		
+		final ServiceQueryResultDTO result = serviceRegistryDBService.queryRegistry(form);
+		
+		Assert.assertEquals(6, result.getUnfilteredHits());
+		Assert.assertEquals(5, result.getServiceQueryData().size());
+		for (int i = 0; i < result.getServiceQueryData().size(); ++i) {
+			Assert.assertEquals(i + 1, result.getServiceQueryData().get(i).getId());
+		}
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test

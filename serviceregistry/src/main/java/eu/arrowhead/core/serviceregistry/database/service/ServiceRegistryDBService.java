@@ -933,7 +933,7 @@ public class ServiceRegistryDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings({"squid:S3655", "squid:S3776"})
-	public ServiceQueryResultDTO queryRegistry(final ServiceQueryFormDTO form) { //TODO: unit tests
+	public ServiceQueryResultDTO queryRegistry(final ServiceQueryFormDTO form) { 
 		logger.debug("queryRegistry is started...");
 		Assert.notNull(form, "Form is null.");
 		Assert.isTrue(!Utilities.isEmpty(form.getServiceDefinitionRequirement()), "Service definition requirement is null or blank");

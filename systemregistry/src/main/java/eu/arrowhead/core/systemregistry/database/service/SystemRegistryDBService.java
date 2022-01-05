@@ -20,6 +20,7 @@ import java.net.Socket;
 import java.security.KeyPair;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -194,7 +195,7 @@ public class SystemRegistryDBService {
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public System updateSystem(final long systemId, final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) { //TODO: unit tests
+    public System updateSystem(final long systemId, final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) { 
         logger.debug("updateSystem started...");
 
         final long validatedSystemId = validateId(systemId);
@@ -266,7 +267,7 @@ public class SystemRegistryDBService {
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public System mergeSystem(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo, final Map<String,String> metadata) { //TODO: unit tests
+    public System mergeSystem(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo, final Map<String,String> metadata) { 
         logger.debug("mergeSystem started...");
 
         final long validatedSystemId = validateId(systemId);
@@ -616,7 +617,7 @@ public class SystemRegistryDBService {
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public SystemQueryResultDTO queryRegistry(final SystemQueryFormDTO form) { //TODO: unit tests
+    public SystemQueryResultDTO queryRegistry(final SystemQueryFormDTO form) { 
         logger.debug("queryRegistry is started...");
         Assert.notNull(form, "Form is null.");
 
@@ -639,7 +640,7 @@ public class SystemRegistryDBService {
                 throw new InvalidParameterException("System Name must not be null");
             }
 
-            registryList = systemRegistryRepository.findAllBySystemIsIn(systems);
+            registryList = new ArrayList<>(systemRegistryRepository.findAllBySystemIsIn(systems));
             unfilteredHits = registryList.size();
 
             if (Utilities.notEmpty(form.getDeviceNameRequirements())) {
@@ -710,7 +711,7 @@ public class SystemRegistryDBService {
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public System createSystem(final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) { //TODO: unit tests
+    public System createSystem(final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) { 
         logger.debug("createSystem started...");
 
         final System system = validateNonNullSystemParameters(systemName, address, port, authenticationInfo, metadata);
