@@ -273,10 +273,15 @@ public class ChoreographerPlanDBService {
 		Assert.notNull(plan, "Plan is null.");
 
 		try {
-			choreographerPlanRepository.refresh(plan);
-			final List<ChoreographerAction> actions = choreographerActionRepository.findByPlan(plan);
-			
+			final Optional<ChoreographerPlan> optional = choreographerPlanRepository.findById(plan.getId());
+			if (optional.isEmpty()) {
+				throw new InvalidParameterException("Plan with id of '" + plan.getId() + "' doesn't exist!");
+			}
+			final List<ChoreographerAction> actions = choreographerActionRepository.findByPlan(optional.get());			
 			return actions.isEmpty() ? List.of() : choreographerStepRepository.findByActionIn(actions);
+			
+		} catch (final InvalidParameterException ex) {
+			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG, ex);
@@ -289,9 +294,15 @@ public class ChoreographerPlanDBService {
 		Assert.notNull(action, "Action is null.");
 		
 		try {
-			choreographerActionRepository.refresh(action);
+			final Optional<ChoreographerAction> optional = choreographerActionRepository.findById(action.getId());
+			if (optional.isEmpty()) {
+				throw new InvalidParameterException("Action with id of " + action.getId() + " doesn't exists");
+			}
 			
-			return choreographerStepRepository.findByActionAndFirstStep(action, true);
+			return choreographerStepRepository.findByActionAndFirstStep(optional.get(), true);
+			
+		} catch (final InvalidParameterException ex) {
+			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG, ex);

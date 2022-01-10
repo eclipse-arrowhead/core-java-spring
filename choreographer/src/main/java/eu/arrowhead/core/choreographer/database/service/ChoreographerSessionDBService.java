@@ -105,7 +105,7 @@ public class ChoreographerSessionDBService {
       		  worklogAndThrow("Initiating plan has been failed", new InvalidParameterException("Plan with id " + planId + " not exists"));
       	  }
       	  
-      	  final String _notifyUri = UriComponentsBuilder.fromUriString(notifyUri).build().toUriString();
+      	  final String _notifyUri = Utilities.isEmpty(notifyUri) ? null : UriComponentsBuilder.fromUriString(notifyUri).build().toUriString();
       	  final ChoreographerPlan plan = optional.get();
       	  final ChoreographerSession session = sessionRepository.saveAndFlush(new ChoreographerSession(plan, ChoreographerSessionStatus.INITIATED, _notifyUri));
       	  

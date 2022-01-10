@@ -116,6 +116,10 @@ public class ChoreographerExecutorService {
 													        request.getMinVersion(), request.getMaxVersion());
 			
 		} catch (final ArrowheadException ex) {
+			final Optional<ChoreographerExecutor> optional = executorDBService.getExecutorOptionalByName(system.getSystemName());
+	        if (optional.isPresent()) {
+	        	deleteExecutorSafely(optional.get(), origin);
+			}
 			driver.unregisterSystem(system.getSystemName(), system.getAddress(), system.getPort());
 			throw ex;
 		}
