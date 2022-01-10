@@ -40,7 +40,7 @@ public class CoreCommonConstants {
 	public static final String SR_QUERY_ALL = "service.registry.query.all.uri";
 	public static final String SR_QUERY_BY_SERVICE_DEFINITION_LIST_URI = "service.registry.query.services.by.service.definition.list.uri";
 	public static final String SR_REGISTER_SYSTEM_URI = "service.registry.register.system.uri";
-	public static final String SR_UNREGISTER_SYSTEM_URI = "service.registry.register.system.uri";
+	public static final String SR_UNREGISTER_SYSTEM_URI = "service.registry.unregister.system.uri";
 	public static final String SR_PULL_CONFIG_URI = "service.registry.pull.config.uri";
 	public static final String REQUIRED_URI_LIST = "required.uri.list";
 	public static final String URI_SUFFIX = "-uri";
