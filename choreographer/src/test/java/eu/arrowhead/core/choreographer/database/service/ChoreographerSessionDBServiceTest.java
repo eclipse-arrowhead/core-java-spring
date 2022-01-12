@@ -59,8 +59,8 @@ import eu.arrowhead.common.database.repository.ChoreographerSessionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerSessionStepRepository;
 import eu.arrowhead.common.database.repository.ChoreographerStepRepository;
 import eu.arrowhead.common.database.repository.ChoreographerWorklogRepository;
-import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
+import eu.arrowhead.common.dto.shared.ChoreographerSessionStatus;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 

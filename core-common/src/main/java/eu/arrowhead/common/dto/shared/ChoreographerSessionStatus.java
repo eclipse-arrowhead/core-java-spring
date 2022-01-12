@@ -12,7 +12,7 @@
  *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
 
-package eu.arrowhead.common.dto.internal;
+package eu.arrowhead.common.dto.shared;
 
 public enum ChoreographerSessionStatus {
     INITIATED,

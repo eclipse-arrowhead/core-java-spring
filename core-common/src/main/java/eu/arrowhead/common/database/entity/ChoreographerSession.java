@@ -30,7 +30,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 
 import eu.arrowhead.common.CoreDefaults;
-import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
+import eu.arrowhead.common.dto.shared.ChoreographerSessionStatus;
 
 @Entity
 public class ChoreographerSession {

@@ -20,7 +20,7 @@ import org.springframework.stereotype.Repository;
 
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
-import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
+import eu.arrowhead.common.dto.shared.ChoreographerSessionStatus;
 
 @Repository
 public interface ChoreographerSessionRepository extends RefreshableRepository<ChoreographerSession,Long> {
