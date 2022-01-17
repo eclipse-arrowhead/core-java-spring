@@ -103,12 +103,14 @@ public class ChoreographerExecutorService {
 		checkAndNormalizeExecutorRequestDTO(request, origin, servletRequest);
 		
 		SystemResponseDTO system = null;
+		boolean recentSRRegistration = false;
 		
 		try {
 			system = driver.queryServiceRegistryBySystem(request.getSystem().getSystemName(), request.getSystem().getAddress(), request.getSystem().getPort());			
 		} catch (final BadPayloadException | InvalidParameterException ex) {
 			// executor has not yet been registered as system
 			system = driver.registerSystem(request.getSystem());
+			recentSRRegistration = true;
 		}
 		
 		try {
@@ -116,11 +118,9 @@ public class ChoreographerExecutorService {
 													        request.getMinVersion(), request.getMaxVersion());
 			
 		} catch (final ArrowheadException ex) {
-			final Optional<ChoreographerExecutor> optional = executorDBService.getExecutorOptionalByName(system.getSystemName());
-	        if (optional.isPresent()) {
-	        	deleteExecutorSafely(optional.get(), origin);
+			if (recentSRRegistration) {
+	        	driver.unregisterSystem(system.getSystemName(), system.getAddress(), system.getPort());
 			}
-			driver.unregisterSystem(system.getSystemName(), system.getAddress(), system.getPort());
 			throw ex;
 		}
 	}
