@@ -459,6 +459,9 @@ CREATE TABLE IF NOT EXISTS `choreographer_session` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `plan_id` bigint(20) NOT NULL,
   `status` varchar(255) NOT NULL,
+  `quantity_done` bigint(20) NOT NULL,
+  `quantity_goal` bigint(20) NOT NULL,
+  `execution_number` bigint(20) NOT NULL,
   `notify_uri` text,
   `started_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -472,6 +475,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_session_step` (
   `step_id` bigint(20) NOT NULL,
   `executor_id` bigint(20) NOT NULL,
   `status` varchar(255) NOT NULL,
+  `execution_number` bigint(20) NOT NULL,
   `message` mediumtext,
   `started_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -479,7 +483,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_session_step` (
   CONSTRAINT `session_step` FOREIGN KEY (`step_id`) REFERENCES `choreographer_step` (`id`) ON DELETE CASCADE,
   CONSTRAINT `session_step_session` FOREIGN KEY (`session_id`) REFERENCES `choreographer_session`(`id`) ON DELETE CASCADE,
   CONSTRAINT `session_step_executor` FOREIGN KEY (`executor_id`) REFERENCES `choreographer_executor` (`id`) ON DELETE CASCADE,
-  UNIQUE KEY `session_step_unique` (`session_id`, `step_id`)
+  UNIQUE KEY `session_step_unique` (`session_id`, `step_id`, `execution_number`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `choreographer_worklog` (
@@ -489,6 +493,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_worklog` (
   `action_name` varchar(255),
   `step_name` varchar(255),
   `session_id` bigint(20),
+  `execution_number` bigint(20),
   `message` mediumtext,
   `exception` mediumtext,
   PRIMARY KEY (`id`)

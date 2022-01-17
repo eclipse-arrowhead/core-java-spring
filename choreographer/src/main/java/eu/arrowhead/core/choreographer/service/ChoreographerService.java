@@ -66,9 +66,11 @@ public class ChoreographerService {
 	public static final String START_SESSION_DESTINATION = "start-session";
 	public static final String SESSION_STEP_DONE_DESTINATION = "session-step-done";
 	
-	private static final String START_SESSION_MSG = "Plan execution is started.";
-	private static final String ABORT_SESSION_MSG = "Plan execution is aborted.";
-	private static final String FINISH_SESSION_MSG = "Plan execution is finished.";
+	private static final String START_SESSION_MSG = "Session is started.";
+	private static final String START_PLAN_MSG = "Plan execution is started.";
+	private static final String FINISH_PLAN_MSG = "Plan execution is finished.";
+	private static final String FINISH_SESSION_MSG = "Session is finished.";
+	private static final String ABORT_SESSION_MSG = "Session is aborted.";
 	
 	@Autowired
     private ChoreographerPlanDBService planDBService;
@@ -100,11 +102,15 @@ public class ChoreographerService {
 
         try {
 	        final ChoreographerPlan plan = planDBService.getPlanById(startSessionDTO.getPlanId());
-	        sessionDBService.worklog(plan.getName(), sessionId, START_SESSION_MSG, null);
-	        final ChoreographerSession session = sessionDBService.changeSessionStatus(sessionId, ChoreographerSessionStatus.RUNNING, null);
-	        sendNotification(session, START_SESSION_MSG, null);
+	        ChoreographerSession session = sessionDBService.changeSessionStatus(sessionId, ChoreographerSessionStatus.RUNNING, null);
+	        sessionDBService.worklog(plan.getName(), sessionId, session.getExecutionNumber(), START_SESSION_MSG, null);
+	        sendNotification(session, START_SESSION_MSG, "Quantity qoal: " + session.getQuantityGoal());
 	        
-	        selectExecutorsForPlan(sessionId, plan, startSessionDTO.isAllowInterCloud(), startSessionDTO.getChooseOptimalExecutor());
+	        session = sessionDBService.increaseExecutionNumber(sessionId);	        
+	        selectExecutorsForPlan(session, plan, startSessionDTO.isAllowInterCloud(), startSessionDTO.getChooseOptimalExecutor());
+	        
+	        sessionDBService.worklog(plan.getName(), sessionId, session.getExecutionNumber(), START_PLAN_MSG, null);
+	        sendNotification(session, START_PLAN_MSG, "Execution: " + session.getExecutionNumber() + "/" + session.getQuantityGoal());
 	        
 	        final ChoreographerAction firstAction = plan.getFirstAction();
 	        executeAction(sessionId, firstAction);
@@ -159,13 +165,14 @@ public class ChoreographerService {
 				logger.warn("Unable to send abort message - " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				logger.debug(ex);
 				final ChoreographerStep step = sessionStep.getStep();
-				sessionDBService.worklog(session.getPlan().getName(), step.getAction().getName(), step.getName(), sessionId, "Unable to send abort message to the executor", ex.getMessage());
+				sessionDBService.worklog(session.getPlan().getName(), step.getAction().getName(), step.getName(), sessionId, session.getExecutionNumber(),
+										 "Unable to send abort message to the executor", ex.getMessage());
 			}
 		}
 		
 		sessionDataStorage.remove(sessionId);
-		sessionDBService.worklog(session.getPlan().getName(), sessionId, "Session is aborted", null);
-		sendNotification(session, ABORT_SESSION_MSG, message.trim());
+		sessionDBService.worklog(session.getPlan().getName(), sessionId, session.getExecutionNumber(), "Session is aborted", null);
+		sendNotification(session, ABORT_SESSION_MSG, "Execution: " + (session.getExecutionNumber()) + "/" + session.getQuantityGoal() + ". " + message.trim());
 	}
 
 	//=================================================================================================
@@ -194,27 +201,27 @@ public class ChoreographerService {
 	}
     
 	//-------------------------------------------------------------------------------------------------
-	private void selectExecutorsForPlan(final long sessionId, final ChoreographerPlan plan, final boolean allowInterCloud, final boolean chooseOptimalExecutor) {
+	private void selectExecutorsForPlan(final ChoreographerSession session, final ChoreographerPlan plan, final boolean allowInterCloud, final boolean chooseOptimalExecutor) {
 		logger.debug("selectExecutorsForPlan started...");
 		
 		final List<ChoreographerStep> steps = planDBService.collectStepsFromPlan(plan);
 		final SessionExecutorCache cache = new SessionExecutorCache(allowInterCloud, chooseOptimalExecutor);
-		sessionDataStorage.put(sessionId, cache);
+		sessionDataStorage.put(session.getId(), cache);
 		
 		for (final ChoreographerStep step : steps) {
 			ExecutorData executorData = cache.get(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion());
 			if (executorData == null) {
-				executorData = executorSelector.selectAndInit(sessionId, step, cache.getExclusions(), allowInterCloud, chooseOptimalExecutor, true);
+				executorData = executorSelector.selectAndInit(session.getId(), step, cache.getExclusions(), allowInterCloud, chooseOptimalExecutor, true);
 				if (executorData == null) { // means we can't execute at least one of the steps currently 
-					throw new ChoreographerSessionException(sessionId, "Can't find properly working executor for step: " + createFullyQualifiedStepName(step));
+					throw new ChoreographerSessionException(session.getId(), "Can't find properly working executor for step: " + createFullyQualifiedStepName(step));
 				}
 				cache.put(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), executorData);
 			} else {
 				// because we found an executor without the selector, we have to create the session step record manually
-				sessionDBService.registerSessionStep(sessionId, step.getId(), executorData.getExecutor().getId());
+				sessionDBService.registerSessionStep(session.getId(), step.getId(), executorData.getExecutor().getId());
 			}
 		}
-		sessionDBService.worklog(plan.getName(), sessionId, "Found executors to all steps.", null);
+		sessionDBService.worklog(plan.getName(), session.getId(), session.getExecutionNumber(), "Found executors to all steps.", null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -389,7 +396,7 @@ public class ChoreographerService {
 			// error is not fatal, maybe an other executor can able to do the step
 			final ChoreographerSessionStep sessionStep = sessionDBService.getSessionStepById(payload.getSessionStepId());
 			final ChoreographerStep step = sessionStep.getStep();
-			sessionDBService.worklog(sessionStep.getSession().getPlan().getName(), step.getAction().getName(), step.getName(), payload.getSessionId(), payload.getMessage(), payload.getException());
+			sessionDBService.worklog(sessionStep.getSession().getPlan().getName(), step.getAction().getName(), step.getName(), payload.getSessionId(), sessionStep.getSession().getExecutionNumber(), payload.getMessage(), payload.getException());
 			releaseGatewayTunnels(sessionStep.getSession().getId(), sessionStep.getId());
 			
 			final SessionExecutorCache cache = sessionDataStorage.get(payload.getSessionId());
@@ -416,7 +423,8 @@ public class ChoreographerService {
 		releaseGatewayTunnels(sessionStep.getSession().getId(), sessionStep.getId());
 		final ChoreographerPlan plan = sessionStep.getSession().getPlan();
 		final ChoreographerStep step = sessionStep.getStep();
-		sessionDBService.worklog(plan.getName(), step.getAction().getName(), step.getName(), payload.getSessionId(), "The executor of this step has aborted successfully." , null);
+		sessionDBService.worklog(plan.getName(), step.getAction().getName(), step.getName(), payload.getSessionId(), sessionStep.getSession().getExecutionNumber(),
+								 "The execution of this step has aborted successfully." , null);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -440,8 +448,15 @@ public class ChoreographerService {
 				if (nextAction != null) {
 					executeAction(sessionId, nextAction);
 				} else {
-					// this was the last step of the last action => session is done
-					sessionDone(sessionId);
+					// this was the last step of the last action
+					final ChoreographerSession session = sessionDBService.increaseSessionQuantityDone(sessionId);
+					sessionDBService.worklog(session.getPlan().getName(), session.getId(), session.getExecutionNumber(), FINISH_PLAN_MSG, null);
+					sendNotification(session, FINISH_PLAN_MSG, "Quantity: " + session.getQuantityDone() + "/" + session.getQuantityGoal());
+					if (session.getQuantityDone() < session.getQuantityGoal()) {
+						rerunPlan(session);
+					} else {						
+						sessionDone(session);
+					}
 				}
 			}
 		} else {
@@ -513,11 +528,25 @@ public class ChoreographerService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void sessionDone(final long sessionId) {
-		logger.debug("sessionDone started...");
+	private void rerunPlan(final ChoreographerSession session) {
+		logger.debug("rerunPlan started...");
 		
-		final ChoreographerSession session = sessionDBService.changeSessionStatus(sessionId, ChoreographerSessionStatus.DONE, null);
-		sendNotification(session, FINISH_SESSION_MSG, null);
+		final ChoreographerSession _session = sessionDBService.increaseExecutionNumber(session.getId());
+		sessionDBService.worklog(_session.getPlan().getName(), _session.getId(), _session.getExecutionNumber(), START_PLAN_MSG, null);
+		sendNotification(_session, START_PLAN_MSG, "Execution: " + _session.getExecutionNumber() + "/" + _session.getQuantityGoal());
+		final ChoreographerAction firstAction = _session.getPlan().getFirstAction();
+        executeAction(_session.getId(), firstAction);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void sessionDone(final ChoreographerSession session) {
+		logger.debug("sessionDone started...");
+
+		final ChoreographerSession _session = sessionDBService.changeSessionStatus(session.getId(), ChoreographerSessionStatus.DONE, null);
+		sessionDBService.worklog(_session.getPlan().getName(), _session.getId(), _session.getExecutionNumber(), FINISH_SESSION_MSG, null);
+		sendNotification(_session, FINISH_SESSION_MSG, "Number of execution: " + _session.getQuantityDone());
+		Assert.isTrue(_session.getQuantityDone() == _session.getQuantityGoal(), "Session quantityDone is not equals to quantityGoal");
+		Assert.isTrue(_session.getExecutionNumber() == _session.getQuantityGoal(), "Session executionNumber is not equals to quantityGoal");
 	}
 	
 	//-------------------------------------------------------------------------------------------------

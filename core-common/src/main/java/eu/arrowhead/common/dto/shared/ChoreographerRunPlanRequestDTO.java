@@ -26,10 +26,11 @@ public class ChoreographerRunPlanRequestDTO implements Serializable {
 
 	//=================================================================================================
     // members
-
-	private static final long serialVersionUID = -6719675498560986076L;
+	
+    private static final long serialVersionUID = 270117099471203107L;
 	
     private Long planId;
+    private long quantity = 1;
     
     private boolean allowInterCloud = false; // if true, then providers (for steps and for executor's dependencies) can come from other clouds, too
     private boolean chooseOptimalExecutor = false; // if true, executor selection tries to minimalize inter-cloud connections (but executor selection takes longer)
@@ -45,7 +46,8 @@ public class ChoreographerRunPlanRequestDTO implements Serializable {
 
     //-------------------------------------------------------------------------------------------------
     public Long getPlanId() { return planId; }
-    public boolean isAllowInterCloud() { return allowInterCloud; }
+    public long getQuantity() { return quantity; }
+	public boolean isAllowInterCloud() { return allowInterCloud; }
     public boolean getChooseOptimalExecutor() { return chooseOptimalExecutor; }
     public String getNotifyProtocol() { return notifyProtocol; }
 	public String getNotifyAddress() { return notifyAddress; }
@@ -54,6 +56,7 @@ public class ChoreographerRunPlanRequestDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
     public void setPlanId(final Long planId) { this.planId = planId; }
+    public void setQuantity(long quantity) { this.quantity = quantity; }
     public void setAllowInterCloud(final boolean allowInterCloud) { this.allowInterCloud = allowInterCloud; }
     public void setChooseOptimalExecutor(final boolean chooseOptimalExecutor) { this.chooseOptimalExecutor = chooseOptimalExecutor; }
     public void setNotifyProtocol(final String notifyProtocol) { this.notifyProtocol = notifyProtocol; }

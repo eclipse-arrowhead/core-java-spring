@@ -101,18 +101,19 @@ public class ChoreographerSessionDBServiceTest {
 	@Test
 	public void testInitiateSession() {
 		final long planId = 1;
+		final long quantityGoal = 15;
 		final String notifyUri = "/notify";
 		
 		final ChoreographerPlan plan = new ChoreographerPlan("test-plan");		
 		when(planRepository.findById(anyLong())).thenReturn(Optional.of(plan));
 		final ArgumentCaptor<ChoreographerSession> sessionCaptor = ArgumentCaptor.forClass(ChoreographerSession.class);
-		final ChoreographerSession expected = new ChoreographerSession(plan, ChoreographerSessionStatus.INITIATED, notifyUri);
+		final ChoreographerSession expected = new ChoreographerSession(plan, ChoreographerSessionStatus.INITIATED, quantityGoal, notifyUri);
 		expected.setId(10);
 		when(sessionRepository.saveAndFlush(sessionCaptor.capture())).thenReturn(expected);
 		final ArgumentCaptor<ChoreographerWorklog> worklogCaptor = ArgumentCaptor.forClass(ChoreographerWorklog.class);
 		when(worklogRepository.saveAndFlush(worklogCaptor.capture())).thenReturn(new ChoreographerWorklog());
 		
-		final ChoreographerSession result = dbService.initiateSession(planId, notifyUri);
+		final ChoreographerSession result = dbService.initiateSession(planId, quantityGoal, notifyUri);
 		
 		final ChoreographerSession sessionCaptured = sessionCaptor.getValue();
 		assertEquals(expected.getPlan().getName(), sessionCaptured.getPlan().getName());
@@ -137,6 +138,7 @@ public class ChoreographerSessionDBServiceTest {
 	@Test(expected = InvalidParameterException.class)
 	public void testInitiateSession_PlanNotExists() {
 		final long planId = 1;
+		final long quantityGoal = 15;
 		final String notifyUri = "/notify";
 		
 		when(planRepository.findById(anyLong())).thenReturn(Optional.empty());
@@ -144,7 +146,7 @@ public class ChoreographerSessionDBServiceTest {
 		when(worklogRepository.saveAndFlush(worklogCaptor.capture())).thenReturn(new ChoreographerWorklog());
 		
 		try {
-			dbService.initiateSession(planId, notifyUri);			
+			dbService.initiateSession(planId, quantityGoal, notifyUri);			
 		} catch (final InvalidParameterException ex) {
 			final ChoreographerWorklog workLogCaptured = worklogCaptor.getValue();
 			assertNotNull(workLogCaptured.getMessage());
@@ -161,12 +163,13 @@ public class ChoreographerSessionDBServiceTest {
 	@Test(expected = ArrowheadException.class)
 	public void testInitiateSession_DatabaseException() {
 		final long planId = 1;
+		final long quantityGoal = 15;
 		final String notifyUri = "/notify";
 		
 		when(planRepository.findById(anyLong())).thenThrow(new HibernateException("test"));
 		
 		try {
-			dbService.initiateSession(planId, notifyUri);			
+			dbService.initiateSession(planId, quantityGoal, notifyUri);			
 		} catch (final ArrowheadException ex) {			
 			verify(planRepository, times(1)).findById(eq(planId));
 			verify(worklogRepository, never()).saveAndFlush(any());

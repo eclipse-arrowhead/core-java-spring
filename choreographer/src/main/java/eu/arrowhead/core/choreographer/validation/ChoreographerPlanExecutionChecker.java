@@ -79,18 +79,19 @@ public class ChoreographerPlanExecutionChecker {
 		
 		final List<String> errors = basicChecks(request);
 		final Long planId = request == null ? null : request.getPlanId();
+		long quantity = request.getQuantity();
 		
-		return errors.isEmpty() ? checkPlanForExecution(request.isAllowInterCloud(), request.getPlanId(), false) : new ChoreographerRunPlanResponseDTO(planId, errors, false);
+		return errors.isEmpty() ? checkPlanForExecution(request.isAllowInterCloud(), request.getPlanId(), quantity, false) : new ChoreographerRunPlanResponseDTO(planId, quantity, errors, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerRunPlanResponseDTO checkPlanForExecution(final boolean allowInterCloud, final long planId) {
+	public ChoreographerRunPlanResponseDTO checkPlanForExecution(final boolean allowInterCloud, final long planId, final long quantity) {
 		logger.debug("checkPlanForExecution started...");
-		return checkPlanForExecution(allowInterCloud, planId, true);
+		return checkPlanForExecution(allowInterCloud, planId, quantity, true);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerRunPlanResponseDTO checkPlanForExecution(final boolean allowInterCloud, final long planId, final boolean dependencyCheck) { 
+	public ChoreographerRunPlanResponseDTO checkPlanForExecution(final boolean allowInterCloud, final long planId, final long quantity, final boolean dependencyCheck) { 
 		logger.debug("checkPlanForExecution started...");
 		
 		ChoreographerPlan plan = null;
@@ -100,7 +101,7 @@ public class ChoreographerPlanExecutionChecker {
 		try {
 			plan = planDBService.getPlanById(planId);
 		} catch (final InvalidParameterException ex) {
-			return new ChoreographerRunPlanResponseDTO(planId, List.of(ex.getMessage()), false);
+			return new ChoreographerRunPlanResponseDTO(planId, quantity, List.of(ex.getMessage()), false);
 		}
 		
 		final List<ChoreographerStep> steps = planDBService.collectStepsFromPlan(plan);
@@ -118,7 +119,7 @@ public class ChoreographerPlanExecutionChecker {
 			needInterCloudForExecutors = checkExecutorDependencies(stepsWithExecutors, allowInterCloud, errors);
 		}
 		
-		return new ChoreographerRunPlanResponseDTO(planId, errors, needInterCloudForSteps || needInterCloudForExecutors);
+		return new ChoreographerRunPlanResponseDTO(planId, quantity, errors, needInterCloudForSteps || needInterCloudForExecutors);
 	}
 
 	//=================================================================================================
@@ -137,6 +138,10 @@ public class ChoreographerPlanExecutionChecker {
 		
 		if (request.getPlanId() == null || request.getPlanId() <= 0) {
 			errors.add("Plan id is not valid.");
+		}
+		
+		if (request.getQuantity() <= 0) {
+			errors.add("Quantity must be greater than 0.");
 		}
 		
 		if (!Utilities.isEmpty(request.getNotifyAddress())) { // means we have a notify URI

@@ -78,6 +78,7 @@ public class ChoreographerPlanController {
 	private static final String FALSE = "false";
     private static final String REQUEST_PARRAM_ALLOW_INTER_CLOUD = "allowInterCloud";
     private static final String PATH_VARIABLE_ID = "id";
+    private static final int DEFAULT_SESSION_QUANTITY = 1;
     private static final String ID_NOT_VALID_ERROR_MESSAGE = "ID must be greater than 0.";
 
     private static final String PLAN_MGMT_URI = CoreCommonConstants.MGMT_URI + "/plan";
@@ -246,8 +247,8 @@ public class ChoreographerPlanController {
         	if (!Utilities.isEmpty(response.getErrorMessages())) {
         		results.add(response);
         	} else {
-        		final ChoreographerSession session = sessionDBService.initiateSession(request.getPlanId(), createNotifyUri(request));
-        		results.add(new ChoreographerRunPlanResponseDTO(request.getPlanId(), session.getId(), response.getNeedInterCloud()));
+        		final ChoreographerSession session = sessionDBService.initiateSession(request.getPlanId(), request.getQuantity(), createNotifyUri(request));
+        		results.add(new ChoreographerRunPlanResponseDTO(request.getPlanId(), session.getId(), session.getQuantityGoal(), response.getNeedInterCloud()));
 			   
         		logger.debug("Sending a message to {}.", ChoreographerService.START_SESSION_DESTINATION);
         		jms.convertAndSend(ChoreographerService.START_SESSION_DESTINATION, new ChoreographerStartSessionDTO(session.getId(), request.getPlanId(), request.isAllowInterCloud(), request.getChooseOptimalExecutor()));
@@ -274,7 +275,7 @@ public class ChoreographerPlanController {
             throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + CHECK_PLAN_MGMT_BY_ID_URI);
         }
 
-        final ChoreographerRunPlanResponseDTO result = planChecker.checkPlanForExecution(gatekeeperIsPresent && allowIntercloud, id);
+        final ChoreographerRunPlanResponseDTO result = planChecker.checkPlanForExecution(gatekeeperIsPresent && allowIntercloud, id, DEFAULT_SESSION_QUANTITY);
         logger.debug("Check report for plan with id: {} successfully retrieved!", id);
 
         return new ChoreographerCheckPlanResponseDTO(id, result.getErrorMessages(), result.getNeedInterCloud());

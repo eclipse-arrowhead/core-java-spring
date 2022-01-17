@@ -40,6 +40,7 @@ public class ChoreographerWorklog {
     private String actionName;
     private String stepName;
     private Long sessionId;
+    private Long executionNumber;
 
     @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
     private String message;
@@ -54,25 +55,26 @@ public class ChoreographerWorklog {
     public ChoreographerWorklog() {}
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerWorklog(final String planName, final String actionName, final String stepName, final Long sessionId, final String message, final String exception) {
+    public ChoreographerWorklog(final String planName, final String actionName, final String stepName, final Long sessionId, final Long executionNumber, final String message, final String exception) {
     	this.planName = planName;
     	this.actionName = actionName;
     	this.stepName = stepName;
     	this.sessionId = sessionId;
+    	this.executionNumber = executionNumber;
     	this.message = message;
     	this.exception = exception;
     }
     
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerWorklog(final String planName, final String actionName, final Long sessionId, final String message, final String exception) {
-    	this(planName, actionName, null, sessionId, message, exception);
+    public ChoreographerWorklog(final String planName, final String actionName, final Long sessionId, final Long executionNumber, final String message, final String exception) {
+    	this(planName, actionName, null, sessionId, executionNumber, message, exception);
     }
     
 
 	//-------------------------------------------------------------------------------------------------
     public ChoreographerWorklog(final String planName, final String message, final String exception) {
-    	this(planName, null, null, null, message, exception);
+    	this(planName, null, null, null, null, message, exception);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -82,6 +84,7 @@ public class ChoreographerWorklog {
     public String getActionName() { return actionName; }
     public String getStepName() { return stepName; }
     public Long getSessionId() { return sessionId; }
+	public Long getExecutionNumber() { return executionNumber; 	}
 	public String getMessage() { return message; }
     public String getException() { return exception; }
 
@@ -92,6 +95,7 @@ public class ChoreographerWorklog {
     public void setStepName(final String stepName) { this.stepName = stepName; }
     public void setEntryDate(final ZonedDateTime entryDate) { this.entryDate = entryDate; }
     public void setSessionId(final Long sessionId) { this.sessionId = sessionId; }
+    public void setExecutionNumber(final Long executionNumber) { this.executionNumber = executionNumber; }
 	public void setMessage(final String message) { this.message = message; }
     public void setException(final String exception) { this.exception = exception; }
 

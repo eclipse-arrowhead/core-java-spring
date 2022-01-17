@@ -147,7 +147,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 	public void testCheckPlanForExecutionPlanNotFound() {
 		when(planDBService.getPlanById(anyLong())).thenThrow(new InvalidParameterException("test"));
 		
-		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(false, 1, false);
+		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(false, 1, 6, false);
 		
 		Assert.assertEquals((Long) 1L, response.getPlanId());
 		Assert.assertEquals(ChoreographerSessionStatus.ABORTED, response.getStatus());
@@ -170,7 +170,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		when(executorDBService.getExecutorsByServiceDefinitionAndVersion(anyString(), anyInt(), anyInt())).thenReturn(List.of());
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(false))).thenReturn(Map.of());
 		
-		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(false, 1, true);
+		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(false, 1, 6, true);
 		
 		Assert.assertEquals((Long) 1L, response.getPlanId());
 		Assert.assertEquals(ChoreographerSessionStatus.ABORTED, response.getStatus());
@@ -197,7 +197,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		when(executorDBService.getExecutorsByServiceDefinitionAndVersion(anyString(), anyInt(), anyInt())).thenReturn(List.of(new ChoreographerExecutor()));
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(true))).thenReturn(Map.of(0, List.of()));
 		
-		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(true, 1, false);
+		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(true, 1, 6, false);
 		
 		Assert.assertEquals((Long) 1L, response.getPlanId());
 		Assert.assertEquals(ChoreographerSessionStatus.ABORTED, response.getStatus());
@@ -224,7 +224,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		when(executorDBService.getExecutorsByServiceDefinitionAndVersion(anyString(), anyInt(), anyInt())).thenReturn(List.of(new ChoreographerExecutor()));
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(false))).thenThrow(ArrowheadException.class);
 		
-		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(false, 1, false);
+		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(false, 1, 6, false);
 		
 		Assert.assertEquals((Long) 1L, response.getPlanId());
 		Assert.assertEquals(ChoreographerSessionStatus.ABORTED, response.getStatus());
@@ -252,7 +252,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(false))).thenReturn(Map.of(0, List.of("#OWN_CLOUD#")));
 		when(executorSelector.select(anyString(), anyInt(), anyInt(), isNull(), eq(false))).thenReturn(null);
 		
-		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(false, 1, true);
+		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(false, 1, 6, true);
 		
 		Assert.assertEquals((Long) 1L, response.getPlanId());
 		Assert.assertEquals(ChoreographerSessionStatus.ABORTED, response.getStatus());
@@ -280,7 +280,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(false))).thenReturn(Map.of(0, List.of("#OWN_CLOUD#")));
 		when(executorSelector.select(anyString(), anyInt(), anyInt(), isNull(), eq(false))).thenReturn(new ExecutorData(new ChoreographerExecutor(), new SystemRequestDTO(), List.of(), false));
 		
-		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(false, 1, true);
+		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(false, 1, 6, true);
 		
 		Assert.assertTrue(Utilities.isEmpty(response.getErrorMessages()));
 		Assert.assertFalse(response.getNeedInterCloud());
@@ -306,7 +306,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(true))).thenReturn(Map.of(0, List.of("operator/name")));
 		when(executorSelector.select(anyString(), anyInt(), anyInt(), isNull(), eq(true))).thenReturn(new ExecutorData(new ChoreographerExecutor(), new SystemRequestDTO(), List.of(), false));
 		
-		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(true, 1, true);
+		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(true, 1, 6, true);
 		
 		Assert.assertTrue(Utilities.isEmpty(response.getErrorMessages()));
 		Assert.assertTrue(response.getNeedInterCloud());
@@ -332,7 +332,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(true))).thenReturn(Map.of(0, List.of("#OWN_CLOUD#")));
 		when(executorSelector.select(anyString(), anyInt(), anyInt(), isNull(), eq(true))).thenReturn(new ExecutorData(new ChoreographerExecutor(), new SystemRequestDTO(), List.of(), true));
 		
-		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(true, 1, true);
+		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(true, 1, 6, true);
 		
 		Assert.assertTrue(Utilities.isEmpty(response.getErrorMessages()));
 		Assert.assertTrue(response.getNeedInterCloud());
