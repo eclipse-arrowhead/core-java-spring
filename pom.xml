@@ -42,6 +42,7 @@
 	    <module>qos-monitor</module>
 	    <module>translator</module>
 		<module>plantdescriptionengine</module>
+		<module>hawkbit-configuration-manager</module>
 	    <module>deb-installer</module>
 	    <module>docker-all</module>
   	</modules>
@@ -213,12 +214,6 @@
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
 				<version>${google.gson.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.eclipse.paho</groupId>
-			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-			<version>${paho.version}</version>
 		</dependency>
 
 		<dependency>

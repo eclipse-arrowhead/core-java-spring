@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+    <Properties>
+        <Property name="LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex
+        </Property>
+		<Property name="CONSOLE_FILE_LEVEL">INFO</Property>
+		<Property name="LOG_DIR">.</Property>
+    </Properties>
+    <Appenders>
+        <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+		<RollingFile name="FileAppender" fileName="${LOG_DIR}/hawkbitconfigurationmanager.log" filePattern="${LOG_DIR}/hawkbitconfigurationmanager-%d{yyyy-MM-dd}-%i.log">
+	    	<PatternLayout>
+	        	<Pattern>${LOG_PATTERN}</Pattern>
+	    	</PatternLayout>
+	    	<Policies>
+	        	<SizeBasedTriggeringPolicy size="100MB" />
+	    	</Policies>
+	    	<DefaultRolloverStrategy max="10" />
+		</RollingFile>
+    </Appenders>
+    <Loggers>
+		<Root level="WARN">
+            <AppenderRef ref="ConsoleAppender" /> <!-- comment out this one in production environment -->
+            <AppenderRef ref="FileAppender" />
+        </Root>
+		<Logger name="eu.arrowhead.core" level="${CONSOLE_FILE_LEVEL}" additivity="true"></Logger>		
+    </Loggers>
+</Configuration>
