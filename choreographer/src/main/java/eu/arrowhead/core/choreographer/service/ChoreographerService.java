@@ -145,7 +145,7 @@ public class ChoreographerService {
 	public void abortSession(final long sessionId, final Long sessionStepId, final String message) {
 		logger.debug("abortSession started...");
 		
-		final ChoreographerSession session = sessionDBService.getSessionById(sessionId);
+		final ChoreographerSession session = sessionDBService.getSessionById(sessionId);		
 		final List<ChoreographerSessionStep> activeSteps = sessionDBService.abortSession(sessionId, message.trim());
 		if (sessionStepId != null) {
 			releaseGatewayTunnels(session.getId(), sessionStepId);

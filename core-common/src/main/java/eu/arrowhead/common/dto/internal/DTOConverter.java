@@ -1056,6 +1056,9 @@ public class DTOConverter {
     			 									entry.getPlan().getId(),
     			 									entry.getPlan().getName(),
     			 									entry.getStatus(),
+    			 									entry.getQuantityDone(),
+    			 									entry.getQuantityGoal(),
+    			 									entry.getExecutionNumber(),
     			 									entry.getNotifyUri(),
                                                     Utilities.convertZonedDateTimeToUTCString(entry.getStartedAt()),
                                                     Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));
