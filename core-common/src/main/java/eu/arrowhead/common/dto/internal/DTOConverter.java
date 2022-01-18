@@ -1108,6 +1108,7 @@ public class DTOConverter {
     											   entry.getActionName(),
     											   entry.getStepName(),
     											   entry.getSessionId(),
+    											   entry.getExecutionNumber(),
     											   entry.getMessage(),
     											   entry.getMessage());
     }
