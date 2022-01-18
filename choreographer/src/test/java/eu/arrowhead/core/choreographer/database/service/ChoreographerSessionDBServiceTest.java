@@ -1544,13 +1544,14 @@ public class ChoreographerSessionDBServiceTest {
 		final String actionName = "test-action";
 		final String stepName = "test-step";
 		final Long sessionId = 5L;
+		final Long executionNum = 47L;
 		final String message = "message";
 		final String exception = "exception";
 		
 		final ArgumentCaptor<ChoreographerWorklog> captor = ArgumentCaptor.forClass(ChoreographerWorklog.class);
 		when(worklogRepository.saveAndFlush(captor.capture())).thenReturn(new ChoreographerWorklog());
 		
-		dbService.worklog(planName, actionName, stepName, sessionId, message, exception);
+		dbService.worklog(planName, actionName, stepName, sessionId, executionNum, message, exception);
 		
 		final ChoreographerWorklog captured = captor.getValue();
 		assertEquals(sessionId, captured.getSessionId());
@@ -1558,6 +1559,7 @@ public class ChoreographerSessionDBServiceTest {
 		assertEquals(actionName, captured.getActionName());
 		assertEquals(stepName, captured.getStepName());
 		assertEquals(sessionId, captured.getSessionId());
+		assertEquals(executionNum, captured.getExecutionNumber());
 		assertEquals(exception, captured.getException());
 	}
 	
@@ -1568,6 +1570,7 @@ public class ChoreographerSessionDBServiceTest {
 		final String actionName = "test-action";
 		final String stepName = "test-step";
 		final Long sessionId = 5L;
+		final Long executionNum = 47L;
 		final String message = "message";
 		final InvalidParameterException exception = new InvalidParameterException("exception");
 		
@@ -1575,7 +1578,7 @@ public class ChoreographerSessionDBServiceTest {
 		when(worklogRepository.saveAndFlush(captor.capture())).thenReturn(new ChoreographerWorklog());
 		
 		try {
-			dbService.worklogException(planName, actionName, stepName, sessionId, message, exception);
+			dbService.worklogException(planName, actionName, stepName, sessionId, executionNum, message, exception);
 			
 		} catch (final Exception ex) {
 			final ChoreographerWorklog captured = captor.getValue();
@@ -1584,6 +1587,7 @@ public class ChoreographerSessionDBServiceTest {
 			assertEquals(actionName, captured.getActionName());
 			assertEquals(stepName, captured.getStepName());
 			assertEquals(sessionId, captured.getSessionId());
+			assertEquals(executionNum, captured.getExecutionNumber());
 			assertTrue(captured.getException().contains(exception.getClass().getSimpleName()));
 			assertTrue(captured.getException().contains(ex.getMessage()));
 			assertTrue(ex instanceof InvalidParameterException);
