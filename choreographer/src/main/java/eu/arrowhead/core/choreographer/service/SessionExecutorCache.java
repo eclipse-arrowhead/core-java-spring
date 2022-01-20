@@ -21,6 +21,8 @@ public class SessionExecutorCache {
 	private final Map<Long,List<Integer>> gatewayTunnels = new ConcurrentHashMap<>();
 	private final boolean allowInterCloud;
 	private final boolean chooseOptimalExecutor;
+	private boolean done = false;
+	private boolean aborted = false;
 	
 	//=================================================================================================
 	// methods
@@ -36,8 +38,10 @@ public class SessionExecutorCache {
 	public Set<Long> getExclusions() { return exclusions; }
 	public Map<Long,List<Integer>> getGatewayTunnels() { return gatewayTunnels; }
 	public boolean isAllowInterCloud() { return allowInterCloud; }
-	public boolean getChooseOptimalExecutor() { return chooseOptimalExecutor; }
-	
+	public boolean getChooseOptimalExecutor() { return chooseOptimalExecutor; }	
+	public boolean isDone() { return done; }
+	public boolean isAborted() { return aborted; }
+
 	//-------------------------------------------------------------------------------------------------
 	public ExecutorData get(final String serviceDefinition, final Integer minVersion, final Integer maxVersion) {
 		final int _minVersion = minVersion == null ? Defaults.DEFAULT_VERSION : minVersion; 
@@ -55,6 +59,16 @@ public class SessionExecutorCache {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public void done() {
+		this.done = true;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void aborted() {
+		this.aborted = true;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public void remove(final String serviceDefinition, final Integer minVersion, final Integer maxVersion) {
 		final int _minVersion = minVersion == null ? Defaults.DEFAULT_VERSION : minVersion; 
 		final int _maxVersion = maxVersion == null ? Integer.MAX_VALUE : maxVersion;
@@ -62,6 +76,10 @@ public class SessionExecutorCache {
 		executorCache.remove(getKey(serviceDefinition, _minVersion, _maxVersion));
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	public boolean isCacheRemovable() {
+		return (aborted || done) && gatewayTunnels.isEmpty();
+	}	
 	
 	//=================================================================================================
 	// assistant method

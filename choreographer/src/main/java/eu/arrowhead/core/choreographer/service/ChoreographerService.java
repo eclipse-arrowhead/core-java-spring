@@ -139,6 +139,8 @@ public class ChoreographerService {
     	default:
     		throw new IllegalArgumentException("Invalid status: " + payload.getStatus());
     	}
+    	
+    	removeSessionExecutorCacheIfPossible(payload.getSessionId());
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -170,7 +172,10 @@ public class ChoreographerService {
 			}
 		}
 		
-		sessionDataStorage.remove(sessionId);
+		if (sessionDataStorage.containsKey(sessionId)) {
+			sessionDataStorage.get(sessionId).aborted();			
+		}
+		removeSessionExecutorCacheIfPossible(sessionId);
 		sessionDBService.worklog(session.getPlan().getName(), sessionId, session.getExecutionNumber(), "Session is aborted", null);
 		sendNotification(session, ABORT_SESSION_MSG, "Execution: " + (session.getExecutionNumber()) + "/" + session.getQuantityGoal() + ". " + message.trim());
 	}
@@ -543,6 +548,9 @@ public class ChoreographerService {
 		logger.debug("sessionDone started...");
 
 		final ChoreographerSession _session = sessionDBService.changeSessionStatus(session.getId(), ChoreographerSessionStatus.DONE, null);
+		if (sessionDataStorage.containsKey(_session.getId())) {
+			sessionDataStorage.get(_session.getId()).done();
+		}
 		sessionDBService.worklog(_session.getPlan().getName(), _session.getId(), _session.getExecutionNumber(), FINISH_SESSION_MSG, null);
 		sendNotification(_session, FINISH_SESSION_MSG, "Number of execution: " + _session.getQuantityDone());
 		Assert.isTrue(_session.getQuantityDone() == _session.getQuantityGoal(), "Session quantityDone is not equals to quantityGoal");
@@ -577,13 +585,25 @@ public class ChoreographerService {
 	private void releaseGatewayTunnels(final long sessionId, final long sessionStepId) {
 		logger.debug("releaseGatewayTunnels started...");
 		
-		final SessionExecutorCache cache = sessionDataStorage.get(sessionId);
-		final List<Integer> ports = cache.getGatewayTunnels().get(sessionStepId);
-		
-		if (!Utilities.isEmpty(ports)) {
-			driver.closeGatewayTunnels(ports);
+		if (sessionDataStorage.containsKey(sessionId)) {
+			final SessionExecutorCache cache = sessionDataStorage.get(sessionId);
+			final List<Integer> ports = cache.getGatewayTunnels().get(sessionStepId);
+			
+			if (!Utilities.isEmpty(ports)) {
+				driver.closeGatewayTunnels(ports);
+				cache.getGatewayTunnels().remove(sessionStepId);
+			}
+			
+			cache.getGatewayTunnels().remove(sessionStepId);			
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void removeSessionExecutorCacheIfPossible(final long sessionId) {
+		logger.debug("removeSessionExecutorCacheIfPossible started...");
 		
-		cache.getGatewayTunnels().remove(sessionStepId);
+		if (sessionDataStorage.containsKey(sessionId) && sessionDataStorage.get(sessionId).isCacheRemovable()) {
+			sessionDataStorage.remove(sessionId);
+		}
 	}
 }
