@@ -240,10 +240,15 @@ public class ChoreographerService {
     private void executeStep(final ChoreographerStep step, final long sessionId) { 
     	logger.debug("executeStep started...");
     	logger.debug("Execution of step with the id of " + step.getId() + " and sessionId of " + sessionId + " started.");
+    	
+    	if (!sessionDataStorage.containsKey(sessionId)) {
+    		logger.debug("Have no session cache, probably it was aborted!");
+    		return;
+    	}
 	
     	final String fullStepName = createFullyQualifiedStepName(step);
 		final ChoreographerSessionStep sessionStep = sessionDBService.changeSessionStepStatus(sessionId, step, ChoreographerSessionStepStatus.RUNNING, "Running step: " + fullStepName);
-
+		
 		final SessionExecutorCache cache = sessionDataStorage.get(sessionId);
 		ExecutorData executorData = cache.get(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion());
 		
