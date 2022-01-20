@@ -188,15 +188,16 @@ public class ChoreographerService {
     	logger.debug("sendNotification started..."); 
     	
     	try {
-    		if (!Utilities.isEmpty(session.getNotifyUri())) {
-    			final ChoreographerNotificationDTO payload = new ChoreographerNotificationDTO(session.getId(),
-    																						  session.getPlan().getId(),
-    																						  session.getPlan().getName(),
+    		final ChoreographerSession _session = sessionDBService.getSessionById(session.getId()); //refresh
+    		if (!Utilities.isEmpty(_session.getNotifyUri())) {
+    			final ChoreographerNotificationDTO payload = new ChoreographerNotificationDTO(_session.getId(),
+																	    					  _session.getPlan().getId(),
+																	    					  _session.getPlan().getName(),
     																						  Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()),
-    																						  session.getStatus(),
+    																						  _session.getStatus(),
     																						  message,
     																						  details);
-    			driver.sendSessionNotification(session.getNotifyUri(), payload);
+    			driver.sendSessionNotification(_session.getNotifyUri(), payload);
     		}
     	} catch (final Exception ex) {
     		// any problem in notification sending should not affect the plan execution
@@ -542,6 +543,13 @@ public class ChoreographerService {
 		logger.debug("rerunPlan started...");
 		
 		final ChoreographerSession _session = sessionDBService.increaseExecutionNumber(session.getId());
+		final List<ChoreographerStep> steps = planDBService.collectStepsFromPlan(_session.getPlan());
+		final SessionExecutorCache cache = sessionDataStorage.get(_session.getId());
+		for (final ChoreographerStep step : steps) {
+			final ExecutorData executorData = cache.get(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion());
+			sessionDBService.registerSessionStep(session.getId(), step.getId(), executorData.getExecutor().getId());
+		}
+		
 		sessionDBService.worklog(_session.getPlan().getName(), _session.getId(), _session.getExecutionNumber(), START_PLAN_MSG, null);
 		sendNotification(_session, START_PLAN_MSG, "Execution: " + _session.getExecutionNumber() + "/" + _session.getQuantityGoal());
 		final ChoreographerAction firstAction = _session.getPlan().getFirstAction();

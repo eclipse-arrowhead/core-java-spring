@@ -367,7 +367,7 @@ public class ChoreographerSessionDBService {
 			if (sessionStepOpt.isEmpty()) {
 				worklogAndThrow("Session step status change has been failed", new InvalidParameterException("Session step with session id " + sessionId +
 																											" and step id " + step.getId() +
-																											"and execution number " + sessionOpt.get().getExecutionNumber() +
+																											" and execution number " + sessionOpt.get().getExecutionNumber() +
 																											" not exists"));
 			}
     		

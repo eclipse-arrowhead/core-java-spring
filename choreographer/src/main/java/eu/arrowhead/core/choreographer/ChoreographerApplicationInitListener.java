@@ -80,6 +80,7 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
 		final DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
 		factory.setErrorHandler(errorHandler);
 		configurer.configure(factory, connectionFactory);
+		factory.setSessionTransacted(false);
         
         return factory;
     }
