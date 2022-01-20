@@ -41,11 +41,11 @@ public class ChoreographerSessionErrorHandler implements ErrorHandler {
 	public void handleError(final Throwable t) {
 		logger.debug("handleError started...");
 		
-		logger.warn("Exception occurs during executing a plan - " + t.getClass().getSimpleName() + ": " + getMessage(t));
+		logger.warn("Exception occurs during executing a plan - " + t.getCause().getClass().getSimpleName() + ": " + getMessage(t.getCause()));
 		logger.debug(t);
 		
-		if (t instanceof ChoreographerSessionException) {
-			final ChoreographerSessionException ex = (ChoreographerSessionException) t;
+		if (t.getCause() instanceof ChoreographerSessionException) {
+			final ChoreographerSessionException ex = (ChoreographerSessionException) t.getCause();
 			service.abortSession(ex.getSessionId(), ex.getSessionStepId(), ex.getDetailedMessage());
 		}
 	}

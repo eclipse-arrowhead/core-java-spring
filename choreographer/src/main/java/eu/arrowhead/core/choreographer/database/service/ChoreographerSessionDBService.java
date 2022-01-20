@@ -363,9 +363,12 @@ public class ChoreographerSessionDBService {
     			worklogAndThrow("Session step status change has been failed", new InvalidParameterException("Session with id " + sessionId + " not exists"));
     		}
     		
-    		final Optional<ChoreographerSessionStep> sessionStepOpt = sessionStepRepository.findBySessionAndStep(sessionOpt.get(), step);
+    		final Optional<ChoreographerSessionStep> sessionStepOpt = sessionStepRepository.findBySessionAndStepAndExecutionNumber(sessionOpt.get(), step, sessionOpt.get().getExecutionNumber());
 			if (sessionStepOpt.isEmpty()) {
-				worklogAndThrow("Session step status change has been failed", new InvalidParameterException("Session step with session id " + sessionId + " and step id " + step.getId() + " not exists"));
+				worklogAndThrow("Session step status change has been failed", new InvalidParameterException("Session step with session id " + sessionId +
+																											" and step id " + step.getId() +
+																											"and execution number " + sessionOpt.get().getExecutionNumber() +
+																											" not exists"));
 			}
     		
 			return changeSessionStepStatus(sessionStepOpt.get().getId(), status, message);
@@ -457,9 +460,9 @@ public class ChoreographerSessionDBService {
 				throw new InvalidParameterException("Step with id " + stepId + " not exists");
 			}
 			
-			final Optional<ChoreographerSessionStep> sessionStepOpt = sessionStepRepository.findBySessionAndStep(sessionOpt.get(), stepOpt.get());
+			final Optional<ChoreographerSessionStep> sessionStepOpt = sessionStepRepository.findBySessionAndStepAndExecutionNumber(sessionOpt.get(), stepOpt.get(), sessionOpt.get().getExecutionNumber());
 			if (sessionStepOpt.isEmpty()) {
-				throw new InvalidParameterException("Session step with session id " + sessionId + " and step id " + stepId + " not exists");
+				throw new InvalidParameterException("Session step with session id " + sessionId + " and step id " + stepId + " and execution number " + sessionOpt.get().getExecutionNumber() + " not exists");
 			}
 
 			return sessionStepOpt.get();

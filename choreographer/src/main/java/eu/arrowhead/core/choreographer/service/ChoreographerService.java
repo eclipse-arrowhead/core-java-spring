@@ -94,7 +94,7 @@ public class ChoreographerService {
 
     //-------------------------------------------------------------------------------------------------
     @JmsListener(destination = START_SESSION_DESTINATION)
-    public void receiveStartSessionMessage(final ChoreographerStartSessionDTO startSessionDTO) {  
+    public void receiveStartSessionMessage(final ChoreographerStartSessionDTO startSessionDTO) { 
     	logger.debug("receiveStartSessionMessage started...");
     	Assert.notNull(startSessionDTO, "Payload is null.");
 
@@ -104,7 +104,7 @@ public class ChoreographerService {
 	        final ChoreographerPlan plan = planDBService.getPlanById(startSessionDTO.getPlanId());
 	        ChoreographerSession session = sessionDBService.changeSessionStatus(sessionId, ChoreographerSessionStatus.RUNNING, null);
 	        sessionDBService.worklog(plan.getName(), sessionId, session.getExecutionNumber(), START_SESSION_MSG, null);
-	        sendNotification(session, START_SESSION_MSG, "Quantity qoal: " + session.getQuantityGoal());
+	        sendNotification(session, START_SESSION_MSG, "Quantity goal: " + session.getQuantityGoal());
 	        
 	        session = sessionDBService.increaseExecutionNumber(sessionId);	        
 	        selectExecutorsForPlan(session, plan, startSessionDTO.isAllowInterCloud(), startSessionDTO.getChooseOptimalExecutor());

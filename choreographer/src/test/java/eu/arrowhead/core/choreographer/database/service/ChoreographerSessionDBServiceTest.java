@@ -739,7 +739,7 @@ public class ChoreographerSessionDBServiceTest {
 		sessionStep.setStatus(ChoreographerSessionStepStatus.RUNNING);
 		
 		when(sessionRepository.findById(anyLong())).thenReturn(Optional.of(session));
-		when(sessionStepRepository.findBySessionAndStep(any(), any())).thenReturn(Optional.of(sessionStep));
+		when(sessionStepRepository.findBySessionAndStepAndExecutionNumber(any(), any(), anyLong())).thenReturn(Optional.of(sessionStep));
 		when(sessionStepRepository.findById(anyLong())).thenReturn(Optional.of(sessionStep));
 		final ArgumentCaptor<ChoreographerSessionStep> sessionStepCaptor = ArgumentCaptor.forClass(ChoreographerSessionStep.class);
 		when(sessionStepRepository.saveAndFlush(sessionStepCaptor.capture())).thenReturn(sessionStep);
@@ -755,7 +755,7 @@ public class ChoreographerSessionDBServiceTest {
 		assertEquals(message, result.getMessage());
 		
 		verify(sessionRepository, times(1)).findById(eq(sessionId));
-		verify(sessionStepRepository, times(1)).findBySessionAndStep(eq(session), eq(step));
+		verify(sessionStepRepository, times(1)).findBySessionAndStepAndExecutionNumber(eq(session), eq(step), anyLong());
 		verify(sessionStepRepository, times(1)).findById(eq(sessionStep.getId()));
 		verify(sessionStepRepository, times(1)).saveAndFlush(eq(sessionStep));
 		verify(worklogRepository, times(1)).saveAndFlush(any(ChoreographerWorklog.class));
@@ -778,7 +778,7 @@ public class ChoreographerSessionDBServiceTest {
 			
 		} catch (final InvalidParameterException ex) {
 			verify(sessionRepository, times(1)).findById(eq(sessionId));
-			verify(sessionStepRepository, never()).findBySessionAndStep(any(), any());
+			verify(sessionStepRepository, never()).findBySessionAndStepAndExecutionNumber(any(), any(), anyLong());
 			verify(sessionStepRepository, never()).findById(any());
 			verify(sessionStepRepository, never()).saveAndFlush(any());
 			verify(worklogRepository, times(1)).saveAndFlush(any(ChoreographerWorklog.class));
@@ -800,14 +800,14 @@ public class ChoreographerSessionDBServiceTest {
 		session.setId(sessionId);
 		
 		when(sessionRepository.findById(anyLong())).thenReturn(Optional.of(session));
-		when(sessionStepRepository.findBySessionAndStep(any(), any())).thenReturn(Optional.empty());
+		when(sessionStepRepository.findBySessionAndStepAndExecutionNumber(any(), any(), anyLong())).thenReturn(Optional.empty());
 		
 		try {
 			dbService.changeSessionStepStatus(sessionId, step, newStatus, message);
 			
 		} catch (final InvalidParameterException ex) {
 			verify(sessionRepository, times(1)).findById(eq(sessionId));
-			verify(sessionStepRepository, times(1)).findBySessionAndStep(eq(session), eq(step));
+			verify(sessionStepRepository, times(1)).findBySessionAndStepAndExecutionNumber(eq(session), eq(step), anyLong());
 			verify(sessionStepRepository, never()).findById(any());
 			verify(sessionStepRepository, never()).saveAndFlush(any());
 			verify(worklogRepository, times(1)).saveAndFlush(any(ChoreographerWorklog.class));
@@ -832,7 +832,7 @@ public class ChoreographerSessionDBServiceTest {
 			
 		} catch (final ArrowheadException ex) {
 			verify(sessionRepository, times(1)).findById(eq(sessionId));
-			verify(sessionStepRepository, never()).findBySessionAndStep(any(), any());
+			verify(sessionStepRepository, never()).findBySessionAndStepAndExecutionNumber(any(), any(), anyLong());
 			verify(sessionStepRepository, never()).findById(any());
 			verify(sessionStepRepository, never()).saveAndFlush(any());
 			verify(worklogRepository, never()).saveAndFlush(any(ChoreographerWorklog.class));
@@ -933,7 +933,7 @@ public class ChoreographerSessionDBServiceTest {
 		
 		when(sessionRepository.findById(anyLong())).thenReturn(Optional.of(session));
 		when(stepRepository.findById(anyLong())).thenReturn(Optional.of(step));
-		when(sessionStepRepository.findBySessionAndStep(any(), any())).thenReturn(Optional.of(returnValue));
+		when(sessionStepRepository.findBySessionAndStepAndExecutionNumber(any(), any(), anyLong())).thenReturn(Optional.of(returnValue));
 		
 		final ChoreographerSessionStep result = dbService.getSessionStepBySessionIdAndStepId(sessionId, stepId);
 		
@@ -942,7 +942,7 @@ public class ChoreographerSessionDBServiceTest {
 		
 		verify(sessionRepository, times(1)).findById(eq(sessionId));
 		verify(stepRepository, times(1)).findById(eq(stepId));
-		verify(sessionStepRepository, times(1)).findBySessionAndStep(eq(session), eq(step));
+		verify(sessionStepRepository, times(1)).findBySessionAndStepAndExecutionNumber(eq(session), eq(step), anyLong());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -959,7 +959,7 @@ public class ChoreographerSessionDBServiceTest {
 		} catch (final InvalidParameterException ex) {
 			verify(sessionRepository, times(1)).findById(eq(sessionId));
 			verify(stepRepository, never()).findById(anyLong());
-			verify(sessionStepRepository, never()).findBySessionAndStep(any(), any());
+			verify(sessionStepRepository, never()).findBySessionAndStepAndExecutionNumber(any(), any(), anyLong());
 			throw ex;
 		}		
 	}
@@ -982,7 +982,7 @@ public class ChoreographerSessionDBServiceTest {
 		} catch (final InvalidParameterException ex) {
 			verify(sessionRepository, times(1)).findById(eq(sessionId));
 			verify(stepRepository, times(1)).findById(eq(stepId));
-			verify(sessionStepRepository, never()).findBySessionAndStep(any(), any());
+			verify(sessionStepRepository, never()).findBySessionAndStepAndExecutionNumber(any(), any(), anyLong());
 			throw ex;
 		}				
 	}
@@ -1000,7 +1000,7 @@ public class ChoreographerSessionDBServiceTest {
 		
 		when(sessionRepository.findById(anyLong())).thenReturn(Optional.of(session));
 		when(stepRepository.findById(anyLong())).thenReturn(Optional.of(step));
-		when(sessionStepRepository.findBySessionAndStep(any(), any())).thenReturn(Optional.empty());
+		when(sessionStepRepository.findBySessionAndStepAndExecutionNumber(any(), any(), anyLong())).thenReturn(Optional.empty());
 		
 		try {
 			dbService.getSessionStepBySessionIdAndStepId(sessionId, stepId);
@@ -1008,7 +1008,7 @@ public class ChoreographerSessionDBServiceTest {
 		} catch (final InvalidParameterException ex) {
 			verify(sessionRepository, times(1)).findById(eq(sessionId));
 			verify(stepRepository, times(1)).findById(eq(stepId));
-			verify(sessionStepRepository, times(1)).findBySessionAndStep(eq(session), eq(step));
+			verify(sessionStepRepository, times(1)).findBySessionAndStepAndExecutionNumber(any(), any(), anyLong());
 			throw ex;
 		}		
 	}
@@ -1027,7 +1027,7 @@ public class ChoreographerSessionDBServiceTest {
 		} catch (final ArrowheadException ex) {
 			verify(sessionRepository, times(1)).findById(eq(sessionId));
 			verify(stepRepository, never()).findById(anyLong());
-			verify(sessionStepRepository, never()).findBySessionAndStep(any(), any());
+			verify(sessionStepRepository, never()).findBySessionAndStepAndExecutionNumber(any(), any(), anyLong());
 			throw ex;
 		}		
 	}

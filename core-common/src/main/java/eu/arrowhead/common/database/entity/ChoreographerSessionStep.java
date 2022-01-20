@@ -35,7 +35,7 @@ import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"sessionId", "stepId"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"sessionId", "stepId", "executionNumber"}))
 public class ChoreographerSessionStep {
 
     //=================================================================================================

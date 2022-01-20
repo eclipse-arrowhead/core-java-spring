@@ -27,7 +27,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
-import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
@@ -77,10 +76,10 @@ public class ChoreographerApplicationInitListener extends ApplicationInitListene
 	
 	//-------------------------------------------------------------------------------------------------
 	@Bean
-    public JmsListenerContainerFactory<?> getJMSFactory(final ConnectionFactory connectionFactory, final DefaultJmsListenerContainerFactoryConfigurer configurer, final ChoreographerSessionErrorHandler errorHandler) {
-        final DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-        configurer.configure(factory, connectionFactory);
-        factory.setErrorHandler(errorHandler);
+    public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(final ConnectionFactory connectionFactory, final DefaultJmsListenerContainerFactoryConfigurer configurer, final ChoreographerSessionErrorHandler errorHandler) {
+		final DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+		factory.setErrorHandler(errorHandler);
+		configurer.configure(factory, connectionFactory);
         
         return factory;
     }
