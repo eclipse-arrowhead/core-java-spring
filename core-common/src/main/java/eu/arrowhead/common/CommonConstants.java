@@ -45,6 +45,7 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_SYSTEMREGISTRY = "System Registry";
 	public static final String CORE_SYSTEM_DEVICEREGISTRY = "Device Registry";
 	public static final String CORE_SYSTEM_ONBOARDING = "Onboarding Controller";
+	public static final String CORE_SYSTEM_DITTO = "Ditto";
 
 	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION = "token-generation";
 	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "auth-public-key";
@@ -291,6 +292,8 @@ public class CommonConstants {
     public static final String TRANSLATOR_URI = "/translator";
     public static final String OP_TRANSLATOR_FIWARE_URI = "/v2";
     public static final String OP_TRANSLATOR_PLUGIN_URI = "/plugin";
+
+	public static final String DITTO_URI = "/ditto";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";

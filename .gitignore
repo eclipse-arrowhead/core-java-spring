@@ -33,6 +33,7 @@ wrapper
 /orchestrator/target
 /serviceregistry/target
 /plantdescriptionengine/target
+/ditto/target
 /.settings
 /**/.settings
 *.prefs
