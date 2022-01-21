@@ -43,8 +43,9 @@
 		<module>gams</module>
 	    <module>qos-monitor</module>
 	    <module>translator</module>
-		<module>plantdescriptionengine</module>
 		<module>hawkbit-configuration-manager</module>
+	    <module>plantdescriptionengine</module>
+	    <module>ditto</module>
 	    <module>deb-installer</module>
 	    <module>docker-all</module>
   	</modules>

@@ -54,6 +54,7 @@ public class Defaults {
     public static final int DEFAULT_MSCV_PORT = 8501;
 	public static final int DEFAULT_PLANT_DESCRIPTION_ENGINE_PORT = 8432;
 	public static final int DEFAULT_HAWKBIT_CONFIGURATION_MANAGER_PORT = 8447;
+	public static final int DEFAULT_DITTO_PORT = 8464;
 
     // HTTP client defaults
     public static final int DEFAULT_CONNECTION_TIMEOUT = 30000;

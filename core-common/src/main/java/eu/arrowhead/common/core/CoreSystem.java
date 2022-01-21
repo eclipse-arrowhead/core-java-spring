@@ -125,6 +125,10 @@ public enum CoreSystem {
 	
 	HAWKBITCONFIGURATIONMANAGER(Defaults.DEFAULT_HAWKBIT_CONFIGURATION_MANAGER_PORT, List.of());
 
+	DITTO(Defaults.DEFAULT_DITTO_PORT, List.of()), //TODO add Ditto services
+
+	PLANTDESCRIPTIONENGINE(Defaults.DEFAULT_PLANT_DESCRIPTION_ENGINE_PORT, List.of()); //TODO add PDE services
+	
 	//=================================================================================================
 	// members
 	

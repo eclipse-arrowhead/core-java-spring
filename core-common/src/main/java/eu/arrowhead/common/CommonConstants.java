@@ -47,6 +47,7 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_ONBOARDING = "Onboarding Controller";
 	public static final String CORE_SYSTEM_MSCV = "Monitoring and Standard Compliance Verification";
 	public static final String CORE_SYSTEM_GAMS = "Generic Autonomic Management System";
+	public static final String CORE_SYSTEM_DITTO = "Ditto";
 
 	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION = "token-generation";
 	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "auth-public-key";
@@ -310,6 +311,7 @@ public static final String CORE_SERVICE_QOSMONITOR_PUBLIC_KEY = "qos-monitor-pub
 
 	public static final String OP_GAMS_SERVICE_URI = "";
 	public static final String OP_GAMS_SENSOR_SERVICE_URI = "/{gams_uid}/sensor";
+	public static final String DITTO_URI = "/ditto";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
