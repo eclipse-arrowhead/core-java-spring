@@ -198,7 +198,7 @@ public class RegistryUtils {
 	//-------------------------------------------------------------------------------------------------
 	// This method may CHANGE the content of providedServices
 	public static void filterOnProviderAddressType(final List<ServiceRegistry> providedServices, final List<AddressType> addressTypes) { 
-		logger.debug("filterOnSecurityType started...");
+		logger.debug("filterOnProviderAddressType started...");
 		if (providedServices == null || providedServices.isEmpty() || addressTypes == null || addressTypes.isEmpty()) {
 			return;
 		}
