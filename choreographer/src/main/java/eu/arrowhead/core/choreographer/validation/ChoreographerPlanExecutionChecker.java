@@ -117,7 +117,7 @@ public class ChoreographerPlanExecutionChecker {
 			errors.add("Quantity could not be greater than " + maxIteration + ".");
 		}
 		
-		final List<ChoreographerStep> steps = planDBService.collectStepsFromPlan(plan);
+		final List<ChoreographerStep> steps = planDBService.collectStepsFromPlan(plan.getId());
 			
 		// executor check
 		final List<ChoreographerStep> stepsWithExecutors = checkAvailableExecutorsInDB(steps, errors);

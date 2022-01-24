@@ -28,7 +28,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
@@ -268,16 +267,15 @@ public class ChoreographerPlanDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<ChoreographerStep> collectStepsFromPlan(final ChoreographerPlan plan) {
+	public List<ChoreographerStep> collectStepsFromPlan(final long planId) {
 		logger.debug("collectStepsPlan started...");
-		Assert.notNull(plan, "Plan is null.");
 
 		try {
-			final Optional<ChoreographerPlan> optional = choreographerPlanRepository.findById(plan.getId());
-			if (optional.isEmpty()) {
-				throw new InvalidParameterException("Plan with id of '" + plan.getId() + "' doesn't exist!");
+			final Optional<ChoreographerPlan> planOpt = choreographerPlanRepository.findById(planId);
+			if (planOpt.isEmpty()) {
+				throw new InvalidParameterException("Plan with id of '" + planId + "' doesn't exist!");
 			}
-			final List<ChoreographerAction> actions = choreographerActionRepository.findByPlan(optional.get());			
+			final List<ChoreographerAction> actions = choreographerActionRepository.findByPlan(planOpt.get());			
 			return actions.isEmpty() ? List.of() : choreographerStepRepository.findByActionIn(actions);
 			
 		} catch (final InvalidParameterException ex) {
@@ -289,17 +287,16 @@ public class ChoreographerPlanDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<ChoreographerStep> getFirstSteps(final ChoreographerAction action) {
+	public List<ChoreographerStep> getFirstSteps(final long actionId) {
 		logger.debug("getFirstSteps started...");
-		Assert.notNull(action, "Action is null.");
 		
 		try {
-			final Optional<ChoreographerAction> optional = choreographerActionRepository.findById(action.getId());
-			if (optional.isEmpty()) {
-				throw new InvalidParameterException("Action with id of " + action.getId() + " doesn't exists");
+			final Optional<ChoreographerAction> actionOpt = choreographerActionRepository.findById(actionId);
+			if (actionOpt.isEmpty()) {
+				throw new InvalidParameterException("Action with id of " + actionId + " doesn't exists");
 			}
 			
-			return choreographerStepRepository.findByActionAndFirstStep(optional.get(), true);
+			return choreographerStepRepository.findByActionAndFirstStep(actionOpt.get(), true);
 			
 		} catch (final InvalidParameterException ex) {
 			throw ex;

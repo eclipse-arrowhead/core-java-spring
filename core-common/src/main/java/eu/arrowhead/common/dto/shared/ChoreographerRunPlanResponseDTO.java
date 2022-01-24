@@ -75,7 +75,7 @@ public class ChoreographerRunPlanResponseDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public void setPlanId(final Long planId) { this.planId = planId; }
 	public void setSessionId(final Long sessionId) { this.sessionId = sessionId; }
-	public void setQuantity(long quantity) { this.quantity = quantity; }
+	public void setQuantity(final long quantity) { this.quantity = quantity; }
 	public void setStatus(final ChoreographerSessionStatus status) { this.status = status; }
 	public void setErrorMessages(final List<String> errorMessages) { this.errorMessages = errorMessages; }
 	public void setNeedInterCloud(final boolean needInterCloud) { this.needInterCloud = needInterCloud; }

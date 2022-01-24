@@ -652,39 +652,10 @@ public class ChoreographerPlanDBServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testCollectStepsFromPlanInputNull() {
-		try {
-			testObject.collectStepsFromPlan(null);
-		} catch (final Exception ex) {
-			Assert.assertEquals("Plan is null.", ex.getMessage());
-			
-			throw ex;
-		}
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = ArrowheadException.class)
-	public void testCollectStepsFromPlanDBException() {
-		doThrow(new IllegalArgumentException("Entity not managed")).when(choreographerPlanRepository).refresh(any(ChoreographerPlan.class));
-		
-		try {
-			testObject.collectStepsFromPlan(new ChoreographerPlan());
-		} catch (final Exception ex) {
-			Assert.assertEquals("Database operation exception", ex.getMessage());
-			
-			verify(choreographerPlanRepository, times(1)).refresh(any(ChoreographerPlan.class));
-			
-			throw ex;
-		}
-	}
-	
-	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCollectStepsFromPlanNoActions() {
-		final ChoreographerPlan plan = new ChoreographerPlan();
+		final long planId = 5l;
 
-		doNothing().when(choreographerPlanRepository).refresh(plan);
 		when(choreographerActionRepository.findByPlan(plan)).thenReturn(List.of());
 		
 		final List<ChoreographerStep> result = testObject.collectStepsFromPlan(plan);
