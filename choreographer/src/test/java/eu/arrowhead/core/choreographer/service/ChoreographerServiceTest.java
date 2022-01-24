@@ -143,7 +143,7 @@ public class ChoreographerServiceTest {
 		when(planDBService.getPlanById(2)).thenReturn(plan);
 		doNothing().when(sessionDBService).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 		when(sessionDBService.changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull())).thenReturn(new ChoreographerSession());
-		when(planDBService.collectStepsFromPlan(any(ChoreographerPlan.class))).thenReturn(List.of(step));
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
 		when(sessionDataStorage.put(eq(1L), any(SessionExecutorCache.class))).thenReturn(null);
 		when(executorSelector.selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(false), eq(false), eq(true))).thenReturn(null);
 		
@@ -153,7 +153,7 @@ public class ChoreographerServiceTest {
 			verify(planDBService, times(1)).getPlanById(2);
 			verify(sessionDBService, times(1)).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 			verify(sessionDBService, times(1)).changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull());
-			verify(planDBService, times(1)).collectStepsFromPlan(any(ChoreographerPlan.class));
+			verify(planDBService, times(1)).collectStepsFromPlan(anyLong());
 			verify(sessionDataStorage, times(1)).put(eq(1L), any(SessionExecutorCache.class));
 			verify(executorSelector, times(1)).selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(false), eq(false), eq(true));
 			
@@ -180,7 +180,7 @@ public class ChoreographerServiceTest {
 		when(planDBService.getPlanById(2)).thenReturn(plan);
 		doNothing().when(sessionDBService).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 		when(sessionDBService.changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull())).thenReturn(new ChoreographerSession());
-		when(planDBService.collectStepsFromPlan(any(ChoreographerPlan.class))).thenReturn(List.of(step));
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
 		when(sessionDataStorage.put(eq(1L), any(SessionExecutorCache.class))).thenReturn(null);
 		when(executorSelector.selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(true), eq(true), eq(true))).thenReturn(null);
 		
@@ -190,7 +190,7 @@ public class ChoreographerServiceTest {
 			verify(planDBService, times(1)).getPlanById(2);
 			verify(sessionDBService, times(1)).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 			verify(sessionDBService, times(1)).changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull());
-			verify(planDBService, times(1)).collectStepsFromPlan(any(ChoreographerPlan.class));
+			verify(planDBService, times(1)).collectStepsFromPlan(anyLong());
 			verify(sessionDataStorage, times(1)).put(eq(1L), any(SessionExecutorCache.class));
 			verify(executorSelector, times(1)).selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(true), eq(true), eq(true));
 			
@@ -226,7 +226,7 @@ public class ChoreographerServiceTest {
 		when(planDBService.getPlanById(2)).thenReturn(plan);
 		doNothing().doThrow(new ArrowheadException("test")).when(sessionDBService).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull()); // second call throws an exception to end the test
 		when(sessionDBService.changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull())).thenReturn(new ChoreographerSession());
-		when(planDBService.collectStepsFromPlan(any(ChoreographerPlan.class))).thenReturn(List.of(step, step2));
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step, step2));
 		when(sessionDataStorage.put(eq(1L), any(SessionExecutorCache.class))).thenReturn(null);
 		when(executorSelector.selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(false), eq(false), eq(true))).thenReturn(new ExecutorData(new ChoreographerExecutor(), new SystemRequestDTO(), List.of(), false));
 		when(sessionDBService.registerSessionStep(eq(1L), eq(2L), anyLong())).thenReturn(new ChoreographerSessionStep());
@@ -237,7 +237,7 @@ public class ChoreographerServiceTest {
 			verify(planDBService, times(1)).getPlanById(2);
 			verify(sessionDBService, times(2)).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 			verify(sessionDBService, times(1)).changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull());
-			verify(planDBService, times(1)).collectStepsFromPlan(any(ChoreographerPlan.class));
+			verify(planDBService, times(1)).collectStepsFromPlan(anyLong());
 			verify(sessionDataStorage, times(1)).put(eq(1L), any(SessionExecutorCache.class));
 			verify(executorSelector, times(1)).selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(false), eq(false) , eq(true));
 			verify(sessionDBService, times(1)).registerSessionStep(eq(1L), eq(2L), anyLong());
@@ -266,10 +266,10 @@ public class ChoreographerServiceTest {
 		when(planDBService.getPlanById(2)).thenReturn(plan);
 		doNothing().when(sessionDBService).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 		when(sessionDBService.changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull())).thenReturn(new ChoreographerSession());
-		when(planDBService.collectStepsFromPlan(any(ChoreographerPlan.class))).thenReturn(List.of(step));
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
 		when(sessionDataStorage.put(eq(1L), any(SessionExecutorCache.class))).thenReturn(null);
 		when(executorSelector.selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(false), eq(false), eq(true))).thenReturn(new ExecutorData(new ChoreographerExecutor(), new SystemRequestDTO(), List.of(), false));
-		when(planDBService.getFirstSteps(any(ChoreographerAction.class))).thenReturn(List.of(step));
+		when(planDBService.getFirstSteps(anyLong())).thenReturn(List.of(step));
 		when(sessionDBService.changeSessionStepStatus(eq(1L), eq(step), eq(ChoreographerSessionStepStatus.RUNNING), anyString())).thenThrow(new ArrowheadException("test"));
 		
 		try {
@@ -278,11 +278,11 @@ public class ChoreographerServiceTest {
 			verify(planDBService, times(1)).getPlanById(2);
 			verify(sessionDBService, times(2)).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 			verify(sessionDBService, times(1)).changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull());
-			verify(planDBService, times(1)).collectStepsFromPlan(any(ChoreographerPlan.class));
+			verify(planDBService, times(1)).collectStepsFromPlan(anyLong());
 			verify(sessionDataStorage, times(1)).put(eq(1L), any(SessionExecutorCache.class));
 			verify(executorSelector, times(1)).selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(false), eq(false), eq(true));
 			verify(sessionDBService, never()).registerSessionStep(eq(1L), anyLong(), anyLong());
-			verify(planDBService, times(1)).getFirstSteps(any(ChoreographerAction.class));
+			verify(planDBService, times(1)).getFirstSteps(anyLong());
 			verify(sessionDBService, times(1)).changeSessionStepStatus(eq(1L), eq(step), eq(ChoreographerSessionStepStatus.RUNNING), anyString());
 
 			Assert.assertEquals(1L, ((ChoreographerSessionException)ex).getSessionId());
@@ -323,10 +323,10 @@ public class ChoreographerServiceTest {
 		when(planDBService.getPlanById(2)).thenReturn(plan);
 		doNothing().when(sessionDBService).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 		when(sessionDBService.changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull())).thenReturn(new ChoreographerSession());
-		when(planDBService.collectStepsFromPlan(any(ChoreographerPlan.class))).thenReturn(List.of(step));
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
 		when(sessionDataStorage.put(eq(1L), any(SessionExecutorCache.class))).thenReturn(null);
 		when(executorSelector.selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(false), eq(false), eq(true))).thenReturn(new ExecutorData(oldExecutor, new SystemRequestDTO(), List.of(), false));
-		when(planDBService.getFirstSteps(any(ChoreographerAction.class))).thenReturn(List.of(step));
+		when(planDBService.getFirstSteps(anyLong())).thenReturn(List.of(step));
 		when(sessionDBService.changeSessionStepStatus(eq(1L), eq(step), eq(ChoreographerSessionStepStatus.RUNNING), anyString())).thenReturn(sessionStep);
 		when(sessionDataStorage.get(eq(1L))).thenReturn(cache);
 		when(sessionDBService.changeSessionStepExecutor(10L, 2L)).thenThrow(new ArrowheadException("early end")); // just for finish the test earlier
@@ -337,11 +337,11 @@ public class ChoreographerServiceTest {
 			verify(planDBService, times(1)).getPlanById(2);
 			verify(sessionDBService, times(2)).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 			verify(sessionDBService, times(1)).changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull());
-			verify(planDBService, times(1)).collectStepsFromPlan(any(ChoreographerPlan.class));
+			verify(planDBService, times(1)).collectStepsFromPlan(anyLong());
 			verify(sessionDataStorage, times(1)).put(eq(1L), any(SessionExecutorCache.class));
 			verify(executorSelector, times(1)).selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(false), eq(false), eq(true));
 			verify(sessionDBService, never()).registerSessionStep(eq(1L), anyLong(), anyLong());
-			verify(planDBService, times(1)).getFirstSteps(any(ChoreographerAction.class));
+			verify(planDBService, times(1)).getFirstSteps(anyLong());
 			verify(sessionDBService, times(1)).changeSessionStepStatus(eq(1L), eq(step), eq(ChoreographerSessionStepStatus.RUNNING), anyString());
 			verify(sessionDataStorage, times(1)).get(eq(1L));
 			verify(sessionDBService, times(1)).changeSessionStepExecutor(10L, 2L);
@@ -384,10 +384,10 @@ public class ChoreographerServiceTest {
 		when(planDBService.getPlanById(2)).thenReturn(plan);
 		doNothing().when(sessionDBService).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 		when(sessionDBService.changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull())).thenReturn(session);
-		when(planDBService.collectStepsFromPlan(any(ChoreographerPlan.class))).thenReturn(List.of(step));
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
 		when(sessionDataStorage.put(eq(1L), any(SessionExecutorCache.class))).thenReturn(null);
 		when(executorSelector.selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(false), eq(false), eq(true))).thenReturn(executorData);
-		when(planDBService.getFirstSteps(any(ChoreographerAction.class))).thenReturn(List.of(step));
+		when(planDBService.getFirstSteps(anyLong())).thenReturn(List.of(step));
 		when(sessionDBService.changeSessionStepStatus(eq(1L), eq(step), eq(ChoreographerSessionStepStatus.RUNNING), anyString())).thenReturn(sessionStep);
 		when(sessionDataStorage.get(eq(1L))).thenReturn(cache);
 		when(driver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenThrow(new ArrowheadException("orch problem"));
@@ -399,11 +399,11 @@ public class ChoreographerServiceTest {
 			verify(planDBService, times(1)).getPlanById(2);
 			verify(sessionDBService, times(2)).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 			verify(sessionDBService, times(1)).changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull());
-			verify(planDBService, times(1)).collectStepsFromPlan(any(ChoreographerPlan.class));
+			verify(planDBService, times(1)).collectStepsFromPlan(anyLong());
 			verify(sessionDataStorage, times(1)).put(eq(1L), any(SessionExecutorCache.class));
 			verify(executorSelector, times(1)).selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(false), eq(false), eq(true));
 			verify(sessionDBService, never()).registerSessionStep(eq(1L), anyLong(), anyLong());
-			verify(planDBService, times(1)).getFirstSteps(any(ChoreographerAction.class));
+			verify(planDBService, times(1)).getFirstSteps(anyLong());
 			verify(sessionDBService, times(1)).changeSessionStepStatus(eq(1L), eq(step), eq(ChoreographerSessionStepStatus.RUNNING), anyString());
 			verify(driver, times(1)).queryOrchestrator(any(OrchestrationFormRequestDTO.class));
 			verify(sessionDataStorage, times(2)).get(eq(1L));
@@ -454,10 +454,10 @@ public class ChoreographerServiceTest {
 		when(planDBService.getPlanById(2)).thenReturn(plan);
 		doNothing().when(sessionDBService).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 		when(sessionDBService.changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull())).thenReturn(session);
-		when(planDBService.collectStepsFromPlan(any(ChoreographerPlan.class))).thenReturn(List.of(step));
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
 		when(sessionDataStorage.put(eq(1L), any(SessionExecutorCache.class))).thenReturn(null);
 		when(executorSelector.selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(false), eq(false), eq(true))).thenReturn(executorData);
-		when(planDBService.getFirstSteps(any(ChoreographerAction.class))).thenReturn(List.of(step));
+		when(planDBService.getFirstSteps(anyLong())).thenReturn(List.of(step));
 		when(sessionDBService.changeSessionStepStatus(eq(1L), eq(step), eq(ChoreographerSessionStepStatus.RUNNING), anyString())).thenReturn(sessionStep);
 		when(driver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of()));
 		when(sessionDataStorage.get(eq(1L))).thenReturn(cache);
@@ -469,11 +469,11 @@ public class ChoreographerServiceTest {
 			verify(planDBService, times(1)).getPlanById(2);
 			verify(sessionDBService, times(2)).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 			verify(sessionDBService, times(1)).changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull());
-			verify(planDBService, times(1)).collectStepsFromPlan(any(ChoreographerPlan.class));
+			verify(planDBService, times(1)).collectStepsFromPlan(anyLong());
 			verify(sessionDataStorage, times(1)).put(eq(1L), any(SessionExecutorCache.class));
 			verify(executorSelector, times(1)).selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(false), eq(false), eq(true));
 			verify(sessionDBService, never()).registerSessionStep(eq(1L), anyLong(), anyLong());
-			verify(planDBService, times(1)).getFirstSteps(any(ChoreographerAction.class));
+			verify(planDBService, times(1)).getFirstSteps(anyLong());
 			verify(sessionDBService, times(1)).changeSessionStepStatus(eq(1L), eq(step), eq(ChoreographerSessionStepStatus.RUNNING), anyString());
 			verify(driver, times(1)).queryOrchestrator(any(OrchestrationFormRequestDTO.class));
 			verify(sessionDataStorage, times(2)).get(eq(1L));
@@ -532,10 +532,10 @@ public class ChoreographerServiceTest {
 		when(planDBService.getPlanById(2)).thenReturn(plan);
 		doNothing().when(sessionDBService).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 		when(sessionDBService.changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull())).thenReturn(session);
-		when(planDBService.collectStepsFromPlan(any(ChoreographerPlan.class))).thenReturn(List.of(step));
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
 		when(sessionDataStorage.put(eq(1L), any(SessionExecutorCache.class))).thenReturn(null);
 		when(executorSelector.selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(false), eq(false), eq(true))).thenReturn(executorData);
-		when(planDBService.getFirstSteps(any(ChoreographerAction.class))).thenReturn(List.of(step));
+		when(planDBService.getFirstSteps(anyLong())).thenReturn(List.of(step));
 		when(sessionDBService.changeSessionStepStatus(eq(1L), eq(step), eq(ChoreographerSessionStepStatus.RUNNING), anyString())).thenReturn(sessionStep);
 		when(driver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of()), new OrchestrationResponseDTO(List.of(orchResult)))
 																			  .thenThrow(new ArrowheadException("early end")); // just for finishing the test early
@@ -549,11 +549,11 @@ public class ChoreographerServiceTest {
 			verify(planDBService, times(1)).getPlanById(2);
 			verify(sessionDBService, times(2)).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 			verify(sessionDBService, times(1)).changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull());
-			verify(planDBService, times(1)).collectStepsFromPlan(any(ChoreographerPlan.class));
+			verify(planDBService, times(1)).collectStepsFromPlan(anyLong());
 			verify(sessionDataStorage, times(1)).put(eq(1L), any(SessionExecutorCache.class));
 			verify(executorSelector, times(1)).selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(false), eq(false), eq(true));
 			verify(sessionDBService, never()).registerSessionStep(eq(1L), anyLong(), anyLong());
-			verify(planDBService, times(1)).getFirstSteps(any(ChoreographerAction.class));
+			verify(planDBService, times(1)).getFirstSteps(anyLong());
 			verify(sessionDBService, times(1)).changeSessionStepStatus(eq(1L), eq(step), eq(ChoreographerSessionStepStatus.RUNNING), anyString());
 			verify(driver, times(3)).queryOrchestrator(any(OrchestrationFormRequestDTO.class));
 			verify(sessionDataStorage, times(2)).get(eq(1L));
@@ -610,10 +610,10 @@ public class ChoreographerServiceTest {
 		when(planDBService.getPlanById(2)).thenReturn(plan);
 		doNothing().when(sessionDBService).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 		when(sessionDBService.changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull())).thenReturn(session);
-		when(planDBService.collectStepsFromPlan(any(ChoreographerPlan.class))).thenReturn(List.of(step));
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
 		when(sessionDataStorage.put(eq(1L), any(SessionExecutorCache.class))).thenReturn(null);
 		when(executorSelector.selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(true), eq(false), eq(true))).thenReturn(executorData);
-		when(planDBService.getFirstSteps(any(ChoreographerAction.class))).thenReturn(List.of(step));
+		when(planDBService.getFirstSteps(anyLong())).thenReturn(List.of(step));
 		when(sessionDBService.changeSessionStepStatus(eq(1L), eq(step), eq(ChoreographerSessionStepStatus.RUNNING), anyString())).thenReturn(sessionStep);
 		when(driver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchResult))).thenThrow(new ArrowheadException("orch problem")); 
 		when(sessionDataStorage.get(eq(1L))).thenReturn(cache);
@@ -625,11 +625,11 @@ public class ChoreographerServiceTest {
 			verify(planDBService, times(1)).getPlanById(2);
 			verify(sessionDBService, times(2)).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 			verify(sessionDBService, times(1)).changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull());
-			verify(planDBService, times(1)).collectStepsFromPlan(any(ChoreographerPlan.class));
+			verify(planDBService, times(1)).collectStepsFromPlan(anyLong());
 			verify(sessionDataStorage, times(1)).put(eq(1L), any(SessionExecutorCache.class));
 			verify(executorSelector, times(1)).selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(true), eq(false), eq(true));
 			verify(sessionDBService, never()).registerSessionStep(eq(1L), anyLong(), anyLong());
-			verify(planDBService, times(1)).getFirstSteps(any(ChoreographerAction.class));
+			verify(planDBService, times(1)).getFirstSteps(anyLong());
 			verify(sessionDBService, times(1)).changeSessionStepStatus(eq(1L), eq(step), eq(ChoreographerSessionStepStatus.RUNNING), anyString());
 			verify(driver, times(2)).queryOrchestrator(any(OrchestrationFormRequestDTO.class));
 			verify(sessionDataStorage, times(2)).get(eq(1L));
@@ -684,10 +684,10 @@ public class ChoreographerServiceTest {
 		when(planDBService.getPlanById(2)).thenReturn(plan);
 		doNothing().when(sessionDBService).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 		when(sessionDBService.changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull())).thenReturn(session);
-		when(planDBService.collectStepsFromPlan(any(ChoreographerPlan.class))).thenReturn(List.of(step));
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
 		when(sessionDataStorage.put(eq(1L), any(SessionExecutorCache.class))).thenReturn(null);
 		when(executorSelector.selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(true), eq(false), eq(true))).thenReturn(executorData);
-		when(planDBService.getFirstSteps(any(ChoreographerAction.class))).thenReturn(List.of(step));
+		when(planDBService.getFirstSteps(anyLong())).thenReturn(List.of(step));
 		when(sessionDBService.changeSessionStepStatus(eq(1L), eq(step), eq(ChoreographerSessionStepStatus.RUNNING), anyString())).thenReturn(sessionStep);
 		when(driver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchResult)), new OrchestrationResponseDTO(List.of())); 
 		when(sessionDataStorage.get(eq(1L))).thenReturn(cache);
@@ -699,11 +699,11 @@ public class ChoreographerServiceTest {
 			verify(planDBService, times(1)).getPlanById(2);
 			verify(sessionDBService, times(2)).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 			verify(sessionDBService, times(1)).changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull());
-			verify(planDBService, times(1)).collectStepsFromPlan(any(ChoreographerPlan.class));
+			verify(planDBService, times(1)).collectStepsFromPlan(anyLong());
 			verify(sessionDataStorage, times(1)).put(eq(1L), any(SessionExecutorCache.class));
 			verify(executorSelector, times(1)).selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(true), eq(false), eq(true));
 			verify(sessionDBService, never()).registerSessionStep(eq(1L), anyLong(), anyLong());
-			verify(planDBService, times(1)).getFirstSteps(any(ChoreographerAction.class));
+			verify(planDBService, times(1)).getFirstSteps(anyLong());
 			verify(sessionDBService, times(1)).changeSessionStepStatus(eq(1L), eq(step), eq(ChoreographerSessionStepStatus.RUNNING), anyString());
 			verify(driver, times(2)).queryOrchestrator(any(OrchestrationFormRequestDTO.class));
 			verify(sessionDataStorage, times(2)).get(eq(1L));
@@ -763,10 +763,10 @@ public class ChoreographerServiceTest {
 		when(planDBService.getPlanById(2)).thenReturn(plan);
 		doNothing().when(sessionDBService).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 		when(sessionDBService.changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull())).thenReturn(session);
-		when(planDBService.collectStepsFromPlan(any(ChoreographerPlan.class))).thenReturn(List.of(step));
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
 		when(sessionDataStorage.put(eq(1L), any(SessionExecutorCache.class))).thenReturn(null);
 		when(executorSelector.selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(true), eq(false), eq(true))).thenReturn(executorData);
-		when(planDBService.getFirstSteps(any(ChoreographerAction.class))).thenReturn(List.of(step));
+		when(planDBService.getFirstSteps(anyLong())).thenReturn(List.of(step));
 		when(sessionDBService.changeSessionStepStatus(eq(1L), eq(step), eq(ChoreographerSessionStepStatus.RUNNING), anyString())).thenReturn(sessionStep);
 		when(driver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchResult)), new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
 		when(sessionDataStorage.get(eq(1L))).thenReturn(cache);
@@ -780,11 +780,11 @@ public class ChoreographerServiceTest {
 			verify(planDBService, times(1)).getPlanById(2);
 			verify(sessionDBService, times(2)).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 			verify(sessionDBService, times(1)).changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull());
-			verify(planDBService, times(1)).collectStepsFromPlan(any(ChoreographerPlan.class));
+			verify(planDBService, times(1)).collectStepsFromPlan(anyLong());
 			verify(sessionDataStorage, times(1)).put(eq(1L), any(SessionExecutorCache.class));
 			verify(executorSelector, times(1)).selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(true), eq(false), eq(true));
 			verify(sessionDBService, never()).registerSessionStep(eq(1L), anyLong(), anyLong());
-			verify(planDBService, times(1)).getFirstSteps(any(ChoreographerAction.class));
+			verify(planDBService, times(1)).getFirstSteps(anyLong());
 			verify(sessionDBService, times(2)).changeSessionStepStatus(eq(1L), eq(step), eq(ChoreographerSessionStepStatus.RUNNING), anyString());
 			verify(driver, times(2)).queryOrchestrator(any(OrchestrationFormRequestDTO.class));
 			verify(sessionDataStorage, times(3)).get(eq(1L));
@@ -854,10 +854,10 @@ public class ChoreographerServiceTest {
 		when(planDBService.getPlanById(2)).thenReturn(plan);
 		doNothing().when(sessionDBService).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 		when(sessionDBService.changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull())).thenReturn(session);
-		when(planDBService.collectStepsFromPlan(any(ChoreographerPlan.class))).thenReturn(List.of(step));
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
 		when(sessionDataStorage.put(eq(1L), any(SessionExecutorCache.class))).thenReturn(null);
 		when(executorSelector.selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(true), eq(false), eq(true))).thenReturn(executorData);
-		when(planDBService.getFirstSteps(any(ChoreographerAction.class))).thenReturn(List.of(step));
+		when(planDBService.getFirstSteps(anyLong())).thenReturn(List.of(step));
 		when(sessionDBService.changeSessionStepStatus(eq(1L), eq(step), eq(ChoreographerSessionStepStatus.RUNNING), anyString())).thenReturn(sessionStep);
 		when(driver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchResult)), new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
 		when(sessionDataStorage.get(eq(1L))).thenReturn(cache);
@@ -872,11 +872,11 @@ public class ChoreographerServiceTest {
 			verify(planDBService, times(1)).getPlanById(2);
 			verify(sessionDBService, times(2)).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 			verify(sessionDBService, times(1)).changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull());
-			verify(planDBService, times(1)).collectStepsFromPlan(any(ChoreographerPlan.class));
+			verify(planDBService, times(1)).collectStepsFromPlan(anyLong());
 			verify(sessionDataStorage, times(1)).put(eq(1L), any(SessionExecutorCache.class));
 			verify(executorSelector, times(1)).selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(true), eq(false), eq(true));
 			verify(sessionDBService, never()).registerSessionStep(eq(1L), anyLong(), anyLong());
-			verify(planDBService, times(1)).getFirstSteps(any(ChoreographerAction.class));
+			verify(planDBService, times(1)).getFirstSteps(anyLong());
 			verify(sessionDBService, times(2)).changeSessionStepStatus(eq(1L), eq(step), eq(ChoreographerSessionStepStatus.RUNNING), anyString());
 			verify(driver, times(2)).queryOrchestrator(any(OrchestrationFormRequestDTO.class));
 			verify(sessionDataStorage, times(3)).get(eq(1L));
@@ -938,10 +938,10 @@ public class ChoreographerServiceTest {
 		when(planDBService.getPlanById(2)).thenReturn(plan);
 		doNothing().when(sessionDBService).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 		when(sessionDBService.changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull())).thenReturn(session);
-		when(planDBService.collectStepsFromPlan(any(ChoreographerPlan.class))).thenReturn(List.of(step));
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
 		when(sessionDataStorage.put(eq(1L), any(SessionExecutorCache.class))).thenReturn(null);
 		when(executorSelector.selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(true), eq(false), eq(true))).thenReturn(executorData);
-		when(planDBService.getFirstSteps(any(ChoreographerAction.class))).thenReturn(List.of(step));
+		when(planDBService.getFirstSteps(anyLong())).thenReturn(List.of(step));
 		when(sessionDBService.changeSessionStepStatus(eq(1L), eq(step), eq(ChoreographerSessionStepStatus.RUNNING), anyString())).thenReturn(sessionStep);
 		when(driver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchResult)), new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
 		when(sessionDataStorage.get(eq(1L))).thenReturn(cache);
@@ -952,11 +952,11 @@ public class ChoreographerServiceTest {
 		verify(planDBService, times(1)).getPlanById(2);
 		verify(sessionDBService, times(2)).worklog(any(String.class), anyLong(), anyLong(), anyString(), isNull());
 		verify(sessionDBService, times(1)).changeSessionStatus(eq(1L), eq(ChoreographerSessionStatus.RUNNING), isNull());
-		verify(planDBService, times(1)).collectStepsFromPlan(any(ChoreographerPlan.class));
+		verify(planDBService, times(1)).collectStepsFromPlan(anyLong());
 		verify(sessionDataStorage, times(1)).put(eq(1L), any(SessionExecutorCache.class));
 		verify(executorSelector, times(1)).selectAndInit(eq(1L), any(ChoreographerStep.class), anySet(), eq(true), eq(false), eq(true));
 		verify(sessionDBService, never()).registerSessionStep(eq(1L), anyLong(), anyLong());
-		verify(planDBService, times(1)).getFirstSteps(any(ChoreographerAction.class));
+		verify(planDBService, times(1)).getFirstSteps(anyLong());
 		verify(sessionDBService, times(1)).changeSessionStepStatus(eq(1L), eq(step), eq(ChoreographerSessionStepStatus.RUNNING), anyString());
 		verify(driver, times(2)).queryOrchestrator(any(OrchestrationFormRequestDTO.class));
 		verify(sessionDataStorage, times(2)).get(eq(1L));
@@ -1427,7 +1427,7 @@ public class ChoreographerServiceTest {
 		
 		when(sessionDBService.changeSessionStepStatus(1, ChoreographerSessionStepStatus.DONE, "Step finished successfully.")).thenReturn(sessionStep);
 		when(sessionDataStorage.get(1L)).thenReturn(new SessionExecutorCache(false, false));
-		when(planDBService.getFirstSteps(any(ChoreographerAction.class))).thenThrow(new ArrowheadException("early end")); // to finish the test earlier
+		when(planDBService.getFirstSteps(anyLong())).thenThrow(new ArrowheadException("early end")); // to finish the test earlier
 		
 		try {
 			testObject.receiveSessionStepDoneMessage(payload);
@@ -1435,7 +1435,7 @@ public class ChoreographerServiceTest {
 			verify(sessionDBService, times(1)).changeSessionStepStatus(1, ChoreographerSessionStepStatus.DONE, "Step finished successfully.");
 			verify(sessionDataStorage, times(1)).get(1L);
 			verify(driver, never()).closeGatewayTunnels(anyList());
-			verify(planDBService, times(1)).getFirstSteps(any(ChoreographerAction.class));
+			verify(planDBService, times(1)).getFirstSteps(anyLong());
 			
 			Assert.assertEquals("early end", ex.getMessage());
 

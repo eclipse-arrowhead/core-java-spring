@@ -160,13 +160,15 @@ public class ChoreographerPlanExecutionCheckerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckPlanForExecutionExecutorNotFound() {
+		final long planId = 5L;
 		final ChoreographerPlan plan = new ChoreographerPlan("plan");
+		plan.setId(planId);
 		final ChoreographerAction action = new ChoreographerAction("action", null);
 		action.setPlan(plan);
 		final ChoreographerStep step = new ChoreographerStep("step", action, "service", 1, 1, "{}", null, 1);
 
 		when(planDBService.getPlanById(anyLong())).thenReturn(plan);
-		when(planDBService.collectStepsFromPlan(any(ChoreographerPlan.class))).thenReturn(List.of(step));
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
 		when(executorDBService.getExecutorsByServiceDefinitionAndVersion(anyString(), anyInt(), anyInt())).thenReturn(List.of());
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(false))).thenReturn(Map.of());
 		
@@ -178,7 +180,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		Assert.assertTrue(response.getErrorMessages().get(0).startsWith("Executor not found for step: "));
 		
 		verify(planDBService, times(1)).getPlanById(1);
-		verify(planDBService, times(1)).collectStepsFromPlan(plan);
+		verify(planDBService, times(1)).collectStepsFromPlan(planId);
 		verify(executorDBService, times(1)).getExecutorsByServiceDefinitionAndVersion("service", 1, 1);
 		verify(driver, times(1)).searchForServices(any(ServiceQueryFormListDTO.class), eq(false));
 		verify(executorSelector, never()).select(anyString(), anyInt(), anyInt(), isNull(), eq(false));
@@ -187,13 +189,15 @@ public class ChoreographerPlanExecutionCheckerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckPlanForExecutionProviderNotFound() {
+		final long planId = 5L;
 		final ChoreographerPlan plan = new ChoreographerPlan("plan");
+		plan.setId(planId);
 		final ChoreographerAction action = new ChoreographerAction("action", null);
 		action.setPlan(plan);
 		final ChoreographerStep step = new ChoreographerStep("step", action, "service", 1, 1, "{}", null, 1);
 
 		when(planDBService.getPlanById(anyLong())).thenReturn(plan);
-		when(planDBService.collectStepsFromPlan(any(ChoreographerPlan.class))).thenReturn(List.of(step));
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
 		when(executorDBService.getExecutorsByServiceDefinitionAndVersion(anyString(), anyInt(), anyInt())).thenReturn(List.of(new ChoreographerExecutor()));
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(true))).thenReturn(Map.of(0, List.of()));
 		
@@ -205,7 +209,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		Assert.assertTrue(response.getErrorMessages().get(0).startsWith("Provider not found for step: "));
 		
 		verify(planDBService, times(1)).getPlanById(1);
-		verify(planDBService, times(1)).collectStepsFromPlan(plan);
+		verify(planDBService, times(1)).collectStepsFromPlan(planId);
 		verify(executorDBService, times(1)).getExecutorsByServiceDefinitionAndVersion("service", 1, 1);
 		verify(driver, times(1)).searchForServices(any(ServiceQueryFormListDTO.class), eq(true));
 		verify(executorSelector, never()).select(anyString(), anyInt(), anyInt(), isNull(), eq(true));
@@ -214,13 +218,15 @@ public class ChoreographerPlanExecutionCheckerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckPlanForExecutionConnectionProblem() {
+		final long planId = 5L;
 		final ChoreographerPlan plan = new ChoreographerPlan("plan");
+		plan.setId(planId);
 		final ChoreographerAction action = new ChoreographerAction("action", null);
 		action.setPlan(plan);
 		final ChoreographerStep step = new ChoreographerStep("step", action, "service", 1, 1, "{}", null, 1);
 
 		when(planDBService.getPlanById(anyLong())).thenReturn(plan);
-		when(planDBService.collectStepsFromPlan(any(ChoreographerPlan.class))).thenReturn(List.of(step));
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
 		when(executorDBService.getExecutorsByServiceDefinitionAndVersion(anyString(), anyInt(), anyInt())).thenReturn(List.of(new ChoreographerExecutor()));
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(false))).thenThrow(ArrowheadException.class);
 		
@@ -232,7 +238,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		Assert.assertTrue(response.getErrorMessages().get(0).startsWith("Something happened when connecting to other core services: "));
 		
 		verify(planDBService, times(1)).getPlanById(1);
-		verify(planDBService, times(1)).collectStepsFromPlan(plan);
+		verify(planDBService, times(1)).collectStepsFromPlan(planId);
 		verify(executorDBService, times(1)).getExecutorsByServiceDefinitionAndVersion("service", 1, 1);
 		verify(driver, times(1)).searchForServices(any(ServiceQueryFormListDTO.class), eq(false));
 		verify(executorSelector, never()).select(anyString(), anyInt(), anyInt(), isNull(), eq(false));
@@ -241,13 +247,15 @@ public class ChoreographerPlanExecutionCheckerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckPlanForExecutionDependencyNotFound() {
+		final long planId = 5L;
 		final ChoreographerPlan plan = new ChoreographerPlan("plan");
+		plan.setId(planId);
 		final ChoreographerAction action = new ChoreographerAction("action", null);
 		action.setPlan(plan);
 		final ChoreographerStep step = new ChoreographerStep("step", action, "service", 1, 1, "{}", null, 1);
 
 		when(planDBService.getPlanById(anyLong())).thenReturn(plan);
-		when(planDBService.collectStepsFromPlan(any(ChoreographerPlan.class))).thenReturn(List.of(step));
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
 		when(executorDBService.getExecutorsByServiceDefinitionAndVersion(anyString(), anyInt(), anyInt())).thenReturn(List.of(new ChoreographerExecutor()));
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(false))).thenReturn(Map.of(0, List.of("#OWN_CLOUD#")));
 		when(executorSelector.select(anyString(), anyInt(), anyInt(), isNull(), eq(false))).thenReturn(null);
@@ -260,7 +268,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		Assert.assertTrue(response.getErrorMessages().get(0).startsWith("Executor not found for step: "));
 		
 		verify(planDBService, times(1)).getPlanById(1);
-		verify(planDBService, times(1)).collectStepsFromPlan(plan);
+		verify(planDBService, times(1)).collectStepsFromPlan(planId);
 		verify(executorDBService, times(1)).getExecutorsByServiceDefinitionAndVersion("service", 1, 1);
 		verify(driver, times(1)).searchForServices(any(ServiceQueryFormListDTO.class), eq(false));
 		verify(executorSelector, times(1)).select(anyString(), anyInt(), anyInt(), isNull(), eq(false));
@@ -269,13 +277,15 @@ public class ChoreographerPlanExecutionCheckerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckPlanForExecutionOkNoInterCloud() {
+		final long planId = 5L;
 		final ChoreographerPlan plan = new ChoreographerPlan("plan");
+		plan.setId(planId);
 		final ChoreographerAction action = new ChoreographerAction("action", null);
 		action.setPlan(plan);
 		final ChoreographerStep step = new ChoreographerStep("step", action, "service", 1, 1, "{}", null, 1);
 
 		when(planDBService.getPlanById(anyLong())).thenReturn(plan);
-		when(planDBService.collectStepsFromPlan(any(ChoreographerPlan.class))).thenReturn(List.of(step));
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
 		when(executorDBService.getExecutorsByServiceDefinitionAndVersion(anyString(), anyInt(), anyInt())).thenReturn(List.of(new ChoreographerExecutor()));
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(false))).thenReturn(Map.of(0, List.of("#OWN_CLOUD#")));
 		when(executorSelector.select(anyString(), anyInt(), anyInt(), isNull(), eq(false))).thenReturn(new ExecutorData(new ChoreographerExecutor(), new SystemRequestDTO(), List.of(), false));
@@ -286,7 +296,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		Assert.assertFalse(response.getNeedInterCloud());
 		
 		verify(planDBService, times(1)).getPlanById(1);
-		verify(planDBService, times(1)).collectStepsFromPlan(plan);
+		verify(planDBService, times(1)).collectStepsFromPlan(planId);
 		verify(executorDBService, times(1)).getExecutorsByServiceDefinitionAndVersion("service", 1, 1);
 		verify(driver, times(1)).searchForServices(any(ServiceQueryFormListDTO.class), eq(false));
 		verify(executorSelector, times(1)).select(anyString(), anyInt(), anyInt(), isNull(), eq(false));
@@ -295,13 +305,15 @@ public class ChoreographerPlanExecutionCheckerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckPlanForExecutionOkNeedInterCloud1() {
+		final long planId = 5L;
 		final ChoreographerPlan plan = new ChoreographerPlan("plan");
+		plan.setId(planId);
 		final ChoreographerAction action = new ChoreographerAction("action", null);
 		action.setPlan(plan);
 		final ChoreographerStep step = new ChoreographerStep("step", action, "service", 1, 1, "{}", null, 1);
 
 		when(planDBService.getPlanById(anyLong())).thenReturn(plan);
-		when(planDBService.collectStepsFromPlan(any(ChoreographerPlan.class))).thenReturn(List.of(step));
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
 		when(executorDBService.getExecutorsByServiceDefinitionAndVersion(anyString(), anyInt(), anyInt())).thenReturn(List.of(new ChoreographerExecutor()));
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(true))).thenReturn(Map.of(0, List.of("operator/name")));
 		when(executorSelector.select(anyString(), anyInt(), anyInt(), isNull(), eq(true))).thenReturn(new ExecutorData(new ChoreographerExecutor(), new SystemRequestDTO(), List.of(), false));
@@ -312,7 +324,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		Assert.assertTrue(response.getNeedInterCloud());
 		
 		verify(planDBService, times(1)).getPlanById(1);
-		verify(planDBService, times(1)).collectStepsFromPlan(plan);
+		verify(planDBService, times(1)).collectStepsFromPlan(planId);
 		verify(executorDBService, times(1)).getExecutorsByServiceDefinitionAndVersion("service", 1, 1);
 		verify(driver, times(1)).searchForServices(any(ServiceQueryFormListDTO.class), eq(true));
 		verify(executorSelector, times(1)).select(anyString(), anyInt(), anyInt(), isNull(), eq(true));
@@ -321,13 +333,15 @@ public class ChoreographerPlanExecutionCheckerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckPlanForExecutionOkNeedInterCloud2() {
+		final long planId = 5L;
 		final ChoreographerPlan plan = new ChoreographerPlan("plan");
+		plan.setId(planId);
 		final ChoreographerAction action = new ChoreographerAction("action", null);
 		action.setPlan(plan);
 		final ChoreographerStep step = new ChoreographerStep("step", action, "service", 1, 1, "{}", null, 1);
 
 		when(planDBService.getPlanById(anyLong())).thenReturn(plan);
-		when(planDBService.collectStepsFromPlan(any(ChoreographerPlan.class))).thenReturn(List.of(step));
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
 		when(executorDBService.getExecutorsByServiceDefinitionAndVersion(anyString(), anyInt(), anyInt())).thenReturn(List.of(new ChoreographerExecutor()));
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(true))).thenReturn(Map.of(0, List.of("#OWN_CLOUD#")));
 		when(executorSelector.select(anyString(), anyInt(), anyInt(), isNull(), eq(true))).thenReturn(new ExecutorData(new ChoreographerExecutor(), new SystemRequestDTO(), List.of(), true));
@@ -338,7 +352,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		Assert.assertTrue(response.getNeedInterCloud());
 		
 		verify(planDBService, times(1)).getPlanById(1);
-		verify(planDBService, times(1)).collectStepsFromPlan(plan);
+		verify(planDBService, times(1)).collectStepsFromPlan(planId);
 		verify(executorDBService, times(1)).getExecutorsByServiceDefinitionAndVersion("service", 1, 1);
 		verify(driver, times(1)).searchForServices(any(ServiceQueryFormListDTO.class), eq(true));
 		verify(executorSelector, times(1)).select(anyString(), anyInt(), anyInt(), isNull(), eq(true));

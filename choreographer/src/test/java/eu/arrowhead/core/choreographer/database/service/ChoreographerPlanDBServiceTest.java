@@ -15,7 +15,9 @@
 package eu.arrowhead.core.choreographer.database.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -29,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.hibernate.HibernateException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,6 +43,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
@@ -652,48 +656,76 @@ public class ChoreographerPlanDBServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCollectStepsFromPlanNoPlan() {
+		final long planId = 5l;
+		
+		when(choreographerPlanRepository.findById(eq(planId))).thenReturn(Optional.empty());
+		
+		try {
+			testObject.collectStepsFromPlan(planId);
+			
+		} catch (final InvalidParameterException ex) {			
+			verify(choreographerPlanRepository, times(1)).findById(eq(planId));
+			verify(choreographerActionRepository, never()).findByPlan(any());
+			verify(choreographerStepRepository, never()).findByActionIn(anyList());
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCollectStepsFromPlanNoActions() {
 		final long planId = 5l;
-
-		when(choreographerActionRepository.findByPlan(plan)).thenReturn(List.of());
+		final ChoreographerPlan plan = new ChoreographerPlan();
+		plan.setId(planId);
 		
-		final List<ChoreographerStep> result = testObject.collectStepsFromPlan(plan);
+		when(choreographerPlanRepository.findById(eq(planId))).thenReturn(Optional.of(plan));
+		when(choreographerActionRepository.findByPlan(eq(plan))).thenReturn(List.of());
+		
+		final List<ChoreographerStep> result = testObject.collectStepsFromPlan(planId);
 
 		Assert.assertEquals(0, result.size());
 			
-		verify(choreographerPlanRepository, times(1)).refresh(plan);
-		verify(choreographerActionRepository, times(1)).findByPlan(plan);
+		verify(choreographerPlanRepository, times(1)).findById(eq(planId));
+		verify(choreographerActionRepository, times(1)).findByPlan(eq(plan));
 		verify(choreographerStepRepository, never()).findByActionIn(anyList());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCollectStepsFromPlanOk() {
+		final long planId = 5l;
 		final ChoreographerPlan plan = new ChoreographerPlan();
+		plan.setId(planId);
 		final ChoreographerAction action = new ChoreographerAction();
 		final List<ChoreographerAction> actionList = List.of(action);
 
-		doNothing().when(choreographerPlanRepository).refresh(plan);
-		when(choreographerActionRepository.findByPlan(plan)).thenReturn(actionList);
+		when(choreographerPlanRepository.findById(eq(planId))).thenReturn(Optional.of(plan));
+		when(choreographerActionRepository.findByPlan(eq(plan))).thenReturn(actionList);
 		when(choreographerStepRepository.findByActionIn(actionList)).thenReturn(List.of(new ChoreographerStep()));
 		
-		final List<ChoreographerStep> result = testObject.collectStepsFromPlan(plan);
+		final List<ChoreographerStep> result = testObject.collectStepsFromPlan(planId);
 
 		Assert.assertEquals(1, result.size());
 			
-		verify(choreographerPlanRepository, times(1)).refresh(plan);
-		verify(choreographerActionRepository, times(1)).findByPlan(plan);
-		verify(choreographerStepRepository, times(1)).findByActionIn(anyList());
+		verify(choreographerPlanRepository, times(1)).findById(eq(planId));
+		verify(choreographerActionRepository, times(1)).findByPlan(eq(plan));
+		verify(choreographerStepRepository, times(1)).findByActionIn(eq(actionList));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testgetFirstStepsInputNull() {
+	@Test(expected = InvalidParameterException.class)
+	public void testGetFirstStepsNoAction() {
+		when(choreographerActionRepository.findById(anyLong())).thenReturn(Optional.empty());
+		
 		try {
-			testObject.getFirstSteps(null);
-		} catch (final Exception ex) {
-			Assert.assertEquals("Action is null.", ex.getMessage());
+			testObject.getFirstSteps(1);
+		} catch (final InvalidParameterException ex) {
+			Assert.assertEquals("Action with id of 1 doesn't exists", ex.getMessage());
+			
+			verify(choreographerActionRepository, times(1)).findById(eq(1L));
+			verify(choreographerStepRepository, never()).findByActionAndFirstStep(any(), anyBoolean());
 			
 			throw ex;
 		}
@@ -702,14 +734,15 @@ public class ChoreographerPlanDBServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class)
 	public void testGetFirstStepsDBException() {
-		doThrow(new IllegalArgumentException("Entity not managed")).when(choreographerActionRepository).refresh(any(ChoreographerAction.class));
+		doThrow(new HibernateException("test")).when(choreographerActionRepository).findById(anyLong());
 		
 		try {
-			testObject.getFirstSteps(new ChoreographerAction());
+			testObject.getFirstSteps(1);
 		} catch (final Exception ex) {
-			Assert.assertEquals("Database operation exception", ex.getMessage());
+			Assert.assertEquals(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG, ex.getMessage());
 			
-			verify(choreographerActionRepository, times(1)).refresh(any(ChoreographerAction.class));
+			verify(choreographerActionRepository, times(1)).findById(eq(1L));
+			verify(choreographerStepRepository, never()).findByActionAndFirstStep(any(), anyBoolean());
 			
 			throw ex;
 		}
@@ -718,17 +751,19 @@ public class ChoreographerPlanDBServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetFirstStepsOk() {
+		final long actionId = 5l;
 		final ChoreographerAction action = new ChoreographerAction();
+		action.setId(actionId);
 
-		doNothing().when(choreographerActionRepository).refresh(action);
-		when(choreographerStepRepository.findByActionAndFirstStep(action, true)).thenReturn(List.of(new ChoreographerStep()));
+		when(choreographerActionRepository.findById(eq(actionId))).thenReturn(Optional.of(action));
+		when(choreographerStepRepository.findByActionAndFirstStep(eq(action), eq(true))).thenReturn(List.of(new ChoreographerStep()));
 		
-		final List<ChoreographerStep> result = testObject.getFirstSteps(action);
+		final List<ChoreographerStep> result = testObject.getFirstSteps(actionId);
 
 		Assert.assertEquals(1, result.size());
 			
-		verify(choreographerActionRepository, times(1)).refresh(action);
-		verify(choreographerStepRepository, times(1)).findByActionAndFirstStep(action, true);
+		verify(choreographerActionRepository, times(1)).findById(eq(actionId));
+		verify(choreographerStepRepository, times(1)).findByActionAndFirstStep(eq(action), eq(true));
 	}
 	
 	//=================================================================================================
