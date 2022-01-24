@@ -104,7 +104,8 @@ public class CoreDefaults {
 	public static final int DEFAULT_RELAY_TEST_TIMEOUT = 5000; // in milliseconds
 	public static final int DEFAULT_RELAY_TEST_MESSAGE_SIZE = 2048; // in bytes
 	public static final boolean DEFAULT_RELAY_TEST_LOG_MEASUREMENTS_IN_DB = true;
-
+	
+	public static final long DEFAULT_CHOREOGRAPHER_MAX_PLAN_ITERATION = Long.MAX_VALUE;
 	
 	//=================================================================================================
 	// assistant methods

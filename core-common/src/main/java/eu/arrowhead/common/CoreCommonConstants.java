@@ -278,6 +278,9 @@ public class CoreCommonConstants {
 	public static final String RELAY_TEST_LOG_MEASUREMENTS_IN_DB = "relay.test.log_measurements_in_db";
 	public static final String $RELAY_TEST_LOG_MEASUREMENTS_IN_DB_WD = "${" + RELAY_TEST_LOG_MEASUREMENTS_IN_DB + ":" + CoreDefaults.DEFAULT_RELAY_TEST_LOG_MEASUREMENTS_IN_DB + "}";
 	
+	public static final String CHOREOGRAPHER_MAX_PLAN_ITERATION = "max_plan_iteration";
+	public static final String $CHOREOGRAPHER_MAX_PLAN_ITERATION_WD = "${" + CHOREOGRAPHER_MAX_PLAN_ITERATION + ":" + CoreDefaults.DEFAULT_CHOREOGRAPHER_MAX_PLAN_ITERATION + "}";
+	
 	public static final String CERTIFICATE_FORMAT = "X.509";
 
 	// Translator-Fiware

@@ -23,6 +23,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.ExampleMatcher.StringMatcher;
@@ -88,6 +89,9 @@ public class ChoreographerSessionDBService {
 	@Autowired
 	private ChoreographerWorklogRepository worklogRepository;
 	
+	@Value(CoreCommonConstants.$CHOREOGRAPHER_MAX_PLAN_ITERATION_WD)
+	private Long maxIteration;
+	
     private final Logger logger = LogManager.getLogger(ChoreographerSessionDBService.class);
 
 	
@@ -103,6 +107,10 @@ public class ChoreographerSessionDBService {
       	  final Optional<ChoreographerPlan> optional = planRepository.findById(planId);
       	  if (optional.isEmpty()) {
       		  worklogAndThrow("Initiating plan has been failed", new InvalidParameterException("Plan with id " + planId + " not exists"));
+      	  }
+      	  
+      	  if (quantity > maxIteration) {
+      		worklogAndThrow("Initiating plan has been failed", new InvalidParameterException("Requested quantity (" + quantity + ") is more than allowed (" + maxIteration + ")"));
       	  }
       	  
       	  final String _notifyUri = Utilities.isEmpty(notifyUri) ? null : UriComponentsBuilder.fromUriString(notifyUri).build().toUriString();

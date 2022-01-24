@@ -22,9 +22,11 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
@@ -68,6 +70,9 @@ public class ChoreographerPlanExecutionChecker {
 	@Autowired
 	private ExecutorSelector executorSelector;
 	
+	@Value(CoreCommonConstants.$CHOREOGRAPHER_MAX_PLAN_ITERATION_WD)
+	private Long maxIteration;
+	
 	private final Logger logger = LogManager.getLogger(ChoreographerPlanExecutionChecker.class);
 	
 	//=================================================================================================
@@ -104,6 +109,14 @@ public class ChoreographerPlanExecutionChecker {
 			return new ChoreographerRunPlanResponseDTO(planId, quantity, List.of(ex.getMessage()), false);
 		}
 		
+		// iteration check
+		if (quantity <= 0) {
+			errors.add("Quantity must be greater than 0.");
+		}
+		if (quantity > maxIteration) {
+			errors.add("Quantity could not be greater than " + maxIteration + ".");
+		}
+		
 		final List<ChoreographerStep> steps = planDBService.collectStepsFromPlan(plan);
 			
 		// executor check
@@ -138,10 +151,6 @@ public class ChoreographerPlanExecutionChecker {
 		
 		if (request.getPlanId() == null || request.getPlanId() <= 0) {
 			errors.add("Plan id is not valid.");
-		}
-		
-		if (request.getQuantity() <= 0) {
-			errors.add("Quantity must be greater than 0.");
 		}
 		
 		if (!Utilities.isEmpty(request.getNotifyAddress())) { // means we have a notify URI
