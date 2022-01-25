@@ -21,6 +21,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import javax.jms.JMSException;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -48,8 +50,10 @@ public class ChoreographerSessionErrorHandlerTest {
 	@Test
 	public void testHandleErrorChoreographerSessionException() {
 		doNothing().when(service).abortSession(1L, 1L, "message");
+		final JMSException jmsException = new JMSException("jms");
+		jmsException.initCause(new ChoreographerSessionException(1L, 1L, "message"));
 		
-		testObject.handleError(new ChoreographerSessionException(1L, 1L, "message"));
+		testObject.handleError(jmsException);
 		
 		verify(service, times(1)).abortSession(1L, 1L, "message");
 	}
@@ -58,7 +62,10 @@ public class ChoreographerSessionErrorHandlerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testHandleErrorGeneralException() {
-		testObject.handleError(new Exception("abc"));
+		final JMSException jmsException = new JMSException("jms");
+		jmsException.initCause(new Exception("abc"));
+		
+		testObject.handleError(jmsException);
 		
 		verify(service, never()).abortSession(anyLong(), anyLong(), anyString());
 	}
