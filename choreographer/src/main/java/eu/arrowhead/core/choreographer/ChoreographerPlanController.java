@@ -276,7 +276,7 @@ public class ChoreographerPlanController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @DeleteMapping(path = ABORT_SESSION_MGMT_BY_ID_URI)
-    public void abortSession(@PathVariable final Long id) { //TODO junit
+    public void abortSession(@PathVariable final Long id) {
     	logger.debug("New abort session request received with id: {}.", id);
     	
     	if (id < 1) {

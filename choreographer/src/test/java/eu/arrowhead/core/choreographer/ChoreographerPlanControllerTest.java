@@ -72,6 +72,7 @@ import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerPlanDBService;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerSessionDBService;
+import eu.arrowhead.core.choreographer.service.ChoreographerService;
 import eu.arrowhead.core.choreographer.validation.ChoreographerPlanExecutionChecker;
 import eu.arrowhead.core.choreographer.validation.ChoreographerPlanValidator;
 
@@ -86,6 +87,7 @@ public class ChoreographerPlanControllerTest {
     private static final String PLAN_MGMT_URI = CommonConstants.CHOREOGRAPHER_URI + CoreCommonConstants.MGMT_URI + "/plan";
     private static final String START_SESSION_MGMT_URI = CommonConstants.CHOREOGRAPHER_URI + CoreCommonConstants.MGMT_URI + "/session/start";
     private static final String CHECK_PLAN_MGMT_URI = CommonConstants.CHOREOGRAPHER_URI + CoreCommonConstants.MGMT_URI + "/check-plan";
+	private static final String ABORT_SESSION_MGMT_URI = CommonConstants.CHOREOGRAPHER_URI + CoreCommonConstants.MGMT_URI + "/session/abort";
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -97,6 +99,9 @@ public class ChoreographerPlanControllerTest {
 	
 	@Autowired
 	private ApplicationContext appContext;
+	
+	@MockBean(name = "mockChoreographerService")
+    private ChoreographerService choreographerService;
 	
 	@MockBean(name = "mockChoreographerPlanDBService")
     private ChoreographerPlanDBService planDBService;
@@ -384,7 +389,7 @@ public class ChoreographerPlanControllerTest {
 		session.setId(1212);
 		
 		when(planChecker.checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class))).thenReturn(new ChoreographerRunPlanResponseDTO());
-		when(sessionDBService.initiateSession(1, 6, null)).thenReturn(session);
+		when(sessionDBService.initiateSession(1, 1, null)).thenReturn(session);
 		doNothing().when(jms).convertAndSend(eq("start-session"), any(ChoreographerStartSessionDTO.class));
 		
 		final MvcResult response = this.mockMvc.perform(post(START_SESSION_MGMT_URI)
@@ -403,7 +408,7 @@ public class ChoreographerPlanControllerTest {
 		Assert.assertEquals(1212, responseBody.get(0).getSessionId().longValue());
 		
 		verify(planChecker, times(1)).checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class));
-		verify(sessionDBService, times(1)).initiateSession(eq(1L), eq(6L), isNull());
+		verify(sessionDBService, times(1)).initiateSession(eq(1L), eq(1L), isNull());
 		verify(jms, times(1)).convertAndSend(eq("start-session"), any(ChoreographerStartSessionDTO.class));
 	}
 	
@@ -419,7 +424,7 @@ public class ChoreographerPlanControllerTest {
 		session.setId(1212);
 		
 		when(planChecker.checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class))).thenReturn(new ChoreographerRunPlanResponseDTO());
-		when(sessionDBService.initiateSession(1, 6, null)).thenReturn(session);
+		when(sessionDBService.initiateSession(1, 1, null)).thenReturn(session);
 		doNothing().when(jms).convertAndSend(eq("start-session"), any(ChoreographerStartSessionDTO.class));
 		
 		final MvcResult response = this.mockMvc.perform(post(START_SESSION_MGMT_URI)
@@ -438,7 +443,7 @@ public class ChoreographerPlanControllerTest {
 		Assert.assertEquals(1212, responseBody.get(0).getSessionId().longValue());
 		
 		verify(planChecker, times(1)).checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class));
-		verify(sessionDBService, times(1)).initiateSession(eq(1L), eq(6L), isNull());
+		verify(sessionDBService, times(1)).initiateSession(eq(1L), eq(1L), isNull());
 		final ArgumentCaptor<ChoreographerStartSessionDTO> captor = ArgumentCaptor.forClass(ChoreographerStartSessionDTO.class);
 		verify(jms, times(1)).convertAndSend(eq("start-session"), captor.capture());
 		
@@ -464,7 +469,7 @@ public class ChoreographerPlanControllerTest {
 		session.setId(1212);
 		
 		when(planChecker.checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class))).thenReturn(new ChoreographerRunPlanResponseDTO());
-		when(sessionDBService.initiateSession(1, 6, null)).thenReturn(session);
+		when(sessionDBService.initiateSession(1, 1, null)).thenReturn(session);
 		doNothing().when(jms).convertAndSend(eq("start-session"), any(ChoreographerStartSessionDTO.class));
 		
 		final MvcResult response = this.mockMvc.perform(post(START_SESSION_MGMT_URI)
@@ -483,7 +488,7 @@ public class ChoreographerPlanControllerTest {
 		Assert.assertEquals(1212, responseBody.get(0).getSessionId().longValue());
 		
 		verify(planChecker, times(1)).checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class));
-		verify(sessionDBService, times(1)).initiateSession(eq(1L), eq(6L), isNull());
+		verify(sessionDBService, times(1)).initiateSession(eq(1L), eq(1L), isNull());
 		final ArgumentCaptor<ChoreographerStartSessionDTO> captor = ArgumentCaptor.forClass(ChoreographerStartSessionDTO.class);
 		verify(jms, times(1)).convertAndSend(eq("start-session"), captor.capture());
 		
@@ -494,6 +499,67 @@ public class ChoreographerPlanControllerTest {
 		Assert.assertTrue(sessionDTO.getChooseOptimalExecutor());
 
 		ReflectionTestUtils.setField(controller, "gatekeeperIsPresent", true);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testAbortSessionOk() throws Exception {
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(5L);
+		session.setStatus(ChoreographerSessionStatus.RUNNING);
+		
+		when(sessionDBService.getSessionById(eq(session.getId()))).thenReturn(session);
+		doNothing().when(choreographerService).abortSession(anyLong(), isNull(), anyString());
+
+		this.mockMvc.perform(delete(ABORT_SESSION_MGMT_URI + "/" + session.getId())
+		   		    .accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk())
+					.andReturn();		
+		
+		verify(sessionDBService, times(1)).getSessionById(eq(session.getId()));
+		verify(choreographerService, times(1)).abortSession(eq(session.getId()), isNull(), eq("Manual abort"));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testAbortSessionInvalidId() throws Exception {
+		final MvcResult response = this.mockMvc.perform(delete(ABORT_SESSION_MGMT_URI + "/-1")
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isBadRequest())
+											   .andReturn();
+		
+		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+		Assert.assertEquals(400, responseBody.getErrorCode());
+		Assert.assertEquals("ID must be greater than 0.", responseBody.getErrorMessage());
+		
+		verify(sessionDBService, never()).getSessionById(anyLong());
+		verify(choreographerService, never()).abortSession(anyLong(), isNull(), anyString());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testAbortSessionInvalidStatus() throws Exception {
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(5L);
+		session.setStatus(ChoreographerSessionStatus.DONE);
+		
+		when(sessionDBService.getSessionById(eq(session.getId()))).thenReturn(session);
+
+		final MvcResult response = this.mockMvc.perform(delete(ABORT_SESSION_MGMT_URI + "/" + session.getId())
+		   		    						   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isBadRequest())
+											   .andReturn();		
+		
+		final ErrorMessageDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, responseBody.getExceptionType());
+		Assert.assertEquals(400, responseBody.getErrorCode());
+		Assert.assertEquals("Session with id " + session.getId() + " couldn't be aborted due to its DONE status", responseBody.getErrorMessage());
+		
+		verify(sessionDBService, times(1)).getSessionById(eq(session.getId()));
+		verify(choreographerService, never()).abortSession(anyLong(), isNull(), anyString());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -529,7 +595,7 @@ public class ChoreographerPlanControllerTest {
 		Assert.assertEquals(1, responseBody.getErrorMessages().size());
 		Assert.assertEquals("something wrong", responseBody.getErrorMessages().get(0));
 		
-		verify(planChecker, times(1)).checkPlanForExecution(false, 1, 6);
+		verify(planChecker, times(1)).checkPlanForExecution(false, 1, 1);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
