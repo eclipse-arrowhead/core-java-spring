@@ -84,7 +84,7 @@ public class ChoreographerPlanExecutionChecker {
 		
 		final List<String> errors = basicChecks(request);
 		final Long planId = request == null ? null : request.getPlanId();
-		long quantity = request.getQuantity();
+		final Long quantity = request == null ? null : request.getQuantity();
 		
 		return errors.isEmpty() ? checkPlanForExecution(request.isAllowInterCloud(), request.getPlanId(), quantity, false) : new ChoreographerRunPlanResponseDTO(planId, quantity, errors, false);
 	}
@@ -100,7 +100,7 @@ public class ChoreographerPlanExecutionChecker {
 		logger.debug("checkPlanForExecution started...");
 		
 		ChoreographerPlan plan = null;
-		List<String> errors = new ArrayList<>();
+		final List<String> errors = new ArrayList<>();
 		
 		// existence check
 		try {

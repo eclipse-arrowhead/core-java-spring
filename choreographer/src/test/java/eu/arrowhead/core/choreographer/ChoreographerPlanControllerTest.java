@@ -354,7 +354,7 @@ public class ChoreographerPlanControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testStartPlansProblemWithPlan() throws Exception {
-		when(planChecker.checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class))).thenReturn(new ChoreographerRunPlanResponseDTO(null, 1, List.of("Plan id is not valid."), false));
+		when(planChecker.checkPlanForExecution(any(ChoreographerRunPlanRequestDTO.class))).thenReturn(new ChoreographerRunPlanResponseDTO(null, 1L, List.of("Plan id is not valid."), false));
 		
 		final MvcResult response = this.mockMvc.perform(post(START_SESSION_MGMT_URI)
 											   .contentType(MediaType.APPLICATION_JSON)

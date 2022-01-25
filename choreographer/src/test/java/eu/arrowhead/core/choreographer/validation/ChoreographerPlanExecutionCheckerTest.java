@@ -31,11 +31,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
@@ -80,8 +82,16 @@ public class ChoreographerPlanExecutionCheckerTest {
 	@Mock
 	private ExecutorSelector executorSelector;
 	
+	private final long maxIteration = 2;
+	
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@Before
+	public void setUp() {
+		ReflectionTestUtils.setField(testObject, "maxIteration", maxIteration);
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -159,6 +169,68 @@ public class ChoreographerPlanExecutionCheckerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void testCheckPlanForExecutionZeroQuantity() {
+		final long planId = 5L;
+		final ChoreographerPlan plan = new ChoreographerPlan("plan");
+		plan.setId(planId);
+		final ChoreographerAction action = new ChoreographerAction("action", null);
+		action.setPlan(plan);
+		final ChoreographerStep step = new ChoreographerStep("step", action, "service", 1, 1, "{}", null, 1);
+
+		when(planDBService.getPlanById(anyLong())).thenReturn(plan);
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
+		when(executorDBService.getExecutorsByServiceDefinitionAndVersion(anyString(), anyInt(), anyInt())).thenReturn(List.of(new ChoreographerExecutor()));
+		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(false))).thenReturn(Map.of());
+		
+		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(false, 1, 0, false);
+		
+		Assert.assertEquals((Long) 1L, response.getPlanId());
+		Assert.assertEquals(ChoreographerSessionStatus.ABORTED, response.getStatus());
+		Assert.assertEquals(1, response.getErrorMessages().size());
+		Assert.assertEquals("Quantity must be greater than 0.", response.getErrorMessages().get(0));
+		
+		verify(planDBService, times(1)).getPlanById(1);
+		
+		verify(planDBService, times(1)).getPlanById(1);
+		verify(planDBService, times(1)).collectStepsFromPlan(planId);
+		verify(executorDBService, times(1)).getExecutorsByServiceDefinitionAndVersion("service", 1, 1);
+		verify(driver, times(1)).searchForServices(any(ServiceQueryFormListDTO.class), eq(false));
+		verify(executorSelector, never()).select(anyString(), anyInt(), anyInt(), isNull(), eq(false));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCheckPlanForExecutionGreateQuantityThanAllowed() {
+		final long planId = 5L;
+		final ChoreographerPlan plan = new ChoreographerPlan("plan");
+		plan.setId(planId);
+		final ChoreographerAction action = new ChoreographerAction("action", null);
+		action.setPlan(plan);
+		final ChoreographerStep step = new ChoreographerStep("step", action, "service", 1, 1, "{}", null, 1);
+
+		when(planDBService.getPlanById(anyLong())).thenReturn(plan);
+		when(planDBService.collectStepsFromPlan(anyLong())).thenReturn(List.of(step));
+		when(executorDBService.getExecutorsByServiceDefinitionAndVersion(anyString(), anyInt(), anyInt())).thenReturn(List.of(new ChoreographerExecutor()));
+		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(false))).thenReturn(Map.of());
+		
+		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(false, 1, 3, false);
+		
+		Assert.assertEquals((Long) 1L, response.getPlanId());
+		Assert.assertEquals(ChoreographerSessionStatus.ABORTED, response.getStatus());
+		Assert.assertEquals(1, response.getErrorMessages().size());
+		Assert.assertEquals("Quantity could not be greater than 2.", response.getErrorMessages().get(0));
+		
+		verify(planDBService, times(1)).getPlanById(1);
+		
+		verify(planDBService, times(1)).getPlanById(1);
+		verify(planDBService, times(1)).collectStepsFromPlan(planId);
+		verify(executorDBService, times(1)).getExecutorsByServiceDefinitionAndVersion("service", 1, 1);
+		verify(driver, times(1)).searchForServices(any(ServiceQueryFormListDTO.class), eq(false));
+		verify(executorSelector, never()).select(anyString(), anyInt(), anyInt(), isNull(), eq(false));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testCheckPlanForExecutionExecutorNotFound() {
 		final long planId = 5L;
 		final ChoreographerPlan plan = new ChoreographerPlan("plan");
@@ -172,7 +244,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		when(executorDBService.getExecutorsByServiceDefinitionAndVersion(anyString(), anyInt(), anyInt())).thenReturn(List.of());
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(false))).thenReturn(Map.of());
 		
-		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(false, 1, 6, true);
+		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(false, 1, 2, true);
 		
 		Assert.assertEquals((Long) 1L, response.getPlanId());
 		Assert.assertEquals(ChoreographerSessionStatus.ABORTED, response.getStatus());
@@ -201,7 +273,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		when(executorDBService.getExecutorsByServiceDefinitionAndVersion(anyString(), anyInt(), anyInt())).thenReturn(List.of(new ChoreographerExecutor()));
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(true))).thenReturn(Map.of(0, List.of()));
 		
-		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(true, 1, 6, false);
+		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(true, 1, 2, false);
 		
 		Assert.assertEquals((Long) 1L, response.getPlanId());
 		Assert.assertEquals(ChoreographerSessionStatus.ABORTED, response.getStatus());
@@ -230,7 +302,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		when(executorDBService.getExecutorsByServiceDefinitionAndVersion(anyString(), anyInt(), anyInt())).thenReturn(List.of(new ChoreographerExecutor()));
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(false))).thenThrow(ArrowheadException.class);
 		
-		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(false, 1, 6, false);
+		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(false, 1, 2, false);
 		
 		Assert.assertEquals((Long) 1L, response.getPlanId());
 		Assert.assertEquals(ChoreographerSessionStatus.ABORTED, response.getStatus());
@@ -260,7 +332,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(false))).thenReturn(Map.of(0, List.of("#OWN_CLOUD#")));
 		when(executorSelector.select(anyString(), anyInt(), anyInt(), isNull(), eq(false))).thenReturn(null);
 		
-		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(false, 1, 6, true);
+		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(false, 1, 2, true);
 		
 		Assert.assertEquals((Long) 1L, response.getPlanId());
 		Assert.assertEquals(ChoreographerSessionStatus.ABORTED, response.getStatus());
@@ -290,7 +362,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(false))).thenReturn(Map.of(0, List.of("#OWN_CLOUD#")));
 		when(executorSelector.select(anyString(), anyInt(), anyInt(), isNull(), eq(false))).thenReturn(new ExecutorData(new ChoreographerExecutor(), new SystemRequestDTO(), List.of(), false));
 		
-		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(false, 1, 6, true);
+		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(false, 1, 2, true);
 		
 		Assert.assertTrue(Utilities.isEmpty(response.getErrorMessages()));
 		Assert.assertFalse(response.getNeedInterCloud());
@@ -318,7 +390,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(true))).thenReturn(Map.of(0, List.of("operator/name")));
 		when(executorSelector.select(anyString(), anyInt(), anyInt(), isNull(), eq(true))).thenReturn(new ExecutorData(new ChoreographerExecutor(), new SystemRequestDTO(), List.of(), false));
 		
-		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(true, 1, 6, true);
+		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(true, 1, 2, true);
 		
 		Assert.assertTrue(Utilities.isEmpty(response.getErrorMessages()));
 		Assert.assertTrue(response.getNeedInterCloud());
@@ -346,7 +418,7 @@ public class ChoreographerPlanExecutionCheckerTest {
 		when(driver.searchForServices(any(ServiceQueryFormListDTO.class), eq(true))).thenReturn(Map.of(0, List.of("#OWN_CLOUD#")));
 		when(executorSelector.select(anyString(), anyInt(), anyInt(), isNull(), eq(true))).thenReturn(new ExecutorData(new ChoreographerExecutor(), new SystemRequestDTO(), List.of(), true));
 		
-		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(true, 1, 6, true);
+		final ChoreographerRunPlanResponseDTO response = testObject.checkPlanForExecution(true, 1, 2, true);
 		
 		Assert.assertTrue(Utilities.isEmpty(response.getErrorMessages()));
 		Assert.assertTrue(response.getNeedInterCloud());
