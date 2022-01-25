@@ -109,13 +109,13 @@ public class ChoreographerSessionDBService {
       	  if (planOpt.isEmpty()) {
       		  worklogAndThrow("Initiating plan has been failed", new InvalidParameterException("Plan with id " + planId + " not exists"));
       	  }
+      	  final ChoreographerPlan plan = planOpt.get();
       	  
       	  if (quantity > maxIteration) {
-      		worklogAndThrow("Initiating plan has been failed", new InvalidParameterException("Requested quantity (" + quantity + ") is more than allowed (" + maxIteration + ")"));
+      		worklogAndThrow(plan.getName(), null, null, "Initiating plan has been failed", new InvalidParameterException("Requested quantity (" + quantity + ") is more than allowed (" + maxIteration + ")"));
       	  }
       	  
       	  final String _notifyUri = Utilities.isEmpty(notifyUri) ? null : UriComponentsBuilder.fromUriString(notifyUri).build().toUriString();
-      	  final ChoreographerPlan plan = planOpt.get();
       	  final ChoreographerSession session = sessionRepository.saveAndFlush(new ChoreographerSession(plan, ChoreographerSessionStatus.INITIATED, quantity, _notifyUri));
       	  
       	  worklog(plan.getName(), session.getId(), session.getExecutionNumber(), "New session has been initiated", null);
@@ -163,7 +163,7 @@ public class ChoreographerSessionDBService {
     
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public ChoreographerSession increaseSessionQuantityDone(final long sessionId) { // TODO junit
+    public ChoreographerSession increaseSessionQuantityDone(final long sessionId) {
     	logger.debug("increaseSessionQuantityDone started...");
     	
     	try {
@@ -175,7 +175,7 @@ public class ChoreographerSessionDBService {
     		ChoreographerSession session = sessionOpt.get();
     		final long done = session.getQuantityDone() + 1;
     		if (done > session.getQuantityGoal()) {
-    			worklogAndThrow("Session quantityDone is invalid", new InvalidParameterException("Session quantityDone is greater than quantityGoal"));
+    			worklogAndThrow(session.getPlan().getName(), session.getId(), session.getExecutionNumber(), "Session quantityDone is invalid", new InvalidParameterException("Session quantityDone is greater than quantityGoal"));
 			}
     		session.setQuantityDone(done);
     		session = sessionRepository.saveAndFlush(session);
@@ -194,7 +194,7 @@ public class ChoreographerSessionDBService {
     
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public ChoreographerSession increaseExecutionNumber(final long sessionId) { // TODO junit
+    public ChoreographerSession increaseExecutionNumber(final long sessionId) {
     	logger.debug("increaseExecutionNumber started...");
     	
     	try {
@@ -206,7 +206,7 @@ public class ChoreographerSessionDBService {
     		ChoreographerSession session = sessionOpt.get();
     		final long executionNum = session.getExecutionNumber() + 1;
     		if (executionNum > session.getQuantityGoal()) {
-    			worklogAndThrow("Session executionNumber is invalid", new InvalidParameterException("Session executionNumber is greater than quantityGoal"));
+    			worklogAndThrow(session.getPlan().getName(), session.getId(), session.getExecutionNumber(), "Session executionNumber is invalid", new InvalidParameterException("Session executionNumber is greater than quantityGoal"));
 			}
     		session.setExecutionNumber(executionNum);
     		session = sessionRepository.saveAndFlush(session);
