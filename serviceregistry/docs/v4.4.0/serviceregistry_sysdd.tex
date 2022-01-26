@@ -1,0 +1,232 @@
+\documentclass[a4paper]{arrowhead}
+
+\usepackage[yyyymmdd]{datetime}
+\usepackage{etoolbox}
+\usepackage[utf8]{inputenc}
+\usepackage{multirow}
+
+\renewcommand{\dateseparator}{-}
+
+\setlength{\parskip}{1em}
+
+%% Special references
+\newcommand{\fref}[1]{{\textcolor{ArrowheadBlue}{\hyperref[sec:functions:#1]{#1}}}}
+\newcommand{\mref}[1]{{\textcolor{ArrowheadPurple}{\hyperref[sec:model:#1]{#1}}}}
+\newcommand{\pdef}[1]{{\textcolor{ArrowheadGrey}{#1\label{sec:model:primitives:#1}\label{sec:model:primitives:#1s}\label{sec:model:primitives:#1es}}}}
+\newcommand{\pref}[1]{{\textcolor{ArrowheadGrey}{\hyperref[sec:model:primitives:#1]{#1}}}}
+
+\newrobustcmd\fsubsection[3]{
+  \addtocounter{subsection}{1}
+  \addcontentsline{toc}{subsection}{\protect\numberline{\thesubsection}function \textcolor{ArrowheadBlue}{#1}}
+  \renewcommand*{\do}[1]{\rref{##1},\ }
+  \Subsection*{
+    \thesubsection\quad
+    function
+    \textcolor{ArrowheadBlue}{#1}
+    (\notblank{#2}{\mref{#2}}{})
+    \notblank{#3}{: \mref{#3}}{}
+  }
+  \label{sec:functions:#1}
+}
+\newrobustcmd\msubsection[2]{
+  \addtocounter{subsection}{1}
+  \addcontentsline{toc}{subsection}{\protect\numberline{\thesubsection}#1 \textcolor{ArrowheadPurple}{#2}}
+  \subsection*{\thesubsection\quad#1 \textcolor{ArrowheadPurple}{#2}}
+  \label{sec:model:#2} \label{sec:model:#2s} \label{sec:model:#2es}
+}
+%%
+
+\begin{document}
+
+%% Arrowhead Document Properties
+\ArrowheadTitle{Service Registry Core System}
+\ArrowheadType{System Design Description}
+\ArrowheadTypeShort{SysDD}
+\ArrowheadVersion{4.4.0}
+\ArrowheadDate{\today}
+\ArrowheadAuthor{Tamás Bordi}
+\ArrowheadStatus{RELEASE}
+\ArrowheadContact{tbordi@aitia.ai}
+\ArrowheadFooter{\href{www.arrowhead.eu}{www.arrowhead.eu}}
+\ArrowheadSetup
+%%
+
+%% Front Page
+\begin{center}
+  \vspace*{1cm}
+  \huge{\arrowtitle}
+
+  \vspace*{0.2cm}
+  \LARGE{\arrowtype}
+  \vspace*{1cm}
+
+  %\Large{Service ID: \textit{"\arrowid"}}
+  \vspace*{\fill}
+
+  % Front Page Image
+  %\includegraphics{figures/TODO}
+
+  \vspace*{1cm}
+  \vspace*{\fill}
+
+  % Front Page Abstract
+  \begin{abstract}
+    This is the template for System Design Description (SysDD document)
+    according to the Eclipse Arrowhead documentation structure. 
+  \end{abstract}
+
+  \vspace*{1cm}
+
+%   \scriptsize
+%   \begin{tabularx}{\textwidth}{l X}
+%     \raisebox{-0.5\height}{\includegraphics[width=2cm]{figures/artemis_logo}} & {ARTEMIS Innovation Pilot Project: Arrowhead\newline
+%     THEME [SP1-JTI-ARTEMIS-2012-AIPP4 SP1-JTI-ARTEMIS-2012-AIPP6]\newline
+%     [Production and Energy System Automation Intelligent-Built environment and urban infrastructure for sustainable and friendly cities]}
+%   \end{tabularx}
+%   \vspace*{-0.2cm}
+ \end{center}
+
+\newpage
+%%
+
+%% Table of Contents
+\tableofcontents
+\newpage
+%%
+
+\section{Overview}
+\label{sec:overview}
+\color{black}
+This document describes the Service Registry Core System, which exists to enable service discovery in a Eclipse Arrowhead Local Cloud (LC). In Section \ref{Implementation}, we describe implementation details of the system.
+
+\newpage
+
+\section{Implementation}
+\label{Implementation}
+
+\subsection {Implementation language and tools}
+
+
+\begin{itemize}
+\item \emph{Programming Language:} \textbf{Java 11}
+\item \emph{Programming Framework:} \textbf{Spring-Boot 2.1.5}
+\item \emph{Building Tool:} \textbf{Maven 3.5+}
+\item \emph{Database Management System:} \textbf{MySQL 5.7}
+\color{red}
+\item Stateful or stateless implementation ???? 
+\end{itemize} 
+\color{black}
+
+\subsection {Functional properties implementation}
+\color{red}
+  \begin{itemize}
+  \item Resources necessary to perform the function operations
+  \item Data handled and eventually stored by the system
+    \begin{itemize}
+    \item Used database
+    \item Database structure
+    \item Used ontology
+    \item Data models
+    \end{itemize}
+  \item Result provided as ...
+  \end{itemize}
+\color{black}
+
+\subsection {Non functional properties implementation}
+\color{red}
+Typical non-functional properties implemented are e.g.
+\subsubsection {Security}
+\subsubsection {Power management}
+\subsubsection {Internal monitoring}
+\subsubsection {Configuration}
+  \begin{itemize}
+  \item Configuration data accepted
+  \item Configuration data formats, se blow.
+  \item ...  
+  \end{itemize}  
+
+For each of the non-functional operations the following details
+should be documented 
+
+\begin{itemize}
+  \item Resources necessary to perform the non-functional operations
+  \item Data handled and eventually stored by the system
+    \begin{itemize}
+    \item Used database
+    \item Database structure
+    \item Used ontology
+    \item Data models
+    \end{itemize}
+  \item Result provided as ...
+  \end{itemize}
+\color{black}
+
+
+
+
+\newpage
+
+\section{Services}
+\label{sec:services}
+
+\color{red}
+Reference to the appropriate SysD, SD and IDD documents plus a
+reference to used library shall be made.
+
+\begin{table*}[ht!]
+  \centering
+  \caption{References to doumentation for services produced and
+    consumed. }
+  \label{tab:services}
+  \begin{tabular}{|r|r|r|r|}
+    \hline
+    \rowcolor{gray!33}\textbf{Services produced} & \textbf{SysD ref} & \textbf{SD ref} & \textbf{IDD ref} \\
+    \hline
+ 
+    aaa & SysD XXX & SD aaa & IDD aaa \\ \hline
+    bbb & SysD XXX & SD bbb & IDD bbb \\ \hline
+
+    &&& \\ \hline
+
+    \rowcolor{gray!33}\textbf{Services consumed} & \textbf{SysD ref} & \textbf{SD ref} & \textbf{IDD ref}\\
+    \hline
+    zzz & SysD ZZZ & SD zzz & IDD zzz \\ \hline
+    yyy & SysD YYY & SD yyy & IDD yyy \\ \hline
+    
+  \end{tabular}
+\end{table*}
+
+\color{black}
+
+
+
+\bibliographystyle{IEEEtran}
+\bibliography{bibliography}
+
+\newpage
+
+\section{Revision History}
+\subsection{Amendments}
+
+\color{red}
+Revision history and Quality assurance as per examples below
+\color{black}
+
+\noindent\begin{tabularx}{\textwidth}{| p{1cm} | p{3cm} | p{2cm} | X | p{4cm} |} \hline
+\rowcolor{gray!33} No. & Date & Version & Subject of Amendments & Author \\ \hline
+
+1 & 2020-12-05 & \arrowversion & & Tanyi Szvetlin \\ \hline
+2 & 2021-07-14 & \arrowversion & Minor updates & Jerker Delsing \\ \hline
+3 & 2022-01-12 & \arrowversion & Minor updates & Jerker Delsing \\ \hline
+\end{tabularx}
+
+\subsection{Quality Assurance}
+
+\noindent\begin{tabularx}{\textwidth}{| p{1cm} | p{3cm} | p{2cm} | X |} \hline
+\rowcolor{gray!33} No. & Date & Version & Approved by \\ \hline
+
+1 & 2022-01-10 & \arrowversion  &  \\ \hline
+
+\end{tabularx}
+
+\end{document}
