@@ -118,6 +118,58 @@ This document describes the Service Registry Core System, which exists to enable
 \color{black}
 
 \subsection {Functional properties implementation}
+
+\subsubsection{Configuration}
+The system configuration properties can be found in the \textbf{application.properties} file located at \textbf{src/main/resources} folder.
+
+\textit{Note:} During the build process this file is going to be built into the executable jar, but also going to be copied next to the jar file. Any modification in the configuration file located next to the executable jar file will overide the built in configuration property value.
+
+\begin{itemize}
+    \item \textbf{ping\_scheduled}
+  
+    If 'true' the service providers will be pinged in a fixed time interval and service offerings will be removed where the provider was not available.
+    
+    \item \textbf{ping\_timeout}
+  
+    How much time the system should wait for the ping response (in milliseconds).
+    
+    \item \textbf{ping\_interval}
+  
+    How frequently should the ping happen, in minutes.
+    
+    \item \textbf{ttl\_scheduled}
+  
+    If 'true' the service offerings will be automatically removed, where the endOfValidity timestamp field is in the past, meaning the offering expired.
+    
+    \item \textbf{ttl\_interval}
+  
+    How frequently the database should be checked for expired services, in minutes.
+    
+    \item \textbf{use\_strict\_service\_intf\_name\_verifier}
+  
+    Interface names has to follow this format PROTOCOL-SECURITY-FORMAT, where security can be SECURE or INSECURE and protocol and format must be a sequence of letters, numbers and underscore. A regexp checker will verify that. If this setting is set to true then the PROTOCOL and FORMAT must come from a predefined set.
+    
+    \item \textbf{use\_strict\_service\_definition\_verifier}
+  
+    If 'true', service definitions has to follow these rules: They only contains letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).
+    
+    \item \textbf{use\_network\_address\_detector}
+  
+    If 'true', address detection from HttpServletRequest will be performed at the time of systems and service registration/unregistration.
+    
+    \item \textbf{filter\_proxy\_addresses}
+  
+    Comma separated list representing the possible proxy servers like load-balancer etc... before ServiceRegistry.
+    
+    \item \textbf{allow\_self\_addressing}
+  
+    If 'true', the registration of systems with self-addressing IPv4, IPv6 and no-type addresses are allowed. In case of self-addressing addresses the IP packets cannot be directed from one device to another.
+    
+    \item \textbf{allow\_non\_routable\_addressing}
+  
+    If 'true', the registration of systems with non-routable IPv4 and IPv6 addresses are allowed. In case of non-routable addresses the IP packets cannot be directed from one network to another.
+\end{itemize}
+
 \color{red}
   \begin{itemize}
   \item Resources necessary to perform the function operations
@@ -133,72 +185,172 @@ This document describes the Service Registry Core System, which exists to enable
 \color{black}
 
 \subsection {Non functional properties implementation}
-\color{red}
-Typical non-functional properties implemented are e.g.
 \subsubsection {Security}
-\subsubsection {Power management}
-\subsubsection {Internal monitoring}
 \subsubsection {Configuration}
-  \begin{itemize}
-  \item Configuration data accepted
-  \item Configuration data formats, se blow.
-  \item ...  
-  \end{itemize}  
+   
+The system configuration properties can be found in the \textbf{application.properties} file located at \textbf{src/main/resources} folder.
 
-For each of the non-functional operations the following details
-should be documented 
+\textit{Note:} During the build process this file is going to be built into the executable jar, but also going to be copied next to the jar file. Any modification in the configuration file located next to the executable jar file will overide the built in configuration property value.
+  \begin{itemize}
+  \item \textbf{spring.datasource.url}
+  
+   URL to the database.
+  
+  \item \textbf{spring.datasource.username}
+  
+  Username to the database.
+  
+  \item \textbf{spring.datasource.password}
+  
+  Password to the database.
+  
+  \item \textbf{spring.datasource.driver-class-name}
+  
+  The driver provides the connection to the database and implements the protocol for transferring the query and result between client and database.
+  
+  \item \textbf{spring.jpa.database-platform}
+  
+  Specify the database dialect for Java Persistence API.
+  
+  \item \textbf{spring.jpa.show-sql}
+  
+  Set to true in order to log out the mysql queries.
+  
+  \item \textbf{spring.jpa.properties.hibernate.format\_sql}
+  
+  Set to true to log out mysql queries in pretty format. (Effective only when 'spring.jpa.show-sql' is 'true')
+  
+  \item \textbf{spring.jpa.hibernate.ddl-auto}
+  
+  Auto initialization of database tables. Value must be always 'none'.
+  
+  \item \textbf{server.address}
+  
+  IP address of the server.
+  
+  \item \textbf{server.port}
+  
+  Port number of the server.
+  
+  \item \textbf{domain.name}
+  
+  Set this when the system is available via domain name within the network.
+  
+  \item \textbf{domain.port}
+  
+  Set this when the system is available via domain port within the network.
+  
+  \item \textbf{core\_system\_name}
+  
+  Name of the system. Must be always 'SERVICEREGISTRY'.
+  
+  \item \textbf{log\_all\_request\_and\_response}
+  
+  Set to 'true' in order to show all request/response in debug log.
+  
+  \item \textbf{server.ssl.enabled}
+  
+  Set to 'false' in order to disable https mode.
+  
+  \item \textbf{server.ssl.key-store-type}
+  
+  Type of the key store.
+  
+  \item \textbf{server.ssl.key-store}
+  
+  Path to the key store.
+  
+  \item \textbf{server.ssl.key-store-password}
+  
+  Password to the key store..
+  
+  \item \textbf{server.ssl.key-alias}
+  
+  Alias name of the certificate.
+  
+  \item \textbf{server.ssl.key-password}
+  
+  Password to the certificate.
+  
+  \item \textbf{server.ssl.client-auth}
+  
+  Must be always 'need' which means that SSL client authentication is necessary when SSL is enabled.
+  
+  \item \textbf{server.ssl.trust-store-type}
+  
+  Type of the trust store.
+  
+  \item \textbf{server.ssl.trust-store}
+  
+  Path to trust store.
+  
+  \item \textbf{server.ssl.trust-store-password}
+  
+  Password to trust store.
+  
+  \item \textbf{disable.hostname.verifier}
+  
+  If true, http client does not check whether the hostname is match one of the server's SAN in its certificate.
+  \end{itemize}
+  
+The logging configuration properties can be found in the \textbf{log4j2.xml} file located at \textbf{src/main/resources} folder.
+
+\textit{Note:} During the build process this file is going to be built into the executable jar, but it is also possible to override it from by an external file. For that use the following command when starting the system: \textit{java -jar ... -Dlog4j.configurationFile={external-file}}
 
 \begin{itemize}
-  \item Resources necessary to perform the non-functional operations
-  \item Data handled and eventually stored by the system
-    \begin{itemize}
-    \item Used database
-    \item Database structure
-    \item Used ontology
-    \item Data models
-    \end{itemize}
-  \item Result provided as ...
-  \end{itemize}
-\color{black}
-
-
-
-
+    \item \textbf{JDBC\_LEVEL}
+    
+    Set this to change the level of log messages in the database. Levels: ALL, TRACE, DEBUG, INFO, WARN, ERROR, FATAL, OFF.
+    
+    \item \textbf{CONSOLE\_FILE\_LEVEL}
+    
+    Set this to change the level of log messages in consol and the log file. Levels: ALL, TRACE, DEBUG, INFO, WARN, ERROR, FATAL, OFF.
+    
+    \item \textbf{LOG\_DIR}
+    
+    Set this to change the directory of log files.
+\end{itemize}
+  
 \newpage
 
 \section{Services}
 \label{sec:services}
 
-\color{red}
-Reference to the appropriate SysD, SD and IDD documents plus a
-reference to used library shall be made.
-
 \begin{table*}[ht!]
   \centering
-  \caption{References to doumentation for services produced and
-    consumed. }
+  \caption{References to doumentation for services produced. }
   \label{tab:services}
-  \begin{tabular}{|r|r|r|r|}
+  \begin{tabular}{|r|r|r|}
     \hline
-    \rowcolor{gray!33}\textbf{Services produced} & \textbf{SysD ref} & \textbf{SD ref} & \textbf{IDD ref} \\
+    \rowcolor{gray!33}\textbf{Services produced} & \textbf{Scope} & \textbf{Published} \\
     \hline
  
-    aaa & SysD XXX & SD aaa & IDD aaa \\ \hline
-    bbb & SysD XXX & SD bbb & IDD bbb \\ \hline
-
-    &&& \\ \hline
-
-    \rowcolor{gray!33}\textbf{Services consumed} & \textbf{SysD ref} & \textbf{SD ref} & \textbf{IDD ref}\\
-    \hline
-    zzz & SysD ZZZ & SD zzz & IDD zzz \\ \hline
-    yyy & SysD YYY & SD yyy & IDD yyy \\ \hline
-    
+    echo & Application + Core Systems & no \\ \hline
+    service-register & Application + Core Systems & yes\\ \hline
+    service-unregister & Application + Core Systems & yes\\ \hline
+    register-system & Application + Core Systems & yes\\ \hline
+    unregister-system & Application + Core Systems & yes\\ \hline
+    query & Application + Core Systems & no\\ \hline
+    query-multi & Core Systems & no\\ \hline
+    query-all & Core Systems & no\\ \hline
+    query-by-system & Core Systems & no\\ \hline
+    query-by-system-id &Core Systems & no\\ \hline
+    pull-system &Core Systems & no\\ \hline
   \end{tabular}
 \end{table*}
 
-\color{black}
-
-
+\begin{table*}[ht!]
+  \centering
+  \caption{References to doumentation for services consumed. }
+  \label{tab:services}
+  \begin{tabular}{|r|r|r|r|r|}
+    \hline
+    \rowcolor{gray!33}\textbf{Services consumed} & \textbf{SysD ref} & \textbf{SD ref} & \textbf{IDD ref} \\
+    \hline
+    - & - & - & -  \\ \hline
+    
+  \end{tabular}
+\end{table*}
 
 \bibliographystyle{IEEEtran}
 \bibliography{bibliography}
