@@ -185,7 +185,22 @@ The system configuration properties can be found in the \textbf{application.prop
 \color{black}
 
 \subsection {Non functional properties implementation}
+
 \subsubsection {Security}
+
+The system's security - when it is enabled - is relying on SSL Certificate Trust Chains. The Arrowhead trust chain consists of three level:
+
+\begin{itemize}
+    \item Master certificate: \textit{arrowhead.eu}
+    \item Cloud certificate: \textit{my-cloud.my-company.arrowhead.eu}
+    \item Client certificate: \textit{my-client.my-cloud.my-company.arrowhead.eu}
+\end{itemize}
+
+The trust chain is created by issuing the cloud certificate from the master certificate and the client certificate from the cloud certificate. With other words, the cloud certificate is signed by the master certificate's private key and the client certificate is signed by the cloud certificate's private key which makes the whole chain trustworthy.
+
+\subsubsection {Access control}
+The services provided by Service Registry Core System are applying various access policies, which are described in the related service description documents.
+
 \subsubsection {Configuration}
    
 The system configuration properties can be found in the \textbf{application.properties} file located at \textbf{src/main/resources} folder.
@@ -334,8 +349,8 @@ The logging configuration properties can be found in the \textbf{log4j2.xml} fil
     query-multi & Core Systems & no\\ \hline
     query-all & Core Systems & no\\ \hline
     query-by-system & Core Systems & no\\ \hline
-    query-by-system-id &Core Systems & no\\ \hline
-    pull-system &Core Systems & no\\ \hline
+    query-by-system-id & Core Systems & no\\ \hline
+    pull-system & Core Systems & yes\\ \hline
   \end{tabular}
 \end{table*}
 

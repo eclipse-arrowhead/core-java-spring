@@ -103,24 +103,21 @@ The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
 In Section \ref{sec:model}, we end the document by presenting the data types used by the mentioned functions.
 
-
-\newpage
-
 \subsection{Significant Prior Art}
 
 \color{red} Describe significant prior art which provides the
 foundation for the service - May be omitted for simple services \color{black}  
 
+\newpage
+
 \subsection{How This Service Is Meant to Be Used}
-\color{red} Describe intended usage of the service \color{black}  
+The given service provider application system is required to use the  \textbf{service-register} service at its startup in order the offered services are being discoverable for the possible consumer application systems within the local cloud.   
 
 \begin{figure}[h!]
   \centering
   \includegraphics[width=\textwidth]{figures/post_service_registry_register_activity_uml}
-  \caption{\color{red} EXAMPLE:
-    Information model as a UML activity diagram.
-    Describes the process of service registration.
-    \color{black}
+  \caption{
+    UML activity diagram of service registration process.
   }
   \label{fig:model_overview}
 \end{figure}
@@ -131,6 +128,13 @@ foundation for the service - May be omitted for simple services \color{black}
 \label{sec:delimitations}
 
 No delimitations. 
+
+\subsection{Access policy}
+\label{sec:accesspolicy}
+
+Available for anyone within the local cloud, but in case of secure mode service provider is allowed to register only its own services. It means that provider system name and system part of certificate common name must match for successful registration.
+
+\textit{Exception:} Translator Supporting Core Sytem is allowed to register other services too.
 
 \newpage
 
