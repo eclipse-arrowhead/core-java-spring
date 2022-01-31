@@ -106,7 +106,6 @@ This document describes the Service Registry Core System, which exists to enable
 
 \subsection {Implementation language and tools}
 
-
 \begin{itemize}
 \item \emph{Programming Language:} \textbf{Java 11}
 \item \emph{Programming Framework:} \textbf{Spring-Boot 2.1.5}
@@ -118,6 +117,19 @@ This document describes the Service Registry Core System, which exists to enable
 \color{black}
 
 \subsection {Functional properties implementation}
+
+\subsubsection{Database structure}
+
+Implementation of data storage functionality was done as described by Figure 1.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=\textwidth]{figures/serviceregistry_database_model}
+  \caption{
+    Database model of Service Registry Core System.
+  }
+  \label{fig:model_overview}
+\end{figure}
 
 \subsubsection{Configuration}
 The system configuration properties can be found in the \textbf{application.properties} file located at \textbf{src/main/resources} folder.
@@ -169,20 +181,6 @@ The system configuration properties can be found in the \textbf{application.prop
   
     If 'true', the registration of systems with non-routable IPv4 and IPv6 addresses are allowed. In case of non-routable addresses the IP packets cannot be directed from one network to another.
 \end{itemize}
-
-\color{red}
-  \begin{itemize}
-  \item Resources necessary to perform the function operations
-  \item Data handled and eventually stored by the system
-    \begin{itemize}
-    \item Used database
-    \item Database structure
-    \item Used ontology
-    \item Data models
-    \end{itemize}
-  \item Result provided as ...
-  \end{itemize}
-\color{black}
 
 \subsection {Non functional properties implementation}
 
@@ -375,16 +373,10 @@ The logging configuration properties can be found in the \textbf{log4j2.xml} fil
 \section{Revision History}
 \subsection{Amendments}
 
-\color{red}
-Revision history and Quality assurance as per examples below
-\color{black}
-
 \noindent\begin{tabularx}{\textwidth}{| p{1cm} | p{3cm} | p{2cm} | X | p{4cm} |} \hline
 \rowcolor{gray!33} No. & Date & Version & Subject of Amendments & Author \\ \hline
 
-1 & 2020-12-05 & \arrowversion & & Tanyi Szvetlin \\ \hline
-2 & 2021-07-14 & \arrowversion & Minor updates & Jerker Delsing \\ \hline
-3 & 2022-01-12 & \arrowversion & Minor updates & Jerker Delsing \\ \hline
+1 & YYYY-MM-DD & \arrowversion & & Xxx Yyy \\ \hline
 \end{tabularx}
 
 \subsection{Quality Assurance}
@@ -392,7 +384,7 @@ Revision history and Quality assurance as per examples below
 \noindent\begin{tabularx}{\textwidth}{| p{1cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} No. & Date & Version & Approved by \\ \hline
 
-1 & 2022-01-10 & \arrowversion  &  \\ \hline
+1 & YYYY-MM-DD & \arrowversion  &  \\ \hline
 
 \end{tabularx}
 
