@@ -15,13 +15,12 @@ import java.security.PublicKey;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import eu.arrowhead.common.CommonConstants;
@@ -40,7 +39,8 @@ public class ServiceRegistryClient {
 	// =================================================================================================
 	// members
 
-	private static final Logger logger = LogManager.getLogger(ServiceRegistryClient.class);
+	private static final String SERVICEREGISTRY_REGISTER_URI =
+			CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_REGISTER_URI;
 
 	@Autowired
 	private HttpService httpService;
@@ -51,42 +51,42 @@ public class ServiceRegistryClient {
 	@Autowired
 	protected SSLProperties sslProperties;
 
-	@Value(CoreCommonConstants.$SERVER_ADDRESS)
-	private String address;
-	
-	@Value(CoreCommonConstants.$SERVER_PORT)
-	private int port;
-	
 	@Value(CoreCommonConstants.$CORE_SYSTEM_NAME)
 	private String systemName;
 
-	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
-	private boolean sslEnabled;
+	@Value(CoreCommonConstants.$DOMAIN_NAME)
+	private String systemDomainName;
+	
+	@Value(CoreCommonConstants.$DOMAIN_PORT)
+	private int systemDomainPort;
+
+	@Value(CommonConstants.$SERVICEREGISTRY_ADDRESS_WD)
+	private String serviceRegistryAddress;
+
+	@Value(CommonConstants.$SERVICEREGISTRY_PORT_WD)
+	private int serviceRegistryPort;
 
 	// =================================================================================================
 	// methods
 
 	// -------------------------------------------------------------------------------------------------
-	public String registerService() {
-		final UriComponents uri = UriComponentsBuilder.newInstance()
-				.scheme("https")
-				.host("localhost")
-				.port(8443)
-				.path("/serviceregistry/register")
-				.build();
+	public String registerService(final String serviceDefinition, final String serviceUri) {
+		Assert.notNull(serviceDefinition, "Service definition is null");
+		Assert.notNull(serviceUri, "Service URI is null");
 
+		final ServiceRegistryRequestDTO request =
+				getServiceRegistryRequest(serviceDefinition, serviceUri);
 		final ResponseEntity<ServiceRegistryResponseDTO> response = httpService.sendRequest(
-				uri, HttpMethod.POST, ServiceRegistryResponseDTO.class, getServiceRegistryRequest());
-		logger.debug("Registration response: " + response.getStatusCode());
+				getServiceRegistryUri(), HttpMethod.POST, ServiceRegistryResponseDTO.class, request);
 		return response.getBody().getServiceUri();
 	}
 
 	// -------------------------------------------------------------------------------------------------
-	private ServiceRegistryRequestDTO getServiceRegistryRequest() {
+	private ServiceRegistryRequestDTO getServiceRegistryRequest(final String serviceDefinition, final String serviceUri) {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setProviderSystem(getSystemDescription());
-		request.setServiceDefinition("service-xyz");
-		request.setServiceUri("/path/to/service");
+		request.setServiceDefinition(serviceDefinition);
+		request.setServiceUri(serviceUri);
 		request.setSecure(sslProperties.isSslEnabled() ? ServiceSecurityType.CERTIFICATE.name()
 				: ServiceSecurityType.NOT_SECURE.name());
 		request.setInterfaces(List.of(CommonConstants.HTTP_SECURE_JSON));
@@ -94,13 +94,25 @@ public class ServiceRegistryClient {
 	}
 
 	// -------------------------------------------------------------------------------------------------
+	private UriComponents getServiceRegistryUri() {
+		final String scheme =
+				sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
+		return UriComponentsBuilder.newInstance()
+				.scheme(scheme)
+				.host(serviceRegistryAddress)
+				.port(serviceRegistryPort)
+				.path(SERVICEREGISTRY_REGISTER_URI)
+				.build();
+	}
+
+	// -------------------------------------------------------------------------------------------------
 	private SystemRequestDTO getSystemDescription() {
 		final SystemRequestDTO system = new SystemRequestDTO();
-		system.setAddress("127.0.0.1");
-		system.setPort(port);
+		system.setAddress(systemDomainName);
+		system.setPort(systemDomainPort);
 		system.setSystemName(systemName);
 		
-		if (sslEnabled) {
+		if (sslProperties.isSslEnabled()) {
 			final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
 			final String authInfo = Base64.getEncoder().encodeToString(publicKey.getEncoded());
 			system.setAuthenticationInfo(authInfo);

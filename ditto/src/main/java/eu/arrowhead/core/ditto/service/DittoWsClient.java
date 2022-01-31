@@ -86,7 +86,7 @@ public class DittoWsClient {
 		final Optional<Thing> thing = change.getThing();
 		logger.debug("Thing change detected. Action: " + change.getAction() + ", " + "Thing: " + thing);
 
-		ThingEvent event = new ThingEvent(this, change);
+		ThingChangeEvent event = new ThingChangeEvent(this, change);
 		eventPublisher.publishEvent(event);
 	}
 
