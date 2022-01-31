@@ -124,14 +124,9 @@ foundation for the system - May be omitted for simple services
 \subsection{How This System Is Meant to Be Used}
 \label{sec:use}
 
-\color{red}
-Describe intended usage of the system. Usage scenarios
-shall be described. Preferable a SysML/UML blaock diagram of the
-System should be provided. See the SysML profile and library
-(github.com/eclipse-arrowhead/profile-library-sysml) for
-support on how such block diagram should look like. Suitable tools are
-Eclipse Papyrus and MagicDraw.
-\color{black}  
+Service Registry is a mandatory core system of Eclipse Arrowhead and is responsible for the fundamental service discovery functionality. Systems and services are being discoverable for other systems by consuming the services provided by Service Registry Core System.
+
+An application or other core system is required to register itself and its services into Service Registry at its start-up and to unregister before shutdown or when it does not intend to continue to provide its services. Querying specifed services directly from Service Registry is primarily permitted to Orchestrator Core System, but public core services - offered by supporting core systems - are also queyable for application systems. 
 
 \subsection{System functionalities and properties}
 \label{sec:properties}
@@ -176,47 +171,50 @@ solve and what i does not solve.
 
 \newpage
 
-\section{Services}
+\section{Services produced}
 \label{sec:services}
 
-\color{red}
-This section describes consumed and produced service.
-In particular, each subsection names a prodiuced or consumed service
-indicating the different capabilities and associated interfaces of the
-service. Reference to the appropriate SD document shall be made.
-\color{black}
+\msubsection{service}{echo}
+This service is offered for both application and core systems too. \color{red}todo\color{black}
 
-\msubsection{produced}{echo}
+\msubsection{service}{service-register}
+This service is offered for both application and core systems too.
 \color{red}todo\color{black}
 
-\msubsection{produced}{service-register}
+\msubsection{service}{service-unregister}
+This service is offered for both application and core systems too.
 \color{red}todo\color{black}
 
-\msubsection{produced}{service-unregister}
+\msubsection{service}{register-system}
+This service is offered for both application and core systems too.
 \color{red}todo\color{black}
 
-\msubsection{produced}{register-system}
+\msubsection{service}{unregister-system}
+This service is offered for both application and core systems too.
 \color{red}todo\color{black}
 
-\msubsection{produced}{unregister-system}
+\msubsection{service}{query}
+This service is offered for both application and core systems too.
 \color{red}todo\color{black}
 
-\msubsection{produced}{query}
+\msubsection{service}{query-multi}
+This service is offered only for specified core systems.
 \color{red}todo\color{black}
 
-\msubsection{produced}{query-multi}
+\msubsection{service}{query-all}
+This service is offered only for specified core systems.
 \color{red}todo\color{black}
 
-\msubsection{produced}{query-all}
+\msubsection{service}{query-by-system}
+This service is offered only for specified core systems.
 \color{red}todo\color{black}
 
-\msubsection{produced}{query-by-system}
+\msubsection{service}{query-by-system-id}
+This service is offered only for specified core systems.
 \color{red}todo\color{black}
 
-\msubsection{produced}{query-by-system-id}
-\color{red}todo\color{black}
-
-\msubsection{produced}{pull-system}
+\msubsection{service}{pull-system}
+This service is offered only for specified core systems.
 \color{red}todo\color{black}
 
 \newpage
