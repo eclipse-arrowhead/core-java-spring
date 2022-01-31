@@ -4,6 +4,7 @@
 \usepackage{etoolbox}
 \usepackage[utf8]{inputenc}
 \usepackage{multirow}
+\usepackage{hyperref}
 
 \renewcommand{\dateseparator}{-}
 
@@ -96,7 +97,7 @@
 \section{Overview}
 \label{sec:overview}
 \color{black}
-This document describes the Service Registry Core System, which exists to enable service discovery in a Eclipse Arrowhead Local Cloud (LC). Examples of such interactions is a provider system offering some kind of Service for use by other systems in the LC. This mandatory Core System provides a database, which stores information related to the currently actively offered Services within the Local Cloud.
+This document describes the Service Registry Core System, which exists to enable service discovery in a Eclipse Arrowhead Local Cloud (LC). Examples of such interactions is a provider system offering some kind of Service for use by other systems in the LC. This mandatory Core System provides the data storage functionality for the information related to the currently actively offered Services within the Local Cloud.
 
 The rest of this document is organized as follows.
 In Section \ref{sec:prior_art}, we reference major prior art capabilities
@@ -221,22 +222,15 @@ This service is offered only for specified core systems.
 
 \section{Security}
 \label{sec:security}
-\color{red}
+
+The security of Eclipse Arrowhead - and therefore the security of Service Registry  - is relying on X.509 certificate trust chains. The Arrowhead trust chain consists of three level:
 \begin{itemize}
-\item  If the system can be started in un-secure and/or
-Arrowhead secure mode.
-\item Handling of Arrowhead compliant and
-non-compliant X.509 certificates.
-\item Implemented security model shall be described, protocol used, data
-protection used, system authentication capability, produced service
-authorisation checking, etc.
+    \item Master certificate: \texttt{arrowhead.eu}
+    \item Cloud certificate: \texttt {my-cloud.my-company.arrowhead.eu}
+    \item Client certificate: \texttt{my-client.my-cloud.my-company.arrowhead.eu}
 \end{itemize}
-For Arrowhead certificate profile
-see github.com/eclipse-arrowhead/documentation
-\color{black}
 
-
-
+For Arrowhead certificate profile see \url{https://github.com/eclipse-arrowhead/documentation}
 
 \bibliographystyle{IEEEtran}
 \bibliography{bibliography}
@@ -246,16 +240,10 @@ see github.com/eclipse-arrowhead/documentation
 \section{Revision History}
 \subsection{Amendments}
 
-\color{red}
-Revision history and Quality assurance as per examples below
-\color{black}
-
 \noindent\begin{tabularx}{\textwidth}{| p{1cm} | p{3cm} | p{2cm} | X | p{4cm} |} \hline
 \rowcolor{gray!33} No. & Date & Version & Subject of Amendments & Author \\ \hline
 
-1 & 2020-12-05 & \arrowversion & & Tanyi Szvetlin \\ \hline
-2 & 2021-07-14 & \arrowversion & Minor updates & Jerker Delsing \\ \hline
-3 & 2022-01-12 & \arrowversion & Minor updates & Jerker Delsing \\ \hline
+1 & YYYY-MM-DD & \arrowversion & & Xxx Yyy \\ \hline
 \end{tabularx}
 
 \subsection{Quality Assurance}
@@ -263,7 +251,7 @@ Revision history and Quality assurance as per examples below
 \noindent\begin{tabularx}{\textwidth}{| p{1cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} No. & Date & Version & Approved by \\ \hline
 
-1 & 2022-01-10 & \arrowversion  &  \\ \hline
+1 & YYYY-MM-DD & \arrowversion  &  \\ \hline
 
 \end{tabularx}
 
