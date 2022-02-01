@@ -31,7 +31,7 @@ public class DittoService implements ApplicationListener<ThingChangeEvent> {
 
 	private final Logger logger = LogManager.getLogger(DittoService.class);
 
-	private static final String BASE_THING_SERVICE_URI = "/things";
+	 private final static String SERVICE_URI_TEMPLATE = "/things/%s/features/%s";
 
 	@Autowired
 	private ServiceRegistryClient serviceRegistryClient;
@@ -97,8 +97,16 @@ public class DittoService implements ApplicationListener<ThingChangeEvent> {
 	// -------------------------------------------------------------------------------------------------
 	private void registerFeature(String entityId, Feature feature) {
 		final String serviceDefinition = getServiceDefinition(feature);
-		final String serviceUri = BASE_THING_SERVICE_URI + "/" + entityId + "/" + feature.getId();
-		serviceRegistryClient.registerService(serviceDefinition, serviceUri);
+		final String serviceUri = String.format(
+				SERVICE_URI_TEMPLATE,
+				entityId,
+				feature.getId());
+
+		try {
+			serviceRegistryClient.registerService(serviceDefinition, serviceUri);
+		} catch (final Exception ex) {
+			logger.error("Service registration for feature failed: " + ex);
+		}
 	}
 
 	private static String getServiceDefinition(Feature feature) {

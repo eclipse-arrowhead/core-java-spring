@@ -12,16 +12,25 @@
 package eu.arrowhead.core.ditto;
 
 import org.apache.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.core.ditto.service.DittoHttpClient;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 @RestController
 public class DittoController {
+
+	//=================================================================================================
+	// members
+	
+	@Autowired
+	private DittoHttpClient dittoHttpClient;	
 
 	//=================================================================================================
 	// methods
@@ -37,4 +46,27 @@ public class DittoController {
 	public String echoService() {
 		return "Got it!";
 	}
+
+	// -------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Forward the given request to the appropriate Ditto Thing",
+			response = String.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED,
+					message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR,
+					message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = "/things/{thing}/features/{feature}/properties/{property}") // TODO: Move to CommonConstants?
+	public Object thingServiceRequest(
+		@PathVariable("thing") String thing,
+		@PathVariable("feature") String feature,
+		@PathVariable("property") String property
+	) {
+		final String DITTO_PATH_TEMPLATE = "/api/2/things/%s/features/%s/properties/%s";
+		final String path = String.format(DITTO_PATH_TEMPLATE, thing, feature, property);
+		final var result = dittoHttpClient.sendGetRequest(path);
+		return result.getBody();
+	}
+
 }

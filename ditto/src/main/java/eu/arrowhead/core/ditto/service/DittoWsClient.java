@@ -28,6 +28,8 @@ public class DittoWsClient {
 	// =================================================================================================
 	// members
 
+	// TODO: Move property names to CommonConstants?
+
 	@Value("${ditto_ws_address}")
 	private String dittoWsAddress;
 

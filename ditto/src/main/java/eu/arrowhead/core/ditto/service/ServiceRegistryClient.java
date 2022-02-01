@@ -15,6 +15,7 @@ import java.security.PublicKey;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -31,7 +32,6 @@ import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.http.HttpService;
-import javax.annotation.Resource;
 
 @Service
 public class ServiceRegistryClient {
@@ -70,15 +70,15 @@ public class ServiceRegistryClient {
 	// methods
 
 	// -------------------------------------------------------------------------------------------------
-	public String registerService(final String serviceDefinition, final String serviceUri) {
+	public ResponseEntity<ServiceRegistryResponseDTO> registerService(final String serviceDefinition,
+			final String serviceUri) {
 		Assert.notNull(serviceDefinition, "Service definition is null");
 		Assert.notNull(serviceUri, "Service URI is null");
 
 		final ServiceRegistryRequestDTO request =
 				getServiceRegistryRequest(serviceDefinition, serviceUri);
-		final ResponseEntity<ServiceRegistryResponseDTO> response = httpService.sendRequest(
+		return httpService.sendRequest(
 				getServiceRegistryUri(), HttpMethod.POST, ServiceRegistryResponseDTO.class, request);
-		return response.getBody().getServiceUri();
 	}
 
 	// -------------------------------------------------------------------------------------------------
@@ -95,10 +95,8 @@ public class ServiceRegistryClient {
 
 	// -------------------------------------------------------------------------------------------------
 	private UriComponents getServiceRegistryUri() {
-		final String scheme =
-				sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
 		return UriComponentsBuilder.newInstance()
-				.scheme(scheme)
+				.scheme(sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP)
 				.host(serviceRegistryAddress)
 				.port(serviceRegistryPort)
 				.path(SERVICEREGISTRY_REGISTER_URI)

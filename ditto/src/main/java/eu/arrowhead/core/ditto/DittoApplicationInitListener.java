@@ -12,12 +12,10 @@
 package eu.arrowhead.core.ditto;
 
 import eu.arrowhead.common.ApplicationInitListener;
-import eu.arrowhead.common.core.CoreSystemService;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import java.util.Base64;
-import java.util.List;
 
 @Component
 public class DittoApplicationInitListener extends ApplicationInitListener {
@@ -33,9 +31,4 @@ public class DittoApplicationInitListener extends ApplicationInitListener {
 		}
 	}
 
-	// -------------------------------------------------------------------------------------------------
-	@Override
-	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
-		return List.of(CoreSystemService.ORCHESTRATION_SERVICE);
-	}
 }
