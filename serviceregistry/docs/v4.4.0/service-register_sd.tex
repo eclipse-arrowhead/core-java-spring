@@ -185,7 +185,7 @@ As a complement to the explicitly defined types in this section, there is also a
 \begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 endOfValidity & \pref{DateTime} & no & Service is available until this UTC timestamp. \\ \hline
-interfaces & \pref{Array}$<$\pref{Object}$>$ & yes & List of interfaces the service supports. \\ \hline
+interfaces & \pref{Array}$<$\pref{Interface}$>$ & yes & List of interfaces the service supports. \\ \hline
 metadata & \pref{Metadata} & no & Metadata \\ \hline
 providerSystem & \pref{Object} & yes & Descriptor of the provider system. \\ \hline
 secure &\pref{SecureType} & yes & Type of security the service uses. \\ \hline
@@ -236,7 +236,7 @@ version &\pref{Version}     & Version of the service. \\ \hline
 \rowcolor{gray!33} Field & Type      & Description \\ \hline
 createdAt & \pref{DateTime} & Interface instance record was created at this UTC timestamp. \\ \hline
 id & \pref{Number} & Identifier of the interface instance \\ \hline
-interfaceName &\pref{Name}  & Name of the interface. \\ \hline
+interfaceName &\pref{Interface}  & Specified name of the interface. \\ \hline
 updatedAt & \pref{DateTime} & Interface instance record was modified at this UTC timestamp. \\ \hline
 \end{tabularx}
 \end{table}
@@ -285,6 +285,7 @@ The concrete interpretations of each of these types and structures must be provi
 \pdef{Boolean}          & One out of \texttt{true} or \texttt{false}. \\ \hline
 \pdef{DateTime}         & Pinpoints a specific moment in time. \\ \hline
 \pdef{Object}           & Set of primitives and possible further objects. \\ \hline
+\pdef{Interface}        & Any suitable type chosen by the implementor of service \\ \hline
 \pdef{List}$<$A$>$      & An \textit{array} of a known number of items, each having type A. \\ \hline
 \pdef{Name}             & A string identifier that is intended to be both human and machine-readable. \\ \hline
 \pdef{Number}           & Decimal number \\ \hline
