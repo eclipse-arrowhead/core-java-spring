@@ -46,27 +46,27 @@ public class DittoService implements ApplicationListener<ThingChangeEvent> {
 
 		final ThingChange change = event.getChange();
 
-			if (change.getThing().isEmpty()) {
-				logger.error("No Thing present in ThingChange");
-				return;
-			}
+		if (change.getThing().isEmpty()) {
+			logger.error("No Thing present in ThingChange");
+			return;
+		}
 
-			Thing thing = change.getThing().get();
-			switch (change.getAction()) {
-				case CREATED:
-					registerServices(thing);
-					break;
-				case UPDATED:
-					unregisterServices(thing);
-					registerServices(thing);
-					break;
-				case DELETED:
-					unregisterServices(thing);
-					break;
-				default:
-					logger.debug("Unhandled ThingChange");
-					break;
-			}
+		Thing thing = change.getThing().get();
+		switch (change.getAction()) {
+			case CREATED:
+				registerServices(thing);
+				break;
+			case UPDATED:
+				unregisterServices(thing);
+				registerServices(thing);
+				break;
+			case DELETED:
+				unregisterServices(thing);
+				break;
+			default:
+				logger.debug("Unhandled ThingChange");
+				break;
+		}
 	}
 
 	// -------------------------------------------------------------------------------------------------
