@@ -1,5 +1,9 @@
 package eu.arrowhead.core.ditto.service;
 
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import javax.annotation.PostConstruct;
+import com.neovisionaries.ws.client.WebSocket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.ditto.client.DisconnectedDittoClient;
@@ -14,12 +18,9 @@ import org.eclipse.ditto.client.messaging.MessagingProvider;
 import org.eclipse.ditto.client.messaging.MessagingProviders;
 import org.eclipse.ditto.things.model.Thing;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import javax.annotation.PostConstruct;
-import com.neovisionaries.ws.client.WebSocket;
 
 @Service
 public class DittoWsClient {
@@ -27,10 +28,15 @@ public class DittoWsClient {
 	// =================================================================================================
 	// members
 
-	// TODO: Change these values.
-	final String WS_ENDPOINT = "ws://localhost:8080";
-	final String DITTO_USERNAME = "ditto";
-	final String DITTO_PASSWORD = "ditto";
+	@Value("${ditto_ws_address}")
+	private String dittoWsAddress;
+
+	@Value("${ditto_username}")
+	private String dittoUsername;
+
+	@Value("${ditto_password}")
+	private String dittoPassword;
+
 	final String THING_REGISTRATION_ID = "THING_REGISTRATION_ID";
 
 	private final Logger logger = LogManager.getLogger(DittoWsClient.class);
@@ -38,30 +44,35 @@ public class DittoWsClient {
 	@Autowired
 	private ApplicationEventPublisher eventPublisher;
 
-	AuthenticationProvider<WebSocket> authenticationProvider =
-			AuthenticationProviders.basic(BasicAuthenticationConfiguration.newBuilder()
-					.username(DITTO_USERNAME)
-					.password(DITTO_PASSWORD)
-					.build());
-
-	MessagingProvider messagingProvider =
-			MessagingProviders.webSocket(WebSocketMessagingConfiguration
-					.newBuilder()
-					.endpoint(WS_ENDPOINT)
-					.build(), authenticationProvider);
-
-	DisconnectedDittoClient disconnectedDittoClient = DittoClients.newInstance(messagingProvider);
-
 	// =================================================================================================
 	// methods
 
 	// -------------------------------------------------------------------------------------------------
 	@PostConstruct
 	private void init() {
+
+		AuthenticationProvider<WebSocket> authenticationProvider =
+				AuthenticationProviders.basic(BasicAuthenticationConfiguration.newBuilder()
+						.username(dittoUsername)
+						.password(dittoPassword)
+						.build());
+
+		MessagingProvider messagingProvider =
+				MessagingProviders.webSocket(WebSocketMessagingConfiguration
+						.newBuilder()
+						.endpoint(dittoWsAddress)
+						.build(), authenticationProvider);
+
 		logger.debug("Connecting to Ditto's WebSocket API");
-		disconnectedDittoClient.connect()
+
+		DisconnectedDittoClient dittoClient = DittoClients.newInstance(messagingProvider);
+		dittoClient.connect()
 				.thenAccept(this::onConnected)
-				.exceptionally(this::onError);
+				.exceptionally((final Throwable e) -> {
+					logger.error("Failed to connect to Ditto's WebSocket API", e);
+					dittoClient.destroy();
+					return null;
+				});
 	}
 
 	// -------------------------------------------------------------------------------------------------
@@ -88,13 +99,6 @@ public class DittoWsClient {
 
 		ThingChangeEvent event = new ThingChangeEvent(this, change);
 		eventPublisher.publishEvent(event);
-	}
-
-	// -------------------------------------------------------------------------------------------------
-	private Void onError(final Throwable e) {
-		logger.error("Failed to connect to Ditto's WebSocket API", e);
-		disconnectedDittoClient.destroy();
-		return null;
 	}
 
 }
