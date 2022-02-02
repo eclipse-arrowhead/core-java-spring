@@ -97,7 +97,7 @@
 \section{Overview}
 \label{sec:overview}
 \color{black}
-This document describes the Service Registry Core System, which exists to enable service discovery in a Eclipse Arrowhead Local Cloud (LC). Examples of such interactions is a provider system offering some kind of Service for use by other systems in the LC. This mandatory Core System provides the data storage functionality for the information related to the currently actively offered Services within the Local Cloud.
+This document describes the Service Registry Core System, which exists to enable service discovery within an Eclipse Arrowhead Local Cloud (LC). Examples of such interactions is a provider system offering some kind of Service for use by other systems in the LC. This mandatory Core System provides the data storage functionality for the information related to the currently actively offered Services within the Local Cloud.
 
 The rest of this document is organized as follows.
 In Section \ref{sec:prior_art}, we reference major prior art capabilities
@@ -127,13 +127,27 @@ foundation for the system - May be omitted for simple services
 
 Service Registry is a mandatory core system of Eclipse Arrowhead and is responsible for the fundamental service discovery functionality. Systems and services are being discoverable for other systems by consuming the services provided by Service Registry Core System.
 
-An application or other core system is required to register itself and its services into Service Registry at its start-up and to unregister before shutdown or when it does not intend to continue to provide its services. Querying specifed services directly from Service Registry is primarily permitted to Orchestrator Core System, but public core services - offered by supporting core systems - are also queyable for application systems. 
+An application or other core system is required to register itself and its services into Service Registry if it is designed to be part of the Local Cloud and to unregister before shutdown or when it does not intend to continue to provide its services.
 
 \subsection{System functionalities and properties}
 \label{sec:properties}
 
+\subsubsection {Functional properties of the system}
+Service Registry solves the following needs to fulfil the the requirements of service discovery.
+
+\begin{itemize}
+    \item Enables the application and other core systems to register themselves in order to being part of the Local Cloud.
+    \item Enables the application and other core systems to unregister themselves from the Local Cloud.
+    \item Enables the application and other core systems to publish their services within the Local Cloud.
+    \item Enables the application and other core systems to revoke their services from the Local Cloud.
+    \item Makes the offered services queryable for other systems within the Local Cloud.
+\end{itemize}
+
+\subsubsection {Non functional properties of the system}
+Beside the requirements of service discovery the Service Registry implements certain authentication of systems, meaning that Service Registry makes decision whether a given system has right to join to the Local Cloud or not.
+
 \subsubsection {Data stored by the system}
-Brief overview of data stored to achive the functionality of the system:
+In order to achive the mentioned functionalities, Service Registry is capable to store the following information set:
 
 \begin{figure}[h!]
   \centering
@@ -144,20 +158,14 @@ Brief overview of data stored to achive the functionality of the system:
   \label{fig:model_overview}
 \end{figure}
 
-\color{red}
-\subsubsection {Stateful or stateless}
-\begin{itemize} 
-\item states preserved, functional and non-functional
-\end{itemize}  
-\color{black}
+\clearpage
 
 \subsection{Important Delimitations}
 \label{sec:delimitations}
 
-\color{red}
-Provide delimitations of the provided system. Describe what the system
-solve and what i does not solve.
-\color{black}
+While Service Registry Core System is responsible to decide who can join to the Local Cloud, it is not responsible to decide that which system is authorized to consume which service, therefore only the so called \textit{"public core services"} are allowed to query directly from Service Registry.
+
+Querying \textit{"not public"} services directly from Service Registry is primarily permitted to Orchestrator Mandatory Core System, while maintaining authorization rules between systems and services is the responsibility of Authorization Mandatory Core System.
 
 \newpage
 
