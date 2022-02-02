@@ -97,7 +97,7 @@
 \section{Overview}
 \label{sec:overview}
 \color{black}
-This document describes the Service Registry Core System, which exists to enable service discovery within an Eclipse Arrowhead Local Cloud (LC). Examples of such interactions is a provider system offering some kind of Service for use by other systems in the LC. This mandatory Core System provides the data storage functionality for the information related to the currently actively offered Services within the Local Cloud.
+This document describes the Service Registry Core System, which exists to enable service discovery within an Eclipse Arrowhead Local Cloud (LC). Examples of such interactions is a provider system offering some kind of service for use by other systems in the LC. This mandatory Core System provides the data storage functionality for the information related to the currently and actively offered Services within the Local Cloud.
 
 The rest of this document is organized as follows.
 In Section \ref{sec:prior_art}, we reference major prior art capabilities
@@ -108,7 +108,7 @@ provided by the system.
 In Section \ref{sec:delimitations}, we describe delimitations of capabilities
 of the system.
 In Section \ref{sec:services}, we describe the abstract service
-functions consumed or produced by the system.
+functions operations produced by the system.
 In Section \ref{sec:security}, we describe the security capabilities
 of the system.
 
@@ -117,10 +117,7 @@ of the system.
 \subsection{Significant Prior Art}
 \label{sec:prior_art}
 
-\color{red}
-Describe significant prior art which provides the
-foundation for the system - May be omitted for simple services
-\color{black}  
+The strong development on cloud technology and various requirements for digitisation and automation has led to the concept of Local Clouds (LS). The concept takes the view that specific geographically local automation tasks should be encapsulated and protected. One of the main building blocks when realizing such Local Cloud is the capability of storing and maintaining information about the systems and services belonged to the given LC.
 
 \subsection{How This System Is Meant to Be Used}
 \label{sec:use}
@@ -133,7 +130,7 @@ An application or other core system is required to register itself and its servi
 \label{sec:properties}
 
 \subsubsection {Functional properties of the system}
-Service Registry solves the following needs to fulfil the the requirements of service discovery.
+Service Registry solves the following needs to fulfil the requirements of service discovery.
 
 \begin{itemize}
     \item Enables the application and other core systems to register themselves in order to being part of the Local Cloud.
@@ -147,7 +144,7 @@ Service Registry solves the following needs to fulfil the the requirements of se
 Beside the requirements of service discovery the Service Registry implements certain authentication of systems, meaning that Service Registry makes decision whether a given system has right to join to the Local Cloud or not.
 
 \subsubsection {Data stored by the system}
-In order to achive the mentioned functionalities, Service Registry is capable to store the following information set:
+In order to achieve the mentioned functionalities, Service Registry is capable to store the information set described by figure \ref{fig:information_overview}.
 
 \begin{figure}[h!]
   \centering
@@ -155,10 +152,8 @@ In order to achive the mentioned functionalities, Service Registry is capable to
   \caption{
     Overview of data stored by Service Registry Core System.
   }
-  \label{fig:model_overview}
+  \label{fig:information_overview}
 \end{figure}
-
-\clearpage
 
 \subsection{Important Delimitations}
 \label{sec:delimitations}
