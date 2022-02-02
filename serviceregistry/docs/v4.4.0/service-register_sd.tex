@@ -103,7 +103,7 @@
 
 \section{Overview}
 \label{sec:overview}
-This document describes the \textbf{service-register} service, which is enables autonomous service registration. Examples of this interaction is a system that has the capability to provide some kind of service. To enable other systems to use, to consume it, this service needs to be offered through the ServiceRegistry.
+This document describes the \textbf{service-register} service, which enables autonomous service registration, therefore it is an integral part of the implementation of service discovery requirements in Service Registry Mandatory Core System. Examples of this interaction is a system that has the capability to provide some kind of service. To enable other systems to use, to consume it, this service needs to be offered through the ServiceRegistry.
 
 The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
@@ -147,7 +147,7 @@ Available for anyone within the local cloud, but in case of secure mode service 
 \section{Service Interface}
 \label{sec:functions}
 
-This section describes the interfaces to the service. The \textbf{service-register} service is used to register services. A service could contain various metadata as well as a physical endpoint. The various parameters are representing the necessary service input information.
+This section describes the interfaces to the service. The \textbf{service-register} service is used to register services. A service could contain various metadata as well as a physical endpoint. The various parameters are representing the necessary system and service input information.
 In particular, each subsection names an interface, an input type and an output type, in that order.
 The input type is named inside parentheses, while the output type is preceded by a colon.
 Input and output types are only denoted when accepted or returned, respectively, by the interface in question. All abstract data types named in this section are defined in Section 3.
