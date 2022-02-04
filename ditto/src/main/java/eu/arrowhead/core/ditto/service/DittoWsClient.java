@@ -1,4 +1,15 @@
-package eu.arrowhead.core.ditto.service;
+/********************************************************************************
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
+ package eu.arrowhead.core.ditto.service;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -21,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import eu.arrowhead.core.ditto.Constants;
 
 @Service
 public class DittoWsClient {
@@ -28,23 +40,22 @@ public class DittoWsClient {
 	// =================================================================================================
 	// members
 
-	// TODO: Move property names to CommonConstants?
-
-	@Value("${ditto_ws_address}")
+	@Value(Constants.$DITTO_WS_ADDRESS_WD)
 	private String dittoWsAddress;
 
-	@Value("${ditto_username}")
+	@Value(Constants.$DITTO_USERNAME)
 	private String dittoUsername;
 
-	@Value("${ditto_password}")
+	@Value(Constants.$DITTO_PASSWORD)
 	private String dittoPassword;
-
-	final String THING_REGISTRATION_ID = "THING_REGISTRATION_ID";
-
-	private final Logger logger = LogManager.getLogger(DittoWsClient.class);
 
 	@Autowired
 	private ApplicationEventPublisher eventPublisher;
+
+	private final Logger logger = LogManager.getLogger(DittoWsClient.class);
+
+	// Arbitrary ID which can be used to cancel the registration later on:
+	final String THING_REGISTRATION_ID = "THING_REGISTRATION_ID";
 
 	// =================================================================================================
 	// methods

@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
+import eu.arrowhead.core.ditto.Constants;
 
 @Service
 public class DittoHttpClient {
@@ -26,15 +27,13 @@ public class DittoHttpClient {
 	// =================================================================================================
 	// members
 
-	// TODO: Move property names to CommonConstants?
-
-	@Value("${ditto_http_address}")
+	@Value(Constants.$DITTO_HTTP_ADDRESS_WD)
 	private String dittoAddress;
 
-	@Value("${ditto_username}")
+	@Value(Constants.$DITTO_USERNAME)
 	private String dittoUsername;
 
-	@Value("${ditto_password}")
+	@Value(Constants.$DITTO_PASSWORD)
 	private String dittoPassword;
 
 	private final RestTemplate restTemplate = new RestTemplate();
@@ -49,7 +48,9 @@ public class DittoHttpClient {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setBasicAuth(dittoUsername, dittoPassword);
 		HttpEntity<String> request = new HttpEntity<String>(headers);
-		return restTemplate.exchange(uri, HttpMethod.GET,
+		return restTemplate.exchange(
+				uri,
+				HttpMethod.GET,
 				request, String.class);
 	}
 }
