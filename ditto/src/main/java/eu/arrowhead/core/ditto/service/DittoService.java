@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import eu.arrowhead.core.ditto.Constants;
 
 @Service
 public class DittoService implements ApplicationListener<ThingChangeEvent> {
@@ -30,8 +31,6 @@ public class DittoService implements ApplicationListener<ThingChangeEvent> {
 	// members
 
 	private final Logger logger = LogManager.getLogger(DittoService.class);
-
-	 private final static String SERVICE_URI_TEMPLATE = "/things/%s/features/%s";
 
 	@Autowired
 	private ServiceRegistryClient serviceRegistryClient;
@@ -93,12 +92,12 @@ public class DittoService implements ApplicationListener<ThingChangeEvent> {
 	private void unregisterServices(Thing thing) {
 		// TODO: Implement!
 	}
-	
+
 	// -------------------------------------------------------------------------------------------------
 	private void registerFeature(String entityId, Feature feature) {
 		final String serviceDefinition = getServiceDefinition(feature);
 		final String serviceUri = String.format(
-				SERVICE_URI_TEMPLATE,
+				Constants.SERVICE_URI_TEMPLATE,
 				entityId,
 				feature.getId());
 
