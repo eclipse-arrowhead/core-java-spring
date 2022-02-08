@@ -128,7 +128,14 @@ The given service provider application system is required to use the  \textbf{se
 \subsection{Important Delimitations}
 \label{sec:delimitations}
 
-No delimitations. 
+The registration data must meet the following criteria:
+
+\begin{itemize}
+    \item Service definition can contain maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).
+    \item System name can't be what is reserved for core systems.
+    \item System name can contain maximum 63 character of letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).
+    \item Interface name has to follow the \texttt{Protocol-SecurityType-MimeType} format.
+\end{itemize}
 
 \subsection{Access policy}
 \label{sec:accesspolicy}
