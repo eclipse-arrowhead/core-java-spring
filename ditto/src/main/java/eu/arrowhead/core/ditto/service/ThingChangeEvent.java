@@ -16,7 +16,7 @@ import org.eclipse.ditto.client.changes.ThingChange;
 import org.springframework.context.ApplicationEvent;
 
 public class ThingChangeEvent extends ApplicationEvent {
-	private ThingChange change;
+	private final ThingChange change;
 
 	public ThingChangeEvent(final Object source, final ThingChange change) {
 		super(Objects.requireNonNull(source));

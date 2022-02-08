@@ -29,7 +29,8 @@ public class Constants {
 	public static final String $DITTO_PASSWORD = "${" + DITTO_PASSWORD + "}";
 
 	public static final String SERVICE_URI_TEMPLATE = "/things/%s/features/%s";
-
+	public static final String SERVICE_DEFINITIONS = "serviceDefinitions";
+	public static final String ENTITY_ID = "entityId";
 
 	// =================================================================================================
 	// assistant methods
