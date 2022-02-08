@@ -70,23 +70,33 @@ public class ServiceRegistryClient {
 	// methods
 
 	// -------------------------------------------------------------------------------------------------
-	public ResponseEntity<ServiceRegistryResponseDTO> registerService(final String serviceDefinition,
-			final String serviceUri) {
+	public ResponseEntity<ServiceRegistryResponseDTO> registerService(
+			final String serviceDefinition,
+			final String serviceUri,
+			final Map<String, String> metadata
+		) {
 		Assert.notNull(serviceDefinition, "Service definition is null");
 		Assert.notNull(serviceUri, "Service URI is null");
 
 		final ServiceRegistryRequestDTO request =
-				getServiceRegistryRequest(serviceDefinition, serviceUri);
+				getServiceRegistryRequest(serviceDefinition, serviceUri, metadata);
 		return httpService.sendRequest(
 				getServiceRegistryUri(), HttpMethod.POST, ServiceRegistryResponseDTO.class, request);
 	}
 
 	// -------------------------------------------------------------------------------------------------
-	private ServiceRegistryRequestDTO getServiceRegistryRequest(final String serviceDefinition, final String serviceUri) {
+	private ServiceRegistryRequestDTO getServiceRegistryRequest(
+		final String serviceDefinition,
+		final String serviceUri,
+		final Map<String, String> metadata
+	) {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setProviderSystem(getSystemDescription());
 		request.setServiceDefinition(serviceDefinition);
 		request.setServiceUri(serviceUri);
+		if (metadata != null) {
+			request.setMetadata(metadata);
+		}
 		request.setSecure(sslProperties.isSslEnabled() ? ServiceSecurityType.CERTIFICATE.name()
 				: ServiceSecurityType.NOT_SECURE.name());
 		request.setInterfaces(List.of(CommonConstants.HTTP_SECURE_JSON));
