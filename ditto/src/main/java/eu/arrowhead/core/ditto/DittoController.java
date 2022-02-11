@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.dto.internal.InventoryIdDTO;
+import eu.arrowhead.common.dto.internal.SystemDataDTO;
 import eu.arrowhead.core.ditto.service.DittoHttpClient;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -45,6 +47,42 @@ public class DittoController {
 	@GetMapping(path = CommonConstants.ECHO_URI)
 	public String echoService() {
 		return "Got it!";
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = CommonConstants.DITTO_URI + CommonConstants.MONITOR_PING_URI)
+	public String monitorPing() {
+		return "OK";
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return system data describing this core system", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = CommonConstants.DITTO_URI + CommonConstants.MONITOR_SYSTEM_DATA_URI)
+	public SystemDataDTO getSystemData() {
+		return new SystemDataDTO("");
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return an inventory ID for this core system", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = CommonConstants.DITTO_URI + CommonConstants.MONITOR_INVENTORY_ID_URI)
+	public InventoryIdDTO getInventoryId() {
+		return new InventoryIdDTO("");
 	}
 
 	// -------------------------------------------------------------------------------------------------

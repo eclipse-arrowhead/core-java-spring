@@ -145,6 +145,8 @@ public enum CoreSystemService {
 
 	GAMS_SERVICE(CommonConstants.CORE_SERVICE_GAMS_SERVICE, CommonConstants.GAMS_URI + CommonConstants.OP_GAMS_SERVICE_URI),
 	GAMS_SENSOR_SERVICE(CommonConstants.CORE_SERVICE_GAMS_SENSOR_SERVICE, CommonConstants.GAMS_URI + CommonConstants.OP_GAMS_SENSOR_SERVICE_URI);
+		// Ditto services
+		DITTO_MONITORABLE_SERVICE(CommonConstants.CORE_SERVICE_MONITORABLE, CommonConstants.DITTO_URI + CommonConstants.MONITOR_URI);
 	
 	//TODO: additional services 
 	
