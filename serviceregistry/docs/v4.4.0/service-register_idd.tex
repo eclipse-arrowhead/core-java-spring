@@ -107,7 +107,7 @@
 \label{sec:overview}
 
 This document describes the \textbf{service-register} service interface,
-which is enables autonomous service registration. It's implemented using protocol, encoding as stated in below table:
+which is enables autonomous service registration. It's implemented using protocol, encoding as stated in the following table:
 
 \begin{table}[ht!]
   \centering
@@ -143,7 +143,7 @@ improper client side certificate is provided, \texttt{500 Internal
 POST /serviceregistry/register HTTP/1.1
 
 {
-  "endOfValidity": "2020-12-05 12:00:00",
+  "endOfValidity": "2020-03-18T22:13:32.143",
   "interfaces": [
     "HTTP-SECURE-JSON"
   ],
@@ -172,8 +172,8 @@ POST /serviceregistry/register HTTP/1.1
   "serviceDefinition": {
     "id": 13,
     "serviceDefinition": "temperature",
-    "createdAt": "2020-12-01 11:59:10",
-    "updatedAt": "2020-12-01 11:59:10"
+    "createdAt": "2020-03-18T22:13:32.143",
+    "updatedAt": "2020-03-18T22:13:32.143"
   },
   "provider": {
     "id": 4,
@@ -184,11 +184,11 @@ POST /serviceregistry/register HTTP/1.1
     "metadata": {
         "location": "building-a"
     },
-    "createdAt": "2020-12-01 11:59:10",
-    "updatedAt": "2020-12-01 11:59:10"
+    "createdAt": "2020-03-18T22:13:32.143",
+    "updatedAt": "2020-03-18T22:13:32.143"
   },
   "serviceUri": "/",
-  "endOfValidity": "2020-12-05 12:00:00",
+  "endOfValidity": "2020-03-18T22:13:32.143",
   "secure": "TOKEN",
   "metadata": {
     "unit": "celsius"
@@ -198,12 +198,12 @@ POST /serviceregistry/register HTTP/1.1
     {
       "id": 1,
       "interfaceName": "HTTP-SECURE-JSON",
-      "createdAt": "2019-10-07 04:29:51",
-      "updatedAt": "2019-10-07 04:29:51"
+      "createdAt": "2020-03-18T22:13:32.143",
+      "updatedAt": "2020-03-18T22:13:32.143"
     }
   ],
-  "createdAt": "2020-12-01 11:59:10",
-  "updatedAt": "2020-12-01 11:59:10"
+  "createdAt": "2020-03-18T22:13:32.143",
+  "updatedAt": "2020-03-18T22:13:32.143"
 }
 \end{lstlisting}
 

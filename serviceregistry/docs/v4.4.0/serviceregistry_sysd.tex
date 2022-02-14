@@ -71,8 +71,7 @@
 
   % Front Page Abstract
   \begin{abstract}
-    This is the template for System Description (SysD document)
-    according to the Eclipse Arrowehad documentation structure. 
+    This document provides system description for the \textbf{Service Registry Core System}.
   \end{abstract}
 
   \vspace*{1cm}
@@ -102,7 +101,7 @@ This document describes the Service Registry Core System, which exists to enable
 The rest of this document is organized as follows.
 In Section \ref{sec:prior_art}, we reference major prior art capabilities
 of the system.
-In Section \ref{sec:use}, we the intended usage of the system.
+In Section \ref{sec:use}, we describe the intended usage of the system.
 In Section \ref{sec:properties}, we describe fundamental properties
 provided by the system.
 In Section \ref{sec:delimitations}, we describe delimitations of capabilities
@@ -134,7 +133,7 @@ An application or other core system is required to register itself and its servi
 \label{sec:properties}
 
 \subsubsection {Functional properties of the system}
-Service Registry solves the following needs to fulfil the requirements of service discovery.
+Service Registry solves the following needs to fulfill the requirements of service discovery.
 
 \begin{itemize}
     \item Enables the application and other core systems to register themselves in order to being part of the Local Cloud.
@@ -172,22 +171,22 @@ Querying \textit{"not public"} services directly from Service Registry is primar
 \label{sec:services}
 
 \msubsection{service}{echo}
-The purpose of this service is to test the system availability. The service is offered for both application and core systems too. 
+The purpose of this service is to test the system availability. The service is offered for both application and core systems. 
 
 \msubsection{service}{service-register}
-The purpose of this service is to publish the provided services and make them discoverable. The service is offered for both application and core systems too. 
+The purpose of this service is to publish the provided services and make them discoverable. The service is offered for both application and core systems. 
 
 \msubsection{service}{service-unregister}
-The purpose of this service is to revoke the published services. The service is offered for both application and core systems too. 
+The purpose of this service is to revoke the published services. The service is offered for both application and core systems. 
 
 \msubsection{service}{register-system}
-The purpose of this service is to join to the Local Cloud. The service is offered for both application and core systems too.
+The purpose of this service is to join to the Local Cloud. The service is offered for both application and core systems.
 
 \msubsection{service}{unregister-system}
-The purpose of this service is to leave the Local Cloud. The service is offered for both application and core systems too.
+The purpose of this service is to leave the Local Cloud. The service is offered for both application and core systems.
 
 \msubsection{service}{query}
-The purpose of this service is to look-up possible provider systems for one specific service. The service is offered for both application and core systems too.
+The purpose of this service is to look-up possible provider systems for one specific service. The service is offered for both application and core systems.
 
 \msubsection{service}{query-multi}
 The purpose of this service is to look-up possible provider systems for a set of service. The service is offered only for specified core systems.
