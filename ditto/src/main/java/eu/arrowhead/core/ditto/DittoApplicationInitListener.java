@@ -11,17 +11,18 @@
 
 package eu.arrowhead.core.ditto;
 
-import eu.arrowhead.common.ApplicationInitListener;
+import java.util.Base64;
+import java.util.List;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
-
-import java.util.Base64;
+import eu.arrowhead.common.ApplicationInitListener;
+import eu.arrowhead.common.core.CoreSystemService;
 
 @Component
 public class DittoApplicationInitListener extends ApplicationInitListener {
 
 	// =================================================================================================
-	// assistant methods
+	// methods
 
 	// -------------------------------------------------------------------------------------------------
 	@Override
@@ -29,6 +30,15 @@ public class DittoApplicationInitListener extends ApplicationInitListener {
 		if (sslProperties.isSslEnabled()) {
 			logger.debug("AuthInfo: {}", Base64.getEncoder().encodeToString(publicKey.getEncoded()));
 		}
+	}
+
+	//=================================================================================================
+	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
+		return List.of(CoreSystemService.AUTH_PUBLIC_KEY_SERVICE);
 	}
 
 }

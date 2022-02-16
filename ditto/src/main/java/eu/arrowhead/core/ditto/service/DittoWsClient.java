@@ -9,7 +9,7 @@
  *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
 
- package eu.arrowhead.core.ditto.service;
+package eu.arrowhead.core.ditto.service;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -37,7 +37,7 @@ import eu.arrowhead.core.ditto.Constants;
 @Service
 public class DittoWsClient {
 
-	// =================================================================================================
+	//=================================================================================================
 	// members
 
 	@Value(Constants.$DITTO_WS_ADDRESS_WD)
@@ -57,10 +57,10 @@ public class DittoWsClient {
 	// Arbitrary ID which can be used to cancel the registration later on:
 	final String THING_REGISTRATION_ID = "THING_REGISTRATION_ID";
 
-	// =================================================================================================
+	//=================================================================================================
 	// methods
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	@PostConstruct
 	private void init() {
 
@@ -88,14 +88,14 @@ public class DittoWsClient {
 				});
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private void onConnected(final DittoClient client) {
 		logger.debug("Connected to Ditto's WebSocket API");
 		this.subscribeForTwinEvents(client);
 		client.twin().registerForThingChanges(THING_REGISTRATION_ID, this::onThingChange);
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private void subscribeForTwinEvents(final DittoClient client) {
 		try {
 			client.twin().startConsumption().toCompletableFuture().get(); // this will block the thread!
@@ -105,7 +105,7 @@ public class DittoWsClient {
 		logger.debug("Subscribed for Ditto Twin events");
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private void onThingChange(ThingChange change) {
 		final Optional<Thing> thing = change.getThing();
 		logger.debug("Thing change detected. Action: " + change.getAction() + ", " + "Thing: " + thing);

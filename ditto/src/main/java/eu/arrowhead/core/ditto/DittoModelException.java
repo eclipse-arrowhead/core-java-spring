@@ -12,21 +12,21 @@
 package eu.arrowhead.core.ditto;
 
 public class DittoModelException extends Exception {
-	
+
 	//=================================================================================================
 	// members
 
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public DittoModelException(final String msg, final Throwable cause) {
-	    super(msg, cause);
+		super(msg, cause);
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public DittoModelException(final String msg) {
-	    super(msg);
+		super(msg);
 	}
-	
+
 }

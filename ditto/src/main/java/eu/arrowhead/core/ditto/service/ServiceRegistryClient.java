@@ -97,8 +97,7 @@ public class ServiceRegistryClient {
 		if (metadata != null) {
 			request.setMetadata(metadata);
 		}
-		request.setSecure(sslProperties.isSslEnabled() ? ServiceSecurityType.CERTIFICATE.name()
-				: ServiceSecurityType.NOT_SECURE.name());
+		request.setSecure(ServiceSecurityType.TOKEN.name());
 		request.setInterfaces(List.of(CommonConstants.HTTP_SECURE_JSON));
 		return request;
 	}

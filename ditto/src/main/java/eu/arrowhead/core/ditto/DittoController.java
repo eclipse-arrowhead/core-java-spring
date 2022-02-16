@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.dto.internal.InventoryIdDTO;
 import eu.arrowhead.common.dto.internal.SystemDataDTO;
 import eu.arrowhead.core.ditto.service.DittoHttpClient;
@@ -32,7 +33,13 @@ public class DittoController {
 	// members
 	
 	@Autowired
-	private DittoHttpClient dittoHttpClient;	
+	private DittoHttpClient dittoHttpClient;
+
+	final String THING_PROPERTY_URI = "/things/{thing}/features/{feature}/properties/{property}";
+	final String DITTO_URI_TEMPLATE = "/api/2/things/%s/features/%s/properties/%s";
+
+	@Autowired
+	protected SSLProperties sslProperties;
 
 	//=================================================================================================
 	// methods
@@ -85,7 +92,7 @@ public class DittoController {
 		return new InventoryIdDTO("");
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Forward the given request to the appropriate Ditto Thing",
 			response = String.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
 	@ApiResponses(value = {
@@ -95,14 +102,12 @@ public class DittoController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR,
 					message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = "/things/{thing}/features/{feature}/properties/{property}") // TODO: Move to CommonConstants?
+	@GetMapping(path = THING_PROPERTY_URI)
 	public Object thingServiceRequest(
-		@PathVariable("thing") String thing,
-		@PathVariable("feature") String feature,
-		@PathVariable("property") String property
-	) {
-		final String DITTO_PATH_TEMPLATE = "/api/2/things/%s/features/%s/properties/%s";
-		final String path = String.format(DITTO_PATH_TEMPLATE, thing, feature, property);
+			@PathVariable("thing") String thing,
+			@PathVariable("feature") String feature,
+			@PathVariable("property") String property) {
+		final String path = String.format(DITTO_URI_TEMPLATE, thing, feature, property);
 		final var result = dittoHttpClient.sendGetRequest(path);
 		return result.getBody();
 	}
