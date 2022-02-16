@@ -33,10 +33,11 @@ import eu.arrowhead.core.ditto.DittoModelException;
 @Service
 public class DittoService implements ApplicationListener<ThingChangeEvent> {
 
-	// =================================================================================================
+	//=================================================================================================
 	// members
 
-	private static final String SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE = "Service definition has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).";
+	private static final String SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE =
+			"Service definition has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).";
 
 	private final Logger logger = LogManager.getLogger(DittoService.class);
 
@@ -46,10 +47,10 @@ public class DittoService implements ApplicationListener<ThingChangeEvent> {
 	@Autowired
 	private CommonNamePartVerifier cnVerifier;
 
-	// =================================================================================================
+	//=================================================================================================
 	// methods
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public void onApplicationEvent(final ThingChangeEvent event) {
 		Assert.notNull(event, "Thing change event is null");
@@ -84,7 +85,7 @@ public class DittoService implements ApplicationListener<ThingChangeEvent> {
 		}
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private void registerServices(final Thing thing) throws DittoModelException {
 
 		if (thing.getEntityId().isEmpty()) {
@@ -107,19 +108,19 @@ public class DittoService implements ApplicationListener<ThingChangeEvent> {
 		}
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private void unregisterServices(Thing thing) {
 		// TODO: Implement!
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private void registerFeature(
 			final String entityId,
 			final Feature feature,
 			final Optional<String> serviceDefinitionOptional) {
 		final String serviceDefinition = serviceDefinitionOptional.isPresent()
 				? serviceDefinitionOptional.get()
-				: getDefaultServiceDefinition(feature);
+				: getDefaultServiceDefinition(entityId, feature);
 		final String serviceUri = String.format(
 				Constants.SERVICE_URI_TEMPLATE,
 				entityId,
@@ -133,7 +134,7 @@ public class DittoService implements ApplicationListener<ThingChangeEvent> {
 		}
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private Optional<JsonObject> getServiceDefinitions(final Thing thing) {
 		if (thing.getAttributes().isPresent()) {
 			final Attributes attributes = thing.getAttributes().get();
@@ -146,7 +147,7 @@ public class DittoService implements ApplicationListener<ThingChangeEvent> {
 		return Optional.empty();
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private Optional<String> getServiceDefinition(final Optional<JsonObject> serviceDefinitions,
 			String featureId) throws DittoModelException {
 		if (serviceDefinitions.isPresent()) {
@@ -157,7 +158,7 @@ public class DittoService implements ApplicationListener<ThingChangeEvent> {
 		return Optional.empty();
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private Optional<String> getServiceDefinition(
 			final Optional<JsonValue> serviceDefinitionOptional) throws DittoModelException {
 		if (serviceDefinitionOptional.isPresent()) {
@@ -173,12 +174,12 @@ public class DittoService implements ApplicationListener<ThingChangeEvent> {
 		return Optional.empty();
 	}
 
-	// -------------------------------------------------------------------------------------------------
-	private static String getDefaultServiceDefinition(final Feature feature) {
-		return feature.getId(); // TODO: Figure out what to use here.
+	//-------------------------------------------------------------------------------------------------
+	private static String getDefaultServiceDefinition(final String entityId, final Feature feature) {
+		return entityId + "-" + feature.getId();
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private Map<String, String> getMetadata(final String entityId) {
 		return Map.of(Constants.ENTITY_ID, entityId);
 	}
