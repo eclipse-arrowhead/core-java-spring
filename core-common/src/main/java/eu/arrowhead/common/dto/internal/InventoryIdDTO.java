@@ -12,6 +12,7 @@
 package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class InventoryIdDTO implements Serializable {
 
@@ -24,7 +25,7 @@ public class InventoryIdDTO implements Serializable {
 	// methods
 
 	// -------------------------------------------------------------------------------------------------
-	public InventoryIdDTO(final String inventoryId) {
+	public InventoryIdDTO(@JsonProperty("inventoryId") final String inventoryId) {
 		this.inventoryId = inventoryId;
 	}
 

@@ -12,34 +12,20 @@
 package eu.arrowhead.core.ditto;
 
 import org.apache.http.HttpStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
-import eu.arrowhead.common.SSLProperties;
-import eu.arrowhead.core.ditto.service.DittoHttpClient;
+import eu.arrowhead.common.dto.internal.InventoryIdDTO;
+import eu.arrowhead.common.dto.internal.SystemDataDTO;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 @RestController
-@RequestMapping(CommonConstants.DITTO_URI)
-public class DittoController {
-
-	//=================================================================================================
-	// members
-	
-	@Autowired
-	private DittoHttpClient dittoHttpClient;
-
-	final String THING_PROPERTY_URI = "/things/{thing}/features/{feature}/properties/{property}";
-	final String DITTO_URI_TEMPLATE = "/api/2/things/%s/features/%s/properties/%s";
-
-	@Autowired
-	protected SSLProperties sslProperties;
+@RequestMapping(CommonConstants.DITTO_URI + CommonConstants.MONITOR_URI)
+public class DittoMonitorController {
 
 	//=================================================================================================
 	// methods
@@ -51,29 +37,32 @@ public class DittoController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = CommonConstants.ECHO_URI)
-	public String echoService() {
-		return "Got it!";
+	@GetMapping(path = CommonConstants.PING_URI)
+	public String monitorPing() {
+		return "OK";
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Forward the given request to the appropriate Ditto Thing",
-			response = String.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
+	@ApiOperation(value = "Return system data describing this core system", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED,
-					message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR,
-					message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = THING_PROPERTY_URI)
-	public Object thingServiceRequest(
-			@PathVariable("thing") String thing,
-			@PathVariable("feature") String feature,
-			@PathVariable("property") String property) {
-		final String path = String.format(DITTO_URI_TEMPLATE, thing, feature, property);
-		final var result = dittoHttpClient.sendGetRequest(path);
-		return result.getBody();
+	@GetMapping(path = CommonConstants.SYSTEM_DATA_URI)
+	public SystemDataDTO getSystemData() {
+		return new SystemDataDTO("");
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return an inventory ID for this core system", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = CommonConstants.INVENTORY_ID_URI)
+	public InventoryIdDTO getInventoryId() {
+		return new InventoryIdDTO("");
+	}
 }

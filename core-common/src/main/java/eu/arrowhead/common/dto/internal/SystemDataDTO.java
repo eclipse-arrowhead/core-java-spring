@@ -12,6 +12,7 @@
 package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class SystemDataDTO implements Serializable {
 
@@ -24,7 +25,7 @@ public class SystemDataDTO implements Serializable {
 	// methods
 
 	// -------------------------------------------------------------------------------------------------
-	public SystemDataDTO(final String data) {
+	public SystemDataDTO(@JsonProperty("systemData") final String data) {
 		this.data = data;
 	}
 
