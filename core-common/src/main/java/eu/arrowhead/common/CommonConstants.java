@@ -327,9 +327,9 @@ public static final String CORE_SERVICE_QOSMONITOR_PUBLIC_KEY = "qos-monitor-pub
 	
 	public static final String ECHO_URI = "/echo";
 	public static final String MONITOR_URI = "/monitor";
-	public static final String MONITOR_PING_URI = MONITOR_URI + "/ping";
-	public static final String MONITOR_SYSTEM_DATA_URI = MONITOR_URI + "/systemdata";
-	public static final String MONITOR_INVENTORY_ID_URI = MONITOR_URI + "/inventoryid";
+	public static final String PING_URI = "/ping";
+	public static final String SYSTEM_DATA_URI = "/systemdata";
+	public static final String INVENTORY_ID_URI = "/inventoryid";
 
 	public static final List<CoreSystemService> PUBLIC_CORE_SYSTEM_SERVICES = List.of(CoreSystemService.ORCHESTRATION_SERVICE,
 																					  CoreSystemService.AUTH_PUBLIC_KEY_SERVICE,
