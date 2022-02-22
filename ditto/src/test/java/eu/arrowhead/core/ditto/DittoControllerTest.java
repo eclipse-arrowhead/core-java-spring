@@ -1,5 +1,8 @@
 package eu.arrowhead.core.ditto;
 
+import static org.junit.Assert.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,9 +15,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import eu.arrowhead.common.CommonConstants;
-import static org.junit.Assert.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -39,11 +39,8 @@ public class DittoControllerTest {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
 
-	// =================================================================================================
-	// Tests of Echo service
-
 	@Test
-	public void echoDitto() throws Exception {
+	public void echo() throws Exception {
 		final MvcResult response = this.mockMvc.perform(get(DITTO_ECHO_URI)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())

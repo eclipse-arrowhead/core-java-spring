@@ -10,7 +10,8 @@
  ********************************************************************************/
 
 package eu.arrowhead.core.ditto.service;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -27,6 +28,10 @@ public class DittoHttpClient {
 	// =================================================================================================
 	// members
 
+	final static String DITTO_THINGS_SEARCH_URI = "/api/2/search/things/";
+	final static String DITTO_THINGS_URI = "/api/2/things/";
+	final static String DITTO_PROPERTY_URI_TEMPLATE = "/api/2/things/%s/features/%s/properties/%s";
+
 	@Value(Constants.$DITTO_HTTP_ADDRESS_WD)
 	private String dittoAddress;
 
@@ -38,19 +43,42 @@ public class DittoHttpClient {
 
 	private final RestTemplate restTemplate = new RestTemplate();
 
+	private final Logger logger = LogManager.getLogger(DittoHttpClient.class);
+
 	// =================================================================================================
 	// methods
 
 	// -------------------------------------------------------------------------------------------------
-	public ResponseEntity<String> sendGetRequest(final String path) {
+	public ResponseEntity<String> getThings() {
+		return sendGetRequest(DITTO_THINGS_SEARCH_URI);
+	}
+
+	// -------------------------------------------------------------------------------------------------
+	public ResponseEntity<String> getThing(final String thingId) {
+		Assert.notNull(thingId, "thingId is null");
+		return sendGetRequest(DITTO_THINGS_URI + thingId);
+	}
+
+	// -------------------------------------------------------------------------------------------------
+	public ResponseEntity<String> getProperty(
+			final String thing,
+			final String feature,
+			final String property) {
+		Assert.notNull(thing, "Thing is null");
+		Assert.notNull(feature, "Feature is null");
+		Assert.notNull(property, "Property is null");
+		final String path = String.format(DITTO_PROPERTY_URI_TEMPLATE, thing, feature, property);
+		return sendGetRequest(path);
+	}
+
+	// -------------------------------------------------------------------------------------------------
+	private ResponseEntity<String> sendGetRequest(final String path) {
 		Assert.notNull(path, "Path is null");
 		final String uri = dittoAddress + path;
 		HttpHeaders headers = new HttpHeaders();
 		headers.setBasicAuth(dittoUsername, dittoPassword);
 		HttpEntity<String> request = new HttpEntity<String>(headers);
-		return restTemplate.exchange(
-				uri,
-				HttpMethod.GET,
-				request, String.class);
+		logger.debug("Sending HTTP GET request to Eclipse Ditto, URI " + uri);
+		return restTemplate.exchange(uri, HttpMethod.GET, request, String.class);
 	}
 }
