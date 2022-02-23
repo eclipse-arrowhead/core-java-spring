@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: orchestrator
+  name: {{ .Release.Name }}-orchestrator-deployment
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: orchestrator
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: orchestrator
+    spec:
+      containers:
+        - image: {{ .Values.orchestrator.image }}
+          name: orchestrator
+          ports:
+            - containerPort: {{ .Values.orchestrator.port }}
+          resources: {}
+          volumeMounts:
+            - name: {{ .Values.orchestrator.address }}-properties-volume
+              mountPath: /orchestrator/application.properties
+              subPath: application.properties
+            - name: {{ .Values.orchestrator.address }}-keystore-volume
+              mountPath: /orchestrator/keystore
+            - name: {{ .Values.orchestrator.address }}-truststore-volume
+              mountPath: /orchestrator/truststore
+      initContainers:
+        - image: busybox:1.28
+          name: wait-for-db
+          volumeMounts:
+            - name: wait-for-db
+              mountPath: /init
+          command:
+            - /bin/sh
+            - /init/wait-for-db.sh
+      volumes:
+        - name: {{ .Values.orchestrator.address }}-properties-volume
+          secret: 
+            secretName: {{ .Release.Name }}-orchestrator-properties
+        - name: wait-for-db
+          configMap:
+            name: {{ .Release.Name }}-wait-for-db
+        - name: {{ .Values.orchestrator.address }}-keystore-volume
+          configMap:
+            name: {{ .Release.Name }}-orchestrator-keystore
+        - name: {{ .Values.orchestrator.address }}-truststore-volume
+          configMap:
+            name: {{ .Release.Name }}-orchestrator-truststore
+      restartPolicy: Always

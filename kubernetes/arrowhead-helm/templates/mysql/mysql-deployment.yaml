@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - image: {{ .Values.mysql.image }}
+          name: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: {{ .Values.mysql.rootPassword }}
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql/
+              subPath: data
+            - name: mysql-conf
+              mountPath: /docker-entrypoint-initdb.d/privileges
+            - name: mysql-conf
+              mountPath: /docker-entrypoint-initdb.d/updateUsers.sql
+              subPath: updateUsers.sql
+            - name: mysql-conf
+              mountPath: /docker-entrypoint-initdb.d/create_empty_arrowhead_db.sql
+              subPath: create_empty_arrowhead_db.sql
+      volumes:
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: mysql-pv-claim
+        - name: mysql-conf
+          configMap:
+            name: mysql-conf

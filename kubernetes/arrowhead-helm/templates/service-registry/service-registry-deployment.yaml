@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: service-registry
+  name: {{ .Release.Name }}-service-registry-deployment
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: service-registry
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: service-registry
+    spec:
+      containers:
+        - image: {{ .Values.serviceRegistry.image }}
+          name: serviceregistry
+          ports:
+            - containerPort: {{ .Values.serviceRegistry.port }}
+          resources: {}
+          volumeMounts:
+            - name: {{ .Values.serviceRegistry.address }}-properties-volume
+              mountPath: /serviceregistry/application.properties
+              subPath: application.properties
+            - name: {{ .Values.serviceRegistry.address }}-keystore-volume
+              mountPath: /serviceregistry/keystore
+            - name: {{ .Values.serviceRegistry.address }}-truststore-volume
+              mountPath: /serviceregistry/truststore
+      initContainers:
+        - image: busybox:1.28
+          name: wait-for-db
+          volumeMounts:
+            - name: wait-for-db
+              mountPath: /init
+          command:
+            - /bin/sh
+            - /init/wait-for-db.sh
+      volumes:
+        - name: {{ .Values.serviceRegistry.address }}-properties-volume
+          secret: 
+            secretName: {{ .Release.Name }}-service-registry-properties
+        - name: wait-for-db
+          configMap:
+            name: {{ .Release.Name }}-wait-for-db
+        - name: {{ .Values.serviceRegistry.address }}-keystore-volume
+          configMap:
+            name: {{ .Release.Name }}-service-registry-keystore
+        - name: {{ .Values.serviceRegistry.address }}-truststore-volume
+          configMap:
+            name: {{ .Release.Name }}-service-registry-truststore
+      restartPolicy: Always
