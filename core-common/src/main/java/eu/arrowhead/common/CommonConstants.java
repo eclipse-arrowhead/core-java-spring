@@ -45,6 +45,9 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_SYSTEMREGISTRY = "System Registry";
 	public static final String CORE_SYSTEM_DEVICEREGISTRY = "Device Registry";
 	public static final String CORE_SYSTEM_ONBOARDING = "Onboarding Controller";
+	public static final String CORE_SYSTEM_DITTO = "Ditto";
+
+	public static final String CORE_SERVICE_MONITORABLE = "monitorable";
 
 	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION = "token-generation";
 	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "auth-public-key";
@@ -292,6 +295,8 @@ public class CommonConstants {
     public static final String OP_TRANSLATOR_FIWARE_URI = "/v2";
     public static final String OP_TRANSLATOR_PLUGIN_URI = "/plugin";
 
+	public static final String DITTO_URI = "/ditto";
+
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
 	public static final String SWAGGER_HTTP_200_MESSAGE = "Core service is available";
@@ -303,6 +308,10 @@ public class CommonConstants {
 	public static final String REQUEST_PARAM_TOKEN = "token";
 	
 	public static final String ECHO_URI = "/echo";
+	public static final String MONITOR_URI = "/monitor";
+	public static final String PING_URI = "/ping";
+	public static final String SYSTEM_DATA_URI = "/systemdata";
+	public static final String INVENTORY_ID_URI = "/inventoryid";
 
 	public static final List<CoreSystemService> PUBLIC_CORE_SYSTEM_SERVICES = List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.AUTH_PUBLIC_KEY_SERVICE,
   			  																		  CoreSystemService.EVENT_PUBLISH_SERVICE, CoreSystemService.EVENT_SUBSCRIBE_SERVICE, CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE,

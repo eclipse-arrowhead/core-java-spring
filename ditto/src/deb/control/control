@@ -1,0 +1,10 @@
+Package: arrowhead-ditto
+Version: [[version]]
+Section: contrib/java
+Priority: optional
+Architecture: all
+Maintainer: Nicklas Nyström <nicklas.nystrom@xarepo.com>
+Homepage: http://www.arrowhead.eu
+Description: Arrowhead Ditto System
+Distribution: development
+Depends: java-runtime-headless, virtual-mysql-server, arrowhead-core-common

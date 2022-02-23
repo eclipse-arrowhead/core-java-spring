@@ -112,6 +112,8 @@ public enum CoreSystem {
 												   CoreSystemService.TRANSLATOR_FIWARE_SERVICE,
 												   CoreSystemService.TRANSLATOR_PLUGIN_SERVICE)),
 	
+	DITTO(Defaults.DEFAULT_DITTO_PORT, List.of(CoreSystemService.DITTO_MONITORABLE_SERVICE)),
+
 	PLANTDESCRIPTIONENGINE(Defaults.DEFAULT_PLANT_DESCRIPTION_ENGINE_PORT, List.of()); //TODO add PDE services
 	
 	//=================================================================================================
