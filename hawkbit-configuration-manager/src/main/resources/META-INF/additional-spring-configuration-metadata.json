@@ -1,0 +1,72 @@
+{"properties": [
+  {
+    "name": "system.name",
+    "type": "java.lang.String",
+    "description": "A description for 'system.name'"
+  },
+  {
+    "name": "system.port",
+    "type": "java.lang.Integer",
+    "description": "A description for 'system.port'"
+  },
+  {
+    "name": "system.providedServiceInterface",
+    "type": "java.lang.String",
+    "description": "A description for 'system.providedServiceInterface'"
+  },
+  {
+    "name": "system.providedServiceDefinition",
+    "type": "java.lang.String",
+    "description": "A description for 'system.providedServiceDefinition'"
+  },
+  {
+    "name": "system.providedServiceVersion",
+    "type": "java.lang.Integer",
+    "description": "A description for 'system.providedServiceVersion'"
+  },
+  {
+    "name": "system.providedServiceUri",
+    "type": "java.lang.String",
+    "description": "A description for 'system.providedServiceUri'"
+  },
+  {
+    "name": "sr_address",
+    "type": "java.lang.String",
+    "description": "A description for 'sr_address'"
+  },
+  {
+    "name": "sr_port",
+    "type": "java.lang.Integer",
+    "description": "A description for 'sr_port'"
+  },
+  {
+    "name": "hawkbit.host",
+    "type": "java.lang.String",
+    "description": "A description for 'hawkbit.host'"
+  },
+  {
+    "name": "hawkbit.port",
+    "type": "java.lang.Integer",
+    "description": "A description for 'hawkbit.port'"
+  },
+  {
+    "name": "hawkbit.username",
+    "type": "java.lang.String",
+    "description": "A description for 'hawkbit.username'"
+  },
+  {
+    "name": "hawkbit.password",
+    "type": "java.lang.String",
+    "description": "A description for 'hawkbit.password'"
+  },
+  {
+    "name": "hawkbit.tenant",
+    "type": "java.lang.String",
+    "description": "A description for 'hawkbit.tenant'"
+  },
+  {
+    "name": "system.address",
+    "type": "java.lang.String",
+    "description": "A description for 'system.address'"
+  }
+]}

@@ -1,0 +1,27 @@
+#!/bin/bash -e
+
+. /usr/share/debconf/confmodule
+
+if logname 2>/dev/null; then
+  USER=$(logname)
+  HOME=$(eval echo "~$USER")
+else
+  USER="root"
+  HOME="/root"
+fi
+
+# Get installation type
+db_input high arrowhead-core-common/sr_host || true
+db_input high arrowhead-core-common/provided_service_definition || true
+db_input high arrowhead-core-common/provided_service_uri || true
+db_input high arrowhead-core-common/provided_service_version || true
+db_input high arrowhead-core-common/provided_service_interface || true
+db_input high arrowhead-core-common/hawkbit_host || true
+db_input high arrowhead-core-common/hawkbit_port || true
+db_input high arrowhead-core-common/hawkbit_username || true
+db_input high arrowhead-core-common/hawkbit_password || true
+db_input high arrowhead-core-common/hawkbit_tenant || true
+
+# Run dialogs
+db_go || true
+
