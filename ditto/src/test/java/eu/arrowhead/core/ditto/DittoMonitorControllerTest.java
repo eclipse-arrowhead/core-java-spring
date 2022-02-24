@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @SpringBootTest
 public class DittoMonitorControllerTest {
 
-	// =================================================================================================
+	//=================================================================================================
 	// members
 
 	@Autowired
@@ -36,7 +36,7 @@ public class DittoMonitorControllerTest {
 
 	private static final String BASE_URI = CommonConstants.DITTO_URI + CommonConstants.MONITOR_URI;
 
-	// =================================================================================================
+	//=================================================================================================
 	// methods
 
 	// -------------------------------------------------------------------------------------------------
@@ -45,7 +45,7 @@ public class DittoMonitorControllerTest {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
 
-	// =================================================================================================
+	//=================================================================================================
 	// Tests of Echo service
 
 	@Test

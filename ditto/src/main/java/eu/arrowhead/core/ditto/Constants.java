@@ -15,7 +15,7 @@ import eu.arrowhead.common.CommonConstants;
 
 public class Constants {
 
-	// =================================================================================================
+	//=================================================================================================
 	// members
 
 	public static final String DITTO_HTTP_ADDRESS = "ditto_http_address";
@@ -34,10 +34,10 @@ public class Constants {
 	public static final String SERVICE_DEFINITIONS = "serviceDefinitions";
 	public static final String ENTITY_ID = "entityId";
 
-	// =================================================================================================
+	//=================================================================================================
 	// assistant methods
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private Constants() {
 		throw new UnsupportedOperationException();
 	}
