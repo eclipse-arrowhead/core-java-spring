@@ -163,6 +163,11 @@ Type: password
 Default:
 Description: MySQL password for TimeManager system (leave empty for random).
 
+Template: arrowhead-core-common/mysql_password_ditto
+Type: password
+Default:
+Description: MySQL password for Ditto integration system (leave empty for random).
+
 Template: arrowhead-core-common/sr_host
 Type: string
 Description: Enter the hostname or IP address of the Service Registry (leave empty if the SR is on the same computer as the system)

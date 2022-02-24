@@ -20,6 +20,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
@@ -36,8 +37,8 @@ public class DittoSecurityFilter extends TokenSecurityFilter {
 
 	private PrivateKey myPrivateKey;
 
-	private Map<String, Object> arrowheadContext;
-	private HttpService httpService;
+	private final Map<String, Object> arrowheadContext;
+	private final HttpService httpService;
 
 	//=================================================================================================
 	// methods
@@ -53,7 +54,7 @@ public class DittoSecurityFilter extends TokenSecurityFilter {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected PrivateKey getMyPrivateKey() {
-		return myPrivateKey;
+		return (PrivateKey) arrowheadContext.get(CommonConstants.SERVER_PRIVATE_KEY);
 	}
 
 	//-------------------------------------------------------------------------------------------------

@@ -36,7 +36,7 @@ import eu.arrowhead.common.http.HttpService;
 @Service
 public class ServiceRegistryClient {
 
-	// =================================================================================================
+	//=================================================================================================
 	// members
 
 	private static final String SERVICEREGISTRY_REGISTER_URI =
@@ -47,7 +47,7 @@ public class ServiceRegistryClient {
 
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
-	
+
 	@Autowired
 	protected SSLProperties sslProperties;
 
@@ -56,7 +56,7 @@ public class ServiceRegistryClient {
 
 	@Value(CoreCommonConstants.$DOMAIN_NAME)
 	private String systemDomainName;
-	
+
 	@Value(CoreCommonConstants.$DOMAIN_PORT)
 	private int systemDomainPort;
 
@@ -66,10 +66,10 @@ public class ServiceRegistryClient {
 	@Value(CommonConstants.$SERVICEREGISTRY_PORT_WD)
 	private int serviceRegistryPort;
 
-	// =================================================================================================
+	//=================================================================================================
 	// methods
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	public ResponseEntity<ServiceRegistryResponseDTO> registerService(
 			final String serviceDefinition,
 			final String serviceUri,
@@ -102,7 +102,7 @@ public class ServiceRegistryClient {
 		return request;
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private UriComponents getServiceRegistryUri() {
 		return UriComponentsBuilder.newInstance()
 				.scheme(sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP)
@@ -112,13 +112,13 @@ public class ServiceRegistryClient {
 				.build();
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private SystemRequestDTO getSystemDescription() {
 		final SystemRequestDTO system = new SystemRequestDTO();
 		system.setAddress(systemDomainName);
 		system.setPort(systemDomainPort);
 		system.setSystemName(systemName);
-		
+
 		if (sslProperties.isSslEnabled()) {
 			final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
 			final String authInfo = Base64.getEncoder().encodeToString(publicKey.getEncoded());
