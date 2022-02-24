@@ -12,25 +12,26 @@
 package eu.arrowhead.core.ditto.service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import eu.arrowhead.core.ditto.Constants;
 
-@Service
+@Component
 public class DittoHttpClient {
 
 	// =================================================================================================
 	// members
 
-	final static String DITTO_THINGS_SEARCH_URI = "/api/2/search/things/";
-	final static String DITTO_THINGS_URI = "/api/2/things/";
-	final static String DITTO_PROPERTY_URI_TEMPLATE = "/api/2/things/%s/features/%s/properties/%s";
+	final private static String DITTO_THINGS_SEARCH_URI = "/api/2/search/things/";
+	final private static String DITTO_THINGS_URI = "/api/2/things/";
+	final private static String DITTO_PROPERTY_URI_TEMPLATE = "/api/2/things/%s/features/%s/properties/%s";
 
 	@Value(Constants.$DITTO_HTTP_ADDRESS_WD)
 	private String dittoAddress;
@@ -41,7 +42,8 @@ public class DittoHttpClient {
 	@Value(Constants.$DITTO_PASSWORD)
 	private String dittoPassword;
 
-	private final RestTemplate restTemplate = new RestTemplate();
+	@Autowired
+	private RestTemplate restTemplate;
 
 	private final Logger logger = LogManager.getLogger(DittoHttpClient.class);
 
@@ -67,13 +69,13 @@ public class DittoHttpClient {
 		Assert.notNull(thing, "Thing is null");
 		Assert.notNull(feature, "Feature is null");
 		Assert.notNull(property, "Property is null");
+
 		final String path = String.format(DITTO_PROPERTY_URI_TEMPLATE, thing, feature, property);
 		return sendGetRequest(path);
 	}
 
 	// -------------------------------------------------------------------------------------------------
 	private ResponseEntity<String> sendGetRequest(final String path) {
-		Assert.notNull(path, "Path is null");
 		final String uri = dittoAddress + path;
 		HttpHeaders headers = new HttpHeaders();
 		headers.setBasicAuth(dittoUsername, dittoPassword);

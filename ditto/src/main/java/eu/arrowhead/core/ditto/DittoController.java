@@ -32,19 +32,18 @@ public class DittoController {
 
 	//=================================================================================================
 	// members
-	
+
 	@Autowired
 	private DittoHttpClient dittoHttpClient;
 
-	final String THING_PROPERTY_URI = "/things/{thing}/features/{feature}/properties/{property}";
-	final String DITTO_URI_TEMPLATE = "/api/2/things/%s/features/%s/properties/%s"; // TODO: Remove!
+	final private String THING_PROPERTY_URI = "/things/{thing}/features/{feature}/properties/{property}";
 
 	@Autowired
 	protected SSLProperties sslProperties;
 
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
@@ -68,7 +67,7 @@ public class DittoController {
 					message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = THING_PROPERTY_URI)
-	public Object thingServiceRequest(
+	public Object thingPropertyRequest(
 			@PathVariable("thing") String thing,
 			@PathVariable("feature") String feature,
 			@PathVariable("property") String property) {
