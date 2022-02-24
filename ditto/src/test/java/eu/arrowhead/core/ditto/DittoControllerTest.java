@@ -36,7 +36,7 @@ public class DittoControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Before
 	public void setup() {
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+		mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
 
 	@Test
