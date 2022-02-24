@@ -67,7 +67,7 @@ public class DittoController {
 					message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = THING_PROPERTY_URI)
-	public Object thingPropertyRequest(
+	public String thingPropertyRequest(
 			@PathVariable("thing") String thing,
 			@PathVariable("feature") String feature,
 			@PathVariable("property") String property) {

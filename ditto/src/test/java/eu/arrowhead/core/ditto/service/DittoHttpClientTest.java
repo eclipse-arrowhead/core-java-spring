@@ -26,7 +26,7 @@ import eu.arrowhead.core.ditto.Constants;
 @SpringBootTest
 public class DittoHttpClientTest {
 
-	// =================================================================================================
+	//=================================================================================================
 	// members
 
 	@Value(Constants.$DITTO_HTTP_ADDRESS_WD)
@@ -41,7 +41,7 @@ public class DittoHttpClientTest {
 
 	final ResponseEntity<String> mockedResponse = new ResponseEntity<>("res-xyz", HttpStatus.OK);
 
-	// =================================================================================================
+	//=================================================================================================
 	// methods
 
 	// -------------------------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ public class DittoHttpClientTest {
 	}
 
 	@Test
-	public void getThing() throws Exception {
+	public void getThing() {
 		final String thingId = "thing-abc";
 		final String dittoThingUri = dittoAddress + "/api/2/things/" + thingId;
 		Mockito.when(restTemplate.exchange(
@@ -67,7 +67,7 @@ public class DittoHttpClientTest {
 	}
 
 	@Test
-	public void getThings() throws Exception {
+	public void getThings() {
 		final String dittoThingsUri = dittoAddress + "/api/2/search/things/";
 		Mockito.when(restTemplate.exchange(
 				eq(dittoThingsUri),
@@ -81,7 +81,7 @@ public class DittoHttpClientTest {
 	}
 
 	@Test
-	public void getProperty() throws Exception {
+	public void getProperty() {
 		final String thingId = "thing-a";
 		final String featureId = "feature-b";
 		final String propertyId = "property-c";

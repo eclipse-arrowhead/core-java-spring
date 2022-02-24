@@ -21,10 +21,10 @@ import eu.arrowhead.common.core.CoreSystemService;
 @Component
 public class DittoApplicationInitListener extends ApplicationInitListener {
 
-	// =================================================================================================
+	//=================================================================================================
 	// methods
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected void customInit(final ContextRefreshedEvent event) {
 		if (sslProperties.isSslEnabled()) {
@@ -34,7 +34,7 @@ public class DittoApplicationInitListener extends ApplicationInitListener {
 
 	//=================================================================================================
 	// assistant methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {

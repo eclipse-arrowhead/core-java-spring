@@ -12,30 +12,32 @@
 package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class SystemDataDTO implements Serializable {
 
-	// =================================================================================================
+	//=================================================================================================
 	// members
 
 	private String data;
 
-	// =================================================================================================
+	//=================================================================================================
 	// methods
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
+	@JsonCreator
 	public SystemDataDTO(@JsonProperty("systemData") final String data) {
 		this.data = data;
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	public String getSystemData() {
 		return data;
 	}
 
 	// -------------------------------------------------------------------------------------------------
-	public void setData(final String data) {
+	public void setSystemData(final String data) {
 		this.data = data;
 	}
 }

@@ -29,7 +29,7 @@ public class DittoMonitorController {
 
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
@@ -43,7 +43,7 @@ public class DittoMonitorController {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return system data describing this core system", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = "Return system data describing this core system", response = SystemDataDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -51,11 +51,11 @@ public class DittoMonitorController {
 	})
 	@GetMapping(path = CommonConstants.SYSTEM_DATA_URI)
 	public SystemDataDTO getSystemData() {
-		return new SystemDataDTO("");
+		return new SystemDataDTO(""); // TODO: Return actual data.
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return an inventory ID for this core system", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = "Return an inventory ID for this core system", response = InventoryIdDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -63,6 +63,6 @@ public class DittoMonitorController {
 	})
 	@GetMapping(path = CommonConstants.INVENTORY_ID_URI)
 	public InventoryIdDTO getInventoryId() {
-		return new InventoryIdDTO("");
+		return new InventoryIdDTO(""); // TODO: Return real inventory ID.
 	}
 }

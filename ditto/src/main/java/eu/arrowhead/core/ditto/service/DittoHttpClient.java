@@ -26,7 +26,7 @@ import eu.arrowhead.core.ditto.Constants;
 @Component
 public class DittoHttpClient {
 
-	// =================================================================================================
+	//=================================================================================================
 	// members
 
 	final private static String DITTO_THINGS_SEARCH_URI = "/api/2/search/things/";
@@ -47,21 +47,21 @@ public class DittoHttpClient {
 
 	private final Logger logger = LogManager.getLogger(DittoHttpClient.class);
 
-	// =================================================================================================
+	//=================================================================================================
 	// methods
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	public ResponseEntity<String> getThings() {
 		return sendGetRequest(DITTO_THINGS_SEARCH_URI);
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	public ResponseEntity<String> getThing(final String thingId) {
 		Assert.notNull(thingId, "thingId is null");
 		return sendGetRequest(DITTO_THINGS_URI + thingId);
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	public ResponseEntity<String> getProperty(
 			final String thing,
 			final String feature,
@@ -74,12 +74,12 @@ public class DittoHttpClient {
 		return sendGetRequest(path);
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private ResponseEntity<String> sendGetRequest(final String path) {
 		final String uri = dittoAddress + path;
-		HttpHeaders headers = new HttpHeaders();
+		final HttpHeaders headers = new HttpHeaders();
 		headers.setBasicAuth(dittoUsername, dittoPassword);
-		HttpEntity<String> request = new HttpEntity<String>(headers);
+		final HttpEntity<String> request = new HttpEntity<>(headers);
 		logger.debug("Sending HTTP GET request to Eclipse Ditto, URI " + uri);
 		return restTemplate.exchange(uri, HttpMethod.GET, request, String.class);
 	}
