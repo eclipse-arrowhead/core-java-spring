@@ -19,10 +19,12 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.dto.internal.InventoryIdDTO;
 import eu.arrowhead.common.dto.internal.SystemDataDTO;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+@Api(tags = { CoreCommonConstants.SWAGGER_TAG_ALL })
 @RestController
 @RequestMapping(CommonConstants.DITTO_URI + CommonConstants.MONITOR_URI)
 public class DittoMonitorController {
