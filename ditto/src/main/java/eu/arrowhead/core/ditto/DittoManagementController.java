@@ -20,25 +20,27 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.core.ditto.service.DittoHttpClient;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+@Api(tags = { CoreCommonConstants.SWAGGER_TAG_ALL })
 @RestController
 @RequestMapping(CommonConstants.DITTO_URI)
 public class DittoManagementController {
 
 	//=================================================================================================
 	// members
-	
+
 	@Autowired
 	private DittoHttpClient dittoHttpClient;
 
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Returns a list of all registered Ditto Things", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = "Returns a list of all registered Ditto Things", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -50,7 +52,7 @@ public class DittoManagementController {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Returns the specified Ditto Thing", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = "Returns the specified Ditto Thing", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
