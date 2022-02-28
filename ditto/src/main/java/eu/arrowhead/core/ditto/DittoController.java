@@ -35,6 +35,8 @@ public class DittoController {
 	//=================================================================================================
 	// members
 
+	private static final String GET_THING_PROPERTY_HTTP_200_MESSAGE = "Returned Thing property";
+
 	@Autowired
 	private DittoHttpClient dittoHttpClient;
 
@@ -59,14 +61,11 @@ public class DittoController {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Forward the given request to the appropriate Ditto Thing",
-			response = String.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
+	@ApiOperation(value = "Forward the given request to the appropriate Ditto Thing", response = String.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED,
-					message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR,
-					message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_THING_PROPERTY_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = THING_PROPERTY_URI)
 	public String thingPropertyRequest(

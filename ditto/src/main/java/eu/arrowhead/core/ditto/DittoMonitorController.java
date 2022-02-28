@@ -30,12 +30,20 @@ import io.swagger.annotations.ApiResponses;
 public class DittoMonitorController {
 
 	//=================================================================================================
+	// members
+
+	private static final String PING_HTTP_200_MESSAGE = "The system is live";
+	private static final String SYSTEM_DATA_HTTP_200_MESSAGE = "System data returned";
+	private static final String INVENTORY_ID_HTTP_200_MESSAGE = "Inventory ID returned";
+
+
+	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = PING_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
@@ -47,7 +55,7 @@ public class DittoMonitorController {
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return system data describing this core system", response = SystemDataDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = SYSTEM_DATA_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
@@ -59,7 +67,7 @@ public class DittoMonitorController {
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return an inventory ID for this core system", response = InventoryIdDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = INVENTORY_ID_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
