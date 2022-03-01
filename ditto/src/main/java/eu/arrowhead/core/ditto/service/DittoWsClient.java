@@ -27,7 +27,11 @@ import org.eclipse.ditto.client.messaging.AuthenticationProvider;
 import org.eclipse.ditto.client.messaging.AuthenticationProviders;
 import org.eclipse.ditto.client.messaging.MessagingProvider;
 import org.eclipse.ditto.client.messaging.MessagingProviders;
-import org.eclipse.ditto.things.model.Thing;
+import org.eclipse.ditto.policies.model.PoliciesResourceType;
+import org.eclipse.ditto.policies.model.Policy;
+import org.eclipse.ditto.policies.model.PolicyId;
+import org.eclipse.ditto.policies.model.Subject;
+import org.eclipse.ditto.policies.model.SubjectIssuer;import org.eclipse.ditto.things.model.Thing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
@@ -56,6 +60,15 @@ public class DittoWsClient {
 
 	// Arbitrary ID which can be used to cancel the registration later on:
 	final String THING_REGISTRATION_ID = "THING_REGISTRATION_ID";
+
+	private final PolicyId AH_DITTO_POLICY_ID = PolicyId.of("eu.arrowhead:ah-ditto");
+
+	private final Policy defaultPolicy = Policy.newBuilder(AH_DITTO_POLICY_ID)
+		.forLabel("DEFAULT")
+		.setSubject(Subject.newInstance(SubjectIssuer.newInstance("nginx"), "ditto"))
+		.setGrantedPermissions(PoliciesResourceType.policyResource("/"), "READ", "WRITE")
+		.setGrantedPermissions(PoliciesResourceType.thingResource("/"), "READ", "WRITE")
+		.build();
 
 	//=================================================================================================
 	// methods
@@ -91,8 +104,13 @@ public class DittoWsClient {
 	//-------------------------------------------------------------------------------------------------
 	private void onConnected(final DittoClient client) {
 		logger.debug("Connected to Ditto's WebSocket API");
-		this.subscribeForTwinEvents(client);
+		subscribeForTwinEvents(client);
 		client.twin().registerForThingChanges(THING_REGISTRATION_ID, this::onThingChange);
+		if (defaultPolicyExists(client)) {
+			client.policies().update(defaultPolicy);
+		} else {
+			client.policies().create(defaultPolicy);
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -112,6 +130,19 @@ public class DittoWsClient {
 
 		ThingChangeEvent event = new ThingChangeEvent(this, change);
 		eventPublisher.publishEvent(event);
+	}
+
+	private boolean defaultPolicyExists(final DittoClient client) {
+		// TODO: Find a better way of doing this check.
+		try {
+			client.policies()
+					.retrieve(AH_DITTO_POLICY_ID)
+					.toCompletableFuture()
+					.get();
+		} catch (InterruptedException | ExecutionException e) {
+			return false;
+		}
+		return true;
 	}
 
 }
