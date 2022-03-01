@@ -11,7 +11,6 @@
 
 package eu.arrowhead.core.ditto.service;
 
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import javax.annotation.PostConstruct;
 import com.neovisionaries.ws.client.WebSocket;
@@ -52,6 +51,9 @@ public class DittoWsClient {
 
 	@Value(Constants.$DITTO_PASSWORD)
 	private String dittoPassword;
+
+	@Value(Constants.$SUBSCRIBE_TO_DITTO_EVENTS)
+	private boolean subscribeToDittoEvents;
 
 	@Autowired
 	private ApplicationEventPublisher eventPublisher;
@@ -105,7 +107,11 @@ public class DittoWsClient {
 	//-------------------------------------------------------------------------------------------------
 	private void onConnected(final DittoClient client) {
 		logger.debug("Connected to Ditto's WebSocket API");
-		subscribeForTwinEvents(client);
+
+		if (subscribeToDittoEvents) {
+			subscribeToDittoEvents(client);
+		}
+
 		client.twin().registerForThingChanges(THING_REGISTRATION_ID, this::onThingChange);
 		if (dittoPolicyExists(client)) {
 			client.policies().update(dittoPolicy);
@@ -115,7 +121,7 @@ public class DittoWsClient {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void subscribeForTwinEvents(final DittoClient client) {
+	private void subscribeToDittoEvents(final DittoClient client) {
 		try {
 			client.twin().startConsumption().toCompletableFuture().get(); // this will block the thread!
 		} catch (InterruptedException | ExecutionException e) {
@@ -126,10 +132,26 @@ public class DittoWsClient {
 
 	//-------------------------------------------------------------------------------------------------
 	private void onThingChange(ThingChange change) {
-		final Optional<Thing> thing = change.getThing();
+		final Thing thing = change.getThing().orElse(null);
 		logger.debug("Thing change detected. Action: " + change.getAction() + ", " + "Thing: " + thing);
 
-		ThingChangeEvent event = new ThingChangeEvent(this, change);
+		ThingEventType type;
+		switch (change.getAction()) {
+			case CREATED:
+				type = ThingEventType.CREATED;
+				break;
+			case UPDATED:
+				type = ThingEventType.UPDATED;
+				break;
+			case DELETED:
+				type = ThingEventType.DELETED;
+				break;
+			default:
+				logger.debug("Unhandled Ditto ChangeAction: " + change.getAction());
+				return;
+		}
+
+		ThingEvent event = new ThingEvent(this, thing, type);
 		eventPublisher.publishEvent(event);
 	}
 

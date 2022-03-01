@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.ditto.client.changes.ThingChange;
 import org.eclipse.ditto.json.JsonObject;
 import org.eclipse.ditto.json.JsonValue;
 import org.eclipse.ditto.things.model.Attributes;
@@ -23,7 +22,6 @@ import org.eclipse.ditto.things.model.Feature;
 import org.eclipse.ditto.things.model.Features;
 import org.eclipse.ditto.things.model.Thing;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -32,8 +30,7 @@ import eu.arrowhead.core.ditto.Constants;
 import eu.arrowhead.core.ditto.DittoModelException;
 
 @Service
-@ConditionalOnProperty(name = Constants.SUBSCRIBE_TO_DITTO_EVENTS, matchIfMissing = true)
-public class DittoEventListener implements ApplicationListener<ThingChangeEvent> {
+public class DittoEventListener implements ApplicationListener<ThingEvent> {
 
 	//=================================================================================================
 	// members
@@ -54,20 +51,14 @@ public class DittoEventListener implements ApplicationListener<ThingChangeEvent>
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public void onApplicationEvent(final ThingChangeEvent event) {
+	public void onApplicationEvent(final ThingEvent event) {
 		Assert.notNull(event, "Thing change event is null");
 
-		final ThingChange change = event.getChange();
+		final ThingEventType type = event.getType();
+		final Thing thing = event.getThing();
 
-		if (change.getThing().isEmpty()) {
-			logger.error("No Thing present in ThingChange");
-			return;
-		}
-
-		Thing thing = change.getThing().get();
 		try {
-
-			switch (change.getAction()) {
+			switch (type) {
 				case CREATED:
 					registerServices(thing);
 					break;
@@ -79,8 +70,7 @@ public class DittoEventListener implements ApplicationListener<ThingChangeEvent>
 					unregisterServices(thing);
 					break;
 				default:
-					logger.debug("Unhandled ThingChange");
-					break;
+					throw new RuntimeException("Unhandled ThingEvent");
 			}
 		} catch (DittoModelException ex) {
 			logger.error(ex);
