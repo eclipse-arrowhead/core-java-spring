@@ -30,6 +30,8 @@ public class Constants {
 	public static final String DITTO_PASSWORD = "ditto_password";
 	public static final String $DITTO_PASSWORD = "${" + DITTO_PASSWORD + "}";
 
+	public static final String SUBSCRIBE_TO_DITTO_EVENTS = "subscribe_to_ditto_events";
+
 	public static final String SERVICE_URI_TEMPLATE = CommonConstants.DITTO_URI + "/things/%s/features/%s";
 	public static final String SERVICE_DEFINITIONS = "serviceDefinitions";
 	public static final String ENTITY_ID = "entityId";

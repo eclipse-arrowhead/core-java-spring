@@ -23,6 +23,7 @@ import org.eclipse.ditto.things.model.Feature;
 import org.eclipse.ditto.things.model.Features;
 import org.eclipse.ditto.things.model.Thing;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -31,7 +32,8 @@ import eu.arrowhead.core.ditto.Constants;
 import eu.arrowhead.core.ditto.DittoModelException;
 
 @Service
-public class DittoService implements ApplicationListener<ThingChangeEvent> {
+@ConditionalOnProperty(name = Constants.SUBSCRIBE_TO_DITTO_EVENTS, matchIfMissing = true)
+public class DittoEventListener implements ApplicationListener<ThingChangeEvent> {
 
 	//=================================================================================================
 	// members
@@ -39,7 +41,7 @@ public class DittoService implements ApplicationListener<ThingChangeEvent> {
 	private static final String SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE =
 			"Service definition has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).";
 
-	private final Logger logger = LogManager.getLogger(DittoService.class);
+	private final Logger logger = LogManager.getLogger(DittoEventListener.class);
 
 	@Autowired
 	private ServiceRegistryClient serviceRegistryClient;
