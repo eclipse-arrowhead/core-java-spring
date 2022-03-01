@@ -34,6 +34,8 @@ public class Constants {
 	public static final String SERVICE_DEFINITIONS = "serviceDefinitions";
 	public static final String ENTITY_ID = "entityId";
 
+	public static final String DITTO_POLICY_ID = "eu.arrowhead:ah-ditto";
+
 	//=================================================================================================
 	// assistant methods
 
