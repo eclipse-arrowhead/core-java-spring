@@ -10,6 +10,7 @@
  ********************************************************************************/
 
 package eu.arrowhead.core.ditto.service;
+import java.io.Serializable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import eu.arrowhead.common.dto.internal.ThingRequestDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.ditto.Constants;
 
 @Component
@@ -83,19 +85,21 @@ public class DittoHttpClient {
 
 	//-------------------------------------------------------------------------------------------------
 	public ResponseEntity<String> registerThing(final String thingId, final ThingRequestDTO thing) {
-		String stringValue = null;
-		try {
-			stringValue = objectMapper.writeValueAsString(thing);
-		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return sendPutRequest(DITTO_THINGS_URI + thingId, stringValue);
+		return sendPutRequest(DITTO_THINGS_URI + thingId, dtoToString(thing));
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	public ResponseEntity<String> unregisterThing(final String thingId) {
 		return sendDeleteRequest(DITTO_THINGS_URI + thingId);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private String dtoToString(Serializable obj) {
+		try {
+			return objectMapper.writeValueAsString(obj);
+		} catch (JsonProcessingException e) {
+			throw new ArrowheadException("Failed to serialize object", e);
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
