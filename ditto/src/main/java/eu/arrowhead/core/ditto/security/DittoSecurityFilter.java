@@ -35,8 +35,6 @@ public class DittoSecurityFilter extends TokenSecurityFilter {
 	//=================================================================================================
 	// members
 
-	private PrivateKey myPrivateKey;
-
 	private final Map<String, Object> arrowheadContext;
 	private final HttpService httpService;
 
@@ -62,12 +60,6 @@ public class DittoSecurityFilter extends TokenSecurityFilter {
 	protected PublicKey getAuthorizationPublicKey() {
 		// TODO: Return cached value.
 		return queryAuthorizationPublicKey();
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	public void setMyPrivateKey(final PrivateKey myPrivateKey) {
-		Assert.notNull(myPrivateKey, "myPrivateKey cannot be null");
-		this.myPrivateKey = myPrivateKey;
 	}
 
 	//-------------------------------------------------------------------------------------------------

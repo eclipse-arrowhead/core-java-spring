@@ -61,9 +61,10 @@ public class DittoWsClient {
 	// Arbitrary ID which can be used to cancel the registration later on:
 	final String THING_REGISTRATION_ID = "THING_REGISTRATION_ID";
 
-	private final PolicyId AH_DITTO_POLICY_ID = PolicyId.of("eu.arrowhead:ah-ditto");
+	private final PolicyId DITTO_POLICY_ID = PolicyId.of(Constants.DITTO_POLICY_ID);
 
-	private final Policy defaultPolicy = Policy.newBuilder(AH_DITTO_POLICY_ID)
+	// TODO: This policy is copied from example code, replace it!
+	private final Policy dittoPolicy = Policy.newBuilder(DITTO_POLICY_ID)
 		.forLabel("DEFAULT")
 		.setSubject(Subject.newInstance(SubjectIssuer.newInstance("nginx"), "ditto"))
 		.setGrantedPermissions(PoliciesResourceType.policyResource("/"), "READ", "WRITE")
@@ -106,10 +107,10 @@ public class DittoWsClient {
 		logger.debug("Connected to Ditto's WebSocket API");
 		subscribeForTwinEvents(client);
 		client.twin().registerForThingChanges(THING_REGISTRATION_ID, this::onThingChange);
-		if (defaultPolicyExists(client)) {
-			client.policies().update(defaultPolicy);
+		if (dittoPolicyExists(client)) {
+			client.policies().update(dittoPolicy);
 		} else {
-			client.policies().create(defaultPolicy);
+			client.policies().create(dittoPolicy);
 		}
 	}
 
@@ -132,11 +133,11 @@ public class DittoWsClient {
 		eventPublisher.publishEvent(event);
 	}
 
-	private boolean defaultPolicyExists(final DittoClient client) {
-		// TODO: Find a better way of doing this check.
+	private boolean dittoPolicyExists(final DittoClient client) {
+		// TODO: Find a better way of performing this check.
 		try {
 			client.policies()
-					.retrieve(AH_DITTO_POLICY_ID)
+					.retrieve(DITTO_POLICY_ID)
 					.toCompletableFuture()
 					.get();
 		} catch (InterruptedException | ExecutionException e) {

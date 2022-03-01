@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.dto.internal.ThingRequestDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.ditto.service.DittoHttpClient;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -85,6 +86,11 @@ public class DittoManagementController {
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@PutMapping(path = "/things/{thingId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public String registerThing(@PathVariable("thingId") String thingId, @RequestBody final ThingRequestDTO thing) { // TODO: Change response type
+		final String givenPolicyId = thing.getPolicyId();
+		if (givenPolicyId != null && !givenPolicyId.equals(Constants.DITTO_POLICY_ID)) {
+			throw new ArrowheadException("Cannot set Policy ID when registering Things via this system");
+		}
+		thing.setPolicyId(Constants.DITTO_POLICY_ID);
 		return dittoHttpClient.registerThing(thingId, thing).getBody();
 	}
 
