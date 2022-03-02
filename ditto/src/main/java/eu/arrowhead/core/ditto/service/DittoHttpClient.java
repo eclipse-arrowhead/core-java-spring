@@ -10,7 +10,6 @@
  ********************************************************************************/
 
 package eu.arrowhead.core.ditto.service;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,12 +76,12 @@ public class DittoHttpClient {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public ResponseEntity<String> registerThing(final String thingId, final String thingJson) {
+	public ResponseEntity<String> putThing(final String thingId, final String thingJson) {
 		return sendPutRequest(DITTO_THINGS_URI + thingId, thingJson);
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public ResponseEntity<String> unregisterThing(final String thingId) {
+	public ResponseEntity<String> deleteThing(final String thingId) {
 		return sendDeleteRequest(DITTO_THINGS_URI + thingId);
 	}
 

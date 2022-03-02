@@ -90,7 +90,7 @@ public class DittoManagementController {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Registers or updates the given Ditto Thing", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = "Creates or updates the given Ditto Thing", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = PUT_THING_HTTP_201_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -98,19 +98,16 @@ public class DittoManagementController {
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@PutMapping(path = "/things/{thingId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public String registerThing(@PathVariable("thingId") String thingId, @RequestBody final String thingRequest) { // TODO: Change response type
+	@ResponseBody public String putThing(@PathVariable("thingId") String thingId, @RequestBody final String thingRequest) { // TODO: Change response type
 
 		Thing thing = ThingsModelFactory.newThingBuilder(thingRequest)
 			.setId(ThingId.of(thingId))
 			.setPolicyId(PolicyId.of(Constants.DITTO_POLICY_ID))
 			.build();
 
-
-		final ResponseEntity<String> response = dittoHttpClient.registerThing(thingId, thing.toJsonString());
+		final ResponseEntity<String> response = dittoHttpClient.putThing(thingId, thing.toJsonString());
 
 		if (!subscribeToDittoEvents) {
-			// If we are not listening for Ditto events, we need to manually register
-			// the Thing's features here:
 			final boolean wasCreated = response.getStatusCode().value() == HttpStatus.SC_CREATED;
 			final ThingEventType eventType = wasCreated ? ThingEventType.CREATED : ThingEventType.UPDATED;
 			ThingEvent event = new ThingEvent(this, thing, eventType);
@@ -121,7 +118,7 @@ public class DittoManagementController {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Unregisters the specified Ditto Thing", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = "Deletes the specified Ditto Thing", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_THING_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -129,8 +126,16 @@ public class DittoManagementController {
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.OK)
 	@DeleteMapping(path = "/things/{thingId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public String unregisterThing(@PathVariable("thingId") String thingId) {
-		return dittoHttpClient.unregisterThing(thingId).getBody();
+	@ResponseBody public void deleteThing(@PathVariable("thingId") String thingId) {
+
+		final String thingJson = dittoHttpClient.getThing(thingId).getBody();
+		dittoHttpClient.deleteThing(thingId);
+
+		if (!subscribeToDittoEvents) {
+			Thing thing = ThingsModelFactory.newThingBuilder(thingJson).build();
+			ThingEvent event = new ThingEvent(this, thing, ThingEventType.DELETED);
+			eventPublisher.publishEvent(event);
+		}
 	}
 
 }
