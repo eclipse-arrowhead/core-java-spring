@@ -10,8 +10,6 @@
  ********************************************************************************/
 
 package eu.arrowhead.core.ditto.service;
-import java.io.Serializable;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,8 +23,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
-import eu.arrowhead.common.dto.internal.ThingRequestDTO;
-import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.ditto.Constants;
 
 @Component
@@ -50,9 +46,6 @@ public class DittoHttpClient {
 
 	@Autowired
 	private RestTemplate restTemplate;
-
-	@Autowired
-	private ObjectMapper objectMapper;
 
 	private final Logger logger = LogManager.getLogger(DittoHttpClient.class);
 
@@ -84,22 +77,13 @@ public class DittoHttpClient {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public ResponseEntity<String> registerThing(final String thingId, final ThingRequestDTO thing) {
-		return sendPutRequest(DITTO_THINGS_URI + thingId, dtoToString(thing));
+	public ResponseEntity<String> registerThing(final String thingId, final String thingJson) {
+		return sendPutRequest(DITTO_THINGS_URI + thingId, thingJson);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	public ResponseEntity<String> unregisterThing(final String thingId) {
 		return sendDeleteRequest(DITTO_THINGS_URI + thingId);
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private String dtoToString(Serializable obj) {
-		try {
-			return objectMapper.writeValueAsString(obj);
-		} catch (JsonProcessingException e) {
-			throw new ArrowheadException("Failed to serialize object", e);
-		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -127,6 +111,7 @@ public class DittoHttpClient {
 		}
 		final HttpEntity<String> request = new HttpEntity<>(body, headers);
 		logger.debug("Sending HTTP " + method + " request to Eclipse Ditto, URI " + uri);
+		// TODO: Error handling
 		return restTemplate.exchange(uri, method, request, String.class);
 	}
 }
