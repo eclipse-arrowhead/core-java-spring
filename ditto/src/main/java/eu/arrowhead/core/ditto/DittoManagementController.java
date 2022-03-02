@@ -12,8 +12,15 @@
 package eu.arrowhead.core.ditto;
 
 import org.apache.http.HttpStatus;
+import org.eclipse.ditto.policies.model.PolicyId;
+import org.eclipse.ditto.things.model.Thing;
+import org.eclipse.ditto.things.model.ThingId;
+import org.eclipse.ditto.things.model.ThingsModelFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,9 +32,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
-import eu.arrowhead.common.dto.internal.ThingRequestDTO;
-import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.ditto.service.DittoHttpClient;
+import eu.arrowhead.core.ditto.service.ThingEvent;
+import eu.arrowhead.core.ditto.service.ThingEventType;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -45,6 +52,12 @@ public class DittoManagementController {
 	private static final String GET_THINGS_HTTP_200_MESSAGE = "Ditto Things returned";
 	private static final String PUT_THING_HTTP_201_MESSAGE = "Ditto Thing registered/updated";
 	private static final String DELETE_THING_HTTP_200_MESSAGE = "Ditto Thing removed";
+
+	@Value(Constants.$SUBSCRIBE_TO_DITTO_EVENTS)
+	private boolean subscribeToDittoEvents;
+
+	@Autowired
+	private ApplicationEventPublisher eventPublisher;
 
 	@Autowired
 	private DittoHttpClient dittoHttpClient;
@@ -85,13 +98,26 @@ public class DittoManagementController {
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@PutMapping(path = "/things/{thingId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public String registerThing(@PathVariable("thingId") String thingId, @RequestBody final ThingRequestDTO thing) { // TODO: Change response type
-		final String givenPolicyId = thing.getPolicyId();
-		if (givenPolicyId != null && !givenPolicyId.equals(Constants.DITTO_POLICY_ID)) {
-			throw new ArrowheadException("Cannot set Policy ID when registering Things via this system");
+	@ResponseBody public String registerThing(@PathVariable("thingId") String thingId, @RequestBody final String thingRequest) { // TODO: Change response type
+
+		Thing thing = ThingsModelFactory.newThingBuilder(thingRequest)
+			.setId(ThingId.of(thingId))
+			.setPolicyId(PolicyId.of(Constants.DITTO_POLICY_ID))
+			.build();
+
+
+		final ResponseEntity<String> response = dittoHttpClient.registerThing(thingId, thing.toJsonString());
+
+		if (!subscribeToDittoEvents) {
+			// If we are not listening for Ditto events, we need to manually register
+			// the Thing's features here:
+			final boolean wasCreated = response.getStatusCode().value() == HttpStatus.SC_CREATED;
+			final ThingEventType eventType = wasCreated ? ThingEventType.CREATED : ThingEventType.UPDATED;
+			ThingEvent event = new ThingEvent(this, thing, eventType);
+			eventPublisher.publishEvent(event);
 		}
-		thing.setPolicyId(Constants.DITTO_POLICY_ID);
-		return dittoHttpClient.registerThing(thingId, thing).getBody();
+
+		return response.getBody();
 	}
 
 	//-------------------------------------------------------------------------------------------------
