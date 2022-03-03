@@ -6,7 +6,6 @@ import org.apache.http.HttpStatus;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.CoreCommonConstants;
-import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.coap.AhCoapServer;
 import eu.arrowhead.common.coap.configuration.CoapCertificates;
@@ -34,10 +33,8 @@ import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.server.resources.CoapExchange;
-import org.eclipse.californium.core.server.resources.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -46,6 +43,7 @@ public class CoapServiceRegistry {
     // =================================================================================================
     // members
     private final Logger logger = LogManager.getLogger(CoapServiceRegistry.class);
+    
     private AhCoapServer coapServer;
 
     @Value(CoreCommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
@@ -150,7 +148,7 @@ public class CoapServiceRegistry {
                             trustStorePassword,
                             trustStorePath));
             coapServer = new AhCoapServer(coapServerConfiguration);
-            initializateResources(serviceRegistryDBService);
+            initializateResources();
             coapServer.start();
         } else {
             logger.info("CoAP Protocol Disabled");
@@ -168,14 +166,13 @@ public class CoapServiceRegistry {
     // =================================================================================================
     // assistant methods
     // -------------------------------------------------------------------------------------------------//-------------------------------------------------------------------------------------------------
-    private void initializateResources(ServiceRegistryDBService serviceRegistryDBService) {
+    private void initializateResources() {
         coapServer.add(new EchoResource());
-        coapServer.add(new PullSystemsResource(serviceRegistryDBService));
-        coapServer.add(new QueryResource(serviceRegistryDBService));
-        coapServer.add(new RegisterResource(serviceRegistryDBService));
-        coapServer.add(new RegisterSystemResource(serviceRegistryDBService));
-        coapServer.add(new UnregisterResource(serviceRegistryDBService));
-        coapServer.add(new UnregisterSystemResource(serviceRegistryDBService));
+        coapServer.add(new QueryResource());
+        coapServer.add(new RegisterResource());
+        coapServer.add(new RegisterSystemResource());
+        coapServer.add(new UnregisterResource());
+        coapServer.add(new UnregisterSystemResource());
     }
 
     // =================================================================================================
@@ -199,77 +196,13 @@ public class CoapServiceRegistry {
     }
 
     // -------------------------------------------------------------------------------------------------
-    class PullSystemsResource extends CoapResource {
-
-        private final ServiceRegistryDBService serviceRegistryDBService;
-        private final ObjectMapper mapper = new ObjectMapper();
-
-        public PullSystemsResource(ServiceRegistryDBService serviceRegistryDBService) {
-            super(URL_PATH_PULL_SYSTEMS);
-            this.serviceRegistryDBService = serviceRegistryDBService;
-            getAttributes().setTitle("Pull-Systems Resource");
-        }
-
-        @Override
-        public void handleGET(CoapExchange exchange) {
-            try {
-                Map<String, String> queryParams = CoapTools.getQueryParams(exchange);
-                Integer page = CoapTools.getParam(queryParams, CoreCommonConstants.REQUEST_PARAM_PAGE, -1);
-                Integer size = CoapTools.getParam(queryParams, CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, -1);
-                String direction = CoapTools.getParam(queryParams, CoreCommonConstants.REQUEST_PARAM_DIRECTION,
-                        CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE);
-                String sortField = CoapTools.getParam(queryParams, CoreCommonConstants.REQUEST_PARAM_SORT_FIELD,
-                        CoreCommonConstants.COMMON_FIELD_NAME_ID);
-
-                final int validatedPage;
-                final int validatedSize;
-                if (page == -1 && size == -1) {
-                    validatedPage = -1;
-                    validatedSize = -1;
-                } else {
-                    if (page == -1 || size == -1) {
-                        exchange.respond(
-                                ResponseCode.BAD_REQUEST,
-                                ResponseCode.BAD_REQUEST.text,
-                                MediaTypeRegistry.TEXT_PLAIN);
-                        return;
-                    } else {
-                        validatedPage = page;
-                        validatedSize = size;
-                    }
-                }
-
-                final Direction validatedDirection = CoreUtilities.calculateDirection(direction,
-                        CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_PULL_SYSTEMS_URI);
-
-                exchange.respond(
-                        ResponseCode.CONTENT,
-                        mapper.writeValueAsString(serviceRegistryDBService.getSystemEntries(validatedPage,
-                                validatedSize, validatedDirection, sortField)),
-                        MediaTypeRegistry.APPLICATION_JSON);
-            } catch (Exception ex) {
-                exchange.respond(
-                        ResponseCode.INTERNAL_SERVER_ERROR,
-                        ex.getMessage(),
-                        MediaTypeRegistry.TEXT_PLAIN);
-            }
-
-        }
-
-    }
-
-    // -------------------------------------------------------------------------------------------------
     class QueryResource extends CoapResource {
 
-        private final ServiceRegistryDBService serviceRegistryDBService;
         private final ObjectMapper mapper = new ObjectMapper();
 
-        public QueryResource(ServiceRegistryDBService serviceRegistryDBService) {
+        public QueryResource() {
             super(URL_PATH_QUERY);
-            this.serviceRegistryDBService = serviceRegistryDBService;
-            add(new QueryAllResource(serviceRegistryDBService));
-            add(new QueryMulti(serviceRegistryDBService));
-            add(new QuerySystemResource(serviceRegistryDBService));
+            add(new QueryMulti());
             getAttributes().setTitle("Query Resource");
         }
 
@@ -297,49 +230,12 @@ public class CoapServiceRegistry {
     }
 
     // -------------------------------------------------------------------------------------------------
-    class QueryAllResource extends CoapResource {
-
-        private final ServiceRegistryDBService serviceRegistryDBService;
-        private final ObjectMapper mapper = new ObjectMapper();
-
-        public QueryAllResource(ServiceRegistryDBService serviceRegistryDBService) {
-            super(URL_PATH_ALL);
-            this.serviceRegistryDBService = serviceRegistryDBService;
-            getAttributes().setTitle("Query All Resource");
-        }
-
-        @Override
-        public void handleGET(CoapExchange exchange) {
-            try {
-                int page = 0;
-                int size = Integer.MAX_VALUE;
-                Direction direction = Direction.ASC;
-                String sortField = CommonConstants.COMMON_FIELD_NAME_ID;
-
-                exchange.respond(
-                        ResponseCode.CONTENT,
-                        mapper.writeValueAsString(serviceRegistryDBService.getServiceRegistryEntriesResponse(page, size,
-                                direction, sortField)),
-                        MediaTypeRegistry.APPLICATION_JSON);
-            } catch (Exception ex) {
-                exchange.respond(
-                        ResponseCode.INTERNAL_SERVER_ERROR,
-                        ex.getMessage(),
-                        MediaTypeRegistry.TEXT_PLAIN);
-            }
-        }
-
-    }
-
-    // -------------------------------------------------------------------------------------------------
     class QueryMulti extends CoapResource {
 
-        private final ServiceRegistryDBService serviceRegistryDBService;
         private final ObjectMapper mapper = new ObjectMapper();
 
-        public QueryMulti(ServiceRegistryDBService serviceRegistryDBService) {
+        public QueryMulti() {
             super(URL_PATH_MULTI);
-            this.serviceRegistryDBService = serviceRegistryDBService;
             getAttributes().setTitle("Multi Query Resource");
         }
 
@@ -374,113 +270,12 @@ public class CoapServiceRegistry {
     }
 
     // -------------------------------------------------------------------------------------------------
-    class QuerySystemResource extends CoapResource {
-
-        private final ServiceRegistryDBService serviceRegistryDBService;
-        private final ObjectMapper mapper = new ObjectMapper();
-
-        public QuerySystemResource(ServiceRegistryDBService serviceRegistryDBService) {
-            super(URL_PATH_SYSTEM);
-            this.serviceRegistryDBService = serviceRegistryDBService;
-            add(new QuerySystemIdResource(serviceRegistryDBService));
-            getAttributes().setTitle("Query System Resource");
-        }
-
-        @Override
-        public void handlePOST(CoapExchange exchange) {
-            try {
-                SystemRequestDTO systemRequestDTO = mapper.readValue(exchange.getRequestText(), SystemRequestDTO.class);
-
-                if (systemRequestDTO == null) {
-                    throw new Exception("System is null.");
-                }
-
-                if (Utilities.isEmpty(systemRequestDTO.getSystemName())) {
-                    throw new Exception("System Name is null.");
-                }
-
-                if (Utilities.isEmpty(systemRequestDTO.getAddress())) {
-                    throw new Exception("Empty System Address");
-                }
-
-                if (systemRequestDTO.getPort() == null) {
-                    throw new Exception("Empty Port");
-                }
-
-                final int validatedPort = systemRequestDTO.getPort().intValue();
-                if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN
-                        || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-                    throw new Exception("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and "
-                            + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
-                }
-
-                String systemName = systemRequestDTO.getSystemName();
-                String address = systemRequestDTO.getAddress();
-                int port = systemRequestDTO.getPort();
-
-                exchange.respond(
-                        ResponseCode.CONTENT,
-                        mapper.writeValueAsString(serviceRegistryDBService
-                                .getSystemByNameAndAddressAndPortResponse(systemName, address, port)),
-                        MediaTypeRegistry.APPLICATION_JSON);
-            } catch (Exception ex) {
-                exchange.respond(
-                        ResponseCode.INTERNAL_SERVER_ERROR,
-                        ex.getMessage(),
-                        MediaTypeRegistry.TEXT_PLAIN);
-            }
-        }
-
-    }
-
-    // -------------------------------------------------------------------------------------------------
-    class QuerySystemIdResource extends CoapResource {
-
-        private final ServiceRegistryDBService serviceRegistryDBService;
-        private final ObjectMapper mapper = new ObjectMapper();
-
-        public QuerySystemIdResource(ServiceRegistryDBService serviceRegistryDBService) {
-            super(URL_PATH_ID);
-            this.serviceRegistryDBService = serviceRegistryDBService;
-            getAttributes().setTitle("Query System Id Resource");
-        }
-
-        @Override
-        public Resource getChild(String name) {
-            return this;
-        }
-
-        @Override
-        public void handleGET(CoapExchange exchange) {
-            try {
-                int systemId = Integer.parseInt(CoapTools.getUrlPathValue(exchange, URL_PATH_ID));
-
-                if (systemId < 1) {
-                    throw new Exception(String.format("Id %d not valid!", systemId));
-                }
-
-                exchange.respond(
-                        ResponseCode.CONTENT,
-                        mapper.writeValueAsString(serviceRegistryDBService.getSystemById(systemId)),
-                        MediaTypeRegistry.APPLICATION_JSON);
-            } catch (Exception ex) {
-                exchange.respond(
-                        ResponseCode.INTERNAL_SERVER_ERROR,
-                        ex.getMessage(),
-                        MediaTypeRegistry.TEXT_PLAIN);
-            }
-        }
-    }
-
-    // -------------------------------------------------------------------------------------------------
     class RegisterResource extends CoapResource {
 
-        private final ServiceRegistryDBService serviceRegistryDBService;
         private final ObjectMapper mapper = new ObjectMapper();
 
-        public RegisterResource(ServiceRegistryDBService serviceRegistryDBService) {
+        public RegisterResource() {
             super(URL_PATH_REGISTER);
-            this.serviceRegistryDBService = serviceRegistryDBService;
             getAttributes().setTitle("Register Resource");
         }
 
@@ -490,7 +285,6 @@ public class CoapServiceRegistry {
 
                 ServiceRegistryRequestDTO serviceRegistryRequestDTO = mapper.readValue(exchange.getRequestText(),
                         ServiceRegistryRequestDTO.class);
-                String origin = URL_PATH_MGMT + "/" + URL_PATH_REGISTER;
 
                 if (Utilities.isEmpty(serviceRegistryRequestDTO.getServiceDefinition())) {
                     throw new Exception("Service definition is null or blank");
@@ -546,12 +340,10 @@ public class CoapServiceRegistry {
     // -------------------------------------------------------------------------------------------------
     class RegisterSystemResource extends CoapResource {
 
-        private final ServiceRegistryDBService serviceRegistryDBService;
         private final ObjectMapper mapper = new ObjectMapper();
 
-        public RegisterSystemResource(ServiceRegistryDBService serviceRegistryDBService) {
+        public RegisterSystemResource() {
             super(URL_PATH_REGISTER_SYSTEM);
-            this.serviceRegistryDBService = serviceRegistryDBService;
             getAttributes().setTitle("Register System Resource");
         }
 
@@ -574,12 +366,8 @@ public class CoapServiceRegistry {
     // -------------------------------------------------------------------------------------------------
     class UnregisterResource extends CoapResource {
 
-        private final ServiceRegistryDBService serviceRegistryDBService;
-        private final ObjectMapper mapper = new ObjectMapper();
-
-        public UnregisterResource(ServiceRegistryDBService serviceRegistryDBService) {
+        public UnregisterResource() {
             super(URL_PATH_UNREGISTER);
-            this.serviceRegistryDBService = serviceRegistryDBService;
             getAttributes().setTitle("Unegister Resource");
         }
 
@@ -612,8 +400,6 @@ public class CoapServiceRegistry {
                     throw new Exception("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and "
                             + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
                 }
-                // serviceRegistryDBService.removeServiceRegistry(serviceDefinition,
-                // providerName, providerAddress, providerPort);
                 exchange.respond(ResponseCode.VALID);
             } catch (Exception ex) {
                 exchange.respond(
@@ -628,12 +414,9 @@ public class CoapServiceRegistry {
     // -------------------------------------------------------------------------------------------------
     class UnregisterSystemResource extends CoapResource {
 
-        private final ServiceRegistryDBService serviceRegistryDBService;
-        private final ObjectMapper mapper = new ObjectMapper();
 
-        public UnregisterSystemResource(ServiceRegistryDBService serviceRegistryDBService) {
+        public UnregisterSystemResource() {
             super(URL_PATH_UNREGISTER_SYSTEM);
-            this.serviceRegistryDBService = serviceRegistryDBService;
             getAttributes().setTitle("Unegister Resource");
         }
 
@@ -774,7 +557,6 @@ public class CoapServiceRegistry {
 
     // -------------------------------------------------------------------------------------------------
     private String checkUnregisterSystemParameters(final String systemName, final String address, final int port) {
-        // parameters can't be null, but can be empty
 
         final String origin = CommonConstants.SERVICEREGISTRY_URI
                 + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI;

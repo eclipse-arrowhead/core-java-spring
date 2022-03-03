@@ -40,9 +40,8 @@ public class CoapOrchestrator {
     private final Logger logger = LogManager.getLogger(CoapOrchestrator.class);
     private AhCoapServer coapServer;
 
-    
-	@Value(CoreCommonConstants.$ORCHESTRATOR_USE_FLEXIBLE_STORE_WD)
-	private boolean useFlexibleStore;
+    @Value(CoreCommonConstants.$ORCHESTRATOR_USE_FLEXIBLE_STORE_WD)
+    private boolean useFlexibleStore;
 
     @Autowired
     private OrchestratorService orchestratorService;
@@ -87,8 +86,6 @@ public class CoapOrchestrator {
     private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
     private static final String GATEKEEPER_IS_NOT_PRESENT_ERROR_MESSAGE = " can not be served. Orchestrator runs in NO GATEKEEPER mode.";
     private static final String ID_NOT_VALID_ERROR_MESSAGE = " Id must be greater than 0. ";
-    private static final String SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE = "System name has invalid format. System names only contain letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).";
-    private static final String SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE = "Service definition has invalid format. Service definition only contains letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).";
 
     // =================================================================================================
     // methods
@@ -107,7 +104,7 @@ public class CoapOrchestrator {
                             keyStorePath,
                             keyStorePassword,
                             keyPassword,
-                            "serviceregistry-coap"),
+                            "orchestrator-coap"),
                     new CoapCertificates(
                             "coap-root",
                             trustStorePassword,

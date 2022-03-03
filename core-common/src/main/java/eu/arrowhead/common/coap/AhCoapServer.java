@@ -21,7 +21,7 @@ import org.eclipse.californium.scandium.dtls.CertificateType;
 
 public class AhCoapServer extends CoapServer {
 
-    //=================================================================================================
+    // =================================================================================================
     // members
     private final Logger logger = LogManager.getLogger(AhCoapServer.class);
 
@@ -41,30 +41,27 @@ public class AhCoapServer extends CoapServer {
 
         addEndpoint(
                 configuration.isSecured()
-                ? createSecuredEndPoint(configuration)
-                : createUnsecuredEndPoint(configuration));
+                        ? createSecuredEndPoint(configuration)
+                        : createUnsecuredEndPoint(configuration));
     }
 
-    //=================================================================================================
-    // methods
-    //-------------------------------------------------------------------------------------------------
-    //=================================================================================================
+    // =================================================================================================
     // assistant methods
-    //-------------------------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------------------------------
     private Endpoint createUnsecuredEndPoint(CoapServerConfiguration configuration) {
         CoapEndpoint.Builder builder = new CoapEndpoint.Builder();
-        UDPConnector udpConnector = new UDPConnector(new InetSocketAddress(configuration.getAddress(), configuration.getPort()));
+        UDPConnector udpConnector = new UDPConnector(
+                new InetSocketAddress(configuration.getAddress(), configuration.getPort()));
         builder.setConnector(udpConnector);
         return builder.build();
     }
 
-    //-------------------------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------------------------------
     private Endpoint createSecuredEndPoint(CoapServerConfiguration configuration) {
         DtlsConnectorConfig.Builder builder = new DtlsConnectorConfig.Builder();
         builder.setAddress(new InetSocketAddress(configuration.getAddress(), configuration.getPort()));
         builder.setRecommendedCipherSuitesOnly(false);
         try {
-            // try to read certificates
             SslContextUtil.Credentials serverCredentials = SslContextUtil.loadCredentials(
                     SslContextUtil.CLASSPATH_SCHEME + configuration.getCredentials().getKeyStorePath().substring(10),
                     configuration.getCredentials().getServerName(),
@@ -83,13 +80,9 @@ public class AhCoapServer extends CoapServer {
 
         } catch (GeneralSecurityException e) {
             e.printStackTrace();
-            System.err.println("certificates are invalid!");
-            System.err.println("Therefore certificates are not supported!");
 
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("certificates are missing!");
-            System.err.println("Therefore certificates are not supported!");
 
         }
 
