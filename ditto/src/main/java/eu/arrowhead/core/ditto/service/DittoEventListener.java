@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.core.ditto.Constants;
 import eu.arrowhead.core.ditto.DittoModelException;
@@ -36,6 +37,9 @@ public class DittoEventListener implements ApplicationListener<ThingEvent> {
 
 	//=================================================================================================
 	// members
+
+	private static final String SERVICE_URI_TEMPLATE =
+			CommonConstants.DITTO_URI + Constants.ACCESS_THING + "/%s/features/%s";
 
 	private static final String SERVICE_DEFINITION_WRONG_FORMAT_ERROR_MESSAGE =
 			"Service definition has invalid format. Service definition only contains maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).";
@@ -109,16 +113,14 @@ public class DittoEventListener implements ApplicationListener<ThingEvent> {
 
 	//-------------------------------------------------------------------------------------------------
 	private void registerFeature(
-			final String entityId,
+			final String thingId,
 			final Feature feature,
 			final Optional<String> serviceDefinitionOptional) {
 		final String serviceDefinition =
-				serviceDefinitionOptional.orElseGet(() -> getDefaultServiceDefinition(entityId, feature));
-		final String serviceUri = String.format(
-				Constants.SERVICE_URI_TEMPLATE,
-				entityId,
-				feature.getId());
-		final Map<String, String> metadata = getMetadata(entityId);
+				serviceDefinitionOptional.orElseGet(() -> getDefaultServiceDefinition(thingId, feature)); // TODO: Move getDefaultServiceDefinition call to getServiceDefinitions
+		final String serviceUri =
+				String.format(SERVICE_URI_TEMPLATE, thingId, feature.getId());
+		final Map<String, String> metadata = getMetadata(thingId);
 
 		try {
 			serviceRegistryClient.registerService(serviceDefinition, serviceUri, metadata);
@@ -173,8 +175,8 @@ public class DittoEventListener implements ApplicationListener<ThingEvent> {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private Map<String, String> getMetadata(final String entityId) {
-		return Map.of(Constants.ENTITY_ID, entityId);
+	private Map<String, String> getMetadata(final String thingId) {
+		return Map.of(Constants.THING_ID, thingId);
 	}
 
 }

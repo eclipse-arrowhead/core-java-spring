@@ -40,7 +40,7 @@ import io.swagger.annotations.ApiResponses;
 
 @Api(tags = { CoreCommonConstants.SWAGGER_TAG_ALL })
 @RestController
-@RequestMapping(CommonConstants.DITTO_URI)
+@RequestMapping(CommonConstants.DITTO_URI + CoreCommonConstants.MGMT_URI)
 public class DittoManagementController {
 
 	//=================================================================================================
