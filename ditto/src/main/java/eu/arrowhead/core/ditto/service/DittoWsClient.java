@@ -36,6 +36,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import eu.arrowhead.core.ditto.Constants;
+import eu.arrowhead.core.ditto.ThingEvent;
+import eu.arrowhead.core.ditto.ThingEventType;
 
 @Service
 public class DittoWsClient {
