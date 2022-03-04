@@ -33,10 +33,10 @@ public class Constants {
 	public static final String SUBSCRIBE_TO_DITTO_EVENTS = "subscribe_to_ditto_events";
 	public static final String $SUBSCRIBE_TO_DITTO_EVENTS = "${" + SUBSCRIBE_TO_DITTO_EVENTS + "}";
 
-	public static final String SERVICE_URI_TEMPLATE = CommonConstants.DITTO_URI + "/things/%s/features/%s";
-	public static final String SERVICE_DEFINITIONS = "serviceDefinitions";
-	public static final String ENTITY_ID = "entityId";
+	public static final String ACCESS_THING = "/access/things";
 
+	public static final String SERVICE_DEFINITIONS = "serviceDefinitions";
+	public static final String THING_ID = "thingId";
 	public static final String DITTO_POLICY_ID = "eu.arrowhead:ah-ditto";
 
 	//=================================================================================================

@@ -40,7 +40,7 @@ public class DittoController {
 	@Autowired
 	private DittoHttpClient dittoHttpClient;
 
-	final private String THING_PROPERTY_URI = "/things/{thing}/features/{feature}/properties/{property}";
+	final private String THING_PROPERTY_URI = Constants.ACCESS_THING + "/{thing}/features/{feature}/properties/{property}";
 
 	@Autowired
 	protected SSLProperties sslProperties;

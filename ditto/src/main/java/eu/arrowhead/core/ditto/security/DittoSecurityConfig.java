@@ -20,6 +20,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.common.security.DefaultSecurityConfig;
+import eu.arrowhead.core.ditto.Constants;
 
 @Configuration
 @EnableWebSecurity
@@ -37,7 +38,7 @@ public class DittoSecurityConfig extends DefaultSecurityConfig {
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String, Object> context;
 
-	final static String THINGS_URL_PATTERN = "/things/*";
+	final static String THINGS_URL_PATTERN = CommonConstants.DITTO_URI + Constants.ACCESS_THING + "/*";
 
 	//=================================================================================================
 	// methods
