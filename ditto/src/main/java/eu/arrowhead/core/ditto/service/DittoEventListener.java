@@ -28,6 +28,8 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.core.ditto.Constants;
 import eu.arrowhead.core.ditto.DittoModelException;
+import eu.arrowhead.core.ditto.ThingEvent;
+import eu.arrowhead.core.ditto.ThingEventType;
 
 @Service
 public class DittoEventListener implements ApplicationListener<ThingEvent> {
@@ -110,9 +112,8 @@ public class DittoEventListener implements ApplicationListener<ThingEvent> {
 			final String entityId,
 			final Feature feature,
 			final Optional<String> serviceDefinitionOptional) {
-		final String serviceDefinition = serviceDefinitionOptional.isPresent()
-				? serviceDefinitionOptional.get()
-				: getDefaultServiceDefinition(entityId, feature);
+		final String serviceDefinition =
+				serviceDefinitionOptional.orElseGet(() -> getDefaultServiceDefinition(entityId, feature));
 		final String serviceUri = String.format(
 				Constants.SERVICE_URI_TEMPLATE,
 				entityId,

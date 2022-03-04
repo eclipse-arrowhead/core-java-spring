@@ -9,7 +9,7 @@
  *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
 
-package eu.arrowhead.core.ditto.service;
+package eu.arrowhead.core.ditto;
 
 import org.eclipse.ditto.things.model.Thing;
 import org.springframework.context.ApplicationEvent;

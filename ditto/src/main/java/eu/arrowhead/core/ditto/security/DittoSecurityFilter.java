@@ -68,7 +68,7 @@ public class DittoSecurityFilter extends TokenSecurityFilter {
 			final String clientCN,
 			final String token,
 			final String requestTarget) {
-		String feature = null;
+		String feature;
 		try {
 			// TODO: Fix this up, make it safe.
 			final URL url = new URL(requestTarget);

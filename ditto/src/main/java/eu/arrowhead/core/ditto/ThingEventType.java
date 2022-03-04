@@ -9,7 +9,7 @@
  *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
 
-package eu.arrowhead.core.ditto.service;
+package eu.arrowhead.core.ditto;
 
 public enum ThingEventType {
 	CREATED,

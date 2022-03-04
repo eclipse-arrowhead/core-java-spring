@@ -33,8 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.core.ditto.service.DittoHttpClient;
-import eu.arrowhead.core.ditto.service.ThingEvent;
-import eu.arrowhead.core.ditto.service.ThingEventType;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -129,6 +127,9 @@ public class DittoManagementController {
 	@ResponseBody public void deleteThing(@PathVariable("thingId") String thingId) {
 
 		final String thingJson = dittoHttpClient.getThing(thingId).getBody();
+
+		// TODO: If body is null, respond with an error!
+
 		dittoHttpClient.deleteThing(thingId);
 
 		if (!subscribeToDittoEvents) {
