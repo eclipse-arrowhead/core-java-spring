@@ -132,7 +132,7 @@
 	                			
 	                			<data>
 	                				<type>file</type>
-	                				<src>${project.basedir}/src/deb/gams.service</src>
+	                				<src>${project.basedir}/src/deb/arrowhead-gams.service</src>
 	                				<mapper>
 	                					<type>perm</type>
 	                					<prefix>/etc/systemd/system</prefix>

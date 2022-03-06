@@ -92,7 +92,7 @@ public class EventConsumer {
     }
 
     @Transactional
-    protected void processEvent(final Event event) {
+    public void processEvent(final Event event) {
         try {
             // make sure that only events for different sensors run mapek concurrently to prevent concurrent processing of sensor data
             synchronized (event.getSensor().getUidAsString().intern()) {

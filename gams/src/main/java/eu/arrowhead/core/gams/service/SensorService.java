@@ -212,7 +212,6 @@ public class SensorService {
         return createEventSensor(instance, entity.getUidString(), type);
     }
 
-    @Transactional
     protected Sensor createEventSensor(final GamsInstance instance, final String name, final SensorType type) {
         validation.verify(instance);
         Assert.hasText(name, "Name must not be empty");
@@ -227,21 +226,18 @@ public class SensorService {
                                .orElseThrow(exceptionSupplier(instance, name));
     }
 
-    @Transactional
     protected void persisted(final AbstractSensorData data) {
         data.setState(ProcessingState.PERSISTED);
         sensorDataRepository.saveAndFlush(data);
         logger.trace("persisted {}", data);
     }
 
-    @Transactional
     protected void processing(final AbstractSensorData data) {
         data.setState(ProcessingState.PROCESSING);
         sensorDataRepository.saveAndFlush(data);
         logger.trace("processing {}", data);
     }
 
-    @Transactional
     protected void processed(final AbstractSensorData data) {
         data.setState(ProcessingState.PROCESSED);
         sensorDataRepository.saveAndFlush(data);

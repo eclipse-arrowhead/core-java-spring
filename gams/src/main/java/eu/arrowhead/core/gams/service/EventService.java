@@ -146,28 +146,24 @@ public class EventService {
         return repository.findValidEvent(ProcessingState.PERSISTED, ProcessingState.IN_QUEUE, limit);
     }
 
-    @Transactional
     protected void persisted(final Event event) {
         event.setState(ProcessingState.PERSISTED);
         repository.saveAndFlush(event);
         logger.debug("Persisted {}", event::shortToString);
     }
 
-    @Transactional
     protected void processing(final Event event) {
         event.setState(ProcessingState.PROCESSING);
         repository.saveAndFlush(event);
         logger.debug("Processing {}", event::shortToString);
     }
 
-    @Transactional
     protected void processed(final Event event) {
         event.setState(ProcessingState.PROCESSED);
         repository.saveAndFlush(event);
         logger.debug("Processed {}", event::shortToString);
     }
 
-    @Transactional
     protected void expireEvents() {
         repository.expireEvents();
     }
