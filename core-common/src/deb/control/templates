@@ -192,3 +192,48 @@ Description: A space-separated list of additional ip addresses to be used as SAN
 Template: arrowhead-core-common/san_dns
 Type: string
 Description: A space-separated list of domain names to be used as SANs
+
+Template: arrowhead-core-common/provided_service_definition
+Type: string
+Default: definition1
+Description: Enter the definition of the service provided by the HawkBit Configuration Manager
+
+Template: arrowhead-core-common/provided_service_uri
+Type: string
+Default: /
+Description: Enter the URI of the service provided by the HawkBit Configuration Manager
+
+Template: arrowhead-core-common/provided_service_version
+Type: string
+Default: 1
+Description: Enter the version of the service provided by the HawkBit Configuration Manager
+
+Template: arrowhead-core-common/provided_service_interface
+Type: string
+Default: HTTP-SECURE-JSON
+Description: Enter the interface name of the service provided by the HawkBit Configuration Manager
+
+Template: arrowhead-core-common/hawkbit_host
+Type: string
+Default: 127.0.0.1
+Description: Enter the hostname or IP address of the HawkBit
+
+Template: arrowhead-core-common/hawkbit_port
+Type: string
+Default: 8080
+Description: Enter a username that can access HawkBit 
+
+Template: arrowhead-core-common/hawkbit_username
+Type: string
+Default: hawkbit
+Description: Enter a username that can access HawkBit  
+
+Template: arrowhead-core-common/hawkbit_password
+Type: string
+Default: hawkbit
+Description: Enter the password the previously specified HawkBit user 
+
+Template: arrowhead-core-common/hawkbit_tenant
+Type: string
+Default: DEFAULT
+Description: Enter the name of the HawkBit tenant

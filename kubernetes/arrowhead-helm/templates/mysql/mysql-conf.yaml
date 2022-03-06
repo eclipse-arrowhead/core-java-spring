@@ -1,0 +1,22 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: mysql-conf
+data:
+{{- range $path, $bytes := .Files.Glob "static/db-init/*" }}
+  {{ base $path }}: |-
+{{ $.Files.Get $path | indent 4 }}
+{{- end }}
+  updateUsers.sql: |-
+{{ printf "RENAME USER 'service_registry'@'localhost' TO '%s'@'localhost';" .Values.serviceRegistry.datasourceUsername | indent 4 }}
+{{ printf "RENAME USER 'service_registry'@'%%' TO '%s'@'%%';" .Values.serviceRegistry.datasourceUsername | indent 4 }}
+{{ printf "ALTER USER '%s'@'localhost' IDENTIFIED BY '%s';" .Values.serviceRegistry.datasourceUsername .Values.serviceRegistry.datasourcePassword | indent 4 }}
+{{ printf "ALTER USER '%s'@'%%' IDENTIFIED BY '%s';" .Values.serviceRegistry.datasourceUsername .Values.serviceRegistry.datasourcePassword | indent 4 }}
+{{ printf "RENAME USER 'authorization'@'localhost' TO '%s'@'localhost';" .Values.authorization.datasourceUsername | indent 4 }}
+{{ printf "RENAME USER 'authorization'@'%%' TO '%s'@'%%';" .Values.authorization.datasourceUsername | indent 4 }}
+{{ printf "ALTER USER '%s'@'localhost' IDENTIFIED BY '%s';" .Values.authorization.datasourceUsername .Values.authorization.datasourcePassword | indent 4 }}
+{{ printf "ALTER USER '%s'@'%%' IDENTIFIED BY '%s';" .Values.authorization.datasourceUsername .Values.authorization.datasourcePassword | indent 4 }}
+{{ printf "RENAME USER 'orchestrator'@'localhost' TO '%s'@'localhost';" .Values.orchestrator.datasourceUsername | indent 4 }}
+{{ printf "RENAME USER 'orchestrator'@'%%' TO '%s'@'%%';" .Values.orchestrator.datasourceUsername | indent 4 }}
+{{ printf "ALTER USER '%s'@'localhost' IDENTIFIED BY '%s';" .Values.orchestrator.datasourceUsername .Values.orchestrator.datasourcePassword | indent 4 }}
+{{ printf "ALTER USER '%s'@'%%' IDENTIFIED BY '%s';" .Values.orchestrator.datasourceUsername .Values.orchestrator.datasourcePassword | indent 4 }}

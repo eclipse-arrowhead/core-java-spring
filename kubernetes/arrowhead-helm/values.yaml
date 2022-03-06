@@ -1,0 +1,153 @@
+replicaCount: 1
+
+namespace: arrowhead
+
+restartPolicy: Always
+
+emissary-ingress:
+  replicaCount: 1
+  service:
+    ports:
+      - name: sreg
+        port: 3000
+        targetPort: 3000
+      - name: auth
+        port: 3001
+        targetPort: 3001
+      - name: orch
+        port: 3002
+        targetPort: 3002
+    loadBalancerIP: 
+
+mysql:
+  image: mysql:8.0
+  port: 3306
+  address: mysql
+  rootPassword: tvYiBMhznmcVOeng
+
+serviceRegistry:
+  image: arrowheadcr.azurecr.io/serviceregistry:4.4.0
+  port: 80
+  address: arrowhead-serviceregistry
+  sslEnabled: true
+  datasourceUsername: s_reg
+  datasourcePassword: 3RgoBkD5mqER68js
+  keystore: test-sreg.p12
+  keystorePassword: SgK0QHHX7ge1vtGs
+  keystoreType: PKCS12
+  keyAlias: service_registry.testcloud2.aitia.arrowhead.eu
+  keyPassword: SgK0QHHX7ge1vtGs
+  truststore: test-cloud.truststore.p12
+  truststorePassword: "123456"
+  truststoreType: PKCS12
+  properties:
+    log_all_request_and_response: false
+    server:
+      address: 0.0.0.0
+      port: 80
+    use_strict_service_definition_verifier: true
+    disable:
+      hostname:
+        verifier: false
+    ping_timeout: 5000
+    spring:
+      jpa:
+        hibernate:
+          ddl-auto: none
+        database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+        properties:
+          hibernate:
+            format_sql: true
+        show-sql: false
+    ping_interval: 60
+    use_network_address_detector: false
+    ttl_scheduled: false
+    allow_non_routable_addressing: true
+    use_strict_service_intf_name_verifier: false
+    domain:
+      port: 3000
+      name: 
+    allow_self_addressing: true
+    ping_scheduled: false
+    ttl_interval: 10
+
+authorization:
+  image: arrowheadcr.azurecr.io/authorization:4.4.0
+  port: 80
+  address: arrowhead-authorization
+  sslEnabled: true
+  datasourceUsername: auth
+  datasourcePassword: CDif68aDUWTvHWaN
+  keystore: test-auth-system.p12
+  keystorePassword: 3Irx3m9D8RfkEoyP
+  keystoreType: PKCS12
+  keyAlias: authorization.testcloud2.aitia.arrowhead.eu
+  keyPassword: 3Irx3m9D8RfkEoyP
+  truststore: test-cloud.truststore.p12
+  truststorePassword: "123456"
+  truststoreType: PKCS12
+  properties:
+    log_all_request_and_response: false
+    server:
+      address: 0.0.0.0
+      port: 80
+    use_strict_service_definition_verifier: true
+    disable:
+      hostname:
+        verifier: false
+    ping_timeout: 5000
+    spring:
+      jpa:
+        hibernate:
+          ddl-auto: none
+        database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+        properties:
+          hibernate:
+            format_sql: true
+        show-sql: false
+    use_strict_service_intf_name_verifier: false
+    domain:
+      port: 3001
+      name: 
+
+orchestrator:
+  image: arrowheadcr.azurecr.io/orchestrator:4.4.0
+  port: 80
+  address: arrowhead-orchestration
+  sslEnabled: true
+  datasourceUsername: orch
+  datasourcePassword: 6zXzDAQ8vkgyJipI
+  keystore: test-orch.p12
+  keystorePassword: C40HciVwR6V6Adbf
+  keystoreType: PKCS12
+  keyAlias: orchestrator.testcloud2.aitia.arrowhead.eu
+  keyPassword: C40HciVwR6V6Adbf
+  truststore: test-cloud.truststore.p12
+  truststorePassword: "123456"
+  truststoreType: PKCS12
+  logging: false
+  domain: 
+  exposedPort: 3002
+  properties:
+    log_all_request_and_response: false
+    server:
+      address: 0.0.0.0
+      port: 80
+    use_strict_service_definition_verifier: true
+    disable:
+      hostname:
+        verifier: false
+    ping_timeout: 5000
+    spring:
+      jpa:
+        hibernate:
+          ddl-auto: none
+        database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+        properties:
+          hibernate:
+            format_sql: true
+        show-sql: false
+    use_strict_service_intf_name_verifier: false
+    domain:
+      port: 3002
+      name: 

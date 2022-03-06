@@ -115,8 +115,10 @@ public enum CoreSystem {
 
 	GAMS(Defaults.DEFAULT_GENERIC_AUTONOMIC_MANAGEMENT_PORT, List.of(CoreSystemService.GAMS_SERVICE,
 																	 CoreSystemService.GAMS_SENSOR_SERVICE)),
-	PLANTDESCRIPTIONENGINE(Defaults.DEFAULT_PLANT_DESCRIPTION_ENGINE_PORT, List.of());
-//TODO add PDE services
+	PLANTDESCRIPTIONENGINE(Defaults.DEFAULT_PLANT_DESCRIPTION_ENGINE_PORT, List.of()),
+//TODO add PDE servicesHAWKBITCONFIGURATIONMANAGER(Defaults.DEFAULT_HAWKBIT_CONFIGURATION_MANAGER_PORT, List.of());
+	HAWKBITCONFIGURATIONMANAGER(Defaults.DEFAULT_HAWKBIT_CONFIGURATION_MANAGER_PORT, List.of());
+
 
 	//=================================================================================================
 	// members
