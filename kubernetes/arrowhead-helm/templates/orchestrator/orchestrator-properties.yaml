@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Release.Name }}-orchestrator-properties
+stringData:
+  application.properties: |-
+{{ list (merge .Values.orchestrator.properties (fromYaml (include "loadDBConnectionDetails" (dict "dot" . "component" .Values.serviceRegistry))) (fromYaml (include "loadCertificateDetails" (dict "component" .Values.orchestrator "mountpath" "/orchestrator"))) (fromYaml (include "loadSRDetails" .))) "" | include "flattenYaml" | indent 4 }}

@@ -116,7 +116,9 @@ public enum CoreSystem {
 											 CoreSystemService.MSCV_PUBLIC_KEY_SERVICE,
 											 CoreSystemService.MSCV_LOGIN_SERVICE)),
 
-	PLANTDESCRIPTIONENGINE(Defaults.DEFAULT_PLANT_DESCRIPTION_ENGINE_PORT, List.of()); //TODO add PDE services
+	PLANTDESCRIPTIONENGINE(Defaults.DEFAULT_PLANT_DESCRIPTION_ENGINE_PORT, List.of()), //TODO add PDE services
+
+	HAWKBITCONFIGURATIONMANAGER(Defaults.DEFAULT_HAWKBIT_CONFIGURATION_MANAGER_PORT, List.of());
 
 	//=================================================================================================
 	// members

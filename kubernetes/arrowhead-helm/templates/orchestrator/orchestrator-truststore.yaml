@@ -1,0 +1,6 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-orchestrator-truststore
+binaryData:
+  truststore.p12: {{ printf "static/certificates/%s" .Values.orchestrator.truststore | .Files.Get | b64enc }}
