@@ -21,8 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
         allowedHeaders = {HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT}
 )
 @RestController
-@RequestMapping(value = CommonConstants.MSCV_URI,
-        consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = CommonConstants.MSCV_URI, produces = MediaType.TEXT_PLAIN_VALUE)
 public class EchoController {
 
 

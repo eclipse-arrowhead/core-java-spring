@@ -190,7 +190,6 @@ public class ScriptService {
             Assert.notNull(newScript, "new " + SCRIPT_NULL_ERROR_MESSAGE);
 
             verifyScriptPath(newScript);
-            // TODO oldScript.setPhysicalPath(newScript.getPhysicalPath());
             oldScript.setLayer(newScript.getLayer());
             oldScript.setMip(newScript.getMip());
             oldScript.setOs(newScript.getOs());
@@ -234,23 +233,11 @@ public class ScriptService {
         return uriTemplate.expand(vars).toUriString();
     }
 
-    @Transactional(readOnly = true)
     protected Set<Script> findAllByLayer(final Layer layer) {
         try {
             logger.debug("findAllByLayer({}) started", layer);
             Assert.notNull(layer, LAYER_NULL_ERROR_MESSAGE);
             return scriptRepository.findAllByLayer(layer);
-        } catch (final PersistenceException pe) {
-            throw new ArrowheadException("Unable to find Scripts", pe);
-        }
-    }
-
-    @Transactional(readOnly = true)
-    protected Set<Script> findAllByOS(final OS os) {
-        try {
-            logger.debug("findAllByOS({}) started", os);
-            Assert.notNull(os, OS_NULL_ERROR_MESSAGE);
-            return scriptRepository.findAllByOs(os);
         } catch (final PersistenceException pe) {
             throw new ArrowheadException("Unable to find Scripts", pe);
         }

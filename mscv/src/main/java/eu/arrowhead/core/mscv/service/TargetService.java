@@ -224,7 +224,6 @@ public class TargetService {
         }
     }
 
-    @Transactional(readOnly = true)
     protected SshTarget getTargetById(final Long id) {
         try {
             logger.debug("getTargetById({}) started", id);

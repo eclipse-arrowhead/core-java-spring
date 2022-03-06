@@ -120,12 +120,11 @@ public class SystemRegistryDBService {
     							   final DeviceRepository deviceRepository,
     							   final SecurityUtilities securityUtilities,
                                    final CertificateAuthorityDriver caDriver,
+                                   final CommonNamePartVerifier cnVerifier,
                                    final DriverUtilities driverUtilities,
+                                   final NetworkAddressPreProcessor networkAddressPreProcessor,
+                                   final NetworkAddressVerifier networkAddressVerifier,
                                    final EventDriver eventDriver) {
-    							   final CertificateAuthorityDriver caDriver,
-    							   final CommonNamePartVerifier cnVerifier,
-    							   final NetworkAddressPreProcessor networkAddressPreProcessor,
-    							   final NetworkAddressVerifier networkAddressVerifier) {
     	this.systemRegistryRepository = systemRegistryRepository;
     	this.systemRepository = systemRepository;
     	this.deviceRepository = deviceRepository;
@@ -800,7 +799,8 @@ public class SystemRegistryDBService {
             final var systemRequestDTO = new SystemRequestDTO(system.getSystemName(),
                                                               system.getAddress(),
                                                               system.getPort(),
-                                                              system.getAuthenticationInfo());
+                                                              system.getAuthenticationInfo(),
+                                                              Utilities.text2Map(system.getMetadata()));
 
             final var requestDTO = new SystemRegistryRequestDTO(systemRequestDTO,
                                                                 deviceRequestDTO,

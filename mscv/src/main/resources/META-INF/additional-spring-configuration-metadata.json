@@ -32,7 +32,7 @@
     },
     {
       "name": "sr_port",
-      "type": "java.lang.String",
+      "type": "java.lang.Integer",
       "description": "Service Registry port."
     },
     {

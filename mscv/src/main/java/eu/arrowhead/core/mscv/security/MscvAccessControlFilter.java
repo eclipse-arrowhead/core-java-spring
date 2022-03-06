@@ -43,7 +43,7 @@ public class MscvAccessControlFilter extends CoreSystemAccessControlFilter {
 
                 if (requestTarget.endsWith(CommonConstants.OP_MSCV_EVENT_CALLBACK_URI)) {
                     // Only event handler can use these methods
-                    checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, new CoreSystem[]{CoreSystem.EVENT_HANDLER}, requestTarget);
+                    checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, new CoreSystem[]{CoreSystem.EVENTHANDLER}, requestTarget);
                 } else if (requestTarget.contains(CoreCommonConstants.MGMT_URI)) {
                     // Only the local System Operator can use these methods
                     checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);

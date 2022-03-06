@@ -16,7 +16,6 @@ import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
-import eu.arrowhead.common.exception.ArrowheadException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -29,8 +28,6 @@ import org.springframework.web.util.UriComponents;
 @Component
 public class MscvApplicationInitListener extends ApplicationInitListener {
 
-    private static final int MAX_RETRIES = 3;
-    private static final long SLEEP_PERIOD = 15_000L;
     private final Logger logger = LogManager.getLogger(MscvApplicationInitListener.class);
     private final DriverUtilities driver;
 
@@ -72,8 +69,6 @@ public class MscvApplicationInitListener extends ApplicationInitListener {
         final ServiceRegistryResponseDTO serviceEntry = driver.findByServiceRegistry(service, false);
         final SystemResponseDTO systemEntry = serviceEntry.getProvider();
 
-        int retryCount = 0;
-
         logger.info("Creating authorization rule for {}", service);
 
         final var authRequest = new AuthorizationIntraCloudRequestDTO();
@@ -81,34 +76,17 @@ public class MscvApplicationInitListener extends ApplicationInitListener {
         authRequest.setProviderIds(Collections.singletonList(systemEntry.getId()));
         authRequest.setInterfaceIds(serviceEntry.getInterfaces().stream().map(ServiceInterfaceResponseDTO::getId).collect(Collectors.toList()));
         authRequest.setServiceDefinitionIds(Collections.singletonList(serviceEntry.getServiceDefinition().getId()));
-        try {
-            httpService.sendRequest(authMgmtUri, HttpMethod.POST, AuthorizationIntraCloudListResponseDTO.class, authRequest);
-        } catch (final ArrowheadException e) {
-            if (retryCount++ > MAX_RETRIES) {
-                throw e;
-            } else {
-                logger.info("Unable to retrieve service {}: {}. Retrying in {}ms", service.getServiceDefinition(), e.getMessage(), SLEEP_PERIOD);
-                sleep();
-            }
-        }
-    }
-
-    private void sleep() {
-        try {
-            Thread.sleep(SLEEP_PERIOD);
-        } catch (InterruptedException e) {
-            logger.warn(e.getMessage());
-        }
+        httpService.sendRequest(authMgmtUri, HttpMethod.POST, AuthorizationIntraCloudListResponseDTO.class, authRequest);
     }
 
     @Override
     protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
         return List.of(CoreSystemService.EVENT_SUBSCRIBE_SERVICE,
-                       CoreSystemService.DEVICE_REGISTRY_REGISTER_SERVICE,
-                       CoreSystemService.DEVICE_REGISTRY_UNREGISTER_SERVICE,
-                       CoreSystemService.SYSTEM_REGISTRY_REGISTER_SERVICE,
-                       CoreSystemService.SYSTEM_REGISTRY_UNREGISTER_SERVICE,
-                       CoreSystemService.SERVICE_REGISTRY_REGISTER_SERVICE,
-                       CoreSystemService.SERVICE_REGISTRY_UNREGISTER_SERVICE);
+                       CoreSystemService.DEVICEREGISTRY_REGISTER_SERVICE,
+                       CoreSystemService.DEVICEREGISTRY_UNREGISTER_SERVICE,
+                       CoreSystemService.SYSTEMREGISTRY_REGISTER_SERVICE,
+                       CoreSystemService.SYSTEMREGISTRY_UNREGISTER_SERVICE,
+                       CoreSystemService.SERVICEREGISTRY_REGISTER_SERVICE,
+                       CoreSystemService.SERVICEREGISTRY_UNREGISTER_SERVICE);
     }
 }
