@@ -11,8 +11,6 @@
 
 package eu.arrowhead.core.ditto;
 
-import eu.arrowhead.common.CommonConstants;
-
 public class Constants {
 
 	//=================================================================================================
