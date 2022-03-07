@@ -10,34 +10,31 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 import eu.arrowhead.core.ditto.Constants;
 
 // @AutoConfigureWebClient(registerRestTemplate = true)
 @RunWith(SpringRunner.class)
-@SpringBootTest
 public class DittoHttpClientTest {
 
 	//=================================================================================================
 	// members
+
+	@InjectMocks
+	private DittoHttpClient testingObject;
 
 	@Value(Constants.$DITTO_HTTP_ADDRESS_WD)
 	private String dittoAddress;
 
 	@Mock
 	RestTemplate restTemplate;
-
-	@Autowired
-	@InjectMocks
-	private DittoHttpClient dittoHttpClient;
 
 	final ResponseEntity<String> mockedResponse = new ResponseEntity<>("res-xyz", HttpStatus.OK);
 
@@ -48,13 +45,21 @@ public class DittoHttpClientTest {
 
 	@Before
 	public void initMocks() {
-		MockitoAnnotations.initMocks(this);
+			MockitoAnnotations.initMocks(this);
+	}
+
+	@Before
+	public void initConfig() {
+			ReflectionTestUtils.setField(testingObject, "dittoAddress", dittoAddress);
+			ReflectionTestUtils.setField(testingObject, "dittoUsername", "ditto");
+			ReflectionTestUtils.setField(testingObject, "dittoPassword", "ditto");
 	}
 
 	@Test
 	public void getThing() {
 		final String thingId = "thing-abc";
 		final String dittoThingUri = dittoAddress + "/api/2/things/" + thingId;
+
 		Mockito.when(restTemplate.exchange(
 				eq(dittoThingUri),
 				eq(HttpMethod.GET),
@@ -62,7 +67,8 @@ public class DittoHttpClientTest {
 				eq(String.class)))
 				.thenReturn(mockedResponse);
 
-		ResponseEntity<String> response = dittoHttpClient.getThing(thingId);
+		ResponseEntity<String> response = testingObject.getThing(thingId);
+
 		assertEquals(mockedResponse.getBody(), response.getBody());
 	}
 
@@ -76,7 +82,7 @@ public class DittoHttpClientTest {
 				eq(String.class)))
 				.thenReturn(mockedResponse);
 
-		ResponseEntity<String> response = dittoHttpClient.getThings();
+		ResponseEntity<String> response = testingObject.getThings();
 		assertEquals(mockedResponse.getBody(), response.getBody());
 	}
 
@@ -97,7 +103,7 @@ public class DittoHttpClientTest {
 				eq(String.class)))
 				.thenReturn(mockedResponse);
 
-		ResponseEntity<String> response = dittoHttpClient.getProperty(thingId, featureId, propertyId);
+		ResponseEntity<String> response = testingObject.getProperty(thingId, featureId, propertyId);
 		assertEquals(mockedResponse.getBody(), response.getBody());
 	}
 
