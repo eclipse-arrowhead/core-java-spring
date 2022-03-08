@@ -91,24 +91,48 @@ public class DittoEventListener implements ApplicationListener<ThingEvent> {
 			return;
 		}
 
-		final String entityId = thing.getEntityId().get().toString();
+		final String thingId = thing.getEntityId().get().toString();
 		final Optional<Features> features = thing.getFeatures();
 
-		logger.debug("Registering services for thing '" + entityId + "'");
+		logger.debug("Registering services for thing '" + thingId + "'");
 
 		if (features.isPresent()) {
 			final Optional<JsonObject> serviceDefinitions = getServiceDefinitions(thing);
 			for (final Feature feature : features.get()) {
 				final Optional<String> serviceDefinition =
 						getServiceDefinition(serviceDefinitions, feature.getId());
-				this.registerFeature(entityId, feature, serviceDefinition);
+				this.registerFeature(thingId, feature, serviceDefinition);
 			}
 		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void unregisterServices(Thing thing) {
-		// TODO: Implement!
+	private void unregisterServices(Thing thing) throws DittoModelException {
+		if (thing.getEntityId().isEmpty()) {
+			logger.error("No EntityId present in Thing");
+			return;
+		}
+
+		final String thingId = thing.getEntityId().get().toString();
+		final Optional<Features> features = thing.getFeatures();
+
+		logger.debug("Unregistering services for thing '" + thingId + "'");
+
+		if (features.isPresent()) {
+			final Optional<JsonObject> serviceDefinitions = getServiceDefinitions(thing);
+			for (final Feature feature : features.get()) {
+				final String serviceUri = String.format(SERVICE_URI_TEMPLATE, thingId, feature.getId());
+				final Optional<String> serviceDefinition =
+						getServiceDefinition(serviceDefinitions, feature.getId());
+						// TODO: Clean this up.
+						try {
+							serviceRegistryClient.unregisterService(serviceDefinition.orElse(null), serviceUri);
+						} catch (final Exception ex) {
+							logger.error("Service registration for feature failed: " + ex);
+						}
+
+			}
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------

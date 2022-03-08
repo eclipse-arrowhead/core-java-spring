@@ -123,7 +123,7 @@ public class DittoManagementController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.OK)
-	@DeleteMapping(path = "/things/{thingId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping(path = "/things/{thingId}")
 	@ResponseBody public void deleteThing(@PathVariable("thingId") String thingId) {
 
 		final String thingJson = dittoHttpClient.getThing(thingId).getBody();
