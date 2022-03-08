@@ -42,6 +42,9 @@ public class ServiceRegistryClient {
 	private static final String SERVICEREGISTRY_REGISTER_URI =
 			CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_REGISTER_URI;
 
+	private static final String SERVICEREGISTRY_UNREGISTER_URI =
+			CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_URI;
+
 	@Autowired
 	private HttpService httpService;
 
@@ -66,6 +69,8 @@ public class ServiceRegistryClient {
 	@Value(CommonConstants.$SERVICEREGISTRY_PORT_WD)
 	private int serviceRegistryPort;
 
+
+
 	//=================================================================================================
 	// methods
 
@@ -78,10 +83,17 @@ public class ServiceRegistryClient {
 		Assert.notNull(serviceDefinition, "Service definition is null");
 		Assert.notNull(serviceUri, "Service URI is null");
 
+		UriComponents uri = getRegisterUri();
 		final ServiceRegistryRequestDTO request =
 				getServiceRegistryRequest(serviceDefinition, serviceUri, metadata);
-		return httpService.sendRequest(
-				getServiceRegistryUri(), HttpMethod.POST, ServiceRegistryResponseDTO.class, request);
+		return httpService.sendRequest(uri, HttpMethod.POST, ServiceRegistryResponseDTO.class, request);
+	}
+
+	// -------------------------------------------------------------------------------------------------
+	public ResponseEntity<Void> unregisterService(final String serviceDefinition, final String serviceUri) {
+		Assert.notNull(serviceUri, "Service URI is null");
+		UriComponents uri = getUnregisterUri(serviceDefinition, serviceUri);
+		return httpService.sendRequest(uri, HttpMethod.DELETE, Void.class);
 	}
 
 	// -------------------------------------------------------------------------------------------------
@@ -103,7 +115,7 @@ public class ServiceRegistryClient {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private UriComponents getServiceRegistryUri() {
+	private UriComponents getRegisterUri() {
 		return UriComponentsBuilder.newInstance()
 				.scheme(sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP)
 				.host(serviceRegistryAddress)
@@ -111,6 +123,21 @@ public class ServiceRegistryClient {
 				.path(SERVICEREGISTRY_REGISTER_URI)
 				.build();
 	}
+
+		//-------------------------------------------------------------------------------------------------
+		private UriComponents getUnregisterUri(final String serviceDefinition, final String serviceUri) {
+			return UriComponentsBuilder.newInstance()
+					.scheme(sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP)
+					.host(serviceRegistryAddress)
+					.queryParam("service_definition", serviceDefinition)
+					.queryParam("service_uri", serviceUri)
+					.queryParam("system_name", systemName.toLowerCase())
+					.queryParam("address", systemDomainName)
+					.queryParam("port", systemDomainPort)
+					.port(serviceRegistryPort)
+					.path(SERVICEREGISTRY_UNREGISTER_URI)
+					.build();
+		}
 
 	//-------------------------------------------------------------------------------------------------
 	private SystemRequestDTO getSystemDescription() {
