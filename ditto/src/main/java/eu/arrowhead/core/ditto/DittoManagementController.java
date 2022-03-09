@@ -46,9 +46,10 @@ public class DittoManagementController {
 	//=================================================================================================
 	// members
 
-	private static final String GET_THING_HTTP_200_MESSAGE = "Ditto Thing returned";
+	private static final String GET_THING_HTTP_200_MESSAGE = "Ditto Thing by requested id returned";
 	private static final String GET_THINGS_HTTP_200_MESSAGE = "Ditto Things returned";
-	private static final String PUT_THING_HTTP_201_MESSAGE = "Ditto Thing registered/updated";
+	private static final String PUT_THING_HTTP_201_MESSAGE = "Ditto Thing registered";
+	private static final String PUT_THING_HTTP_204_MESSAGE = "Ditto Thing updated";
 	private static final String DELETE_THING_HTTP_200_MESSAGE = "Ditto Thing removed";
 
 	@Value(Constants.$SUBSCRIBE_TO_DITTO_EVENTS)
@@ -91,12 +92,12 @@ public class DittoManagementController {
 	@ApiOperation(value = "Creates or updates the given Ditto Thing", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = PUT_THING_HTTP_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_NO_CONTENT, message = PUT_THING_HTTP_204_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@PutMapping(path = "/things/{thingId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public String putThing(@PathVariable("thingId") String thingId, @RequestBody final String thingRequest) { // TODO: Change response type
+	@ResponseBody public ResponseEntity<String> putThing(@PathVariable("thingId") String thingId, @RequestBody final String thingRequest) {
 
 		Thing thing = ThingsModelFactory.newThingBuilder(thingRequest)
 			.setId(ThingId.of(thingId))
@@ -112,7 +113,7 @@ public class DittoManagementController {
 			eventPublisher.publishEvent(event);
 		}
 
-		return response.getBody();
+		return new ResponseEntity<String>(response.getStatusCode());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -122,7 +123,6 @@ public class DittoManagementController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@ResponseStatus(value = org.springframework.http.HttpStatus.OK)
 	@DeleteMapping(path = "/things/{thingId}")
 	@ResponseBody public void deleteThing(@PathVariable("thingId") String thingId) {
 
