@@ -28,10 +28,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.core.ditto.service.DittoHttpClient;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -72,8 +72,8 @@ public class DittoManagementController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = "/things")
-	public String getThings() {
-		return dittoHttpClient.getThings().getBody();
+	public ResponseEntity<String> getThings() {
+		return dittoHttpClient.getThings();
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -84,8 +84,8 @@ public class DittoManagementController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = "/things/{thingId}")
-	public String getThing(@PathVariable("thingId") String thingId) {
-		return dittoHttpClient.getThing(thingId).getBody();
+	public ResponseEntity<String> getThing(@PathVariable("thingId") String thingId) {
+		 return dittoHttpClient.getThing(thingId);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -104,39 +104,54 @@ public class DittoManagementController {
 			.setPolicyId(PolicyId.of(Constants.DITTO_POLICY_ID))
 			.build();
 
-		final ResponseEntity<String> response = dittoHttpClient.putThing(thingId, thing.toJsonString());
+		final ResponseEntity<String> putResponse = dittoHttpClient.putThing(thingId, thing.toJsonString());
+		final int statusCode = putResponse.getStatusCode().value();
+		final boolean wasCreated = statusCode == HttpStatus.SC_CREATED;
+		final boolean wasUpdated = statusCode == HttpStatus.SC_NO_CONTENT;
+
+		if (!wasCreated && !wasUpdated) {
+			return putResponse; // Error response
+		}
 
 		if (!subscribeToDittoEvents) {
-			final boolean wasCreated = response.getStatusCode().value() == HttpStatus.SC_CREATED;
 			final ThingEventType eventType = wasCreated ? ThingEventType.CREATED : ThingEventType.UPDATED;
 			ThingEvent event = new ThingEvent(this, thing, eventType);
 			eventPublisher.publishEvent(event);
 		}
 
-		return new ResponseEntity<String>(response.getStatusCode());
+		return putResponse; // Success response
 	}
 
-	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Deletes the specified Ditto Thing", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	// -------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Deletes the specified Ditto Thing", response = String.class,
+			tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_THING_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@DeleteMapping(path = "/things/{thingId}")
-	@ResponseBody public void deleteThing(@PathVariable("thingId") String thingId) {
+	@ResponseBody
+	public ResponseEntity<Void> deleteThing(@PathVariable("thingId") String thingId) {
 
-		final String thingJson = dittoHttpClient.getThing(thingId).getBody();
+		final ResponseEntity<String> getThingResponse = dittoHttpClient.getThing(thingId);
+		if (getThingResponse.getStatusCode() != org.springframework.http.HttpStatus.OK) {
+			throw new DataNotFoundException("Thing with ID " + thingId + " does not exist.");
+		}
 
-		// TODO: If body is null, respond with an error!
-
-		dittoHttpClient.deleteThing(thingId);
+		final ResponseEntity<Void> deletionResponse = dittoHttpClient.deleteThing(thingId);
+		if (deletionResponse.getStatusCode() != org.springframework.http.HttpStatus.NO_CONTENT) {
+			return deletionResponse; // Error response
+		}
 
 		if (!subscribeToDittoEvents) {
+			final String thingJson = getThingResponse.getBody();
 			Thing thing = ThingsModelFactory.newThingBuilder(thingJson).build();
 			ThingEvent event = new ThingEvent(this, thing, ThingEventType.DELETED);
 			eventPublisher.publishEvent(event);
 		}
+
+		return deletionResponse; // Success response
 	}
 
 }

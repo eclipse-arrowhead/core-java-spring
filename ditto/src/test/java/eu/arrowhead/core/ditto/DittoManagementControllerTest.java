@@ -133,14 +133,14 @@ public class DittoManagementControllerTest {
 		final String thingUri = THINGS_URI + THING_ID;
 
 		final ResponseEntity<String> getResponse = new ResponseEntity<>(thingJson, HttpStatus.OK);
-		final ResponseEntity<String> deletionResponse = new ResponseEntity<>(null, HttpStatus.OK);
+		final ResponseEntity<Void> deletionResponse = new ResponseEntity<>(null, HttpStatus.OK);
 
 		Mockito.when(dittoHttpClient.getThing(THING_ID)).thenReturn(getResponse);
 		Mockito.when(dittoHttpClient.deleteThing(THING_ID)).thenReturn(deletionResponse);
 
 		// TODO: Check that an event is published
 
-		final MvcResult response = this.mockMvc.perform(delete(thingUri)
+		this.mockMvc.perform(delete(thingUri)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())

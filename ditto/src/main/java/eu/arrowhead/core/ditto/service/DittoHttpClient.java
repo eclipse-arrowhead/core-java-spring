@@ -17,10 +17,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import eu.arrowhead.core.ditto.Constants;
 
@@ -81,7 +83,7 @@ public class DittoHttpClient {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public ResponseEntity<String> deleteThing(final String thingId) {
+	public ResponseEntity<Void> deleteThing(final String thingId) {
 		return sendDeleteRequest(DITTO_THINGS_URI + thingId);
 	}
 
@@ -96,12 +98,17 @@ public class DittoHttpClient {
 	}
 
 	// -------------------------------------------------------------------------------------------------
-	private ResponseEntity<String> sendDeleteRequest(final String path) {
-		return sendRequest(HttpMethod.DELETE, path, null);
+	private ResponseEntity<Void> sendDeleteRequest(final String path) {
+		return sendRequest(HttpMethod.DELETE, path, null, Void.class);
 	}
 
-	//-------------------------------------------------------------------------------------------------
-	private ResponseEntity<String> sendRequest(final HttpMethod method, final String path, final String body) {
+	// -------------------------------------------------------------------------------------------------
+	private <T> ResponseEntity<T> sendRequest (
+			final HttpMethod method,
+			final String path,
+			final String body,
+			Class<T> responseType
+		) {
 		final String uri = dittoAddress + path;
 		final HttpHeaders headers = new HttpHeaders();
 		headers.setBasicAuth(dittoUsername, dittoPassword);
@@ -110,7 +117,22 @@ public class DittoHttpClient {
 		}
 		final HttpEntity<String> request = new HttpEntity<>(body, headers);
 		logger.debug("Sending HTTP " + method + " request to Eclipse Ditto, URI " + uri);
-		// TODO: Error handling
-		return restTemplate.exchange(uri, method, request, String.class);
+
+		try {
+			return restTemplate.exchange(uri, method, request, responseType);
+		} catch (final HttpClientErrorException e) {
+			return new ResponseEntity<T>(e.getStatusCode());
+		} catch (Exception e) {
+			logger.error(e);
+			return new ResponseEntity<T>(HttpStatus.BAD_GATEWAY);
+		}
+	}
+
+	// -------------------------------------------------------------------------------------------------
+	private ResponseEntity<String> sendRequest(
+			final HttpMethod method,
+			final String path,
+			final String body) {
+		return sendRequest(method, path, body, String.class);
 	}
 }

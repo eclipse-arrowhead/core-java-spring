@@ -68,12 +68,11 @@ public class DittoController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = THING_PROPERTY_URI)
-	public String thingPropertyRequest(
+	public ResponseEntity<String> thingPropertyRequest(
 			@PathVariable("thing") String thing,
 			@PathVariable("feature") String feature,
 			@PathVariable("property") String property) {
-		final ResponseEntity<String> result = dittoHttpClient.getProperty(thing, feature, property);
-		return result.getBody();
+		return dittoHttpClient.getProperty(thing, feature, property);
 	}
 
 }
