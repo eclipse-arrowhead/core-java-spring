@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.core.ditto.service.DittoHttpClient;
@@ -40,7 +39,7 @@ import io.swagger.annotations.ApiResponses;
 
 @Api(tags = { CoreCommonConstants.SWAGGER_TAG_ALL })
 @RestController
-@RequestMapping(CommonConstants.DITTO_URI + CoreCommonConstants.MGMT_URI)
+@RequestMapping(Constants.THING_MGMT_URI)
 public class ThingManagementController {
 
 	//=================================================================================================
@@ -71,7 +70,7 @@ public class ThingManagementController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = "/things")
+	@GetMapping
 	public ResponseEntity<String> getThings() {
 		return dittoHttpClient.getThings();
 	}
@@ -83,7 +82,7 @@ public class ThingManagementController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = "/things/{thingId}")
+	@GetMapping(path = "/{thingId}")
 	public ResponseEntity<String> getThing(@PathVariable("thingId") String thingId) {
 		 return dittoHttpClient.getThing(thingId);
 	}
@@ -96,7 +95,7 @@ public class ThingManagementController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PutMapping(path = "/things/{thingId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(path = "/{thingId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public ResponseEntity<String> putThing(@PathVariable("thingId") String thingId, @RequestBody final String thingRequest) {
 
 		Thing thing = ThingsModelFactory.newThingBuilder(thingRequest)
@@ -130,7 +129,7 @@ public class ThingManagementController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@DeleteMapping(path = "/things/{thingId}")
+	@DeleteMapping(path = "/{thingId}")
 	@ResponseBody
 	public ResponseEntity<Void> deleteThing(@PathVariable("thingId") String thingId) {
 

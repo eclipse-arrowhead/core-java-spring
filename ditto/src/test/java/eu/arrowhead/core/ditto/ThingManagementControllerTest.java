@@ -23,8 +23,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.dto.internal.ThingRequestDTO;
 import eu.arrowhead.core.ditto.service.DittoHttpClient;
 
@@ -45,9 +43,6 @@ public class ThingManagementControllerTest {
 	private DittoHttpClient dittoHttpClient;
 
 	private MockMvc mockMvc;
-
-	private final String DITTO_MGMT_URI = CommonConstants.DITTO_URI + CoreCommonConstants.MGMT_URI;
-	private final String THINGS_URI = DITTO_MGMT_URI + "/things/";
 
 	private final String THING_ID = "x:y:z";
 	private final String THING_DEFINITION = "a:b:c";
@@ -73,7 +68,7 @@ public class ThingManagementControllerTest {
 				new ResponseEntity<>(mockResponseBody, HttpStatus.OK);
 		Mockito.when(dittoHttpClient.getThings()).thenReturn(mockedResponse);
 
-		final MvcResult response = this.mockMvc.perform(get(THINGS_URI)
+		final MvcResult response = this.mockMvc.perform(get(Constants.THING_MGMT_URI)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andReturn();
@@ -82,8 +77,7 @@ public class ThingManagementControllerTest {
 
 	@Test
 	public void getThing() throws Exception {
-
-		final String thingUri = THINGS_URI + THING_ID;
+		final String thingUri = Constants.THING_MGMT_URI + "/" + THING_ID;
 		final String mockResponseBody = "{<MOCK_RESPONSE_BODY>}";
 		final ResponseEntity<String> mockedResponse =
 				new ResponseEntity<>(mockResponseBody, HttpStatus.OK);
@@ -102,13 +96,8 @@ public class ThingManagementControllerTest {
 		final ThingRequestDTO thingRequestDTO =
 				new ThingRequestDTO(THING_DEFINITION, null, Collections.emptyMap(), Collections.emptyMap());
 		final String thingRequestJson = objectMapper.writeValueAsString(thingRequestDTO);
-		final String thingUri = THINGS_URI + THING_ID;
+		final String thingUri = Constants.THING_MGMT_URI + "/" + THING_ID;
 		final String mockResponseBody = "{<MOCK_RESPONSE_BODY>}";
-
-		// Thing thing = ThingsModelFactory.newThingBuilder(thingJson).build(); TODO: Build a thing
-		// instead?
-
-
 		final ResponseEntity<String> mockedResponse =
 				new ResponseEntity<>(mockResponseBody, HttpStatus.CREATED);
 
@@ -130,7 +119,7 @@ public class ThingManagementControllerTest {
 	@Test
 	public void deleteThing() throws Exception {
 
-		final String thingUri = THINGS_URI + THING_ID;
+		final String thingUri = Constants.THING_MGMT_URI + "/" + THING_ID;
 
 		final ResponseEntity<String> getResponse = new ResponseEntity<>(thingJson, HttpStatus.OK);
 		final ResponseEntity<Void> deletionResponse = new ResponseEntity<>(null, HttpStatus.OK);
