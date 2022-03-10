@@ -11,31 +11,25 @@
 
 package eu.arrowhead.core.ditto;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 
-public class Constants {
+@Service
+public class DittoDevopsCommands {
 
 	//=================================================================================================
 	// members
-
-	public static final String DITTO_HTTP_ADDRESS = "ditto_http_address";
-	public static final String $DITTO_HTTP_ADDRESS_WD = "${" + DITTO_HTTP_ADDRESS + "}";
-
-	public static final String DITTO_WS_ADDRESS = "ditto_ws_address";
-	public static final String $DITTO_WS_ADDRESS_WD = "${" + DITTO_WS_ADDRESS + "}";
-
-	public static final String DITTO_USERNAME = "ditto_username";
-	public static final String $DITTO_USERNAME = "${" + DITTO_USERNAME + "}";
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	public static final String DITTO_PASSWORD = "ditto_password";
 	public static final String $DITTO_PASSWORD = "${" + DITTO_PASSWORD + "}";
-
-	public static final String DITTO_DEVOPS_USERNAME = "ditto_devops_username";
-	public static final String $DITTO_DEVOPS_USERNAME = "${" + DITTO_DEVOPS_USERNAME + "}";
-
-	public static final String DITTO_DEVOPS_PASSWORD = "ditto_devops_password";
-	public static final String $DITTO_DEVOPS_PASSWORD = "${" + DITTO_DEVOPS_PASSWORD + "}";
 
 	public static final String SUBSCRIBE_TO_DITTO_EVENTS = "subscribe_to_ditto_events";
 	public static final String $SUBSCRIBE_TO_DITTO_EVENTS = "${" + SUBSCRIBE_TO_DITTO_EVENTS + "}";
@@ -49,10 +43,34 @@ public class Constants {
 	public static final String DITTO_POLICY_ID = "eu.arrowhead:ah-ditto";
 
 	//=================================================================================================
-	// assistant methods
+	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	private Constants() {
-		throw new UnsupportedOperationException();
+	public String create(final JsonNode connection) {
+		// create a JSON object
+		final ObjectNode command = objectMapper.createObjectNode();
+
+		command.put("targetActorSelection", "/system/sharding/connection");
+		command.set("headers", buildHeaders());
+		command.set("piggybackCommand",
+				buildPiggybackCommand("connectivity.commands:createConnection", connection));
+
+		return command.toString();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private ObjectNode buildHeaders() {
+		final ObjectNode headers = objectMapper.createObjectNode();
+		headers.put("aggregate", false);
+		headers.put("is-group-topic", true);
+		return headers;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private JsonNode buildPiggybackCommand(final String type, final JsonNode connection) {
+		final ObjectNode piggybackCommand = objectMapper.createObjectNode();
+		piggybackCommand.put("type", type);
+		piggybackCommand.set("connection", connection);
+		return piggybackCommand;
 	}
 }

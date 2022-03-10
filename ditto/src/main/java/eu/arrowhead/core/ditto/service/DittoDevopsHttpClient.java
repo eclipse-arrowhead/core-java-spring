@@ -10,6 +10,8 @@
  ********************************************************************************/
 
 package eu.arrowhead.core.ditto.service;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,97 +23,90 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import eu.arrowhead.core.ditto.Constants;
+import eu.arrowhead.core.ditto.DittoDevopsCommands;
 
 @Service
-public class DittoHttpClient {
+public class DittoDevopsHttpClient {
 
 	//=================================================================================================
 	// members
 
-	final private static String DITTO_THINGS_SEARCH_URI = "/api/2/search/things/";
-	final private static String DITTO_THINGS_URI = "/api/2/things/";
-	final private static String DITTO_PROPERTY_URI_TEMPLATE = "/api/2/things/%s/features/%s/properties/%s";
+	private final Logger logger = LogManager.getLogger(DittoDevopsHttpClient.class);
 
-	private final Logger logger = LogManager.getLogger(DittoHttpClient.class);
+	private static final String DITTO_CONNECTIVITY_URI = "/devops/piggyback/connectivity";
 
 	@Value(Constants.$DITTO_HTTP_ADDRESS_WD)
 	private String dittoAddress;
 
-	@Value(Constants.$DITTO_USERNAME)
-	private String dittoUsername;
+	@Value(Constants.$DITTO_DEVOPS_USERNAME)
+	private String dittoDevopsUsername;
 
-	@Value(Constants.$DITTO_PASSWORD)
-	private String dittoPassword;
+	@Value(Constants.$DITTO_DEVOPS_PASSWORD)
+	private String dittoDevopsPassword;
 
 	@Autowired
 	private RestTemplate restTemplate;
+
+	@Autowired
+	private DittoDevopsCommands dittoDevopsCommands;
 
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public ResponseEntity<String> getThings() {
-		return sendGetRequest(DITTO_THINGS_SEARCH_URI);
+	public ResponseEntity<String> getConnections() {
+		// TODO: Implement!
+		throw new NotImplementedException("Not implemented!");
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public ResponseEntity<String> getThing(final String thingId) {
-		Assert.notNull(thingId, "thingId is null");
-		return sendGetRequest(DITTO_THINGS_URI + thingId);
+	public ResponseEntity<String> getConnection(final String connectionId) {
+		// TODO: Implement!
+		throw new NotImplementedException("Not implemented!");
+	}
+
+	public ResponseEntity<JsonNode> putConnection(final JsonNode connection) {
+		// TODO: Create or update.
+		final String command = dittoDevopsCommands.create(connection);
+		ResponseEntity<JsonNode> response = sendPostRequest(DITTO_CONNECTIVITY_URI, command);
+
+		// TODO: Figure out why the response has this format: {{"?": "?": { ... }}}
+		final JsonNode contents = response.getBody().get("?").get("?");
+		final int statusCode = contents.get("status").asInt();
+		return new ResponseEntity<JsonNode>(contents, HttpStatus.valueOf(statusCode));
+	}
+
+	public ResponseEntity<String> deleteConnection(final String connectionId) {
+		throw new NotImplementedException("Not implemented!");
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public ResponseEntity<String> getProperty(
-			final String thing,
-			final String feature,
-			final String property) {
-		Assert.notNull(thing, "Thing is null");
-		Assert.notNull(feature, "Feature is null");
-		Assert.notNull(property, "Property is null");
-
-		final String path = String.format(DITTO_PROPERTY_URI_TEMPLATE, thing, feature, property);
-		return sendGetRequest(path);
+	private ResponseEntity<JsonNode> sendGetRequest(final String path) {
+		return sendRequest(HttpMethod.GET, path, null, JsonNode.class);
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public ResponseEntity<String> putThing(final String thingId, final String thingJson) {
-		return sendPutRequest(DITTO_THINGS_URI + thingId, thingJson);
+	private ResponseEntity<JsonNode> sendPostRequest(final String path, final String body) {
+		return sendRequest(HttpMethod.POST, path, body, JsonNode.class);
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public ResponseEntity<Void> deleteThing(final String thingId) {
-		return sendDeleteRequest(DITTO_THINGS_URI + thingId);
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private ResponseEntity<String> sendGetRequest(final String path) {
-		return sendRequest(HttpMethod.GET, path, null);
-	}
-
-	// -------------------------------------------------------------------------------------------------
-	private ResponseEntity<String> sendPutRequest(final String path, final String body) {
-		return sendRequest(HttpMethod.PUT, path, body);
-	}
-
-	// -------------------------------------------------------------------------------------------------
 	private ResponseEntity<Void> sendDeleteRequest(final String path) {
 		return sendRequest(HttpMethod.DELETE, path, null, Void.class);
 	}
 
-	// -------------------------------------------------------------------------------------------------
-	private <T> ResponseEntity<T> sendRequest (
+	//-------------------------------------------------------------------------------------------------
+	private <T> ResponseEntity<T> sendRequest(
 			final HttpMethod method,
 			final String path,
 			final String body,
-			Class<T> responseType
-		) {
+			Class<T> responseType) {
 		final String uri = dittoAddress + path;
 		final HttpHeaders headers = new HttpHeaders();
-		headers.setBasicAuth(dittoUsername, dittoPassword);
+		headers.setBasicAuth(dittoDevopsUsername, dittoDevopsPassword);
 		if (body != null) {
 			headers.setContentType(MediaType.APPLICATION_JSON);
 		}
@@ -128,7 +123,7 @@ public class DittoHttpClient {
 		}
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private ResponseEntity<String> sendRequest(
 			final HttpMethod method,
 			final String path,
