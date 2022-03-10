@@ -30,7 +30,7 @@ import eu.arrowhead.core.ditto.service.DittoHttpClient;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest()
-public class DittoManagementControllerTest {
+public class ThingManagementControllerTest {
 
 	// =================================================================================================
 	// members
