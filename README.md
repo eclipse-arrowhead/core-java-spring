@@ -8419,3 +8419,23 @@ This implementation is based on [Eclipse HawkBit](https://www.eclipse.org/hawkbi
 <a name="device_hub" />
 
 The Device Hub allows devices to publish telemetry information and events or receive commands using various protocols like HTTP, MQTT, or CoAP. In turn, other applications can consume this information from a single Hub using a single protocol (AMQP 1.0) without individually interacting with each device protocol directly. The Device Hub is an integration of Eclipse Hono with the Arrowhead core systems. For more details, see the [description](./device-hub/README.md) and example [configuration files](./device-hub/hono-deployment/) for a Helm Chart [in the Device Hub folder](./device-hub/).
+  # AH-Ditto Adapter
+ 
+This adapter enables the integration of Eclipse Ditto and Eclipse Arrowhead. The objective is to support virtual representations to front physical devices and provide their services. We use the term digital twin as a proxy (DTaaP), or shortly digital proxy. Benefits of having a digital proxy that provide services on behalf of a device include:
++ Energy Efficiency: devices can sleep (duty cycle) while digital proxy services are available.
++ Availability & Persistence: Digital proxy provides seamless persistency to service consumers. Physical device can be replaced.
+
++ Security: Devices not capable of strong security interacts only with their digital proxy, while the digital proxy registers services and provides strong security to consumers
+
+Please see the [AH-Ditto Digital Twin - System of systems Description (SosD)] and [AH-Ditto Digital Twin - System Description (SysD)] for further details.
+
+## Services
+
+AH-Ditto provides two different services:
+ + Management services - These services are responsible to do administrative operations related to the Things. These management operations include CRUD operations related to policies, Things, DTs (Digital Twin), connections, and their services. These services have all access rights to do all operations. Only admin users will be allowed to consume management services. 
+ + Consumer services - These services are for consumer applications. Any consumer from Eclipse Arrowhead meeting the security criteria of the framework can access these services via AH-Ditto. With these services consumers will be able to read the status of desired DTs (Digital Twins) from Eclipse Ditto through AH-Ditto. Consumer services registered within the Eclipse Arrowhead framework will provide “READ” access. 
+ 
+
+ [AH-Ditto Digital Twin - System of systems Description (SosD)]:documentation/ah-ditto/ah-ditto-digital-twin-sosd.md
+
+ [AH-Ditto Digital Twin - System Description (SysD)]:documentation/ah-ditto/ah-ditto-digital-twin-sysd.md
