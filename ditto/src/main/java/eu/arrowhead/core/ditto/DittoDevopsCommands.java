@@ -46,14 +46,42 @@ public class DittoDevopsCommands {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public String create(final JsonNode connection) {
+	public String create(final JsonNode connection, final String method) {
 		// create a JSON object
 		final ObjectNode command = objectMapper.createObjectNode();
 
 		command.put("targetActorSelection", "/system/sharding/connection");
 		command.set("headers", buildHeaders());
-		command.set("piggybackCommand",
+		if(method == "create"){
+			command.set("piggybackCommand",
 				buildPiggybackCommand("connectivity.commands:createConnection", connection));
+		}else if(method == "modify"){
+			command.set("piggybackCommand",
+				buildPiggybackCommand("connectivity.commands:modifyConnection", connection));
+		}
+		return command.toString();
+	}
+
+	// create function overload
+	public String create(final String connectionId, final String method) {
+		// create a JSON object
+		final ObjectNode command = objectMapper.createObjectNode();
+
+		command.put("targetActorSelection", "/system/sharding/connection");
+		command.set("headers", buildHeaders());
+		if(method == "retrieve"){
+			command.set("piggybackCommand",
+				buildPiggybackCommand("connectivity.commands:retrieveConnection", connectionId));
+		}else if(method =="open"){
+			command.set("piggybackCommand",
+				buildPiggybackCommand("connectivity.commands:openConnection", connectionId));
+		}else if(method == "close"){
+			command.set("piggybackCommand",
+				buildPiggybackCommand("connectivity.commands:closeConnection", connectionId));
+		}else if(method =="delete"){
+			command.set("piggybackCommand",
+				buildPiggybackCommand("connectivity.commands:deleteConnection", connectionId));
+		}
 
 		return command.toString();
 	}
@@ -71,6 +99,14 @@ public class DittoDevopsCommands {
 		final ObjectNode piggybackCommand = objectMapper.createObjectNode();
 		piggybackCommand.put("type", type);
 		piggybackCommand.set("connection", connection);
+		return piggybackCommand;
+	}
+
+	// overloaded function
+	private JsonNode buildPiggybackCommand(final String type, final String connectionID) {
+		final ObjectNode piggybackCommand = objectMapper.createObjectNode();
+		piggybackCommand.put("type", type);
+		piggybackCommand.put("connectionId", connectionID);
 		return piggybackCommand;
 	}
 }
