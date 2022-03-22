@@ -11,8 +11,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.core.translator.services.translator.TranslatorHub;
-import eu.arrowhead.core.translator.services.translator.common.InterfaceDTO;
 import eu.arrowhead.core.translator.services.translator.common.TranslatorHubDTO;
 import eu.arrowhead.core.translator.services.translator.common.TranslatorSetupDTO;
 import eu.arrowhead.core.translator.services.translator.common.Translation.Protocol;

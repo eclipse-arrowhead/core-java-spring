@@ -130,7 +130,8 @@ public class TranslatorController {
         @PostMapping(path = PATH_NEW_TRANSLATOR_ROOT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
         @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
         @ResponseBody
-        public TranslatorHubDTO postTranslator(@RequestBody final TranslatorSetupDTO setup, HttpServletRequest request) {
+        public TranslatorHubDTO postTranslator(@RequestBody final TranslatorSetupDTO setup,
+                        HttpServletRequest request) {
                 return translatorService.createTranslatorHub(setup);
         }
 

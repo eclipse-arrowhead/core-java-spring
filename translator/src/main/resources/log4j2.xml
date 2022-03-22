@@ -41,6 +41,8 @@
             <AppenderRef ref="MySQLDatabase" />			
         </AsyncLogger>
         <Logger name="eu.arrowhead.common" level="${CONSOLE_FILE_LEVEL}" additivity="true"></Logger>
-        <Logger name="eu.arrowhead.core" level="${CONSOLE_FILE_LEVEL}" additivity="true"></Logger>		
+        <Logger name="eu.arrowhead.core" level="${CONSOLE_FILE_LEVEL}" additivity="true"></Logger>
+        <Logger name="org.eclipse.jetty" level="error"/>	
+        <Logger name="org.eclipse.californium" level="error"/>
     </Loggers>
 </Configuration>

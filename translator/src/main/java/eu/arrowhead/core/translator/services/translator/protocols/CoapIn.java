@@ -7,6 +7,7 @@ import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.Request;
+import org.eclipse.californium.core.coap.Response;
 import org.eclipse.californium.core.network.config.NetworkConfig;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 import org.eclipse.californium.core.server.resources.Resource;
@@ -21,11 +22,8 @@ public class CoapIn extends ProtocolIn {
 
   public CoapIn(URI uri) {
     super(uri);
-    System.out.println("Coap Server Start "+uri.toString());
     coapServer = new RootCoapServer(uri.getPort());
-    System.out.println("Coap Server");
     coapServer.start();
-    System.out.println("Coap Server Done");
   }
 
   private class RootCoapServer extends CoapServer {
@@ -59,13 +57,10 @@ public class CoapIn extends ProtocolIn {
     }
 
     public void notifyObservers(InterProtocolResponse response) {
-      System.out.println("notifyObservers: " + new String(response.getContent()));
+      //System.out.println("notifyObservers: " + new String(response.getContent()));
       payload = response.getContent();
       rc = response.getStatusCode();
       ct = response.getContentType();
-      /*
-       * new Thread(() -> { changed(); }).start();
-       */
       new Thread(() -> {
         changed();
       }).start();
@@ -76,19 +71,20 @@ public class CoapIn extends ProtocolIn {
 
       try {
         Request request = exchange.advanced().getRequest();
+        Response response = exchange.advanced().getResponse();
         URI uri = new URI(request.getURI());
-        System.out.println("GET " + exchange.getRequestOptions().getObserve() + " " + request.isObserve());
+        //System.out.println("GET " + exchange.getRequestOptions().getObserve() + " " + request.isObserve());
 
         if (request.isObserve()) {
-          System.out.println("Observing!");
-          new Thread(() -> {
-            protocolOut.observe(new InterProtocolRequest(uri.getPath(), uri.getQuery(),
-                Translation.contentFormatFromCoap(request.getOptions().getContentFormat()), null));
-          }).start();
+          if (response == null) {
+            new Thread(() -> {
+              protocolOut.observe(new InterProtocolRequest(uri.getPath(), uri.getQuery(),
+                  Translation.contentFormatFromCoap(request.getOptions().getContentFormat()), null));
+            }).start();
+          }
           sendResponse(exchange, new InterProtocolResponse(ct, rc, payload));
 
         } else {
-          System.out.println("GET! new InterProtocolRequest(uri.getPath(), uri.getQuery()"+ uri.getPath()+" "+uri.getQuery());
           sendResponse(exchange, protocolOut.get(new InterProtocolRequest(uri.getPath(), uri.getQuery(),
               Translation.contentFormatFromCoap(request.getOptions().getContentFormat()), null)));
         }
@@ -159,8 +155,6 @@ public class CoapIn extends ProtocolIn {
 
     // Private
     private void sendResponse(CoapExchange exchange, InterProtocolResponse response) {
-      System.out.println(String.format("Send Response to %s content:%s", exchange.advanced().getRequest().getURI(),
-          new String(response.getContent())));
       exchange.respond(Translation.statusToCoap(response.getStatusCode()), response.getContent(),
           Translation.contentFormatToCoap(response.getContentType()));
     }
@@ -169,7 +163,6 @@ public class CoapIn extends ProtocolIn {
 
   @Override
   synchronized void notifyObservers(InterProtocolResponse response) {
-    System.out.println("notifyObservers: " + new String(response.getContent()));
     CustomRootResource rr = (CustomRootResource) coapServer.getRoot();
     rr.notifyObservers(response);
   }
