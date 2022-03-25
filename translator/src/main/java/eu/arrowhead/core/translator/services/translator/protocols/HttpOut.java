@@ -218,7 +218,7 @@ public class HttpOut extends ProtocolOut {
             remoteRequest = uri.toString();
         }
         try {
-            System.out.println("OBS " + remoteRequest);
+            //System.out.println("OBS " + remoteRequest);
             Request httpReq = client.POST(remoteRequest);
             httpReq.method(GET);
             httpReq.header(HttpHeader.CONNECTION, "keep-alive");

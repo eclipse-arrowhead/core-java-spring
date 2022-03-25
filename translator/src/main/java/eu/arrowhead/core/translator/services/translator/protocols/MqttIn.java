@@ -10,6 +10,8 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
+import eu.arrowhead.core.translator.services.translator.common.ContentTranslator;
+
 public class MqttIn extends ProtocolIn {
     private MqttClient client;
     private final MemoryPersistence persistence = new MemoryPersistence();
@@ -19,7 +21,6 @@ public class MqttIn extends ProtocolIn {
     public MqttIn(URI uri) throws Exception {
         super(uri);
         topicId = "" + uri.getPort();
-        System.out.println("MQTTIN: " + topicId);
         client = new MqttClient(broker, topicId, persistence);
 
         /*
@@ -66,6 +67,11 @@ public class MqttIn extends ProtocolIn {
 
     @Override
     synchronized void notifyObservers(InterProtocolResponse response) {
+
+        // Translation
+        response.setContent(
+                ContentTranslator.translate(getContentType(), protocolOut.getContentType(), response.getContent()));
+
         publish(topicId + "/out", response.getContentAsString());
     }
 

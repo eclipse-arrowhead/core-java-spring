@@ -20,6 +20,8 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
+import eu.arrowhead.core.translator.services.translator.common.ContentTranslator;
+
 /**
  *
  * @author Pablo Puñal Pereira <pablo.punal@thingwave.eu>
@@ -47,7 +49,8 @@ public class HttpIn extends ProtocolIn {
         private ArrayList<AsyncContextState> contexts = new ArrayList();
 
         @Override
-        public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        public void service(HttpServletRequest request, HttpServletResponse response)
+                throws ServletException, IOException {
             if (request.getMethod().equalsIgnoreCase("PATCH")) {
                 doPatch(request, response);
             } else {
@@ -58,7 +61,7 @@ public class HttpIn extends ProtocolIn {
         @Override
         protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
-            //System.out.println("GET!");
+            // System.out.println("GET!");
 
             if (req.getHeader("Connection") == null || !req.getHeader("Connection").equals("keep-alive")) {
 
@@ -88,7 +91,7 @@ public class HttpIn extends ProtocolIn {
 
         @Override
         protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-            byte[] content = new byte[]{};
+            byte[] content = new byte[] {};
             try {
                 content = getContentAsByteArray(req);
             } catch (IOException ex) {
@@ -105,9 +108,9 @@ public class HttpIn extends ProtocolIn {
                             content)));
         }
 
-        //@Override
+        // @Override
         protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-            byte[] content = new byte[]{};
+            byte[] content = new byte[] {};
             try {
                 content = getContentAsByteArray(req);
             } catch (IOException ex) {
@@ -126,7 +129,7 @@ public class HttpIn extends ProtocolIn {
 
         @Override
         protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-            byte[] content = new byte[]{};
+            byte[] content = new byte[] {};
             try {
                 content = getContentAsByteArray(req);
             } catch (IOException ex) {
@@ -171,9 +174,14 @@ public class HttpIn extends ProtocolIn {
         }
 
         public void notifyObservers(InterProtocolResponse response) {
-            //System.out.println("Sending: " + new String(response.getContent()));
+
+            // Translation
+            response.setContent(
+                    ContentTranslator.translate(getContentType(), protocolOut.getContentType(), response.getContent()));
+
+            // System.out.println("Sending: " + new String(response.getContent()));
             contexts.forEach(cont -> {
-                //System.out.println("E");
+                // System.out.println("E");
                 try {
                     ServletOutputStream outputStream = cont.getResponse().getOutputStream();
                     if (outputStream.isReady()) {
@@ -188,7 +196,8 @@ public class HttpIn extends ProtocolIn {
                         System.err.println("not ready!");
                     }
                 } catch (IOException ex) { // Ignore
-                    //System.err.println("updateObservers IOException: " + ex.getLocalizedMessage());
+                    // System.err.println("updateObservers IOException: " +
+                    // ex.getLocalizedMessage());
                 }
 
             });

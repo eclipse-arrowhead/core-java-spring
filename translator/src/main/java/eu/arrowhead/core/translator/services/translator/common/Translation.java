@@ -4,7 +4,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 
 public class Translation {
-  public enum Protocol {
+
+  public static enum Protocol {
     UNKOWN(0), HTTP(1), COAP(2), MQTT(3), WS(4);
 
     public final int value;
@@ -25,6 +26,35 @@ public class Translation {
           return WS;
         default:
           return UNKOWN;
+      }
+    }
+  }
+
+  public static enum ContentType {
+    ANY(0),
+    TEXT(1),
+    XML(2),
+    JSON(3),
+    CBOR(4);
+
+    public final int value;
+
+    ContentType(int value) {
+      this.value = value;
+    }
+
+    public static ContentType valueOf(final int value) {
+      switch (value) {
+        case 1:
+          return TEXT;
+        case 2:
+          return XML;
+        case 3:
+          return JSON;
+        case 4:
+          return CBOR;
+        default:
+          return ANY;
       }
     }
   }

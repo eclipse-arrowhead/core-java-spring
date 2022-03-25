@@ -13,6 +13,7 @@ import org.eclipse.californium.core.server.resources.CoapExchange;
 import org.eclipse.californium.core.server.resources.Resource;
 import org.eclipse.jetty.http.MimeTypes;
 
+import eu.arrowhead.core.translator.services.translator.common.ContentTranslator;
 import eu.arrowhead.core.translator.services.translator.common.Translation;
 
 public class CoapIn extends ProtocolIn {
@@ -57,7 +58,12 @@ public class CoapIn extends ProtocolIn {
     }
 
     public void notifyObservers(InterProtocolResponse response) {
-      //System.out.println("notifyObservers: " + new String(response.getContent()));
+      // System.out.println("notifyObservers: " + new String(response.getContent()));
+
+      // Translation
+      response.setContent(
+          ContentTranslator.translate(getContentType(), protocolOut.getContentType(), response.getContent()));
+
       payload = response.getContent();
       rc = response.getStatusCode();
       ct = response.getContentType();
@@ -73,7 +79,8 @@ public class CoapIn extends ProtocolIn {
         Request request = exchange.advanced().getRequest();
         Response response = exchange.advanced().getResponse();
         URI uri = new URI(request.getURI());
-        //System.out.println("GET " + exchange.getRequestOptions().getObserve() + " " + request.isObserve());
+        // System.out.println("GET " + exchange.getRequestOptions().getObserve() + " " +
+        // request.isObserve());
 
         if (request.isObserve()) {
           if (response == null) {

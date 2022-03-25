@@ -49,6 +49,7 @@ public class TranslatorHub {
   private void startHub() {
     try {
 
+      //System.out.println("IN: " + setup.getIn().getContentType()+" OUT: "+setup.getOut().getContentType());
       switch (setup.getIn().getProtocol()) {
         case COAP:
           setup.getIn().setPort(getAvailablePort());
@@ -90,7 +91,9 @@ public class TranslatorHub {
       }
 
       protocolIn.setProtocolOut(protocolOut);
+      protocolIn.setContentType(setup.getIn().getContentType());
       protocolOut.setProtocolIn(protocolIn);
+      protocolOut.setContentType(setup.getOut().getContentType());
 
     } catch (Exception ex) {
       System.err.println("Exception: " + ex.getLocalizedMessage());

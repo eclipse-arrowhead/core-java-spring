@@ -7,7 +7,7 @@ public class InterProtocolResponse {
 
     private final String contentType;
     private final int statusCode;
-    private final byte[] content;
+    private byte[] content;
 
     public InterProtocolResponse() {
         contentType = MimeTypes.Type.TEXT_PLAIN.asString();
@@ -35,6 +35,10 @@ public class InterProtocolResponse {
         return statusCode;
     }
 
+    public void setContent(byte[] content) {
+        this.content = content;
+    }
+
     public byte[] getContent() {
         return content;
     }
@@ -44,4 +48,3 @@ public class InterProtocolResponse {
     }
 
 }
-

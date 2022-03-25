@@ -23,6 +23,8 @@ import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 
+import eu.arrowhead.core.translator.services.translator.common.ContentTranslator;
+
 public class WsIn extends ProtocolIn {
 
     private final Server wsServer = new Server();
@@ -43,6 +45,11 @@ public class WsIn extends ProtocolIn {
 
     @Override
     synchronized void notifyObservers(InterProtocolResponse response) {
+
+        // Translation
+        response.setContent(
+                ContentTranslator.translate(getContentType(), protocolOut.getContentType(), response.getContent()));
+                
         wsServlet.notifyAllSessions(response);
     }
 
