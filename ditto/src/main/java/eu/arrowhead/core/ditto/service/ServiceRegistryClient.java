@@ -96,6 +96,9 @@ public class ServiceRegistryClient {
 		return httpService.sendRequest(uri, HttpMethod.DELETE, Void.class);
 	}
 
+	//=================================================================================================
+	// assistant methods
+
 	// -------------------------------------------------------------------------------------------------
 	private ServiceRegistryRequestDTO getServiceRegistryRequest(
 		final String serviceDefinition,
@@ -124,20 +127,20 @@ public class ServiceRegistryClient {
 				.build();
 	}
 
-		//-------------------------------------------------------------------------------------------------
-		private UriComponents getUnregisterUri(final String serviceDefinition, final String serviceUri) {
-			return UriComponentsBuilder.newInstance()
-					.scheme(sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP)
-					.host(serviceRegistryAddress)
-					.queryParam("service_definition", serviceDefinition)
-					.queryParam("service_uri", serviceUri)
-					.queryParam("system_name", systemName.toLowerCase())
-					.queryParam("address", systemDomainName)
-					.queryParam("port", systemDomainPort)
-					.port(serviceRegistryPort)
-					.path(SERVICEREGISTRY_UNREGISTER_URI)
-					.build();
-		}
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getUnregisterUri(final String serviceDefinition, final String serviceUri) {
+		return UriComponentsBuilder.newInstance()
+				.scheme(sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP)
+				.host(serviceRegistryAddress)
+				.queryParam("service_definition", serviceDefinition)
+				.queryParam("service_uri", serviceUri)
+				.queryParam("system_name", systemName.toLowerCase())
+				.queryParam("address", systemDomainName)
+				.queryParam("port", systemDomainPort)
+				.port(serviceRegistryPort)
+				.path(SERVICEREGISTRY_UNREGISTER_URI)
+				.build();
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	private SystemRequestDTO getSystemDescription() {

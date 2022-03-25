@@ -22,7 +22,7 @@ import eu.arrowhead.common.core.CoreSystemService;
 public class DittoApplicationInitListener extends ApplicationInitListener {
 
 	//=================================================================================================
-	// methods
+	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
@@ -31,9 +31,6 @@ public class DittoApplicationInitListener extends ApplicationInitListener {
 			logger.debug("AuthInfo: {}", Base64.getEncoder().encodeToString(publicKey.getEncoded()));
 		}
 	}
-
-	//=================================================================================================
-	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
 	@Override

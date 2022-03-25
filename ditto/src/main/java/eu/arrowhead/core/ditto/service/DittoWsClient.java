@@ -114,7 +114,6 @@ public class DittoWsClient {
 			subscribeToDittoEvents(client);
 		}
 
-		client.twin().registerForThingChanges(THING_REGISTRATION_ID, this::onThingChange);
 		if (dittoPolicyExists(client)) {
 			client.policies().update(dittoPolicy);
 		} else {
@@ -126,6 +125,7 @@ public class DittoWsClient {
 	private void subscribeToDittoEvents(final DittoClient client) {
 		try {
 			client.twin().startConsumption().toCompletableFuture().get(); // this will block the thread!
+			client.twin().registerForThingChanges(THING_REGISTRATION_ID, this::onThingChange);
 		} catch (InterruptedException | ExecutionException e) {
 			logger.error("Failed to connect to Ditto's WebSocket API", e);
 		}
