@@ -1,0 +1,23 @@
+{
+    "policyId": "eu.arrowhead:ah-ditto",
+    "attributes": {
+        "name": "pi",
+        "type": "pi board",
+        "serviceDefinitions": {
+            "thermometer": "thermometer",
+            "humidity":"humidity"
+        }
+    },
+    "features": {
+        "thermometer": {
+            "properties": {
+                "temperature": 0
+            }
+        },
+        "humidity": {
+            "properties": {
+                "hum": 0
+            }
+        }
+    }
+}
