@@ -1,0 +1,36 @@
+{
+    "targetActorSelection": "/system/sharding/connection",
+    "headers": {
+    	"aggregate": false
+    },
+    "piggybackCommand": {
+        "type": "connectivity.commands:modifyConnection",
+        "connection": {
+            "id": "demo-test4",
+            "connectionType": "mqtt",
+            "connectionStatus": "open",
+            "failoverEnabled": true,
+            "uri": "tcp://192.168.1.210:1883",
+            "sources": [{
+                "addresses": ["ditto-tutorial4/#"],
+                "authorizationContext": ["nginx:ditto"],
+                "qos": 0,
+                "filters": []
+            }],
+            "targets": [{
+                "address": "ditto-tutorial4/{{ thing:id }}",
+                "topics": ["_/_/things/twin/events", "_/_/things/live/messages"],
+                "authorizationContext": ["nginx:ditto"],
+                "qos": 0
+            }],
+            "mappingContext": {
+                "mappingEngine": "JavaScript",
+                "options": {
+                    "incomingScript": "function mapToDittoProtocolMsg(headers, textPayload, bytePayload, contentType) { const jsonString = String.fromCharCode.apply(null, new Uint8Array(bytePayload)); const jsonData = JSON.parse(jsonString); const thingId = jsonData.thingId.split(':'); const value = { thermometer: { properties: { temperature: jsonData.temp } }, humidity: { properties: { hum: jsonData.hum } } }; return Ditto.buildDittoProtocolMsg(thingId[0], thingId[1], 'things', 'twin','commands', 'modify', '/features', headers, value); }",
+                    "loadBytebufferJS": "false",
+                    "loadLongJS": "false"
+                }
+            }
+        }
+    }
+}
