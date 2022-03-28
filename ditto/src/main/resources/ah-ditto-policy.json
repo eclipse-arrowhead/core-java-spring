@@ -1,0 +1,49 @@
+{
+  "entries": {
+    "ah-ditto-admin": {
+      "subjects": {
+        "nginx:ah-ditto-admin": {
+          "type": "nginx basic auth user"
+        }
+      },
+      "resources": {
+        "thing:/": {
+          "grant": [
+            "READ",
+            "WRITE"
+          ],
+          "revoke": []
+        },
+        "policy:/": {
+          "grant": [
+            "READ",
+            "WRITE"
+          ],
+          "revoke": []
+        },
+        "message:/": {
+          "grant": [
+            "READ",
+            "WRITE"
+          ],
+          "revoke": []
+        }
+      }
+    },
+    "ah-ditto-consumer": {
+      "subjects": {
+        "nginx:ah-ditto-consumer": {
+          "type": "technical client"
+        }
+      },
+      "resources": {
+        "thing:/features/": {
+          "grant": [
+            "READ"
+          ],
+          "revoke": []
+        }
+      }
+    }
+  }
+}
