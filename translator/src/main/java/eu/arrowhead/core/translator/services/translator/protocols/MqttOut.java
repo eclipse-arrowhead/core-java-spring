@@ -1,7 +1,6 @@
 package eu.arrowhead.core.translator.services.translator.protocols;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Random;
 
 import javax.servlet.http.HttpServletResponse;
@@ -26,7 +25,6 @@ public class MqttOut extends ProtocolOut {
         super(uri);
         topicId = "" + uri.getPort();
         client = new MqttClient(broker, getRandomString(), persistence);
-        //System.out.println("MqttOut: " + topicId);
 
         client.setCallback(new MqttCallback() {
 
@@ -36,7 +34,6 @@ public class MqttOut extends ProtocolOut {
 
             @Override
             public void messageArrived(String topic, MqttMessage message) throws Exception {
-                //System.out.println(String.format("out TOPIC: %s  MSG:%s", topic, new String(message.getPayload())));
 
                 protocolIn.notifyObservers(
                         new InterProtocolResponse(Type.TEXT_PLAIN,
@@ -60,19 +57,12 @@ public class MqttOut extends ProtocolOut {
             }
             client.subscribe(topic, 0);
         } catch (MqttException ex) {
-            System.out.println("MqttException: " + ex.getLocalizedMessage());
+            // Ignore
         }
     }
 
     @Override
     public InterProtocolResponse observe(InterProtocolRequest request) {
-        String remoteRequest;
-        try {
-            remoteRequest = new URI(uri.getScheme(), uri.getHost() + ":" + uri.getPort() + uri.getPath(),
-                    request.getPath(), request.getQueries()).toString();
-        } catch (URISyntaxException ex) {
-            remoteRequest = uri.toString();
-        }
 
         return new InterProtocolResponse(
                 MimeTypes.Type.TEXT_PLAIN,
@@ -80,10 +70,9 @@ public class MqttOut extends ProtocolOut {
                 payloadBuffer);
     }
 
-
     private String getRandomString() {
         int leftLimit = 97;
-        int rightLimit = 122; 
+        int rightLimit = 122;
         int targetStringLength = 10;
         Random random = new Random();
         StringBuilder buffer = new StringBuilder(targetStringLength);

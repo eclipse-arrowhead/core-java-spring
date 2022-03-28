@@ -3,8 +3,6 @@ package eu.arrowhead.core.translator.services.translator.protocols;
 import java.net.URI;
 
 import org.eclipse.jetty.http.MimeTypes;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -22,28 +20,6 @@ public class MqttIn extends ProtocolIn {
         super(uri);
         topicId = "" + uri.getPort();
         client = new MqttClient(broker, topicId, persistence);
-
-        /*
-         * client.setCallback(new MqttCallback() {
-         * 
-         * @Override
-         * public void connectionLost(Throwable thrwbl) {
-         * }
-         * 
-         * @Override
-         * public void messageArrived(String topic, MqttMessage message) throws
-         * Exception {
-         * System.out.println(String.format("TOPIC: %s  MSG:%s", topic, new
-         * String(message.getPayload())));
-         * }
-         * 
-         * @Override
-         * public void deliveryComplete(IMqttDeliveryToken imdt) {
-         * }
-         * });
-         * 
-         * subscribe(topicId);
-         */
         new Thread(() -> {
             try {
                 Thread.sleep(1000);
@@ -61,7 +37,7 @@ public class MqttIn extends ProtocolIn {
             }
             client.publish(topic, new MqttMessage(msg.getBytes()));
         } catch (MqttException ex) {
-            System.out.println("MqttException: " + ex.getLocalizedMessage());
+            // Ignore
         }
     }
 

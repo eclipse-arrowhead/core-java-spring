@@ -3,7 +3,6 @@ package eu.arrowhead.core.translator.services.translator;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Random;
 
 import org.apache.http.HttpStatus;
@@ -48,8 +47,6 @@ public class TranslatorHub {
   // -------------------------------------------------------------------------------------------------
   private void startHub() {
     try {
-
-      //System.out.println("IN: " + setup.getIn().getContentType()+" OUT: "+setup.getOut().getContentType());
       switch (setup.getIn().getProtocol()) {
         case COAP:
           setup.getIn().setPort(getAvailablePort());
@@ -96,7 +93,6 @@ public class TranslatorHub {
       protocolOut.setContentType(setup.getOut().getContentType());
 
     } catch (Exception ex) {
-      System.err.println("Exception: " + ex.getLocalizedMessage());
       throw new ArrowheadException("Problems to start a hub: " + ex.getLocalizedMessage(),
           HttpStatus.SC_INTERNAL_SERVER_ERROR);
     }

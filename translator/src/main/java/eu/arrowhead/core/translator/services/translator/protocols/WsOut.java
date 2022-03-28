@@ -8,7 +8,6 @@ import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 
-
 public class WsOut extends ProtocolOut {
 
     private final WebSocketClient wsClient;
@@ -30,11 +29,11 @@ public class WsOut extends ProtocolOut {
     public InterProtocolResponse post(InterProtocolRequest request) {
         String remoteRequest;
         try {
-            remoteRequest = new URI(uri.getScheme(), uri.getHost() + ":" + uri.getPort() + uri.getPath(), request.getPath(), request.getQueries()).toString();
+            remoteRequest = new URI(uri.getScheme(), uri.getHost() + ":" + uri.getPort() + uri.getPath(),
+                    request.getPath(), request.getQueries()).toString();
         } catch (URISyntaxException ex) {
             remoteRequest = uri.toString();
         }
-        System.out.println("post " + remoteRequest);
         try {
             if (!wsClient.isRunning()) {
                 wsClient.start();
@@ -71,12 +70,12 @@ public class WsOut extends ProtocolOut {
     public InterProtocolResponse observe(InterProtocolRequest request) {
         String remoteRequest;
         try {
-            remoteRequest = new URI(uri.getScheme(), uri.getHost() + ":" + uri.getPort() + uri.getPath(), request.getPath(), request.getQueries()).toString();
+            remoteRequest = new URI(uri.getScheme(), uri.getHost() + ":" + uri.getPort() + uri.getPath(),
+                    request.getPath(), request.getQueries()).toString();
         } catch (URISyntaxException ex) {
             remoteRequest = uri.toString();
         }
 
-        //System.out.println("obs " + remoteRequest);
         try {
             if (!wsClient.isRunning()) {
                 wsClient.start();
@@ -114,7 +113,6 @@ public class WsOut extends ProtocolOut {
 
         @Override
         public void onWebSocketBinary(byte[] payload, int offset, int len) {
-            //System.out.println("onWebSocketBinary; "+new String(payload));
             payloadBuffer = payload;
             protocolIn.notifyObservers(new InterProtocolResponse(
                     MimeTypes.Type.TEXT_PLAIN,
@@ -124,7 +122,6 @@ public class WsOut extends ProtocolOut {
 
         @Override
         public void onWebSocketText(String message) {
-            //System.out.println("onWebSocketText; "+message);
             payloadBuffer = message.getBytes();
             protocolIn.notifyObservers(new InterProtocolResponse(
                     MimeTypes.Type.TEXT_PLAIN,

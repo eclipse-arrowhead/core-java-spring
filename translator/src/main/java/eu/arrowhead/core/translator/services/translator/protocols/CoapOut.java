@@ -21,23 +21,19 @@ public class CoapOut extends ProtocolOut {
     public InterProtocolResponse get(InterProtocolRequest request) {
         String remoteRequest = uri.toString() + request.getPath()
                 + (request.getQueries() == null ? "" : "?" + request.getQueries());
-        System.out.println("GET: " + remoteRequest);
         try {
             CoapClient coapClient = new CoapClient(remoteRequest);
 
             CoapResponse response = coapClient.get();
 
-            System.out.println("GET-response: " + response.getResponseText());
             return new InterProtocolResponse(
                     Translation.contentFormatFromCoap(response.getOptions().getContentFormat()),
                     Translation.statusFromCoap(response.getCode()), response.getPayload());
 
         } catch (ConnectorException ex) {
-            System.err.println("CoapOut get: " + ex.getLocalizedMessage());
             return new InterProtocolResponse(MimeTypes.Type.TEXT_PLAIN, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     ex.getLocalizedMessage().getBytes());
         } catch (IOException ex) {
-            System.err.println("CoapOut get:: " + ex.getLocalizedMessage());
             return new InterProtocolResponse(MimeTypes.Type.TEXT_PLAIN, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     ex.getLocalizedMessage().getBytes());
         }
@@ -57,11 +53,9 @@ public class CoapOut extends ProtocolOut {
                     Translation.statusFromCoap(response.getCode()), response.getPayload());
 
         } catch (ConnectorException ex) {
-            System.err.println("CoapOut get: " + ex.getLocalizedMessage());
             return new InterProtocolResponse(MimeTypes.Type.TEXT_PLAIN, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     ex.getLocalizedMessage().getBytes());
         } catch (IOException ex) {
-            System.err.println("CoapOut get:: " + ex.getLocalizedMessage());
             return new InterProtocolResponse(MimeTypes.Type.TEXT_PLAIN, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     ex.getLocalizedMessage().getBytes());
         }
@@ -81,11 +75,9 @@ public class CoapOut extends ProtocolOut {
                     Translation.statusFromCoap(response.getCode()), response.getPayload());
 
         } catch (ConnectorException ex) {
-            System.err.println("CoapOut get: " + ex.getLocalizedMessage());
             return new InterProtocolResponse(MimeTypes.Type.TEXT_PLAIN, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     ex.getLocalizedMessage().getBytes());
         } catch (IOException ex) {
-            System.err.println("CoapOut get:: " + ex.getLocalizedMessage());
             return new InterProtocolResponse(MimeTypes.Type.TEXT_PLAIN, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     ex.getLocalizedMessage().getBytes());
         }
@@ -104,11 +96,9 @@ public class CoapOut extends ProtocolOut {
                     Translation.statusFromCoap(response.getCode()), response.getPayload());
 
         } catch (ConnectorException ex) {
-            System.err.println("CoapOut get: " + ex.getLocalizedMessage());
             return new InterProtocolResponse(MimeTypes.Type.TEXT_PLAIN, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     ex.getLocalizedMessage().getBytes());
         } catch (IOException ex) {
-            System.err.println("CoapOut get:: " + ex.getLocalizedMessage());
             return new InterProtocolResponse(MimeTypes.Type.TEXT_PLAIN, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     ex.getLocalizedMessage().getBytes());
         }
@@ -148,11 +138,9 @@ public class CoapOut extends ProtocolOut {
                     response.getCode().value, response.getPayload());
 
         } catch (ConnectorException ex) {
-            System.err.println("CoapOut get: " + ex.getLocalizedMessage());
             return new InterProtocolResponse(MimeTypes.Type.TEXT_PLAIN, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     ex.getLocalizedMessage().getBytes());
         } catch (IOException ex) {
-            System.err.println("CoapOut get:: " + ex.getLocalizedMessage());
             return new InterProtocolResponse(MimeTypes.Type.TEXT_PLAIN, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     ex.getLocalizedMessage().getBytes());
         }

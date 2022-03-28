@@ -58,7 +58,7 @@ public class WsIn extends ProtocolIn {
         private final ArrayList<Session> sessions;
 
         WsServlet() {
-            sessions = new ArrayList();
+            sessions = new ArrayList<Session>();
         }
 
         void addSession(Session session) {
@@ -76,7 +76,7 @@ public class WsIn extends ProtocolIn {
                         session.getRemote().sendBytes(ByteBuffer.wrap(response.getContent()));
                     }
                 } catch (IOException ex) {
-                    System.err.println("notifyAll Exception: " + ex.getLocalizedMessage());
+                    // Ignore
                 }
             });
         }
@@ -126,18 +126,16 @@ public class WsIn extends ProtocolIn {
 
             @OnWebSocketClose
             public void onWebSocketClose(Session session, int statusCode, String reason) {
-                // System.out.println("On onWebSocketClose: " + session.getRemoteAddress());
                 wsServlet.removeSession(session);
             }
 
             @OnWebSocketError
             public void onWebSocketError(Throwable cause) {
-                // System.out.println("On onWebSocketError: " + cause);
+                // Ignore
             }
 
             @OnWebSocketMessage
             public void onBinary(Session session, byte buf[], int offset, int length) throws IOException {
-                // System.out.println("On Binary: " + new String(buf));
                 wsServlet.notifyAllSessions(protocolOut.post(
                         new InterProtocolRequest(
                                 path,
@@ -148,7 +146,6 @@ public class WsIn extends ProtocolIn {
 
             @OnWebSocketMessage
             public void onText(Session session, String message) {
-                // System.out.println("On onText: " + message);
                 wsServlet.notifyAllSessions(protocolOut.post(
                         new InterProtocolRequest(
                                 path,

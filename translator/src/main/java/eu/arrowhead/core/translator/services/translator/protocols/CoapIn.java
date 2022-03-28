@@ -58,7 +58,6 @@ public class CoapIn extends ProtocolIn {
     }
 
     public void notifyObservers(InterProtocolResponse response) {
-      // System.out.println("notifyObservers: " + new String(response.getContent()));
 
       // Translation
       response.setContent(
@@ -79,8 +78,6 @@ public class CoapIn extends ProtocolIn {
         Request request = exchange.advanced().getRequest();
         Response response = exchange.advanced().getResponse();
         URI uri = new URI(request.getURI());
-        // System.out.println("GET " + exchange.getRequestOptions().getObserve() + " " +
-        // request.isObserve());
 
         if (request.isObserve()) {
           if (response == null) {
@@ -96,26 +93,6 @@ public class CoapIn extends ProtocolIn {
               Translation.contentFormatFromCoap(request.getOptions().getContentFormat()), null)));
         }
 
-        /*
-         * Request request = exchange.advanced().getRequest(); URI uri = new
-         * URI(request.getURI()); System.out.println("GET " +
-         * exchange.getRequestOptions().getObserve() + " " + request.isObserve()); if
-         * (payload == null) {
-         * 
-         * if (request.isObserve()) { System.out.println("Observing!!"); new Thread(()
-         * -> { protocolOut.observe( new InterProtocolRequest( uri.getPath(),
-         * uri.getQuery(),
-         * Translation.contentFormatFromCoap(request.getOptions().getContentFormat()),
-         * null)); }).start();
-         * 
-         * } else { System.out.println("GET!"); sendResponse( exchange, protocolOut.get(
-         * new InterProtocolRequest( uri.getPath(), uri.getQuery(),
-         * Translation.contentFormatFromCoap(request.getOptions().getContentFormat()),
-         * null))); }
-         * 
-         * } else { System.out.println("Observable response!!"); sendResponse( exchange,
-         * new InterProtocolResponse(ct, rc, payload)); }
-         */
       } catch (URISyntaxException ex) {
         exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR, ex.getLocalizedMessage());
       }

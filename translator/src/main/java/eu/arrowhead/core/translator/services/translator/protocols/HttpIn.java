@@ -1,6 +1,5 @@
 package eu.arrowhead.core.translator.services.translator.protocols;
 
-import com.google.gson.Gson;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -22,10 +21,6 @@ import org.eclipse.jetty.servlet.ServletHolder;
 
 import eu.arrowhead.core.translator.services.translator.common.ContentTranslator;
 
-/**
- *
- * @author Pablo Puñal Pereira <pablo.punal@thingwave.eu>
- */
 public class HttpIn extends ProtocolIn {
 
     private final Server httpServer = new Server();
@@ -46,7 +41,7 @@ public class HttpIn extends ProtocolIn {
 
     private class HttpService extends HttpServlet {
 
-        private ArrayList<AsyncContextState> contexts = new ArrayList();
+        private ArrayList<AsyncContextState> contexts = new ArrayList<AsyncContextState>();
 
         @Override
         public void service(HttpServletRequest request, HttpServletResponse response)
@@ -60,8 +55,6 @@ public class HttpIn extends ProtocolIn {
 
         @Override
         protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-
-            // System.out.println("GET!");
 
             if (req.getHeader("Connection") == null || !req.getHeader("Connection").equals("keep-alive")) {
 
@@ -179,9 +172,7 @@ public class HttpIn extends ProtocolIn {
             response.setContent(
                     ContentTranslator.translate(getContentType(), protocolOut.getContentType(), response.getContent()));
 
-            // System.out.println("Sending: " + new String(response.getContent()));
             contexts.forEach(cont -> {
-                // System.out.println("E");
                 try {
                     ServletOutputStream outputStream = cont.getResponse().getOutputStream();
                     if (outputStream.isReady()) {
@@ -193,11 +184,9 @@ public class HttpIn extends ProtocolIn {
                         outputStream.flush();
                         cont.getResponse().flushBuffer();
                     } else {
-                        System.err.println("not ready!");
+                        // Not ready, ignore
                     }
                 } catch (IOException ex) { // Ignore
-                    // System.err.println("updateObservers IOException: " +
-                    // ex.getLocalizedMessage());
                 }
 
             });

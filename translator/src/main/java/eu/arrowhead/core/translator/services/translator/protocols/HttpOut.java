@@ -18,10 +18,6 @@ import org.eclipse.jetty.client.util.InputStreamResponseListener;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.MimeTypes;
 
-/**
- *
- * @author Pablo Puñal Pereira <pablo.punal@thingwave.eu>
- */
 public class HttpOut extends ProtocolOut {
 
     private final static String GET = "GET";
@@ -42,7 +38,8 @@ public class HttpOut extends ProtocolOut {
     public InterProtocolResponse get(InterProtocolRequest request) {
         String remoteRequest;
         try {
-            remoteRequest = new URI(uri.getScheme(), uri.getHost() + ":" + uri.getPort() + uri.getPath(), request.getPath(), request.getQueries()).toString();
+            remoteRequest = new URI(uri.getScheme(), uri.getHost() + ":" + uri.getPort() + uri.getPath(),
+                    request.getPath(), request.getQueries()).toString();
         } catch (URISyntaxException ex) {
             remoteRequest = uri.toString();
         }
@@ -59,13 +56,11 @@ public class HttpOut extends ProtocolOut {
                     res.getContent());
 
         } catch (InterruptedException | ExecutionException ex) {
-            System.err.println("HttpOutput: " + ex.getLocalizedMessage());
             return new InterProtocolResponse(
                     MimeTypes.Type.TEXT_PLAIN,
                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     ex.getLocalizedMessage().getBytes());
         } catch (TimeoutException ex) {
-            System.err.println("HttpOutput: " + ex.getLocalizedMessage());
             return new InterProtocolResponse(
                     MimeTypes.Type.TEXT_PLAIN,
                     HttpServletResponse.SC_REQUEST_TIMEOUT,
@@ -78,11 +73,11 @@ public class HttpOut extends ProtocolOut {
     public InterProtocolResponse post(InterProtocolRequest request) {
         String remoteRequest;
         try {
-            remoteRequest = new URI(uri.getScheme(), uri.getHost() + ":" + uri.getPort() + uri.getPath(), request.getPath(), request.getQueries()).toString();
+            remoteRequest = new URI(uri.getScheme(), uri.getHost() + ":" + uri.getPort() + uri.getPath(),
+                    request.getPath(), request.getQueries()).toString();
         } catch (URISyntaxException ex) {
             remoteRequest = uri.toString();
         }
-        //System.out.println(POST + " " + remoteRequest);
         try {
             Request httpReq = client.POST(remoteRequest);
             httpReq.method(POST);
@@ -95,13 +90,11 @@ public class HttpOut extends ProtocolOut {
                     res.getStatus(),
                     res.getContent());
         } catch (InterruptedException | ExecutionException ex) {
-            System.err.println("HttpOutput: " + ex.getLocalizedMessage());
             return new InterProtocolResponse(
                     MimeTypes.Type.TEXT_PLAIN,
                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     ex.getLocalizedMessage().getBytes());
         } catch (TimeoutException ex) {
-            System.err.println("HttpOutput: " + ex.getLocalizedMessage());
             return new InterProtocolResponse(
                     MimeTypes.Type.TEXT_PLAIN,
                     HttpServletResponse.SC_REQUEST_TIMEOUT,
@@ -113,11 +106,11 @@ public class HttpOut extends ProtocolOut {
     public InterProtocolResponse put(InterProtocolRequest request) {
         String remoteRequest;
         try {
-            remoteRequest = new URI(uri.getScheme(), uri.getHost() + ":" + uri.getPort() + uri.getPath(), request.getPath(), request.getQueries()).toString();
+            remoteRequest = new URI(uri.getScheme(), uri.getHost() + ":" + uri.getPort() + uri.getPath(),
+                    request.getPath(), request.getQueries()).toString();
         } catch (URISyntaxException ex) {
             remoteRequest = uri.toString();
         }
-        //System.out.println(PUT + " " + remoteRequest);
         try {
             Request httpReq = client.POST(remoteRequest);
             httpReq.method(PUT);
@@ -130,13 +123,11 @@ public class HttpOut extends ProtocolOut {
                     res.getStatus(),
                     res.getContent());
         } catch (InterruptedException | ExecutionException ex) {
-            System.err.println("HttpOutput: " + ex.getLocalizedMessage());
             return new InterProtocolResponse(
                     MimeTypes.Type.TEXT_PLAIN,
                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     ex.getLocalizedMessage().getBytes());
         } catch (TimeoutException ex) {
-            System.err.println("HttpOutput: " + ex.getLocalizedMessage());
             return new InterProtocolResponse(
                     MimeTypes.Type.TEXT_PLAIN,
                     HttpServletResponse.SC_REQUEST_TIMEOUT,
@@ -148,7 +139,8 @@ public class HttpOut extends ProtocolOut {
     public InterProtocolResponse patch(InterProtocolRequest request) {
         String remoteRequest;
         try {
-            remoteRequest = new URI(uri.getScheme(), uri.getHost() + ":" + uri.getPort() + uri.getPath(), request.getPath(), request.getQueries()).toString();
+            remoteRequest = new URI(uri.getScheme(), uri.getHost() + ":" + uri.getPort() + uri.getPath(),
+                    request.getPath(), request.getQueries()).toString();
         } catch (URISyntaxException ex) {
             remoteRequest = uri.toString();
         }
@@ -164,13 +156,11 @@ public class HttpOut extends ProtocolOut {
                     res.getStatus(),
                     res.getContent());
         } catch (InterruptedException | ExecutionException ex) {
-            System.err.println("HttpOutput: " + ex.getLocalizedMessage());
             return new InterProtocolResponse(
                     MimeTypes.Type.TEXT_PLAIN,
                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     ex.getLocalizedMessage().getBytes());
         } catch (TimeoutException ex) {
-            System.err.println("HttpOutput: " + ex.getLocalizedMessage());
             return new InterProtocolResponse(
                     MimeTypes.Type.TEXT_PLAIN,
                     HttpServletResponse.SC_REQUEST_TIMEOUT,
@@ -182,7 +172,8 @@ public class HttpOut extends ProtocolOut {
     public InterProtocolResponse delete(InterProtocolRequest request) {
         String remoteRequest;
         try {
-            remoteRequest = new URI(uri.getScheme(), uri.getHost() + ":" + uri.getPort() + uri.getPath(), request.getPath(), request.getQueries()).toString();
+            remoteRequest = new URI(uri.getScheme(), uri.getHost() + ":" + uri.getPort() + uri.getPath(),
+                    request.getPath(), request.getQueries()).toString();
         } catch (URISyntaxException ex) {
             remoteRequest = uri.toString();
         }
@@ -213,43 +204,37 @@ public class HttpOut extends ProtocolOut {
     public InterProtocolResponse observe(InterProtocolRequest request) {
         String remoteRequest;
         try {
-            remoteRequest = new URI(uri.getScheme(), uri.getHost() + ":" + uri.getPort() + uri.getPath(), request.getPath(), request.getQueries()).toString();
+            remoteRequest = new URI(uri.getScheme(), uri.getHost() + ":" + uri.getPort() + uri.getPath(),
+                    request.getPath(), request.getQueries()).toString();
         } catch (URISyntaxException ex) {
             remoteRequest = uri.toString();
         }
         try {
-            //System.out.println("OBS " + remoteRequest);
             Request httpReq = client.POST(remoteRequest);
             httpReq.method(GET);
             httpReq.header(HttpHeader.CONNECTION, "keep-alive");
             httpReq.header(HttpHeader.CONTENT_TYPE, request.getContentType());
-            //ContentResponse res = httpReq.send();
             InputStreamResponseListener listener = new InputStreamResponseListener();
             httpReq.send(listener);
             Response response = listener.get(10, TimeUnit.SECONDS);
             if (response.getStatus() == 200) {
-                // Use try-with-resources to close input stream.
                 new Thread(() -> {
-                    try ( InputStream responseContent = listener.getInputStream()) {
+                    try (InputStream responseContent = listener.getInputStream()) {
 
                         ByteArrayOutputStream result = new ByteArrayOutputStream();
                         byte[] buffer = new byte[2048];
                         int length;
-                        //System.out.println("waiting for data...");
                         while ((length = responseContent.read(buffer)) != -1) {
                             result.write(buffer, 0, length);
-                            //System.out.println("IN: " + new String(buffer));
 
                             protocolIn.notifyObservers(new InterProtocolResponse(
                                     MimeTypes.Type.TEXT_PLAIN,
                                     response.getStatus(),
-                                    buffer)
-                            );
+                                    buffer));
                             buffer = new byte[2048];
                         }
                     } catch (IOException ex) {
                         // Ignore
-                        //System.out.println("EXIT_: " + ex.getLocalizedMessage());
                     }
                 }).start();
             }
@@ -259,13 +244,11 @@ public class HttpOut extends ProtocolOut {
                     "Stop Observing".getBytes());
 
         } catch (InterruptedException | ExecutionException ex) {
-            System.err.println("HttpOutput: " + ex.getLocalizedMessage());
             return new InterProtocolResponse(
                     MimeTypes.Type.TEXT_PLAIN,
                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     ex.getLocalizedMessage().getBytes());
         } catch (TimeoutException ex) {
-            System.err.println("HttpOutput: " + ex.getLocalizedMessage());
             return new InterProtocolResponse(
                     MimeTypes.Type.TEXT_PLAIN,
                     HttpServletResponse.SC_REQUEST_TIMEOUT,

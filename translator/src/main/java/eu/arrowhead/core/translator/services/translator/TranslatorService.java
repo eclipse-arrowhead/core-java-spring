@@ -52,8 +52,6 @@ public class TranslatorService {
       throw new ArrowheadException(String.format("Translator Hub id %d does NOT exists", id), HttpStatus.SC_CONFLICT);
     // Get hub
     TranslatorHub hub = hubs.get(id);
-    // Stop it
-    // hub.stop();
     // remove it
     hubs.remove(id);
 
@@ -61,7 +59,7 @@ public class TranslatorService {
 
   // -------------------------------------------------------------------------------------------------
   public ArrayList<TranslatorHubDTO> getHubsList() {
-    ArrayList<TranslatorHubDTO> list = new ArrayList();
+    ArrayList<TranslatorHubDTO> list = new ArrayList<TranslatorHubDTO>();
     hubs.entrySet().forEach((entry) -> {
       list.add(entry.getValue().getDTO());
     });
@@ -76,14 +74,6 @@ public class TranslatorService {
       throw new ArrowheadException("Empty TranslatorSetupDTO", HttpStatus.SC_BAD_REQUEST);
     if (setup.getIn() == null)
       throw new ArrowheadException("Empty In Interface", HttpStatus.SC_BAD_REQUEST);
-    /*
-     * TODO: remove it if (setup.getIn().getIp() == null) throw new
-     * ArrowheadException("Empty In Interface Ip Address",
-     * HttpStatus.SC_BAD_REQUEST); if (setup.getIn().getPort() < 1 ||
-     * setup.getIn().getPort() > 65535) throw new
-     * ArrowheadException("Wrong In Interface Port number",
-     * HttpStatus.SC_BAD_REQUEST);
-     */
     if (setup.getIn().getProtocol() == null || setup.getOut().getProtocol() == Protocol.UNKOWN)
       throw new ArrowheadException("Empty In Interface Protocol", HttpStatus.SC_BAD_REQUEST);
     if (setup.getOut() == null)
