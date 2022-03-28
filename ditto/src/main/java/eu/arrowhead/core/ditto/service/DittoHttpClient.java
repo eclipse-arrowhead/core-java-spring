@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+
 import eu.arrowhead.core.ditto.Constants;
 
 @Service
@@ -34,6 +35,7 @@ public class DittoHttpClient {
 
 	final private static String DITTO_THINGS_SEARCH_URI = "/api/2/search/things/";
 	final private static String DITTO_THINGS_URI = "/api/2/things/";
+	final private static String DITTO_POLICY_URI = "/api/2/policies/";
 	final private static String DITTO_PROPERTY_URI_TEMPLATE = "/api/2/things/%s/features/%s/properties/%s";
 
 	private final Logger logger = LogManager.getLogger(DittoHttpClient.class);
@@ -85,6 +87,10 @@ public class DittoHttpClient {
 	//-------------------------------------------------------------------------------------------------
 	public ResponseEntity<Void> deleteThing(final String thingId) {
 		return sendDeleteRequest(DITTO_THINGS_URI + thingId);
+	}
+
+	public ResponseEntity<String> createPolicy(String policyId, String body) {
+		return sendPutRequest(DITTO_POLICY_URI + policyId, body);
 	}
 
 	//-------------------------------------------------------------------------------------------------
