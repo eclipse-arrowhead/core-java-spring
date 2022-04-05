@@ -12,10 +12,11 @@
 package eu.arrowhead.core.ditto;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 
 public class Constants {
 
-	// =================================================================================================
+	//=================================================================================================
 	// members
 
 	public static final String DITTO_HTTP_ADDRESS = "ditto_http_address";
@@ -30,14 +31,27 @@ public class Constants {
 	public static final String DITTO_PASSWORD = "ditto_password";
 	public static final String $DITTO_PASSWORD = "${" + DITTO_PASSWORD + "}";
 
-	public static final String SERVICE_URI_TEMPLATE = CommonConstants.DITTO_URI + "/things/%s/features/%s";
-	public static final String SERVICE_DEFINITIONS = "serviceDefinitions";
-	public static final String ENTITY_ID = "entityId";
+	public static final String DITTO_DEVOPS_USERNAME = "ditto_devops_username";
+	public static final String $DITTO_DEVOPS_USERNAME = "${" + DITTO_DEVOPS_USERNAME + "}";
 
-	// =================================================================================================
+	public static final String DITTO_DEVOPS_PASSWORD = "ditto_devops_password";
+	public static final String $DITTO_DEVOPS_PASSWORD = "${" + DITTO_DEVOPS_PASSWORD + "}";
+
+	public static final String SUBSCRIBE_TO_DITTO_EVENTS = "subscribe_to_ditto_events";
+	public static final String $SUBSCRIBE_TO_DITTO_EVENTS = "${" + SUBSCRIBE_TO_DITTO_EVENTS + "}";
+
+	public static final String THING_MGMT_URI = CommonConstants.DITTO_URI + CoreCommonConstants.MGMT_URI + "/things";
+	public static final String CONNECTION_MGMT_URI = CommonConstants.DITTO_URI + CoreCommonConstants.MGMT_URI + "/connectivity";
+	public static final String ACCESS_THING = "/access/things";
+
+	public static final String SERVICE_DEFINITIONS = "serviceDefinitions";
+	public static final String THING_ID = "thingId";
+	public static final String DITTO_POLICY_ID = "eu.arrowhead:ah-ditto";
+
+	//=================================================================================================
 	// assistant methods
 
-	// -------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	private Constants() {
 		throw new UnsupportedOperationException();
 	}

@@ -9,35 +9,42 @@
  *   Arrowhead Consortia - conceptualization
  ********************************************************************************/
 
-package eu.arrowhead.common.dto.internal;
+package eu.arrowhead.core.ditto;
 
-import java.io.Serializable;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.eclipse.ditto.things.model.Thing;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.util.Assert;
 
-public class InventoryIdDTO implements Serializable {
+public class ThingEvent extends ApplicationEvent {
 
 	//=================================================================================================
 	// members
 
-	private String inventoryId;
+	private final Thing thing;
+	private final ThingEventType type;
 
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	@JsonCreator
-	public InventoryIdDTO(@JsonProperty("inventoryId") final String inventoryId) {
-		this.inventoryId = inventoryId;
+	public ThingEvent(final Object source, final Thing thing, final ThingEventType type) {
+		super(source);
+
+		Assert.notNull(source, "source is null");
+		Assert.notNull(type, "type is null");
+
+		this.thing = thing;
+		this.type = type;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public String getInventoryId() {
-		return inventoryId;
+	public Thing getThing() {
+		return thing;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public void setInventoryId(final String inventoryId) {
-		this.inventoryId = inventoryId;
+	public ThingEventType getType() {
+		return type;
 	}
+
 }

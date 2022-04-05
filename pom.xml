@@ -25,11 +25,11 @@
   	<modules>
 	    <module>core-common</module>
 	    <module>serviceregistry</module>
-	    <module>configuration</module>
+	    <!-- <module>configuration</module> -->
 	    <module>authorization</module>
-	    <module>certificate-authority</module>
+	    <!-- <module>certificate-authority</module> -->
 	    <module>orchestrator</module>
-	    <module>eventhandler</module>
+	    <!-- <module>eventhandler</module>
 	    <module>datamanager</module>
 	    <module>timemanager</module>
 	    <module>relay-library</module>
@@ -41,10 +41,10 @@
 	    <module>onboarding</module>
 	    <module>qos-monitor</module>
 	    <module>translator</module>
-	    <module>plantdescriptionengine</module>
+	    <module>plantdescriptionengine</module> -->
 	    <module>ditto</module>
-	    <module>deb-installer</module>
-	    <module>docker-all</module>
+	    <!-- <module>deb-installer</module>
+	    <module>docker-all</module> -->
   	</modules>
   	
 	<properties>

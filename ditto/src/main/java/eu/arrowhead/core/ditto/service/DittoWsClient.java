@@ -11,7 +11,6 @@
 
 package eu.arrowhead.core.ditto.service;
 
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import javax.annotation.PostConstruct;
 import com.neovisionaries.ws.client.WebSocket;
@@ -27,12 +26,18 @@ import org.eclipse.ditto.client.messaging.AuthenticationProvider;
 import org.eclipse.ditto.client.messaging.AuthenticationProviders;
 import org.eclipse.ditto.client.messaging.MessagingProvider;
 import org.eclipse.ditto.client.messaging.MessagingProviders;
-import org.eclipse.ditto.things.model.Thing;
+import org.eclipse.ditto.policies.model.PoliciesResourceType;
+import org.eclipse.ditto.policies.model.Policy;
+import org.eclipse.ditto.policies.model.PolicyId;
+import org.eclipse.ditto.policies.model.Subject;
+import org.eclipse.ditto.policies.model.SubjectIssuer;import org.eclipse.ditto.things.model.Thing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import eu.arrowhead.core.ditto.Constants;
+import eu.arrowhead.core.ditto.ThingEvent;
+import eu.arrowhead.core.ditto.ThingEventType;
 
 @Service
 public class DittoWsClient {
@@ -49,6 +54,9 @@ public class DittoWsClient {
 	@Value(Constants.$DITTO_PASSWORD)
 	private String dittoPassword;
 
+	@Value(Constants.$SUBSCRIBE_TO_DITTO_EVENTS)
+	private boolean subscribeToDittoEvents;
+
 	@Autowired
 	private ApplicationEventPublisher eventPublisher;
 
@@ -56,6 +64,16 @@ public class DittoWsClient {
 
 	// Arbitrary ID which can be used to cancel the registration later on:
 	final String THING_REGISTRATION_ID = "THING_REGISTRATION_ID";
+
+	private final PolicyId DITTO_POLICY_ID = PolicyId.of(Constants.DITTO_POLICY_ID);
+
+	// TODO: This policy is copied from example code, replace it!
+	private final Policy dittoPolicy = Policy.newBuilder(DITTO_POLICY_ID)
+		.forLabel("DEFAULT")
+		.setSubject(Subject.newInstance(SubjectIssuer.newInstance("nginx"), "ditto"))
+		.setGrantedPermissions(PoliciesResourceType.policyResource("/"), "READ", "WRITE")
+		.setGrantedPermissions(PoliciesResourceType.thingResource("/"), "READ", "WRITE")
+		.build();
 
 	//=================================================================================================
 	// methods
@@ -91,14 +109,23 @@ public class DittoWsClient {
 	//-------------------------------------------------------------------------------------------------
 	private void onConnected(final DittoClient client) {
 		logger.debug("Connected to Ditto's WebSocket API");
-		this.subscribeForTwinEvents(client);
-		client.twin().registerForThingChanges(THING_REGISTRATION_ID, this::onThingChange);
+
+		if (subscribeToDittoEvents) {
+			subscribeToDittoEvents(client);
+		}
+
+		if (dittoPolicyExists(client)) {
+			client.policies().update(dittoPolicy);
+		} else {
+			client.policies().create(dittoPolicy);
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void subscribeForTwinEvents(final DittoClient client) {
+	private void subscribeToDittoEvents(final DittoClient client) {
 		try {
 			client.twin().startConsumption().toCompletableFuture().get(); // this will block the thread!
+			client.twin().registerForThingChanges(THING_REGISTRATION_ID, this::onThingChange);
 		} catch (InterruptedException | ExecutionException e) {
 			logger.error("Failed to connect to Ditto's WebSocket API", e);
 		}
@@ -107,11 +134,40 @@ public class DittoWsClient {
 
 	//-------------------------------------------------------------------------------------------------
 	private void onThingChange(ThingChange change) {
-		final Optional<Thing> thing = change.getThing();
+		final Thing thing = change.getThing().orElse(null);
 		logger.debug("Thing change detected. Action: " + change.getAction() + ", " + "Thing: " + thing);
 
-		ThingChangeEvent event = new ThingChangeEvent(this, change);
+		ThingEventType type;
+		switch (change.getAction()) {
+			case CREATED:
+				type = ThingEventType.CREATED;
+				break;
+			case UPDATED:
+				type = ThingEventType.UPDATED;
+				break;
+			case DELETED:
+				type = ThingEventType.DELETED;
+				break;
+			default:
+				logger.debug("Unhandled Ditto ChangeAction: " + change.getAction());
+				return;
+		}
+
+		ThingEvent event = new ThingEvent(this, thing, type);
 		eventPublisher.publishEvent(event);
+	}
+
+	private boolean dittoPolicyExists(final DittoClient client) {
+		// TODO: Find a better way of performing this check.
+		try {
+			client.policies()
+					.retrieve(DITTO_POLICY_ID)
+					.toCompletableFuture()
+					.get();
+		} catch (InterruptedException | ExecutionException e) {
+			return false;
+		}
+		return true;
 	}
 
 }

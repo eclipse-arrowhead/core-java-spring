@@ -91,3 +91,8 @@ source translator_privileges.sql
 CREATE USER IF NOT EXISTS 'plant_description_engine'@'localhost' IDENTIFIED BY 'ivJ2y9qWCpTmzr0';
 CREATE USER IF NOT EXISTS 'plant_description_engine'@'%' IDENTIFIED BY 'ivJ2y9qWCpTmzr0';
 source plant_description_engine_privileges.sql
+
+-- Ditto
+CREATE USER IF NOT EXISTS 'ditto'@'localhost' IDENTIFIED BY 'hRSF1xh0LAxo4Eo';
+CREATE USER IF NOT EXISTS 'ditto'@'%' IDENTIFIED BY 'hRSF1xh0LAxo4Eo';
+source ditto_privileges.sql

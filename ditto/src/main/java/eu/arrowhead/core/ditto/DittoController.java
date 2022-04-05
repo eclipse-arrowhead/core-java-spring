@@ -22,29 +22,32 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.core.ditto.service.DittoHttpClient;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+@Api(tags = { CoreCommonConstants.SWAGGER_TAG_ALL })
 @RestController
 @RequestMapping(CommonConstants.DITTO_URI)
 public class DittoController {
 
 	//=================================================================================================
 	// members
-	
+
+	private static final String GET_THING_PROPERTY_HTTP_200_MESSAGE = "Returned Thing property";
+
 	@Autowired
 	private DittoHttpClient dittoHttpClient;
 
-	final String THING_PROPERTY_URI = "/things/{thing}/features/{feature}/properties/{property}";
-	final String DITTO_URI_TEMPLATE = "/api/2/things/%s/features/%s/properties/%s"; // TODO: Remove!
+	final private String THING_PROPERTY_URI = Constants.ACCESS_THING + "/{thing}/features/{feature}/properties/{property}";
 
 	@Autowired
 	protected SSLProperties sslProperties;
 
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
@@ -58,22 +61,18 @@ public class DittoController {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Forward the given request to the appropriate Ditto Thing",
-			response = String.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
+	@ApiOperation(value = "Forward the given request to the appropriate Ditto Thing", response = String.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED,
-					message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR,
-					message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_THING_PROPERTY_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = THING_PROPERTY_URI)
-	public Object thingServiceRequest(
+	public ResponseEntity<String> thingPropertyRequest(
 			@PathVariable("thing") String thing,
 			@PathVariable("feature") String feature,
 			@PathVariable("property") String property) {
-		final ResponseEntity<String> result = dittoHttpClient.getProperty(thing, feature, property);
-		return result.getBody();
+		return dittoHttpClient.getProperty(thing, feature, property);
 	}
 
 }
