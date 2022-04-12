@@ -87,6 +87,9 @@ public class DittoEventListener implements ApplicationListener<ThingEvent> {
 		}
 	}
 
+	//=================================================================================================
+	// assistant methods
+
 	//-------------------------------------------------------------------------------------------------
 	private void registerServices(final Thing thing) throws DittoModelException {
 
@@ -146,20 +149,20 @@ public class DittoEventListener implements ApplicationListener<ThingEvent> {
 		}
 	}
 
-		//-------------------------------------------------------------------------------------------------
-		private void unregisterFeature(final String thingId, final String featureId, final Map<String, String> serviceDefinitions) {
-			try {
-				final String serviceUri = String.format(SERVICE_URI_TEMPLATE, thingId, featureId);
+	//-------------------------------------------------------------------------------------------------
+	private void unregisterFeature(final String thingId, final String featureId, final Map<String, String> serviceDefinitions) {
+		try {
+			final String serviceUri = String.format(SERVICE_URI_TEMPLATE, thingId, featureId);
 
-				final String serviceDefinition =
-						serviceDefinitions.containsKey(featureId)
-								? serviceDefinitions.get(featureId)
-								: getDefaultServiceDefinition(thingId, featureId);
+			final String serviceDefinition =
+					serviceDefinitions.containsKey(featureId)
+							? serviceDefinitions.get(featureId)
+							: getDefaultServiceDefinition(thingId, featureId);
 
-				serviceRegistryClient.unregisterService(serviceDefinition, serviceUri);
-			} catch (final Exception ex) {
-				logger.error("Service registration for feature failed: " + ex);
-			}
+			serviceRegistryClient.unregisterService(serviceDefinition, serviceUri);
+		} catch (final Exception ex) {
+			logger.error("Service registration for feature failed: " + ex);
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
