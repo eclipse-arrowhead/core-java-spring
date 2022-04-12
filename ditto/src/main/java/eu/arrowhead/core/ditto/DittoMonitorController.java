@@ -11,7 +11,9 @@
 
 package eu.arrowhead.core.ditto;
 
+import java.util.Map;
 import org.apache.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,6 +38,10 @@ public class DittoMonitorController {
 	private static final String SYSTEM_DATA_HTTP_200_MESSAGE = "System data returned";
 	private static final String INVENTORY_ID_HTTP_200_MESSAGE = "Inventory ID returned";
 
+	public static final String SYSTEM_DESCRIPTION = "An Arrowhead core system enabling interactions with Eclipse Ditto.";
+
+	@Value(CoreCommonConstants.$CORE_SYSTEM_NAME)
+	private String coreSystemName;
 
 	//=================================================================================================
 	// methods
@@ -61,7 +67,7 @@ public class DittoMonitorController {
 	})
 	@GetMapping(path = CommonConstants.SYSTEM_DATA_URI)
 	public SystemDataDTO getSystemData() {
-		return new SystemDataDTO(""); // TODO: Return actual data.
+		return generateSystemData();
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -73,6 +79,19 @@ public class DittoMonitorController {
 	})
 	@GetMapping(path = CommonConstants.INVENTORY_ID_URI)
 	public InventoryIdDTO getInventoryId() {
-		return new InventoryIdDTO(""); // TODO: Return real inventory ID.
+		return new InventoryIdDTO(null);
 	}
+
+	//=================================================================================================
+	// assistant methods
+
+	//-------------------------------------------------------------------------------------------------
+	private SystemDataDTO generateSystemData() {
+		final Map<String, String> systemData = Map.of(
+			"systemName", coreSystemName.toLowerCase(),
+			"description", SYSTEM_DESCRIPTION
+		);
+		return new SystemDataDTO(systemData);
+	}
+
 }
