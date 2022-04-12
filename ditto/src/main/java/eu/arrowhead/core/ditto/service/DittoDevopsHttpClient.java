@@ -64,24 +64,14 @@ public class DittoDevopsHttpClient {
 
 	//-------------------------------------------------------------------------------------------------
 	public ResponseEntity<JsonNode> getConnection(final String connectionId, final String methode) {
-		// TODO: Implement!
-		// throw new NotImplementedException("Not implemented!");
-		// final String command = dittoDevopsCommands.create(connectionId);
 		final String command = dittoDevopsCommands.create(connectionId, methode);
-		System.out.println(command);
 		ResponseEntity<JsonNode> response = sendPostRequest(DITTO_CONNECTIVITY_URI, command);
 		final JsonNode contents = response.getBody().get("?").get("?");
 		final int statusCode = contents.get("status").asInt();
-		System.out.println(contents);
-		return new ResponseEntity<JsonNode>(contents, HttpStatus.valueOf(statusCode));
+		return new ResponseEntity<>(contents, HttpStatus.valueOf(statusCode));
 	}
 
 	public ResponseEntity<JsonNode> putConnection(final JsonNode connection, final String methode) {
-		// TODO: Create or update.
-		System.out.println(connection);
-		System.out.println(methode);
-		
-		
 		final String command = dittoDevopsCommands.create(connection, methode);
 		System.out.println(command);
 		ResponseEntity<JsonNode> response = sendPostRequest(DITTO_CONNECTIVITY_URI, command);
@@ -96,20 +86,10 @@ public class DittoDevopsHttpClient {
 		throw new NotImplementedException("Not implemented!");
 	}
 
-	// //-------------------------------------------------------------------------------------------------
-	// private ResponseEntity<JsonNode> sendGetRequest(final String path) {
-	// 	return sendRequest(HttpMethod.GET, path, null, JsonNode.class);
-	// }
-
 	//-------------------------------------------------------------------------------------------------
 	private ResponseEntity<JsonNode> sendPostRequest(final String path, final String body) {
 		return sendRequest(HttpMethod.POST, path, body, JsonNode.class);
 	}
-
-	// //-------------------------------------------------------------------------------------------------
-	// private ResponseEntity<Void> sendDeleteRequest(final String path) {
-	// 	return sendRequest(HttpMethod.DELETE, path, null, Void.class);
-	// }
 
 	//-------------------------------------------------------------------------------------------------
 	private <T> ResponseEntity<T> sendRequest(
@@ -129,18 +109,11 @@ public class DittoDevopsHttpClient {
 		try {
 			return restTemplate.exchange(uri, method, request, responseType);
 		} catch (final HttpClientErrorException e) {
-			return new ResponseEntity<T>(e.getStatusCode());
+			return new ResponseEntity<>(e.getStatusCode());
 		} catch (Exception e) {
 			logger.error(e);
-			return new ResponseEntity<T>(HttpStatus.BAD_GATEWAY);
+			return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
 		}
 	}
 
-	//-------------------------------------------------------------------------------------------------
-	private ResponseEntity<String> sendRequest(
-			final HttpMethod method,
-			final String path,
-			final String body) {
-		return sendRequest(method, path, body, String.class);
-	}
 }
