@@ -48,7 +48,7 @@ from [github](https://github.com/eclipse/mosquitto) or run it in a Docker contai
 `docker run -d -p 1883:1883 -p 9001:9001 eclipse-mosquitto`. 
 ## Create Policy
 
-Currently, AH-Ditto creates a dummy policy on things creation. But the policy for AH-Ditto supposed to be as shown below and in `policy.json`. Created policy have a policyID of `eu.arrowhead:ah-ditto`.
+Currently, AH-Ditto creates a dummy policy on Thing creation. But the policy for AH-Ditto is supposed to be as shown below and in `policy.json`. Created policy have a policyID of `eu.arrowhead:ah-ditto`.
 
 ```json
 {
@@ -134,7 +134,7 @@ We can create the thing by consuming the management service of AH-Ditto. If we s
 PUT /ditto/mgmt/things/{thingId} 
 ```
 ### Service registration to Eclipse Arrowhead Framework
-Once AH-Ditto recieved the request it create thing based on the model in the Eclipse Ditto. As soon as the thing is created in the Eclipse Ditto, AH-Ditto register the services in service_registry based on the features. As the thing model have two features as `thermometer` and `humidity`, the services registered in service_registry have following endpoints.
+Once AH-Ditto recieved the request it create thing based on the model in the Eclipse Ditto. As soon as the thing is created in Eclipse Ditto, AH-Ditto register the services in service_registry based on the features. As the thing model have two features as `thermometer` and `humidity`, the services registered in service_registry have the following endpoints.
 * thermometer => `/ditto/access/things/my.test:pi/features/thermometer`
 * humidity => `/ditto/access/things/my.test:pi/features/humidity`
 
@@ -144,7 +144,7 @@ Now the consumers from the Eclipse Arrowhead Framework can discover these servic
 > Once the services are registered in the service registry, we need to update the orchestration store rules. We can do this via running the `orchesteratorStoreRules.sql` script from `mysql`.
 
 ## Create Connection
-In order to establish communication between the device and Eclipse Ditto we need to setup and use a broker. To do that, we setup MQTT broker. Now we need to create and open a connection in Eclipse Ditto. To do that we need to cosume a management service of AH-Ditto with the `connection.json` as body payload.
+In order to establish communication between the device and Eclipse Ditto we need to set up and launch an MQTT broker. Now we need to create and open a connection in Eclipse Ditto. To do that we need to consume a management service of AH-Ditto with the `connection.json` as body payload.
 ```
 POST /ditto/mgmt/connectivity/create
 ```
@@ -251,23 +251,25 @@ function mapToDittoProtocolMsg(headers, textPayload, bytePayload, contentType) {
 
 ## Consumer Application
 
-For consumer application we have use an actuaotor fan. Based on the temperature value the fan maintain its speed. There fan always want to consume the service from our device. The device can be in sleep state and therefore cannot provide service all the time. But with the presence of digital twin thr device only need to populate its digital twin with the update temperature value and the consumer can then get the value anytime from the digital twin. The consumer application can get from this [GitHUb](https://github.com/Xarepo/pde-tests)
+For our consumer example application we have used an actuator fan. Based on the temperature value the fan maintain its speed. There fan always want to consume the service from our device. The device can be in sleep state and therefore cannot provide service all the time. But with the presence of digital twin thr device only need to populate its digital twin with the update temperature value and the consumer can then get the value anytime from the digital twin. The consumer application can get from this [GitHUb](https://github.com/Xarepo/pde-tests)
 
 To run this from `vscode`, we can create the `launch.json` file and update the contents of the file as follows:
 
 ```json
-"version": "0.2.0",
-"configurations": [
-        {
-            "type": "java",
-            "name": "Fan",
-            "request": "launch",
-            "mainClass": "eu.arrowhead.core.fan.Fan",
-            "projectName": "fan",
-            "args": [
-                "config/properties/fan.properties",
-                ]
-        }
-    ]
+{
+    "version": "0.2.0",
+    "configurations": [
+            {
+                "type": "java",
+                "name": "Fan",
+                "request": "launch",
+                "mainClass": "eu.arrowhead.core.fan.Fan",
+                "projectName": "fan",
+                "args": [
+                    "config/properties/fan.properties",
+                    ]
+            }
+        ]
+    }
 }
 ```

@@ -11,6 +11,8 @@
 
 package eu.arrowhead.core.ditto;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.http.HttpStatus;
 import org.eclipse.ditto.policies.model.PolicyId;
 import org.eclipse.ditto.things.model.Thing;
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.core.ditto.service.DittoHttpClient;
 import io.swagger.annotations.Api;
@@ -59,6 +62,8 @@ public class ThingManagementController {
 
 	@Autowired
 	private DittoHttpClient dittoHttpClient;
+
+	private final Logger logger = LogManager.getLogger(ThingManagementController.class);
 
 	//=================================================================================================
 	// methods
@@ -145,8 +150,13 @@ public class ThingManagementController {
 
 		if (!subscribeToDittoEvents) {
 			final String thingJson = getThingResponse.getBody();
-			Thing thing = ThingsModelFactory.newThingBuilder(thingJson).build();
-			ThingEvent event = new ThingEvent(this, thing, ThingEventType.DELETED);
+			if (thingJson == null) {
+				final String errorMessage = "No thing data received from Ditto";
+				logger.error(errorMessage);
+				throw new ArrowheadException(errorMessage);
+			}
+			final Thing thing = ThingsModelFactory.newThingBuilder(thingJson).build();
+			final ThingEvent event = new ThingEvent(this, thing, ThingEventType.DELETED);
 			eventPublisher.publishEvent(event);
 		}
 

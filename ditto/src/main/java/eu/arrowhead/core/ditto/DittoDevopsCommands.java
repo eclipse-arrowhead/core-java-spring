@@ -51,10 +51,10 @@ public class DittoDevopsCommands {
 
 		command.put("targetActorSelection", "/system/sharding/connection");
 		command.set("headers", buildHeaders());
-		if(method == "create"){
+		if ("create".equals(method)){
 			command.set("piggybackCommand",
 				buildPiggybackCommand("connectivity.commands:createConnection", connection));
-		}else if(method == "modify"){
+		} else if ("modify".equals(method)){
 			command.set("piggybackCommand",
 				buildPiggybackCommand("connectivity.commands:modifyConnection", connection));
 		}
@@ -68,16 +68,16 @@ public class DittoDevopsCommands {
 
 		command.put("targetActorSelection", "/system/sharding/connection");
 		command.set("headers", buildHeaders());
-		if(method == "retrieve"){
+		if ("retrieve".equals(method)){
 			command.set("piggybackCommand",
 				buildPiggybackCommand("connectivity.commands:retrieveConnection", connectionId));
-		}else if(method =="open"){
+		} else if ("open".equals(method)){
 			command.set("piggybackCommand",
 				buildPiggybackCommand("connectivity.commands:openConnection", connectionId));
-		}else if(method == "close"){
+		} else if ("close".equals(method)){
 			command.set("piggybackCommand",
 				buildPiggybackCommand("connectivity.commands:closeConnection", connectionId));
-		}else if(method =="delete"){
+		} else if ("delete".equals(method)){
 			command.set("piggybackCommand",
 				buildPiggybackCommand("connectivity.commands:deleteConnection", connectionId));
 		}

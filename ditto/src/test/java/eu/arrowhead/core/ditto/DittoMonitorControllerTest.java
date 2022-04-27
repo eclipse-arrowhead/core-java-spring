@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -15,12 +16,15 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.dto.internal.InventoryIdDTO;
 import eu.arrowhead.common.dto.internal.SystemDataDTO;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@ContextConfiguration(classes = {DittoTestContext.class})
 public class DittoMonitorControllerTest {
 
 	//=================================================================================================
@@ -64,8 +68,9 @@ public class DittoMonitorControllerTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		final String content = response.getResponse().getContentAsString();
-		SystemDataDTO systemData = objectMapper.readValue(content, SystemDataDTO.class);
-		assertEquals("", systemData.getSystemData());
+		final Map<String, String> systemData = objectMapper.readValue(content, SystemDataDTO.class).getSystemData();
+		assertEquals("ditto", systemData.get("systemName"));
+		assertEquals(DittoMonitorController.SYSTEM_DESCRIPTION, systemData.get("description"));
 	}
 
 	@Test
@@ -76,7 +81,7 @@ public class DittoMonitorControllerTest {
 				.andReturn();
 		final String content = response.getResponse().getContentAsString();
 		InventoryIdDTO inventoryId = objectMapper.readValue(content, InventoryIdDTO.class);
-		assertEquals("", inventoryId.getInventoryId());
+		assertNull(inventoryId.getInventoryId());
 	}
 
 }
