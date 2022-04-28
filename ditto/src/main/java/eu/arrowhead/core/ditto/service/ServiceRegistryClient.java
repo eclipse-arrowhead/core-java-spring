@@ -15,7 +15,10 @@ import java.security.PublicKey;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+
 import javax.annotation.Resource;
+
+import org.apache.commons.codec.binary.Base32;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -24,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
@@ -85,14 +89,14 @@ public class ServiceRegistryClient {
 
 		UriComponents uri = getRegisterUri();
 		final ServiceRegistryRequestDTO request =
-				getServiceRegistryRequest(serviceDefinition, serviceUri, metadata);
+				getServiceRegistryRequest(encodeServiceDefinition(serviceDefinition), serviceUri, metadata);
 		return httpService.sendRequest(uri, HttpMethod.POST, ServiceRegistryResponseDTO.class, request);
 	}
 
 	// -------------------------------------------------------------------------------------------------
 	public ResponseEntity<Void> unregisterService(final String serviceDefinition, final String serviceUri) {
 		Assert.notNull(serviceUri, "Service URI is null");
-		UriComponents uri = getUnregisterUri(serviceDefinition, serviceUri);
+		UriComponents uri = getUnregisterUri(encodeServiceDefinition(serviceDefinition), serviceUri);
 		return httpService.sendRequest(uri, HttpMethod.DELETE, Void.class);
 	}
 
@@ -157,4 +161,15 @@ public class ServiceRegistryClient {
 		return system;
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	private String encodeServiceDefinition(String serviceDefinition) {
+		Base32 base32 = new Base32();
+		String encodedServiceDefinition = base32.encodeAsString(serviceDefinition.getBytes());
+		encodedServiceDefinition = encodedServiceDefinition.toLowerCase();
+		encodedServiceDefinition = encodedServiceDefinition.replace('=', '-');
+
+		encodedServiceDefinition = encodedServiceDefinition + "a";
+
+		return encodedServiceDefinition;
+	}
 }

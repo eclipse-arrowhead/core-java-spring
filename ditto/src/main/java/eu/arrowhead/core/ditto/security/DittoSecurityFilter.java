@@ -16,10 +16,13 @@ import java.net.URL;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Map;
+
+import org.apache.commons.codec.binary.Base32;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
+
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
@@ -68,17 +71,19 @@ public class DittoSecurityFilter extends TokenSecurityFilter {
 			final String clientCN,
 			final String token,
 			final String requestTarget) {
+		String thing;
 		String feature;
 		try {
 			// TODO: Fix this up, make it safe.
 			final URL url = new URL(requestTarget);
 			String[] parts = url.getPath().split("/things/|/features/|/properties/");
+			thing = parts[1];
 			feature = parts[2];
 		} catch (MalformedURLException e) {
 			throw new AuthException("Malformed URL");
 		}
 		TokenInfo tokenInfo = super.checkToken(clientCN, token, requestTarget);
-		if (!tokenInfo.getService().equals(feature)) {
+		if (!decodeServiceDefinition(tokenInfo.getService()).equals(thing + "-" + feature)) {
 			throw new AuthException(
 					"The requested feature did not match the service specified in the token");
 		}
@@ -109,6 +114,18 @@ public class DittoSecurityFilter extends TokenSecurityFilter {
 			}
 		}
 		throw new ArrowheadException(errorMessage);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private String decodeServiceDefinition(String encodedServiceDefinition) {
+		Base32 base32 = new Base32();
+		
+		String serviceDefinition = encodedServiceDefinition.replaceAll(".$", "");
+		serviceDefinition = serviceDefinition.replace('-', '=');
+		serviceDefinition = serviceDefinition.toUpperCase();
+		serviceDefinition = new String(base32.decode(serviceDefinition));
+
+		return serviceDefinition;
 	}
 
 }
