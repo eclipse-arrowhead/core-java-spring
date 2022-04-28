@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
@@ -41,6 +42,9 @@ public class ThingManagementControllerTest {
 	@Autowired
 	private ObjectMapper objectMapper;
 
+	@Value(Constants.$GLOBAL_DITTO_POLICY)
+	private String policyId;
+
 	@MockBean(name = "mockDittoHttpClient")
 	private DittoHttpClient dittoHttpClient;
 
@@ -50,7 +54,7 @@ public class ThingManagementControllerTest {
 	private final String THING_DEFINITION = "a:b:c";
 
 	final String thingJson =
-			"{\"thingId\":\"" + THING_ID + "\",\"policyId\":\"" + Constants.DITTO_POLICY_ID
+			"{\"thingId\":\"" + THING_ID + "\",\"policyId\":\"" + policyId
 					+ "\",\"definition\":\"" + THING_DEFINITION + "\",\"attributes\":{},\"features\":{}}";
 
 	// =================================================================================================

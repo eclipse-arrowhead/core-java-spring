@@ -57,6 +57,9 @@ public class ThingManagementController {
 	@Value(Constants.$SUBSCRIBE_TO_DITTO_EVENTS)
 	private boolean subscribeToDittoEvents;
 
+	@Value(Constants.$GLOBAL_DITTO_POLICY)
+	private String policyId;
+
 	@Autowired
 	private ApplicationEventPublisher eventPublisher;
 
@@ -105,7 +108,7 @@ public class ThingManagementController {
 
 		Thing thing = ThingsModelFactory.newThingBuilder(thingRequest)
 			.setId(ThingId.of(thingId))
-			.setPolicyId(PolicyId.of(Constants.DITTO_POLICY_ID))
+			.setPolicyId(PolicyId.of(policyId))
 			.build();
 
 		final ResponseEntity<String> putResponse = dittoHttpClient.putThing(thingId, thing.toJsonString());
@@ -119,7 +122,7 @@ public class ThingManagementController {
 
 		if (!subscribeToDittoEvents) {
 			final ThingEventType eventType = wasCreated ? ThingEventType.CREATED : ThingEventType.UPDATED;
-			ThingEvent event = new ThingEvent(this, thing, eventType);
+			final ThingEvent event = new ThingEvent(this, thing, eventType);
 			eventPublisher.publishEvent(event);
 		}
 

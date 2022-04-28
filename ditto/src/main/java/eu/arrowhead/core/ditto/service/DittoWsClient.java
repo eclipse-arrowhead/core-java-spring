@@ -26,11 +26,7 @@ import org.eclipse.ditto.client.messaging.AuthenticationProvider;
 import org.eclipse.ditto.client.messaging.AuthenticationProviders;
 import org.eclipse.ditto.client.messaging.MessagingProvider;
 import org.eclipse.ditto.client.messaging.MessagingProviders;
-import org.eclipse.ditto.policies.model.PoliciesResourceType;
-import org.eclipse.ditto.policies.model.Policy;
-import org.eclipse.ditto.policies.model.PolicyId;
-import org.eclipse.ditto.policies.model.Subject;
-import org.eclipse.ditto.policies.model.SubjectIssuer;import org.eclipse.ditto.things.model.Thing;
+import org.eclipse.ditto.things.model.Thing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
@@ -64,16 +60,6 @@ public class DittoWsClient {
 
 	// Arbitrary ID which can be used to cancel the registration later on:
 	final String THING_REGISTRATION_ID = "THING_REGISTRATION_ID";
-
-	private final PolicyId DITTO_POLICY_ID = PolicyId.of(Constants.DITTO_POLICY_ID);
-
-	// TODO: This policy is copied from example code, replace it!
-	private final Policy dittoPolicy = Policy.newBuilder(DITTO_POLICY_ID)
-		.forLabel("DEFAULT")
-		.setSubject(Subject.newInstance(SubjectIssuer.newInstance("nginx"), "ditto"))
-		.setGrantedPermissions(PoliciesResourceType.policyResource("/"), "READ", "WRITE")
-		.setGrantedPermissions(PoliciesResourceType.thingResource("/"), "READ", "WRITE")
-		.build();
 
 	//=================================================================================================
 	// assistant methods
@@ -113,12 +99,6 @@ public class DittoWsClient {
 		if (subscribeToDittoEvents) {
 			subscribeToDittoEvents(client);
 		}
-
-		if (dittoPolicyExists(client)) {
-			client.policies().update(dittoPolicy);
-		} else {
-			client.policies().create(dittoPolicy);
-		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -155,19 +135,6 @@ public class DittoWsClient {
 
 		ThingEvent event = new ThingEvent(this, thing, type);
 		eventPublisher.publishEvent(event);
-	}
-
-	private boolean dittoPolicyExists(final DittoClient client) {
-		// TODO: Find a better way of performing this check.
-		try {
-			client.policies()
-					.retrieve(DITTO_POLICY_ID)
-					.toCompletableFuture()
-					.get();
-		} catch (InterruptedException | ExecutionException e) {
-			return false;
-		}
-		return true;
 	}
 
 }

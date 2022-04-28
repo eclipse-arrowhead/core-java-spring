@@ -39,7 +39,6 @@ public class DittoDevopsCommands {
 
 	public static final String SERVICE_DEFINITIONS = "serviceDefinitions";
 	public static final String THING_ID = "thingId";
-	public static final String DITTO_POLICY_ID = "eu.arrowhead:ah-ditto";
 
 	//=================================================================================================
 	// methods

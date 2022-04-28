@@ -31,6 +31,9 @@ public class Constants {
 	public static final String DITTO_PASSWORD = "ditto_password";
 	public static final String $DITTO_PASSWORD = "${" + DITTO_PASSWORD + "}";
 
+	public static final String GLOBAL_DITTO_POLICY = "global_policy_id";
+	public static final String $GLOBAL_DITTO_POLICY = "${" + GLOBAL_DITTO_POLICY + "}";
+
 	public static final String DITTO_DEVOPS_USERNAME = "ditto_devops_username";
 	public static final String $DITTO_DEVOPS_USERNAME = "${" + DITTO_DEVOPS_USERNAME + "}";
 
@@ -46,7 +49,6 @@ public class Constants {
 
 	public static final String SERVICE_DEFINITIONS = "serviceDefinitions";
 	public static final String THING_ID = "thingId";
-	public static final String DITTO_POLICY_ID = "eu.arrowhead:ah-ditto";
 
 	//=================================================================================================
 	// assistant methods
