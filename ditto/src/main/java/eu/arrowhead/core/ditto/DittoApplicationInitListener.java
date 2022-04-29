@@ -35,7 +35,7 @@ public class DittoApplicationInitListener extends ApplicationInitListener {
 	@Value("classpath:ah-ditto-policy.json")
 	Resource resourceFile;
 
-	@Value("${global_policy_id}")
+	@Value(Constants.$GLOBAL_DITTO_POLICY)
 	private String policyId;
 
 	//=================================================================================================
@@ -66,7 +66,7 @@ public class DittoApplicationInitListener extends ApplicationInitListener {
 			e.printStackTrace();
 		}
 
-		while(!dittoHttpClient.createPolicy(policyId, policyString).getStatusCode().is2xxSuccessful()) {
+		while (!dittoHttpClient.createPolicy(policyId, policyString).getStatusCode().is2xxSuccessful()) {
 			logger.error("Could not create default policy. Retrying...");
 			try {
 				Thread.sleep(500l);

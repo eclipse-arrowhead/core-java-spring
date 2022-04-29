@@ -14,5 +14,6 @@ package eu.arrowhead.core.ditto;
 public enum ThingEventType {
 	CREATED,
 	UPDATED,
-	DELETED
+	DELETED,
+	DETACHED // Issued for all Things when AH Ditto is shut down
 }

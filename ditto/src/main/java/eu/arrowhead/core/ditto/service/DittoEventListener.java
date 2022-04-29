@@ -79,6 +79,9 @@ public class DittoEventListener implements ApplicationListener<ThingEvent> {
 				case DELETED:
 					unregisterServices(thing);
 					break;
+				case DETACHED:
+					unregisterServices(thing);
+					break;
 				default:
 					throw new RuntimeException("Unhandled ThingEvent");
 			}
