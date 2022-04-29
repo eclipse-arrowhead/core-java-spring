@@ -15,25 +15,34 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Base64;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
-
 import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.core.ditto.service.DittoHttpClient;
+import eu.arrowhead.core.ditto.service.DittoWsClient;
 
 @Component
 public class DittoApplicationInitListener extends ApplicationInitListener {
+	
 	@Autowired
-	DittoHttpClient dittoHttpClient;
+	private ApplicationEventPublisher eventPublisher;
+	
+	@Autowired
+	private DittoHttpClient dittoHttpClient;
+
+	@Autowired
+	private DittoWsClient dittoWsClient;
 
 	@Value("classpath:ah-ditto-policy.json")
-	Resource resourceFile;
+	private Resource resourceFile;
 
 	@Value(Constants.$GLOBAL_DITTO_POLICY)
 	private String policyId;
@@ -49,6 +58,20 @@ public class DittoApplicationInitListener extends ApplicationInitListener {
 		}
 
 		createPolicy();
+
+		dittoWsClient.getAhDittoThings().forEach(thing -> eventPublisher.publishEvent(
+			new ThingEvent(this, thing, ThingEventType.ATTACHED)
+		));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@EventListener(ContextClosedEvent.class)
+    private void onClose(ContextClosedEvent contextClosedEvent) {		
+		dittoWsClient.getAhDittoThings().forEach(thing -> {
+			eventPublisher.publishEvent(
+				new ThingEvent(this, thing, ThingEventType.DETACHED)
+			);
+		});
 	}
 
 	//-------------------------------------------------------------------------------------------------

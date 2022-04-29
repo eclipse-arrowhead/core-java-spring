@@ -15,5 +15,6 @@ public enum ThingEventType {
 	CREATED,
 	UPDATED,
 	DELETED,
-	DETACHED // Issued for all Things when AH Ditto is shut down
+	DETACHED, // Issued for all Things when AH Ditto is shut down
+	ATTACHED // Issued for all Things when AH Ditto is launched
 }

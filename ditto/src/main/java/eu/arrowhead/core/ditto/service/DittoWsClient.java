@@ -32,8 +32,6 @@ import org.eclipse.ditto.things.model.Thing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.ditto.Constants;
@@ -72,6 +70,21 @@ public class DittoWsClient {
 	final String THING_REGISTRATION_ID = "THING_REGISTRATION_ID";
 
 	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
+	/**
+	 * @return All existing Things created by this core system.
+	 */
+	public Stream<Thing> getAhDittoThings() {
+		return getThings()
+			.filter(thing -> {
+				final PolicyId policy = thing.getPolicyEntityId().orElse(null);
+				return policy != null && policy.toString().equals(globalPolicy);
+			});
+	}
+
+	//=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
@@ -101,15 +114,6 @@ public class DittoWsClient {
 					return null;
 				});
 	}
-
-	//-------------------------------------------------------------------------------------------------
-	@EventListener(ContextClosedEvent.class)
-    private void onClose(ContextClosedEvent contextClosedEvent) {
-		getAhDittoThings().forEach(thing -> {
-			final ThingEvent event = new ThingEvent(this, thing, ThingEventType.DETACHED);
-			eventPublisher.publishEvent(event);
-		});
-    }
 
 	//-------------------------------------------------------------------------------------------------
 	private void onConnected(final DittoClient client) {
@@ -155,18 +159,6 @@ public class DittoWsClient {
 
 		ThingEvent event = new ThingEvent(this, thing, type);
 		eventPublisher.publishEvent(event);
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	/**
-	 * @return All existing Things created by this core system.
-	 */
-	private Stream<Thing> getAhDittoThings() {
-		return getThings()
-			.filter(thing -> {
-				final PolicyId policy = thing.getPolicyEntityId().orElse(null);
-				return policy != null && policy.toString().equals(globalPolicy);
-			});
 	}
 
 	//-------------------------------------------------------------------------------------------------

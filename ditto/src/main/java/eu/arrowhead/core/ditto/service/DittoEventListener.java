@@ -28,6 +28,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.core.ditto.Constants;
 import eu.arrowhead.core.ditto.DittoModelException;
@@ -50,6 +51,8 @@ public class DittoEventListener implements ApplicationListener<ThingEvent> {
 
 	private final Logger logger = LogManager.getLogger(DittoEventListener.class);
 
+	private int maxRegistrationRetries = 15;
+
 	@Autowired
 	private ServiceRegistryClient serviceRegistryClient;
 
@@ -69,6 +72,10 @@ public class DittoEventListener implements ApplicationListener<ThingEvent> {
 
 		try {
 			switch (type) {
+				case ATTACHED:
+					// Called on startup for Things previously created by this core system
+					registerServices(thing);
+					break;
 				case CREATED:
 					registerServices(thing);
 					break;
@@ -80,6 +87,7 @@ public class DittoEventListener implements ApplicationListener<ThingEvent> {
 					unregisterServices(thing);
 					break;
 				case DETACHED:
+					// Called on system shutdown for each existing Thing
 					unregisterServices(thing);
 					break;
 				default:
@@ -140,7 +148,8 @@ public class DittoEventListener implements ApplicationListener<ThingEvent> {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void registerFeature(final String thingId, final Feature feature, final String serviceDefinition) {
+	private void registerFeature(final String thingId, final Feature feature,
+			final String serviceDefinition, final int numRetries) {
 		final String serviceUri =
 				String.format(SERVICE_URI_TEMPLATE, thingId, feature.getId());
 		final Map<String, String> metadata = getMetadata(thingId);
@@ -148,8 +157,23 @@ public class DittoEventListener implements ApplicationListener<ThingEvent> {
 		try {
 			serviceRegistryClient.registerService(serviceDefinition, serviceUri, metadata);
 		} catch (final Exception ex) {
-			logger.error("Service registration for feature failed: " + ex);
+			if (numRetries == 0 || ex.getMessage().contains("already exists")) {
+				return;
+			}
+
+			logger.info("Failed to register Ditto Thing service, retrying in in a moment");
+			try {
+				Thread.sleep(1000l);
+				registerFeature(thingId, feature, serviceDefinition, numRetries - 1);
+			} catch (InterruptedException e) {
+				logger.error(e);
+			}
 		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void registerFeature(final String thingId, final Feature feature, final String serviceDefinition) {
+		registerFeature(thingId, feature, serviceDefinition, maxRegistrationRetries);
 	}
 
 	//-------------------------------------------------------------------------------------------------
