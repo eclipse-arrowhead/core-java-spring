@@ -16,6 +16,7 @@ package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.util.Assert;
@@ -36,6 +37,7 @@ public class SystemQueryFormDTO implements Serializable {
 	private Integer versionRequirement; // if specified version must match
 	private Integer minVersionRequirement; // if specified version must be equals or higher; ignored if versionRequirement is specified
 	private Integer maxVersionRequirement; // if specified version must be equals or lower; ignored if versionRequirement is specified
+	private List<AddressType> addressTypeRequirements; // if specified one of the address types must match
 
 	private boolean pingProviders = false;
 
@@ -50,6 +52,7 @@ public class SystemQueryFormDTO implements Serializable {
 	public Integer getMinVersionRequirement() { return minVersionRequirement; }
 	public Integer getMaxVersionRequirement() { return maxVersionRequirement; }
 	public boolean getPingProviders() { return pingProviders; }
+	public List<AddressType> getAddressTypeRequirements() { return addressTypeRequirements; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setSystemNameRequirements(final String systemNameRequirements) { this.systemNameRequirements = systemNameRequirements; }
@@ -59,6 +62,7 @@ public class SystemQueryFormDTO implements Serializable {
 	public void setMinVersionRequirement(final Integer minVersionRequirement) { this.minVersionRequirement = minVersionRequirement; }
 	public void setMaxVersionRequirement(final Integer maxVersionRequirement) { this.maxVersionRequirement = maxVersionRequirement; }
 	public void setPingProviders(final boolean pingProviders) { this.pingProviders = pingProviders; }
+	public void setAddressTypeRequirements(final List<AddressType> addressTypeRequirements) { this.addressTypeRequirements = addressTypeRequirements; }
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override
@@ -81,9 +85,10 @@ public class SystemQueryFormDTO implements Serializable {
 		this.versionRequirement = builder.versionRequirement;
 		this.minVersionRequirement = builder.minVersionRequirement;
 		this.maxVersionRequirement = builder.maxVersionRequirement;
+		this.addressTypeRequirements = builder.addressTypeRequirements;
 		this.pingProviders = builder.pingProviders;
 	}
-	
+
 	//=================================================================================================
 	// nested classes
 	public static class Builder {
@@ -97,6 +102,7 @@ public class SystemQueryFormDTO implements Serializable {
 		private Integer versionRequirement; 
 		private Integer minVersionRequirement; 
 		private Integer maxVersionRequirement; 
+		private List<AddressType> addressTypeRequirements; 
 		
 		private boolean pingProviders = false;
 
@@ -149,6 +155,18 @@ public class SystemQueryFormDTO implements Serializable {
 		//-------------------------------------------------------------------------------------------------
 		public Builder pingProviders(final boolean pingProviders) {
 			this.pingProviders = pingProviders;
+			return this;
+		}
+		
+		//-------------------------------------------------------------------------------------------------
+		public Builder providerAddressTypes(final AddressType... addressTypes) {
+			this.addressTypeRequirements = addressTypes == null || addressTypes.length == 0 ? null : List.of(addressTypes);
+			return this;
+		}
+		
+		//-------------------------------------------------------------------------------------------------
+		public Builder providerAddressTypes(final List<AddressType> addressTypes) {
+			this.addressTypeRequirements = addressTypes;
 			return this;
 		}
 		

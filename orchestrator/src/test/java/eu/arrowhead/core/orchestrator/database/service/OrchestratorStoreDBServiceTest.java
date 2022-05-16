@@ -52,6 +52,7 @@ import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreModifyPriorityRequestDTO;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreRequestDTO;
+import eu.arrowhead.common.dto.shared.AddressType;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -1378,7 +1379,7 @@ public class OrchestratorStoreDBServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private System getSystemForTest() {
-		final System system = new System("systemName", "address", 1234, null, null);
+		final System system = new System("systemName", "address", AddressType.HOSTNAME, 1234, null, null);
 		system.setId(getIdForTest());
 		system.setCreatedAt(getCreatedAtForTest());
 		system.setUpdatedAt(getUpdatedAtForTest());

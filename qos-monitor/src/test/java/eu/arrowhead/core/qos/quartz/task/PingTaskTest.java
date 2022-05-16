@@ -57,6 +57,7 @@ import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLog;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
+import eu.arrowhead.common.dto.shared.AddressType;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
@@ -2174,6 +2175,7 @@ public class PingTaskTest {
 		final System system = new System(
 				"testSystem",
 				"address",
+				AddressType.HOSTNAME,
 				12345,
 				"authenticationInfo",
 				"");
@@ -2186,6 +2188,7 @@ public class PingTaskTest {
 
 		final System system = new System(
 				"testSystem",
+				null,
 				null,
 				12345,
 				"authenticationInfo",
@@ -2208,6 +2211,7 @@ public class PingTaskTest {
 		final System system = new System(
 				"testSystem",
 				"   ",
+				null,
 				12345,
 				"authenticationInfo",
 				"");

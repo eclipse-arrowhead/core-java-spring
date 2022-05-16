@@ -79,6 +79,7 @@ import eu.arrowhead.common.dto.internal.ServiceRegistryGroupedResponseDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.internal.ServicesGroupedByServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.internal.ServicesGroupedBySystemsResponseDTO;
+import eu.arrowhead.common.dto.shared.AddressType;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
@@ -1649,7 +1650,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		}
 		
 		for (int i = 1; i <= amountOfSystem; ++i) {										
-			final System system = new System("testSystem" + i, "testAddress" + i, i * 1000, null, null);
+			final System system = new System("testSystem" + i, "testAddress" + i, AddressType.HOSTNAME, i * 1000, null, null);
 			system.setId(i);
 			system.setCreatedAt(timeStamp);
 			system.setUpdatedAt(timeStamp);			

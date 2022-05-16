@@ -56,6 +56,7 @@ import eu.arrowhead.common.dto.internal.ServiceInterfacesListResponseDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryGroupedResponseDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
+import eu.arrowhead.common.dto.shared.AddressType;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
@@ -69,6 +70,7 @@ import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
+import eu.arrowhead.common.processor.SpecialNetworkAddressTypeDetector;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
@@ -102,6 +104,9 @@ public class ServiceRegistryDBService {
 	
 	@Autowired
 	private NetworkAddressPreProcessor networkAddressPreProcessor;
+	
+	@Autowired
+	private SpecialNetworkAddressTypeDetector networkAddressTypeDetector;
 	
 	@Autowired
 	private NetworkAddressVerifier networkAddressVerifier;
@@ -197,7 +202,7 @@ public class ServiceRegistryDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public System updateSystem(final long systemId, final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) {	
+	public System updateSystem(final long systemId, final String systemName, final String address, final int port, final String authenticationInfo, final Map<String,String> metadata) { 	
 		logger.debug("updateSystem started...");
 
 		final long validatedSystemId = validateSystemId(systemId);
@@ -210,6 +215,7 @@ public class ServiceRegistryDBService {
 		
 		final String validatedAddress = networkAddressPreProcessor.normalize(address);
 		networkAddressVerifier.verify(validatedAddress);
+		final AddressType addressType = networkAddressTypeDetector.detectAddressType(validatedAddress);
 		final String validatedAuthenticationInfo = authenticationInfo;
 
 
@@ -227,6 +233,7 @@ public class ServiceRegistryDBService {
 
 			system.setSystemName(validatedSystemName);
 			system.setAddress(validatedAddress);
+			system.setAddressType(addressType);
 			system.setPort(validatedPort);
 			system.setAuthenticationInfo(validatedAuthenticationInfo);
 			system.setMetadata(Utilities.map2Text(metadata));
@@ -297,7 +304,7 @@ public class ServiceRegistryDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public System mergeSystem(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo, final Map<String,String> metadata) {		
+	public System mergeSystem(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo, final Map<String,String> metadata) { 	
 		logger.debug("mergeSystem started...");
 
 		final long validatedSystemId = validateSystemId(systemId);
@@ -311,6 +318,7 @@ public class ServiceRegistryDBService {
 		if (!Utilities.isEmpty(validatedAddress)) {
 			networkAddressVerifier.verify(validatedAddress);
 		}
+		final AddressType addressType = networkAddressTypeDetector.detectAddressType(validatedAddress);
 		final String validatedAuthenticationInfo = authenticationInfo;
 
 		try {
@@ -333,6 +341,7 @@ public class ServiceRegistryDBService {
 
 			if (!Utilities.isEmpty(validatedAddress)) {
 				system.setAddress(validatedAddress);
+				system.setAddressType(addressType);
 			}
 
 			if (validatedPort != null) {
@@ -350,6 +359,24 @@ public class ServiceRegistryDBService {
 			return systemRepository.saveAndFlush(system);
 		} catch (final InvalidParameterException ex) {
 			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public void calculateSystemAddressTypeIfNecessary() {
+		try {
+			final List<System> systems = systemRepository.findByAddressTypeIsNull();
+			for (final System system : systems) {
+				final AddressType addressType = networkAddressTypeDetector.detectAddressType(system.getAddress());
+				system.setAddressType(addressType);
+			}
+			
+			systemRepository.saveAll(systems);
+			systemRepository.flush();
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -643,8 +670,7 @@ public class ServiceRegistryDBService {
 			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? null : Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
 			final String metadataStr = Utilities.map2Text(request.getMetadata());
 			final int version = request.getVersion() == null ? Defaults.DEFAULT_VERSION : request.getVersion().intValue();
-			final ServiceRegistry srEntry = createServiceRegistry(serviceDefinition, provider, validatedServiceUri, endOfValidity, validatedSecurityType, metadataStr, version,
-					request.getInterfaces());
+			final ServiceRegistry srEntry = createServiceRegistry(serviceDefinition, provider, validatedServiceUri, endOfValidity, validatedSecurityType, metadataStr, version, request.getInterfaces());
 
 			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(srEntry);
 		} catch (final DateTimeParseException ex) {
@@ -720,8 +746,7 @@ public class ServiceRegistryDBService {
 				throw new InvalidParameterException("Service Registry entry with id '" + id + "' does not exist");
 			}
 
-			final String validatedServiceDefinition = !Utilities.isEmpty(request.getServiceDefinition()) ? request.getServiceDefinition().toLowerCase().trim() :
-					srEntry.getServiceDefinition().getServiceDefinition();
+			final String validatedServiceDefinition = !Utilities.isEmpty(request.getServiceDefinition()) ? request.getServiceDefinition().toLowerCase().trim() : srEntry.getServiceDefinition().getServiceDefinition();
 			if (useStrictServiceDefinitionVerifier) {
 				Assert.isTrue(cnVerifier.isValid(validatedServiceDefinition), "Service definition" + INVALID_FORMAT_ERROR_MESSAGE);
 			}
@@ -733,11 +758,11 @@ public class ServiceRegistryDBService {
 																										   
 			final String validatedProviderAddress = (request.getProviderSystem() != null && !Utilities.isEmpty(request.getProviderSystem().getAddress())) ?
 																										   networkAddressPreProcessor.normalize(request.getProviderSystem().getAddress()) :
-					srEntry.getSystem().getAddress();
+																										   srEntry.getSystem().getAddress();
 			networkAddressVerifier.verify(validatedProviderAddress);
 																										   
 			final int validatedProviderPort = (request.getProviderSystem() != null && request.getProviderSystem().getPort() != null) ? request.getProviderSystem().getPort().intValue() :
-					srEntry.getSystem().getPort();
+																																	   srEntry.getSystem().getPort();
 
 			final Optional<ServiceDefinition> optServiceDefinition = serviceDefinitionRepository.findByServiceDefinition(validatedServiceDefinition);
 			final ServiceDefinition serviceDefinition = optServiceDefinition.isPresent() ? optServiceDefinition.get() : createServiceDefinition(validatedServiceDefinition);
@@ -769,8 +794,7 @@ public class ServiceRegistryDBService {
 				provider = srEntry.getSystem();
 			}
 
-			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? srEntry.getEndOfValidity() :
-					Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
+			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? srEntry.getEndOfValidity() : Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
 			final String validatedMetadataStr = request.getMetadata() != null ? Utilities.map2Text(request.getMetadata()) : srEntry.getMetadata();
 			final int validatedVersion = request.getVersion() != null ? request.getVersion().intValue() : srEntry.getVersion();
 
@@ -783,8 +807,7 @@ public class ServiceRegistryDBService {
 			final String validatedServiceUri = request.getServiceUri() != null ? request.getServiceUri().trim() : srEntry.getServiceUri();
 			final List<String> validatedInterfaces = request.getInterfaces() != null && !request.getInterfaces().isEmpty() ? request.getInterfaces() : validatedInterfacesTemp;
 
-			srEntry = updateServiceRegistry(srEntry, serviceDefinition, provider, validatedServiceUri , endOfValidity,  validatedSecurityType, validatedMetadataStr, validatedVersion,
-					validatedInterfaces);
+			srEntry = updateServiceRegistry(srEntry, serviceDefinition, provider, validatedServiceUri , endOfValidity,  validatedSecurityType, validatedMetadataStr, validatedVersion, validatedInterfaces);
 
 			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(srEntry);
 		} catch (final InvalidParameterException | IllegalArgumentException ex) {
@@ -814,7 +837,6 @@ public class ServiceRegistryDBService {
 		} catch (final InvalidParameterException ex) {
 			throw new IllegalArgumentException(ex.getMessage());
 		}
-	
 		
 		final String validatedServiceUri = Utilities.isEmpty(serviceUri) ? "" : serviceUri.trim();
 		checkConstraintOfServiceRegistryTable(serviceDefinition, provider, validatedServiceUri);
@@ -911,7 +933,7 @@ public class ServiceRegistryDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings({"squid:S3655", "squid:S3776"})
-	public ServiceQueryResultDTO queryRegistry(final ServiceQueryFormDTO form) {
+	public ServiceQueryResultDTO queryRegistry(final ServiceQueryFormDTO form) { 
 		logger.debug("queryRegistry is started...");
 		Assert.notNull(form, "Form is null.");
 		Assert.isTrue(!Utilities.isEmpty(form.getServiceDefinitionRequirement()), "Service definition requirement is null or blank");
@@ -931,6 +953,12 @@ public class ServiceRegistryDBService {
 			if (providedServices.isEmpty()) {
 				// no providers found
 				return DTOConverter.convertListOfServiceRegistryEntriesToServiceQueryResultDTO(providedServices, unfilteredHits);
+			}
+			
+			// filter on provider's address type
+			if (form.getProviderAddressTypeRequirements() != null && !form.getProviderAddressTypeRequirements().isEmpty()) {
+				final List<AddressType> normalizeAddressTypeRequirements = RegistryUtils.normalizeAddressTypes(form.getProviderAddressTypeRequirements());
+				RegistryUtils.filterOnProviderAddressType(providedServices, normalizeAddressTypeRequirements);
 			}
 
 			// filter on interfaces
@@ -1329,6 +1357,7 @@ public class ServiceRegistryDBService {
 
 		final String validatedAddress = networkAddressPreProcessor.normalize(address);
 		networkAddressVerifier.verify(validatedAddress);
+		final AddressType addressType = networkAddressTypeDetector.detectAddressType(validatedAddress);
 		
 		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 			throw new InvalidParameterException(PORT_RANGE_ERROR_MESSAGE);
@@ -1339,7 +1368,7 @@ public class ServiceRegistryDBService {
 
 		checkConstraintsOfSystemTable(validatedSystemName, validatedAddress, port);
 
-		return new System(validatedSystemName, validatedAddress, port, validatedAuthenticationInfo, Utilities.map2Text(metadata));
+		return new System(validatedSystemName, validatedAddress, addressType, port, validatedAuthenticationInfo, Utilities.map2Text(metadata));
 	}
 
 	//-------------------------------------------------------------------------------------------------

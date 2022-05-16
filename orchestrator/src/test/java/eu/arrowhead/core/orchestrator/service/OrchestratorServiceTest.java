@@ -16,7 +16,6 @@ package eu.arrowhead.core.orchestrator.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
@@ -310,7 +309,7 @@ public class OrchestratorServiceTest {
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
 		srResult.getServiceQueryData().add(srEntry);
 		
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		
 		final OrchestrationResponseDTO response = testingObject.externalServiceRequest(request);
 		
@@ -338,7 +337,7 @@ public class OrchestratorServiceTest {
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
 		srResult.getServiceQueryData().add(srEntry);
 		
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		@SuppressWarnings("unchecked")
 		final ArgumentCaptor<List<OrchestrationResultDTO>> valueCapture = ArgumentCaptor.forClass(List.class);
 		when(orchestratorDriver.generateAuthTokens(any(), valueCapture.capture())).thenReturn(List.of());
@@ -370,7 +369,7 @@ public class OrchestratorServiceTest {
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
 		srResult.getServiceQueryData().add(srEntry);
 		
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		@SuppressWarnings("unchecked")
 		final ArgumentCaptor<List<OrchestrationResultDTO>> valueCapture = ArgumentCaptor.forClass(List.class);
 		when(orchestratorDriver.generateAuthTokens(any(), valueCapture.capture())).thenReturn(List.of());
@@ -402,7 +401,7 @@ public class OrchestratorServiceTest {
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
 		srResult.getServiceQueryData().add(srEntry);
 		
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		@SuppressWarnings("unchecked")
 		final ArgumentCaptor<List<OrchestrationResultDTO>> valueCapture = ArgumentCaptor.forClass(List.class);
 		when(orchestratorDriver.generateAuthTokens(any(), valueCapture.capture())).thenReturn(List.of());
@@ -433,7 +432,7 @@ public class OrchestratorServiceTest {
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
 		srResult.getServiceQueryData().add(srEntry);
 		
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		@SuppressWarnings("unchecked")
 		final ArgumentCaptor<List<OrchestrationResultDTO>> valueCapture = ArgumentCaptor.forClass(List.class);
 		when(orchestratorDriver.generateAuthTokens(any(), valueCapture.capture())).thenReturn(List.of());
@@ -727,7 +726,7 @@ public class OrchestratorServiceTest {
 																				    preferredProviders(ppData).
 																					build();
 		
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(new ServiceQueryResultDTO());
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(new ServiceQueryResultDTO());
 		
 		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request, false);
 		
@@ -752,7 +751,7 @@ public class OrchestratorServiceTest {
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
 		srResult.getServiceQueryData().add(new ServiceRegistryResponseDTO());
 		
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(List.of());
 		
 		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request, false);
@@ -784,14 +783,14 @@ public class OrchestratorServiceTest {
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
 		srResult.getServiceQueryData().add(srEntry);
 		
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(qosManager.filterReservedProviders(anyList(), any(SystemRequestDTO.class))).thenReturn(List.of());
 		
 		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request, true);
 		
 		Assert.assertEquals(0, result.getResponse().size());
 		
-		verify(orchestratorDriver, times(1)).queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean());
+		verify(orchestratorDriver, times(1)).queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class));
 		verify(orchestratorDriver, never()).queryAuthorization(any(SystemRequestDTO.class), anyList());
 		verify(qosManager, times(1)).filterReservedProviders(anyList(), any(SystemRequestDTO.class));
 	}
@@ -817,7 +816,7 @@ public class OrchestratorServiceTest {
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
 		srResult.getServiceQueryData().add(srEntry);
 		
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		
 		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request, false);
@@ -855,7 +854,7 @@ public class OrchestratorServiceTest {
 		final OrchestrationResultDTO convertedSrEntry2 = new OrchestrationResultDTO(srEntry2.getProvider(), srEntry2.getServiceDefinition(), srEntry2.getServiceUri(), 
 																					srEntry2.getSecure(), srEntry2.getMetadata(), srEntry2.getInterfaces(), srEntry2.getVersion());
 		
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(intraCloudProviderMatchmaker.doMatchmaking(any(), any(IntraCloudProviderMatchmakingParameters.class))).thenReturn(convertedSrEntry2);
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
@@ -892,7 +891,7 @@ public class OrchestratorServiceTest {
 		srResult.getServiceQueryData().add(srEntry);
 		srResult.getServiceQueryData().add(srEntry2);
 		
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
@@ -925,7 +924,7 @@ public class OrchestratorServiceTest {
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
 		srResult.getServiceQueryData().add(srEntry);
 		
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
@@ -981,7 +980,7 @@ public class OrchestratorServiceTest {
 				
 		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
@@ -1034,7 +1033,7 @@ public class OrchestratorServiceTest {
 				
 		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
@@ -1087,7 +1086,7 @@ public class OrchestratorServiceTest {
 				
 		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
@@ -1141,7 +1140,7 @@ public class OrchestratorServiceTest {
 				
 		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(List.of());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
@@ -1196,7 +1195,7 @@ public class OrchestratorServiceTest {
 				
 		when(orchestratorDriver.queryServiceRegistryBySystemRequestDTO(any())).thenReturn(systemResponseDTO);
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerIdAndServiceDefinitionAndServiceInterface(anyLong(), any(), any())).thenReturn(entryList);
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
@@ -1327,7 +1326,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
 		when(orchestratorDriver.queryServiceRegistryBySystemRequestDTO(any(SystemRequestDTO.class))).thenReturn(systemResponseDTO);
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
@@ -1407,7 +1406,7 @@ public class OrchestratorServiceTest {
 		
 		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
  		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
@@ -1486,7 +1485,7 @@ public class OrchestratorServiceTest {
 		
 		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
@@ -1565,7 +1564,7 @@ public class OrchestratorServiceTest {
 		
 		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
@@ -1645,7 +1644,7 @@ public class OrchestratorServiceTest {
 		
 		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
@@ -1726,7 +1725,7 @@ public class OrchestratorServiceTest {
 		
 		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
@@ -1806,7 +1805,7 @@ public class OrchestratorServiceTest {
 		
 		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
@@ -1884,7 +1883,7 @@ public class OrchestratorServiceTest {
 		
 		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
@@ -1965,7 +1964,7 @@ public class OrchestratorServiceTest {
 		
 		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
@@ -2047,7 +2046,7 @@ public class OrchestratorServiceTest {
 		
 		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
@@ -2106,7 +2105,7 @@ public class OrchestratorServiceTest {
 				
 		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
@@ -2906,7 +2905,7 @@ public class OrchestratorServiceTest {
 				
 		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
-		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), any(OrchestrationFlags.class))).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
