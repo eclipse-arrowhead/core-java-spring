@@ -17,6 +17,9 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 
@@ -54,4 +57,14 @@ public class GSDQueryFormDTO implements Serializable {
 	public void setRequestedService(final ServiceQueryFormDTO requestedService) { this.requestedService = requestedService; }
 	public void setPreferredClouds(final List<CloudRequestDTO> preferredClouds) { this.preferredClouds = preferredClouds; }
 	public void setNeedQoSMeasurements (final boolean needQoSMeasurements) { this.needQoSMeasurements = needQoSMeasurements; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

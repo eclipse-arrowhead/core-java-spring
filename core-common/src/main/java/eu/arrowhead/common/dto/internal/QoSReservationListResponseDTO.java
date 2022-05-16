@@ -17,6 +17,9 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class QoSReservationListResponseDTO implements Serializable {
 	
 	//=================================================================================================
@@ -46,5 +49,14 @@ public class QoSReservationListResponseDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public void setData(final List<QoSReservationResponseDTO> data) { this.data = data; }
 	public void setCount(final long count) { this.count = count; }	
-
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

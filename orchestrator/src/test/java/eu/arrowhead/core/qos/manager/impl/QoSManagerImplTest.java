@@ -34,6 +34,7 @@ import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
+import eu.arrowhead.common.dto.shared.AddressType;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.QoSMeasurementAttributesFormDTO;
@@ -641,7 +642,7 @@ public class QoSManagerImplTest {
 	//-------------------------------------------------------------------------------------------------
 	private QoSIntraMeasurement getQoSIntraMeasurementForTest() {
 
-		final System system = new System("test-sys", "1.1.1.1", 1000, "dfvldsfme", null);
+		final System system = new System("test-sys", "1.1.1.1", AddressType.IPV4, 1000, "dfvldsfme", null);
 		final QoSIntraMeasurement measurement = new QoSIntraMeasurement(
 				system, 
 				QoSMeasurementType.PING, 

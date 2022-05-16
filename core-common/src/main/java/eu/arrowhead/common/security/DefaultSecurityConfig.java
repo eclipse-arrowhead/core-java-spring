@@ -34,10 +34,10 @@ public class DefaultSecurityConfig extends WebSecurityConfigurerAdapter {
 	// members
 
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
-	private boolean sslEnabled;
+	protected boolean sslEnabled;
 	
 	@Value(CoreCommonConstants.$LOG_ALL_REQUEST_AND_RESPONSE_WD)
-	private boolean debugMode;
+	protected boolean debugMode;
 	
 	//=================================================================================================
 	// assistant methods

@@ -15,13 +15,20 @@
 package eu.arrowhead.common.dto.internal;
 
 import javax.validation.constraints.NotBlank;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.Serializable;
 
 public class AddTrustedKeyRequestDTO implements Serializable {
+	
+	//=================================================================================================
+	// members
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -1358728410825823717L;
 
-    @NotBlank(message = "The publicKey is mandatory")
+	@NotBlank(message = "The publicKey is mandatory")
     private String publicKey;
 
     @NotBlank(message = "The description is mandatory")
@@ -32,46 +39,40 @@ public class AddTrustedKeyRequestDTO implements Serializable {
 
     @NotBlank(message = "The validBefore field is mandatory")
     private String validBefore;
+    
+    //=================================================================================================
+	// methods
 
-    public AddTrustedKeyRequestDTO() {
-    }
+    //-------------------------------------------------------------------------------------------------
+	public AddTrustedKeyRequestDTO() {}
 
-    public AddTrustedKeyRequestDTO(String publicKey, String description, String validAfter, String validBefore) {
+    //-------------------------------------------------------------------------------------------------
+	public AddTrustedKeyRequestDTO(final String publicKey, final String description, final String validAfter, final String validBefore) {
         this.publicKey = publicKey;
         this.validAfter = validAfter;
         this.validBefore = validBefore;
         this.description = description;
     }
 
-    public String getPublicKey() {
-        return publicKey;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public String getPublicKey() { return publicKey; }
+	public String getValidBefore() { return validBefore; }
+	public String getValidAfter() { return validAfter; }
+	public String getDescription() { return description; }
 
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
-
-    public String getValidBefore() {
-        return validBefore;
-    }
-
-    public void setValidBefore(String validBefore) {
-        this.validBefore = validBefore;
-    }
-
-    public String getValidAfter() {
-        return validAfter;
-    }
-
-    public void setValidAfter(String validAfter) {
-        this.validAfter = validAfter;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public void setPublicKey(final String publicKey) { this.publicKey = publicKey; }
+    public void setValidBefore(final String validBefore) { this.validBefore = validBefore; }
+    public void setValidAfter(final String validAfter) { this.validAfter = validAfter; }
+    public void setDescription(final String description) { this.description = description; }
+    
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

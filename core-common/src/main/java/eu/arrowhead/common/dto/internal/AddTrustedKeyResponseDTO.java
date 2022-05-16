@@ -16,45 +16,52 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class AddTrustedKeyResponseDTO implements Serializable {
+	
+	//=================================================================================================
+	// members
 
-    private static final long serialVersionUID = 1L;
-
-    private long id;
+	private static final long serialVersionUID = -8357854932110796927L;
+	
+	private long id;
     private String validAfter;
     private String validBefore;
 
-    public AddTrustedKeyResponseDTO(long id) {
+    //=================================================================================================
+	// methods
+    
+    //-------------------------------------------------------------------------------------------------
+	public AddTrustedKeyResponseDTO(final long id) {
         this(id, null, null);
     }
 
-    public AddTrustedKeyResponseDTO(long id, String validAfter, String validBefore) {
+    //-------------------------------------------------------------------------------------------------
+	public AddTrustedKeyResponseDTO(final long id, final String validAfter, final String validBefore) {
         this.id = id;
         this.validAfter = validAfter;
         this.validBefore = validBefore;
     }
 
-    public String getValidAfter() {
-        return validAfter;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public String getValidAfter() { return validAfter; }
+	public String getValidBefore() { return validBefore; }
+	public long getId() { return id; }
 
-    public void setValidAfter(String validAfter) {
-        this.validAfter = validAfter;
-    }
-
-    public String getValidBefore() {
-        return validBefore;
-    }
-
-    public void setValidBefore(String validBefore) {
-        this.validBefore = validBefore;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public void setValidAfter(final String validAfter) { this.validAfter = validAfter; }
+    public void setValidBefore(final String validBefore) { this.validBefore = validBefore; }
+    public void setId(final long id) { this.id = id; }
+    
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

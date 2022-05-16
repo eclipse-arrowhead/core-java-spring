@@ -14,16 +14,16 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.StringJoiner;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonInclude(Include.NON_NULL)
-public class DeviceRequestDTO implements Serializable
-{
+public class DeviceRequestDTO implements Serializable {
 
     //=================================================================================================
     // members
@@ -41,14 +41,14 @@ public class DeviceRequestDTO implements Serializable
     //-------------------------------------------------------------------------------------------------
     public DeviceRequestDTO() {}
 
-    public DeviceRequestDTO(final String deviceName, final String macAddress) {
+    //-------------------------------------------------------------------------------------------------
+	public DeviceRequestDTO(final String deviceName, final String macAddress) {
         this.deviceName = deviceName;
         this.macAddress = macAddress;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public DeviceRequestDTO(final String deviceName, final String address, final String macAddress, final String authenticationInfo)
-    {
+    public DeviceRequestDTO(final String deviceName, final String address, final String macAddress, final String authenticationInfo) {
         this.deviceName = deviceName;
         this.address = address;
         this.macAddress = macAddress;
@@ -57,43 +57,32 @@ public class DeviceRequestDTO implements Serializable
 
     //-------------------------------------------------------------------------------------------------
     public String getDeviceName() { return deviceName; }
+    public String getAddress() { return address; }
+    public String getMacAddress() { return macAddress; }
+    public String getAuthenticationInfo() { return authenticationInfo; }
 
     //-------------------------------------------------------------------------------------------------
     public void setDeviceName(final String deviceName) { this.deviceName = deviceName; }
-
-    public String getAddress() { return address; }
-
     public void setAddress(final String address) { this.address = address; }
-
-    public String getMacAddress() { return macAddress; }
-
     public void setMacAddress(final String macAddress) { this.macAddress = macAddress; }
-
-    public String getAuthenticationInfo() { return authenticationInfo; }
-
     public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
 
     //-------------------------------------------------------------------------------------------------
-    @Override
-    public int hashCode()
-    {
+    @Override 
+    public int hashCode() {
         return Objects.hash(address, macAddress, deviceName);
     }
 
     //-------------------------------------------------------------------------------------------------
     @Override
-    public boolean equals(final Object obj)
-    {
-        if (this == obj)
-        {
+    public boolean equals(final Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (obj == null)
-        {
+        if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass())
-        {
+        if (getClass() != obj.getClass()) {
             return false;
         }
         final DeviceRequestDTO other = (DeviceRequestDTO) obj;
@@ -103,13 +92,13 @@ public class DeviceRequestDTO implements Serializable
                 Objects.equals(deviceName, other.deviceName);
     }
 
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", DeviceRequestDTO.class.getSimpleName() + "[", "]")
-                .add("deviceName='" + deviceName + "'")
-                .add("address='" + address + "'")
-                .add("macAddress='" + macAddress + "'")
-                .add("authenticationInfo='" + authenticationInfo + "'")
-                .toString();
-    }
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

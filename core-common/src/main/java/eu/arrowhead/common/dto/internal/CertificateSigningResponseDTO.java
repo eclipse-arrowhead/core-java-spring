@@ -17,39 +17,52 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class CertificateSigningResponseDTO implements Serializable {
 
-    private static final long serialVersionUID = -6810780579000655432L;
+    //=================================================================================================
+	// members
 
-    private long id;
+	private static final long serialVersionUID = 8539314545661981641L;
+	private long id;
     private List<String> certificateChain;
 
-    public CertificateSigningResponseDTO() {
+    //=================================================================================================
+	// methods
+    
+    //-------------------------------------------------------------------------------------------------
+	public CertificateSigningResponseDTO() {
         this.id = 0;
     }
 
-    public CertificateSigningResponseDTO(long id) {
+    //-------------------------------------------------------------------------------------------------
+	public CertificateSigningResponseDTO(final long id) {
         this.id = id;
     }
 
-    public CertificateSigningResponseDTO(long id, List<String> certificateChain) {
+    //-------------------------------------------------------------------------------------------------
+	public CertificateSigningResponseDTO(final long id, final List<String> certificateChain) {
         this.id = id;
         this.certificateChain = certificateChain;
     }
 
-    public List<String> getCertificateChain() {
-        return certificateChain;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public List<String> getCertificateChain() { return certificateChain; }
+	public long getId() { return id; }
 
-    public void setCertificateChain(List<String> certificateChain) {
-        this.certificateChain = certificateChain;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public void setCertificateChain(final List<String> certificateChain) { this.certificateChain = certificateChain; }
+    public void setId(final long id) { this.id = id; }
+    
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

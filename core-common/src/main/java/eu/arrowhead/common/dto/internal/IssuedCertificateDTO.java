@@ -17,11 +17,17 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.math.BigInteger;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class IssuedCertificateDTO implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
-    private long id;
+    //=================================================================================================
+	// members
+	
+	private static final long serialVersionUID = -7430192640059791256L;
+	
+	private long id;
     private String createdBy;
     private String createdAt;
     private String revokedAt;
@@ -31,13 +37,18 @@ public class IssuedCertificateDTO implements Serializable {
     private BigInteger serialNumber;
     private IssuedCertificateStatus status;
 
-    public IssuedCertificateDTO() {
+    //=================================================================================================
+	// methods
+    
+    //-------------------------------------------------------------------------------------------------
+	public IssuedCertificateDTO() {
         status = IssuedCertificateStatus.UNKNOWN;
     }
 
-    public IssuedCertificateDTO(long id, String createdBy, String createdAt, String revokedAt,
-                                String validFrom, String validUntil,
-                                String commonName, BigInteger serialNumber, IssuedCertificateStatus status) {
+    //-------------------------------------------------------------------------------------------------
+	public IssuedCertificateDTO(final long id, final String createdBy, final String createdAt, final String revokedAt,
+                                final String validFrom, final String validUntil,
+                                final String commonName, final BigInteger serialNumber, final IssuedCertificateStatus status) {
         this.id = id;
         this.createdBy = createdBy;
         this.createdAt = createdAt;
@@ -49,79 +60,35 @@ public class IssuedCertificateDTO implements Serializable {
         this.status = status;
     }
 
-    public static long getSerialversionuid() {
-        return serialVersionUID;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public long getId() { return id; }
+	public String getCreatedBy() { return createdBy; }
+	public String getCreatedAt() { return createdAt; }
+	public String getRevokedAt() { return revokedAt; }
+	public String getValidFrom() { return validFrom; }
+	public String getValidUntil() { return validUntil; }
+	public String getCommonName() { return commonName; }
+	public BigInteger getSerialNumber() { return serialNumber; }
+	public IssuedCertificateStatus getStatus() { return status; }
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public String getRevokedAt() {
-        return revokedAt;
-    }
-
-    public void setRevokedAt(String revokedAt) {
-        this.revokedAt = revokedAt;
-    }
-
-    public String getValidFrom() {
-        return validFrom;
-    }
-
-    public void setValidFrom(String validFrom) {
-        this.validFrom = validFrom;
-    }
-
-    public String getValidUntil() {
-        return validUntil;
-    }
-
-    public void setValidUntil(String validUntil) {
-        this.validUntil = validUntil;
-    }
-
-    public String getCommonName() {
-        return commonName;
-    }
-
-    public void setCommonName(String commonName) {
-        this.commonName = commonName;
-    }
-
-    public BigInteger getSerialNumber() {
-        return serialNumber;
-    }
-
-    public void setSerialNumber(BigInteger serialNumber) {
-        this.serialNumber = serialNumber;
-    }
-
-    public IssuedCertificateStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(IssuedCertificateStatus status) {
-        this.status = status;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public void setId(final long id) { this.id = id; }
+    public void setCreatedBy(final String createdBy) { this.createdBy = createdBy; }
+    public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
+    public void setRevokedAt(final String revokedAt) { this.revokedAt = revokedAt; }
+    public void setValidFrom(final String validFrom) { this.validFrom = validFrom; }
+    public void setValidUntil(final String validUntil) { this.validUntil = validUntil; }
+    public void setCommonName(final String commonName) { this.commonName = commonName; }
+    public void setSerialNumber(final BigInteger serialNumber) { this.serialNumber = serialNumber; }
+    public void setStatus(final IssuedCertificateStatus status) { this.status = status; }
+    
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

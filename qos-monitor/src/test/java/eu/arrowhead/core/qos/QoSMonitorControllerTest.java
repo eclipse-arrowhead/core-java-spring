@@ -646,7 +646,7 @@ public class QoSMonitorControllerTest {
 	@Test
 	public void getMgmtInterRelayEchoMeasurementByCloudAndRelayTest() throws Exception {
 		final CloudResponseDTO cloud = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "fddddbvf", null, null);
-		final RelayResponseDTO relay = new RelayResponseDTO(1L, "2.2.2.2", 20000, true, false, RelayType.GATEWAY_RELAY, null, null);
+		final RelayResponseDTO relay = new RelayResponseDTO(1L, "2.2.2.2", 20000, null, true, false, RelayType.GATEWAY_RELAY, null, null);
 		final CloudRelayFormDTO requestDTO = new CloudRelayFormDTO(cloud, relay);
 		
 		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
@@ -667,7 +667,7 @@ public class QoSMonitorControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getMgmtInterRelayEchoMeasurementByCloudAndRelayWithNullCloudTest() throws Exception {
-		final RelayResponseDTO relay = new RelayResponseDTO(1L, "2.2.2.2", 20000, true, false, RelayType.GATEWAY_RELAY, null, null);
+		final RelayResponseDTO relay = new RelayResponseDTO(1L, "2.2.2.2", 20000, null, true, false, RelayType.GATEWAY_RELAY, null, null);
 		final CloudRelayFormDTO requestDTO = new CloudRelayFormDTO(null, relay);
 		
 		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
@@ -710,7 +710,7 @@ public class QoSMonitorControllerTest {
 	@Test
 	public void getMgmtInterRelayEchoMeasurementByCloudAndRelayWithNullCloudOperatorTest() throws Exception {
 		final CloudResponseDTO cloud = new CloudResponseDTO(1L, null, "test-n", true, true, false, "fddddbvf", null, null);
-		final RelayResponseDTO relay = new RelayResponseDTO(1L, "2.2.2.2", 20000, true, false, RelayType.GATEWAY_RELAY, null, null);
+		final RelayResponseDTO relay = new RelayResponseDTO(1L, "2.2.2.2", 20000, null, true, false, RelayType.GATEWAY_RELAY, null, null);
 		final CloudRelayFormDTO requestDTO = new CloudRelayFormDTO(cloud, relay);
 		
 		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
@@ -732,7 +732,7 @@ public class QoSMonitorControllerTest {
 	@Test
 	public void getMgmtInterRelayEchoMeasurementByCloudAndRelayWithNullCloudNameTest() throws Exception {
 		final CloudResponseDTO cloud = new CloudResponseDTO(1L, "test-op", null, true, true, false, "fddddbvf", null, null);
-		final RelayResponseDTO relay = new RelayResponseDTO(1L, "2.2.2.2", 20000, true, false, RelayType.GATEWAY_RELAY, null, null);
+		final RelayResponseDTO relay = new RelayResponseDTO(1L, "2.2.2.2", 20000, null, true, false, RelayType.GATEWAY_RELAY, null, null);
 		final CloudRelayFormDTO requestDTO = new CloudRelayFormDTO(cloud, relay);
 		
 		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
@@ -754,7 +754,7 @@ public class QoSMonitorControllerTest {
 	@Test
 	public void getMgmtInterRelayEchoMeasurementByCloudAndRelayWithNullRelayAddressTest() throws Exception {
 		final CloudResponseDTO cloud = new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "fddddbvf", null, null);
-		final RelayResponseDTO relay = new RelayResponseDTO(1L, null, 20000, true, false, RelayType.GATEWAY_RELAY, null, null);
+		final RelayResponseDTO relay = new RelayResponseDTO(1L, null, 20000, null, true, false, RelayType.GATEWAY_RELAY, null, null);
 		final CloudRelayFormDTO requestDTO = new CloudRelayFormDTO(cloud, relay);
 		
 		final QoSInterRelayEchoMeasurementResponseDTO responseDTO = getInterRelayEchoMeasurementResponseDTOForTest();
@@ -2023,7 +2023,7 @@ public class QoSMonitorControllerTest {
 	private QoSInterRelayMeasurementResponseDTO getQoSInterRelayMeasurementResponseDTOForTest(final QoSMeasurementType type) {
 		return new QoSInterRelayMeasurementResponseDTO(1L,
 													   new CloudResponseDTO(1L, "test-op", "test-n", true, true, false, "fddddbvf", null, null),
-													   new RelayResponseDTO(1L, "2.2.2.2", 20000, true, false, RelayType.GATEWAY_RELAY, null, null),
+													   new RelayResponseDTO(1L, "2.2.2.2", 20000, null, true, false, RelayType.GATEWAY_RELAY, null, null),
 													   type,
 													   QoSMeasurementStatus.FINISHED,
 													   Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()),

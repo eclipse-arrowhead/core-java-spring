@@ -33,6 +33,7 @@ public class AuthAccessControlFilter extends CoreSystemAccessControlFilter {
 	
 	private static final String AUTHORIZATION_INTRA_CLOUD_MGMT_URI = CoreCommonConstants.MGMT_URI + "/intracloud";
 	private static final CoreSystem[] allowedCoreSystemsForChecks = { CoreSystem.ORCHESTRATOR, CoreSystem.GATEKEEPER };
+	private static final CoreSystem[] allowedCoreSystemsForTokenGenerations = { CoreSystem.ORCHESTRATOR, CoreSystem.CHOREOGRAPHER };
 	private static final CoreSystem[] allowedCoreSystemsForSubscriptionChecks = { CoreSystem.EVENTHANDLER };
 	private static final CoreSystem[] allowedCoreSystemsForRuleMgmt = { CoreSystem.ONBOARDINGCONTROLLER };
 
@@ -55,12 +56,14 @@ public class AuthAccessControlFilter extends CoreSystemAccessControlFilter {
 		} else if (requestTarget.contains(CoreCommonConstants.MGMT_URI)) {
 			// Only the local System Operator can use these methods
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
-		} else if (requestTarget.endsWith(CommonConstants.OP_AUTH_TOKEN_URI) || requestTarget.endsWith(CommonConstants.OP_AUTH_INTRA_CHECK_URI) ||
-				   requestTarget.endsWith(CommonConstants.OP_AUTH_INTER_CHECK_URI)) {
-			// Only the specified core systems can use all the other methods
+		} else if (requestTarget.endsWith(CommonConstants.OP_AUTH_TOKEN_URI) || requestTarget.endsWith(CommonConstants.OP_AUTH_TOKEN_MULTI_SERVICE_URI)) {
+			// Only the specified core systems can use this methods
+			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForTokenGenerations, requestTarget);
+		} else if (requestTarget.endsWith(CommonConstants.OP_AUTH_INTRA_CHECK_URI) || requestTarget.endsWith(CommonConstants.OP_AUTH_INTER_CHECK_URI)) {
+			// Only the specified core systems can use all these methods
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForChecks, requestTarget);
 		} else if (requestTarget.endsWith(CommonConstants.OP_AUTH_SUBSCRIPTION_CHECK_URI)) {
-			// Only the specified core systems can use all the other methods
+			// Only the specified core systems can use this method
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForSubscriptionChecks, requestTarget);
 		}
 	}

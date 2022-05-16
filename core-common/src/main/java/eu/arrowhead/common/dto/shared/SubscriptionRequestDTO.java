@@ -18,6 +18,9 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class SubscriptionRequestDTO implements Serializable {
 	
 	//=================================================================================================
@@ -33,7 +36,6 @@ public class SubscriptionRequestDTO implements Serializable {
 	private String startDate;
 	private String endDate;
 	private Set<SystemRequestDTO> sources;
-	
 		
 	//=================================================================================================
 	// methods
@@ -73,4 +75,14 @@ public class SubscriptionRequestDTO implements Serializable {
 	public void setStartDate(final String startDate) { this.startDate = startDate; }
 	public void setEndDate(final String endDate) { this.endDate = endDate; }
 	public void setSources(final Set<SystemRequestDTO> sources) { this.sources = sources; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

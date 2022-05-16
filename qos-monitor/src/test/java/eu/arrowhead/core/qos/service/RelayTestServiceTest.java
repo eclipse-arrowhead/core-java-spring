@@ -642,7 +642,7 @@ public class RelayTestServiceTest {
 		request.setReceiverQoSMonitorPublicKey("valid key");
 		
 		final CloudWithRelaysResponseDTO cloudResponse = new CloudWithRelaysResponseDTO();
-		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4201, true, false, RelayType.GATEWAY_RELAY, null, null)));
+		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4201, null, true, false, RelayType.GATEWAY_RELAY, null, null)));
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		
 		relayTestService.initRelayTest(request);
@@ -670,7 +670,7 @@ public class RelayTestServiceTest {
 		request.setReceiverQoSMonitorPublicKey("valid key");
 		
 		final CloudWithRelaysResponseDTO cloudResponse = new CloudWithRelaysResponseDTO();
-		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, true, false, RelayType.GATEWAY_RELAY, null, null)));
+		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, null, true, false, RelayType.GATEWAY_RELAY, null, null)));
 
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		when(relayClient.createConnection(anyString(), anyInt(), anyBoolean())).thenThrow(JMSException.class);
@@ -705,7 +705,7 @@ public class RelayTestServiceTest {
 		request.setReceiverQoSMonitorPublicKey("valid key");
 		
 		final CloudWithRelaysResponseDTO cloudResponse = new CloudWithRelaysResponseDTO();
-		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, true, false, RelayType.GATEWAY_RELAY, null, null)));
+		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, null, true, false, RelayType.GATEWAY_RELAY, null, null)));
 
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		when(relayClient.createConnection(anyString(), anyInt(), anyBoolean())).thenReturn(getTestSession());
@@ -746,7 +746,7 @@ public class RelayTestServiceTest {
 		request.setReceiverQoSMonitorPublicKey("valid key");
 		
 		final CloudWithRelaysResponseDTO cloudResponse = new CloudWithRelaysResponseDTO();
-		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, true, false, RelayType.GATEWAY_RELAY, null, null)));
+		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, null, true, false, RelayType.GATEWAY_RELAY, null, null)));
 
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		when(relayClient.createConnection(anyString(), anyInt(), anyBoolean())).thenReturn(getTestSession());
@@ -779,14 +779,15 @@ public class RelayTestServiceTest {
 		request.setReceiverQoSMonitorPublicKey("valid key");
 		
 		final CloudWithRelaysResponseDTO cloudResponse = new CloudWithRelaysResponseDTO();
-		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, true, false, RelayType.GATEWAY_RELAY, null, null)));
+		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, null, true, false, RelayType.GATEWAY_RELAY, null, null)));
 
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		when(relayClient.createConnection(anyString(), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		final SenderSideRelayTestThread testThreadDoNothing = getSenderSideTestThreadDoNothing();
 		when(threadFactory.createSenderSideThread(any(Session.class), any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyString(), anyString())).thenReturn(testThreadDoNothing);  
 		final MessageProducer testProducer = getTestProducer();
-		when(relayClient.initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), anyString(), anyString())).thenReturn(new ConsumerSideRelayInfo(testProducer, testProducer));
+		final MessageConsumer testConsumer = getTestConsumer();
+		when(relayClient.initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), anyString(), anyString())).thenReturn(new ConsumerSideRelayInfo(testProducer, testProducer, testConsumer, testConsumer));
 
 		relayTestService.initRelayTest(request);
 		
@@ -910,7 +911,7 @@ public class RelayTestServiceTest {
 		request.setSenderQoSMonitorPublicKey("valid key");
 		
 		final CloudWithRelaysResponseDTO cloudResponse = new CloudWithRelaysResponseDTO();
-		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4201, true, false, RelayType.GATEWAY_RELAY, null, null)));
+		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4201, null, true, false, RelayType.GATEWAY_RELAY, null, null)));
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		
 		relayTestService.joinRelayTest(request);
@@ -936,7 +937,7 @@ public class RelayTestServiceTest {
 		request.setSenderQoSMonitorPublicKey("valid key");
 		
 		final CloudWithRelaysResponseDTO cloudResponse = new CloudWithRelaysResponseDTO();
-		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, true, false, RelayType.GATEWAY_RELAY, null, null)));
+		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, null, true, false, RelayType.GATEWAY_RELAY, null, null)));
 
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		when(qosDBService.getOrCreateInterRelayMeasurement(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(QoSMeasurementType.class))).thenReturn(new QoSInterRelayMeasurement());
@@ -971,7 +972,7 @@ public class RelayTestServiceTest {
 		request.setSenderQoSMonitorPublicKey("valid key");
 		
 		final CloudWithRelaysResponseDTO cloudResponse = new CloudWithRelaysResponseDTO();
-		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, true, false, RelayType.GATEWAY_RELAY, null, null)));
+		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, null, true, false, RelayType.GATEWAY_RELAY, null, null)));
 
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		when(qosDBService.getOrCreateInterRelayMeasurement(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(QoSMeasurementType.class))).thenReturn(new QoSInterRelayMeasurement());
@@ -1012,7 +1013,7 @@ public class RelayTestServiceTest {
 		request.setSenderQoSMonitorPublicKey("valid key");
 		
 		final CloudWithRelaysResponseDTO cloudResponse = new CloudWithRelaysResponseDTO();
-		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, true, false, RelayType.GATEWAY_RELAY, null, null)));
+		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, null, true, false, RelayType.GATEWAY_RELAY, null, null)));
 
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		when(qosDBService.getOrCreateInterRelayMeasurement(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(QoSMeasurementType.class))).thenReturn(new QoSInterRelayMeasurement());
@@ -1046,7 +1047,7 @@ public class RelayTestServiceTest {
 		request.setSenderQoSMonitorPublicKey("valid key");
 		
 		final CloudWithRelaysResponseDTO cloudResponse = new CloudWithRelaysResponseDTO();
-		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, true, false, RelayType.GATEWAY_RELAY, null, null)));
+		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, null, true, false, RelayType.GATEWAY_RELAY, null, null)));
 
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		when(qosDBService.getOrCreateInterRelayMeasurement(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(QoSMeasurementType.class))).thenReturn(new QoSInterRelayMeasurement());
@@ -1054,7 +1055,8 @@ public class RelayTestServiceTest {
 		final ReceiverSideRelayTestThread testThreadDoNothing = getReceiverSideTestThreadDoNothing();
 		when(threadFactory.createReceiverSideThread(any(Session.class), any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyString())).thenReturn(testThreadDoNothing);  
 		final MessageProducer testProducer = getTestProducer();
-		when(relayClient.initializeProviderSideRelay(any(Session.class), any(MessageListener.class))).thenReturn(new ProviderSideRelayInfo("peer", "queue", testProducer, testProducer));
+		final MessageConsumer testConsumer = getTestConsumer();
+		when(relayClient.initializeProviderSideRelay(any(Session.class), any(MessageListener.class))).thenReturn(new ProviderSideRelayInfo("peer", "queue", testProducer, testProducer, testConsumer, testConsumer));
 
 		final PublicKey publicKey = getTestPublicKey();
 		ReflectionTestUtils.setField(relayTestService, "myPublicKey", publicKey);
@@ -1204,6 +1206,8 @@ public class RelayTestServiceTest {
 			public ConsumerSideRelayInfo initializeConsumerSideRelay(final Session session, final MessageListener listener, final String peerName, final String queueId) throws JMSException { return null; }
 			public void handleCloseControlMessage(final Message msg, final Session session) throws JMSException {}
 			public byte[] getBytesFromMessage(final Message msg, final PublicKey peerPublicKey) throws JMSException { return null; }
+			public void unsubscribeFromQueues(final MessageConsumer consumer, final MessageConsumer consumerControl) throws JMSException {}
+			public boolean destroyQueues(final Session session, final MessageProducer producer, final MessageProducer producerControl) throws JMSException { return false; }
 		};
 	}
 	
@@ -1307,6 +1311,19 @@ public class RelayTestServiceTest {
 			public Destination getDestination() throws JMSException { return null; }
 			public int getDeliveryMode() throws JMSException { return 0; }
 			public long getDeliveryDelay() throws JMSException { return 0; }
+			public void close() throws JMSException {}
+		};
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MessageConsumer getTestConsumer() {
+		return new MessageConsumer() {
+			public void setMessageListener(final MessageListener listener) throws JMSException {}
+			public Message receiveNoWait() throws JMSException { return null; }
+			public Message receive(final long timeout) throws JMSException { return null; }
+			public Message receive() throws JMSException { return null; }
+			public String getMessageSelector() throws JMSException { return null; }
+			public MessageListener getMessageListener() throws JMSException { return null; }
 			public void close() throws JMSException {}
 		};
 	}

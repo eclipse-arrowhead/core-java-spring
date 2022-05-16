@@ -14,12 +14,15 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import org.springframework.util.Assert;
-
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
+
+import org.springframework.util.Assert;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SystemQueryFormDTO implements Serializable {
 
@@ -34,17 +37,14 @@ public class SystemQueryFormDTO implements Serializable {
 	private Integer versionRequirement; // if specified version must match
 	private Integer minVersionRequirement; // if specified version must be equals or higher; ignored if versionRequirement is specified
 	private Integer maxVersionRequirement; // if specified version must be equals or lower; ignored if versionRequirement is specified
+	private List<AddressType> addressTypeRequirements; // if specified one of the address types must match
 
 	private boolean pingProviders = false;
 
-
 	//=================================================================================================
 	// methods
-	//-------------------------------------------------------------------------------------------------
 
-	public SystemQueryFormDTO() {}
 	//-------------------------------------------------------------------------------------------------
-
 	public String getSystemNameRequirements() { return systemNameRequirements; }
 	public String getDeviceNameRequirements() { return deviceNameRequirements; }
 	public Map<String,String> getMetadataRequirements() { return metadataRequirements; }
@@ -52,8 +52,9 @@ public class SystemQueryFormDTO implements Serializable {
 	public Integer getMinVersionRequirement() { return minVersionRequirement; }
 	public Integer getMaxVersionRequirement() { return maxVersionRequirement; }
 	public boolean getPingProviders() { return pingProviders; }
-	//-------------------------------------------------------------------------------------------------
+	public List<AddressType> getAddressTypeRequirements() { return addressTypeRequirements; }
 
+	//-------------------------------------------------------------------------------------------------
 	public void setSystemNameRequirements(final String systemNameRequirements) { this.systemNameRequirements = systemNameRequirements; }
 	public void setDeviceNameRequirements(final String deviceNameRequirements) { this.deviceNameRequirements = deviceNameRequirements; }
 	public void setMetadataRequirements(final Map<String,String> metadataRequirements) { this.metadataRequirements = metadataRequirements; }
@@ -61,24 +62,22 @@ public class SystemQueryFormDTO implements Serializable {
 	public void setMinVersionRequirement(final Integer minVersionRequirement) { this.minVersionRequirement = minVersionRequirement; }
 	public void setMaxVersionRequirement(final Integer maxVersionRequirement) { this.maxVersionRequirement = maxVersionRequirement; }
 	public void setPingProviders(final boolean pingProviders) { this.pingProviders = pingProviders; }
-
+	public void setAddressTypeRequirements(final List<AddressType> addressTypeRequirements) { this.addressTypeRequirements = addressTypeRequirements; }
+	
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", SystemQueryFormDTO.class.getSimpleName() + "[", "]")
-				.add("systemNameRequirements='" + systemNameRequirements + "'")
-				.add("deviceNameRequirements='" + deviceNameRequirements + "'")
-				.add("metadataRequirements=" + metadataRequirements)
-				.add("versionRequirement=" + versionRequirement)
-				.add("minVersionRequirement=" + minVersionRequirement)
-				.add("maxVersionRequirement=" + maxVersionRequirement)
-				.add("pingProviders=" + pingProviders)
-				.toString();
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
 	}
+
 	//=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-
 	private SystemQueryFormDTO(final Builder builder) {
 		this.systemNameRequirements = builder.systemNameRequirements;
 		this.deviceNameRequirements = builder.deviceNameRequirements;
@@ -86,13 +85,13 @@ public class SystemQueryFormDTO implements Serializable {
 		this.versionRequirement = builder.versionRequirement;
 		this.minVersionRequirement = builder.minVersionRequirement;
 		this.maxVersionRequirement = builder.maxVersionRequirement;
+		this.addressTypeRequirements = builder.addressTypeRequirements;
 		this.pingProviders = builder.pingProviders;
 	}
+
 	//=================================================================================================
 	// nested classes
-	//-------------------------------------------------------------------------------------------------
 	public static class Builder {
-
 
 		//=================================================================================================
 		// members
@@ -103,6 +102,7 @@ public class SystemQueryFormDTO implements Serializable {
 		private Integer versionRequirement; 
 		private Integer minVersionRequirement; 
 		private Integer maxVersionRequirement; 
+		private List<AddressType> addressTypeRequirements; 
 		
 		private boolean pingProviders = false;
 
@@ -114,7 +114,6 @@ public class SystemQueryFormDTO implements Serializable {
 			Assert.isTrue(systemNameRequirements != null && !systemNameRequirements.isBlank(), "systemNameRequirements is null or blank.");
 			this.systemNameRequirements = systemNameRequirements;
 		}
-
 
 		//-------------------------------------------------------------------------------------------------
 		public Builder deviceName(final String deviceNameRequirements) {
@@ -156,6 +155,18 @@ public class SystemQueryFormDTO implements Serializable {
 		//-------------------------------------------------------------------------------------------------
 		public Builder pingProviders(final boolean pingProviders) {
 			this.pingProviders = pingProviders;
+			return this;
+		}
+		
+		//-------------------------------------------------------------------------------------------------
+		public Builder providerAddressTypes(final AddressType... addressTypes) {
+			this.addressTypeRequirements = addressTypes == null || addressTypes.length == 0 ? null : List.of(addressTypes);
+			return this;
+		}
+		
+		//-------------------------------------------------------------------------------------------------
+		public Builder providerAddressTypes(final List<AddressType> addressTypes) {
+			this.addressTypeRequirements = addressTypes;
 			return this;
 		}
 		

@@ -17,6 +17,9 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class SystemDescriberDTO implements Serializable {
 	
 	//=================================================================================================
@@ -45,5 +48,15 @@ public class SystemDescriberDTO implements Serializable {
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setSystemName(final String systemName) { this.systemName = systemName; }
-	public void setMetadata(final  Map<String,String> metadata) { this.metadata = metadata; }	
+	public void setMetadata(final  Map<String,String> metadata) { this.metadata = metadata; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

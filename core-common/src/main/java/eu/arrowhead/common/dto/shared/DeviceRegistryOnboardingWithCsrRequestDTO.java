@@ -14,12 +14,13 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import java.io.Serializable;
 import java.util.Map;
-import java.util.StringJoiner;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonInclude(Include.NON_NULL)
 public class DeviceRegistryOnboardingWithCsrRequestDTO extends DeviceRegistryRequestDTO implements Serializable {
@@ -28,13 +29,14 @@ public class DeviceRegistryOnboardingWithCsrRequestDTO extends DeviceRegistryReq
     // members
 
     private static final long serialVersionUID = -635438605292398404L;
+    
     private String certificateSigningRequest;
 
     //=================================================================================================
     // methods
 
-    public DeviceRegistryOnboardingWithCsrRequestDTO() {
-    }
+    //-------------------------------------------------------------------------------------------------
+	public DeviceRegistryOnboardingWithCsrRequestDTO() {}
 
     //-------------------------------------------------------------------------------------------------
     public DeviceRegistryOnboardingWithCsrRequestDTO(final DeviceRequestDTO device, final String endOfValidity, final String certificateSigningRequest) {
@@ -58,19 +60,18 @@ public class DeviceRegistryOnboardingWithCsrRequestDTO extends DeviceRegistryReq
     }
 
     //-------------------------------------------------------------------------------------------------
-    public String getCertificateSigningRequest() {
-        return certificateSigningRequest;
-    }
+    public String getCertificateSigningRequest() { return certificateSigningRequest; }
 
-    public void setCertificateSigningRequest(final String certificateSigningRequest) {
-        this.certificateSigningRequest = certificateSigningRequest;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public void setCertificateSigningRequest(final String certificateSigningRequest) { this.certificateSigningRequest = certificateSigningRequest; }
 
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", DeviceRegistryOnboardingWithCsrRequestDTO.class.getSimpleName() + "[", "]")
-                .add("certificateSigningRequest=" + certificateSigningRequest)
-                .add("parent=" + super.toString())
-                .toString();
-    }
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

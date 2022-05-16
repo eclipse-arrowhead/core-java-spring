@@ -28,6 +28,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
+import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.common.dto.shared.AddressType;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 
 @RunWith(SpringRunner.class)
@@ -437,6 +439,87 @@ public class RegistryUtilsTest {
 		
 		Assert.assertEquals(expectedList, providedServices);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testNormalizeAddressTypesNullList() {
+		Assert.assertEquals(0, RegistryUtils.normalizeAddressTypes(null).size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testNormalizeAddressTypesEmptyList() {
+		Assert.assertEquals(0, RegistryUtils.normalizeAddressTypes(List.of()).size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void  testNormalizeAddressTypesRemoveNull() {
+		Assert.assertEquals(0, RegistryUtils.normalizeAddressTypes(Arrays.asList((AddressType)null)).size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
+	public void testFilterOnProviderAddressTypeProvidedServicesNullOrEmpty() {
+		RegistryUtils.filterOnProviderAddressType(null, List.of(AddressType.IPV6)); // it just shows there is no exception if it called with null first parameter
+		RegistryUtils.filterOnProviderAddressType(List.of(), List.of(AddressType.IPV6)); // it just shows there is no exception if it called with empty first parameter
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFilterOnProviderAddressTypeAddressTypeListNullOrEmpty() {
+		final ServiceRegistry sr = new ServiceRegistry();
+		final List<ServiceRegistry> providedServices = List.of(sr);
+		final List<ServiceRegistry> expectedList = List.of(sr);
+		
+		RegistryUtils.filterOnProviderAddressType(providedServices, null); // it just shows there is no exception and no changes if it called with null second parameter
+		
+		Assert.assertEquals(expectedList, providedServices);
+		
+		RegistryUtils.filterOnProviderAddressType(providedServices, List.of()); // it just shows there is no exception and no changes if it called with empty second parameter
+		
+		Assert.assertEquals(expectedList, providedServices);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFilterOnProviderAddressTypeNoMatch() {
+		final List<ServiceRegistry> providedServices = getProvidedServices();
+		
+		Assert.assertEquals(3, providedServices.size());
+		
+		RegistryUtils.filterOnProviderAddressType(providedServices, List.of(AddressType.IPV6));
+		
+		Assert.assertEquals(0, providedServices.size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFilterOnProviderAddressTypeOneMatch() {
+		final List<ServiceRegistry> providedServices = getProvidedServices();
+		
+		Assert.assertEquals(3, providedServices.size());
+		
+		RegistryUtils.filterOnProviderAddressType(providedServices, List.of(AddressType.IPV4));
+		
+		Assert.assertEquals(1, providedServices.size());
+		Assert.assertEquals(2, providedServices.get(0).getId());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFilterOnProviderAddressTypeTwoMatches() {
+		final List<ServiceRegistry> providedServices = getProvidedServices();
+		
+		Assert.assertEquals(3, providedServices.size());
+		
+		RegistryUtils.filterOnProviderAddressType(providedServices, List.of(AddressType.IPV4, AddressType.HOSTNAME));
+		
+		Assert.assertEquals(2, providedServices.size());
+		Assert.assertEquals(2, providedServices.get(0).getId());
+		Assert.assertEquals(3, providedServices.get(1).getId());
+	}
  	
 	//=================================================================================================
 	// assistant methods
@@ -458,6 +541,7 @@ public class RegistryUtilsTest {
 		srEntry1.setSecure(ServiceSecurityType.TOKEN);
 		srEntry1.setMetadata(null);
 		srEntry1.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(srEntry1, intf1));
+		srEntry1.setSystem(new System("system", "something", null, 1234, null, null));
 		
 		final ServiceRegistry srEntry2 = new ServiceRegistry();
 		srEntry2.setId(2);
@@ -465,6 +549,7 @@ public class RegistryUtilsTest {
 		srEntry2.setSecure(ServiceSecurityType.CERTIFICATE);
 		srEntry2.setMetadata("key=value, otherkey=othervalue");
 		srEntry2.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(srEntry2, intf3));
+		srEntry2.setSystem(new System("system2", "127.0.0.1", AddressType.IPV4, 1234, null, null));
 		
 		final ServiceRegistry srEntry3 = new ServiceRegistry();
 		srEntry3.setId(3);
@@ -473,6 +558,7 @@ public class RegistryUtilsTest {
 		srEntry3.setMetadata("key=value2");
 		srEntry3.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(srEntry3, intf1));
 		srEntry3.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(srEntry3, intf2));
+		srEntry3.setSystem(new System("system3", "localhost", AddressType.HOSTNAME, 1234, null, null));
 		
 		return new ArrayList<>(List.of(srEntry1, srEntry2, srEntry3));
 	}

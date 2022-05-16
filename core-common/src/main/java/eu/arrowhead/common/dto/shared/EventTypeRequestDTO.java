@@ -16,6 +16,9 @@ package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class EventTypeRequestDTO implements Serializable {
 
 	//=================================================================================================
@@ -41,4 +44,14 @@ public class EventTypeRequestDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setEventTypeName(final String eventTypeName) { this.eventTypeName = eventTypeName; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

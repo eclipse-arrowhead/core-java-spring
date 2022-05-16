@@ -15,27 +15,46 @@
 package eu.arrowhead.common.dto.internal;
 
 import javax.validation.constraints.NotBlank;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.Serializable;
 
 public class TrustedKeyCheckRequestDTO implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	//=================================================================================================
+	// members
 
-    @NotBlank(message = "The publicKey is mandatory")
+	private static final long serialVersionUID = -3004992813887425759L;
+	
+	@NotBlank(message = "The publicKey is mandatory")
     private String publicKey;
+	
+	//=================================================================================================
+	// methods
 
-    public TrustedKeyCheckRequestDTO() {
-    }
+    //-------------------------------------------------------------------------------------------------
+	public TrustedKeyCheckRequestDTO() {}
 
-    public TrustedKeyCheckRequestDTO(String publicKey) {
+    //-------------------------------------------------------------------------------------------------
+	public TrustedKeyCheckRequestDTO(final String publicKey) {
         this.publicKey = publicKey;
     }
 
-    public String getPublicKey() {
-        return publicKey;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public String getPublicKey() { return publicKey; }
 
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public void setPublicKey(final String publicKey) { this.publicKey = publicKey; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

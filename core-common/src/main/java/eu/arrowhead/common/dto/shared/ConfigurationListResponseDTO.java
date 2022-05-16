@@ -17,10 +17,11 @@ package eu.arrowhead.common.dto.shared;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonInclude(Include.NON_NULL)
 public class ConfigurationListResponseDTO implements Serializable {
@@ -57,12 +58,13 @@ public class ConfigurationListResponseDTO implements Serializable {
     public void setCount(final long count) { this.count = count; }
     public void setData(final List<ConfigurationResponseDTO> data) { this.data = data; }
     
-    //-------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", ConfigurationListResponseDTO.class.getSimpleName() + "[", "]")
-                .add("count=" + count)
-                .add("data=" + data)
-				.toString();
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
 	}
 }

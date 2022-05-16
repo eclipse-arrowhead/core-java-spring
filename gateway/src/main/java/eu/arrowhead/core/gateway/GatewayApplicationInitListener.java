@@ -32,6 +32,8 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.gateway.service.ActiveSessionDTO;
 import eu.arrowhead.core.gateway.service.GatewayService;
+import eu.arrowhead.core.gateway.thread.ConsumerSideServerSocketThread;
+import eu.arrowhead.core.gateway.thread.ProviderSideSocketThreadHandler;
 
 @Component
 public class GatewayApplicationInitListener extends ApplicationInitListener {
@@ -51,6 +53,18 @@ public class GatewayApplicationInitListener extends ApplicationInitListener {
 	//-------------------------------------------------------------------------------------------------
 	@Bean(name = CoreCommonConstants.GATEWAY_ACTIVE_SESSION_MAP)
 	public ConcurrentMap<String,ActiveSessionDTO> getActiveSessions() {
+		return new ConcurrentHashMap<>();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean(name = CoreCommonConstants.GATEWAY_ACTIVE_CONSUMER_SIDE_SOCKET_THREAD_MAP)
+	public ConcurrentMap<String,ConsumerSideServerSocketThread> getConsumerSideSocketThreads() {
+		return new ConcurrentHashMap<>();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean(name = CoreCommonConstants.GATEWAY_ACTIVE_PROVIDER_SIDE_SOCKET_THREAD_HANDLER_MAP)
+	public ConcurrentMap<String,ProviderSideSocketThreadHandler> getProviderSideSocketThreadHandlers() {
 		return new ConcurrentHashMap<>();
 	}
 	
