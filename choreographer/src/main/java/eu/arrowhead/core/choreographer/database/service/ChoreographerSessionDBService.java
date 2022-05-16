@@ -23,6 +23,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.ExampleMatcher.StringMatcher;
@@ -52,10 +53,10 @@ import eu.arrowhead.common.database.repository.ChoreographerSessionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerSessionStepRepository;
 import eu.arrowhead.common.database.repository.ChoreographerStepRepository;
 import eu.arrowhead.common.database.repository.ChoreographerWorklogRepository;
-import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionListResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerSessionStatus;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionStepListResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerWorklogListResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -88,6 +89,9 @@ public class ChoreographerSessionDBService {
 	@Autowired
 	private ChoreographerWorklogRepository worklogRepository;
 	
+	@Value(CoreCommonConstants.$CHOREOGRAPHER_MAX_PLAN_ITERATION_WD)
+	private Long maxIteration;
+	
     private final Logger logger = LogManager.getLogger(ChoreographerSessionDBService.class);
 
 	
@@ -96,20 +100,25 @@ public class ChoreographerSessionDBService {
 	
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public ChoreographerSession initiateSession(final long planId, final String notifyUri) {
+    public ChoreographerSession initiateSession(final long planId, final long quantity, final String notifyUri) {
         logger.debug("initiateSession started...");
+        Assert.isTrue(quantity > 0, "quantity must be positive");
         
         try {
-      	  final Optional<ChoreographerPlan> optional = planRepository.findById(planId);
-      	  if (optional.isEmpty()) {
+      	  final Optional<ChoreographerPlan> planOpt = planRepository.findById(planId);
+      	  if (planOpt.isEmpty()) {
       		  worklogAndThrow("Initiating plan has been failed", new InvalidParameterException("Plan with id " + planId + " not exists"));
       	  }
+      	  final ChoreographerPlan plan = planOpt.get();
       	  
-      	  final String _notifyUri = UriComponentsBuilder.fromUriString(notifyUri).build().toUriString();
-      	  final ChoreographerPlan plan = optional.get();
-      	  final ChoreographerSession session = sessionRepository.saveAndFlush(new ChoreographerSession(plan, ChoreographerSessionStatus.INITIATED, _notifyUri));
+      	  if (quantity > maxIteration) {
+      		worklogAndThrow(plan.getName(), null, null, "Initiating plan has been failed", new InvalidParameterException("Requested quantity (" + quantity + ") is more than allowed (" + maxIteration + ")"));
+      	  }
       	  
-      	  worklog(plan.getName(), session.getId(), "New session has been initiated", null);
+      	  final String _notifyUri = Utilities.isEmpty(notifyUri) ? null : UriComponentsBuilder.fromUriString(notifyUri).build().toUriString();
+      	  final ChoreographerSession session = sessionRepository.saveAndFlush(new ChoreographerSession(plan, ChoreographerSessionStatus.INITIATED, quantity, _notifyUri));
+      	  
+      	  worklog(plan.getName(), session.getId(), session.getExecutionNumber(), "New session has been initiated", null);
       	  return session;
       
         } catch (final InvalidParameterException ex) {
@@ -128,18 +137,18 @@ public class ChoreographerSessionDBService {
         Assert.notNull(status, "ChoreographerSessionStatus is null");
 
         try {
-      	  final Optional<ChoreographerSession> optional = sessionRepository.findById(sessionId);
-      	  if (optional.isEmpty()) {
+      	  final Optional<ChoreographerSession> sessionOpt = sessionRepository.findById(sessionId);
+      	  if (sessionOpt.isEmpty()) {
       		  worklogAndThrow("Session status change has been failed", new InvalidParameterException("Session with id " + sessionId + " not exists"));
       	  }
       	  
-      	  ChoreographerSession session = optional.get();
+      	  ChoreographerSession session = sessionOpt.get();
       	  if (status != session.getStatus()) {
       		  session.setStatus(status);
       		  session = sessionRepository.saveAndFlush(session);
       		  
       		  final String exception = status == ChoreographerSessionStatus.ABORTED ? errorMessage : null;
-      		  worklog(session.getPlan().getName(), session.getId(), "Session status has been changed to " + status, exception);
+      		  worklog(session.getPlan().getName(), session.getId(), session.getExecutionNumber(), "Session status has been changed to " + status, exception);
       	  }
 
       	  return session;
@@ -154,6 +163,69 @@ public class ChoreographerSessionDBService {
     
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
+    public ChoreographerSession increaseSessionQuantityDone(final long sessionId) {
+    	logger.debug("increaseSessionQuantityDone started...");
+    	
+    	try {
+    		final Optional<ChoreographerSession> sessionOpt = sessionRepository.findById(sessionId);
+    		if (sessionOpt.isEmpty()) {
+    			worklogAndThrow("Session quantityDone change has been failed", new InvalidParameterException("Session with id " + sessionId + " not exists"));
+        	}
+			
+    		ChoreographerSession session = sessionOpt.get();
+    		final long done = session.getQuantityDone() + 1;
+    		if (done > session.getQuantityGoal()) {
+    			worklogAndThrow(session.getPlan().getName(), session.getId(), session.getExecutionNumber(), "Session quantityDone is invalid", new InvalidParameterException("Session quantityDone is greater than quantityGoal"));
+			}
+    		session.setQuantityDone(done);
+    		session = sessionRepository.saveAndFlush(session);
+    		
+    		worklog(session.getPlan().getName(), session.getId(), session.getExecutionNumber(), "Session quantityDone has been changed to " + done, null);
+    		return session;
+    		
+    	} catch (final InvalidParameterException ex) {
+            throw ex;
+            
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public ChoreographerSession increaseExecutionNumber(final long sessionId) {
+    	logger.debug("increaseExecutionNumber started...");
+    	
+    	try {
+    		final Optional<ChoreographerSession> sessionOpt = sessionRepository.findById(sessionId);
+    		if (sessionOpt.isEmpty()) {
+    			worklogAndThrow("Session executionNumber change has been failed", new InvalidParameterException("Session with id " + sessionId + " not exists"));
+        	}
+			
+    		ChoreographerSession session = sessionOpt.get();
+    		final long executionNum = session.getExecutionNumber() + 1;
+    		if (executionNum > session.getQuantityGoal()) {
+    			worklogAndThrow(session.getPlan().getName(), session.getId(), session.getExecutionNumber(), "Session executionNumber is invalid", new InvalidParameterException("Session executionNumber is greater than quantityGoal"));
+			}
+    		session.setExecutionNumber(executionNum);
+    		session = sessionRepository.saveAndFlush(session);
+    		
+    		worklog(session.getPlan().getName(), session.getId(), session.getExecutionNumber(), "Session executionNumber has been changed to " + executionNum, null);
+    		return session;
+    		
+    	} catch (final InvalidParameterException ex) {
+            throw ex;
+            
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
     public List<ChoreographerSessionStep> abortSession(final long sessionId, final String message) {
         logger.debug("abortSession started...");
 
@@ -164,7 +236,7 @@ public class ChoreographerSessionDBService {
       	  	}
       	  
       	  	final ChoreographerSession session = sessionOpt.get();
-      	  	worklog(session.getPlan().getName(), sessionId, "Session is aborting.", message);
+      	  	worklog(session.getPlan().getName(), sessionId, session.getExecutionNumber(), "Session is aborting.", message);
       	  	changeSessionStatus(sessionId, ChoreographerSessionStatus.ABORTED, message);
       	  	
       	  	final List<ChoreographerSessionStep> result = new ArrayList<>();
@@ -190,11 +262,11 @@ public class ChoreographerSessionDBService {
 		logger.debug("getSessionById started...");
 	
 		try {
-			final Optional<ChoreographerSession> optional = sessionRepository.findById(id);
-			if (optional.isEmpty()) {
+			final Optional<ChoreographerSession> sessionOpt = sessionRepository.findById(id);
+			if (sessionOpt.isEmpty()) {
 				throw new InvalidParameterException("Session with id " + id + " not exists");
 			}
-			return optional.get();
+			return sessionOpt.get();
 			
 	    } catch (final InvalidParameterException ex) {
 	    	throw ex;
@@ -218,11 +290,11 @@ public class ChoreographerSessionDBService {
 			final ChoreographerSession schema = new ChoreographerSession();
 			schema.setStatus(status);
 			if (planId != null) {
-				final Optional<ChoreographerPlan> optional = planRepository.findById(planId);
-				if (optional.isEmpty()) {
+				final Optional<ChoreographerPlan> planOpt = planRepository.findById(planId);
+				if (planOpt.isEmpty()) {
 					throw new InvalidParameterException("Plan with id " + planId + " not exists"); 
 				}
-				schema.setPlan(optional.get());
+				schema.setPlan(planOpt.get());
 			}
 			
 			final ExampleMatcher matcher = ExampleMatcher.matching()
@@ -266,19 +338,19 @@ public class ChoreographerSessionDBService {
 			
 			final Optional<ChoreographerStep> stepOpt = stepRepository.findById(stepId);
 			if (stepOpt.isEmpty()) {
-				worklogAndThrow(plan.getName(), session.getId(), "Session step registration has been failed", new InvalidParameterException("Step with id " + stepId + " not exists"));
+				worklogAndThrow(plan.getName(), session.getId(), session.getExecutionNumber(), "Session step registration has been failed", new InvalidParameterException("Step with id " + stepId + " not exists"));
 			}
 			final ChoreographerStep step = stepOpt.get();
 			
 			final Optional<ChoreographerExecutor> executorOpt = executorRepository.findById(executorId);
 			if (executorOpt.isEmpty()) {
-				worklogAndThrow(plan.getName(), session.getId(), "Session step registration has been failed", new InvalidParameterException("Executor with id " + executorId + " not exists"));
+				worklogAndThrow(plan.getName(), session.getId(), session.getExecutionNumber(), "Session step registration has been failed", new InvalidParameterException("Executor with id " + executorId + " not exists"));
 			}
 			final ChoreographerExecutor executor = executorOpt.get();
 			
 			final ChoreographerSessionStep sessionStep = sessionStepRepository.saveAndFlush(new ChoreographerSessionStep(session, step, executor, ChoreographerSessionStepStatus.WAITING,
-																							"New session step has been registrated"));
-			worklog(plan.getName(), step.getAction().getName(), step.getName(), session.getId(), "New session step has been registrated with id " + sessionStep.getId(), null);
+																							session.getExecutionNumber(), "New session step has been registrated"));
+			worklog(plan.getName(), step.getAction().getName(), step.getName(), session.getId(), session.getExecutionNumber(), "New session step has been registrated with id " + sessionStep.getId(), null);
 			return sessionStep;
         	
         } catch (final InvalidParameterException ex) {
@@ -300,9 +372,12 @@ public class ChoreographerSessionDBService {
     			worklogAndThrow("Session step status change has been failed", new InvalidParameterException("Session with id " + sessionId + " not exists"));
     		}
     		
-    		final Optional<ChoreographerSessionStep> sessionStepOpt = sessionStepRepository.findBySessionAndStep(sessionOpt.get(), step);
+    		final Optional<ChoreographerSessionStep> sessionStepOpt = sessionStepRepository.findBySessionAndStepAndExecutionNumber(sessionOpt.get(), step, sessionOpt.get().getExecutionNumber());
 			if (sessionStepOpt.isEmpty()) {
-				worklogAndThrow("Session step status change has been failed", new InvalidParameterException("Session step with session id " + sessionId + " and step id " + step.getId() + " not exists"));
+				worklogAndThrow("Session step status change has been failed", new InvalidParameterException("Session step with session id " + sessionId +
+																											" and step id " + step.getId() +
+																											" and execution number " + sessionOpt.get().getExecutionNumber() +
+																											" not exists"));
 			}
     		
 			return changeSessionStepStatus(sessionStepOpt.get().getId(), status, message);
@@ -322,20 +397,22 @@ public class ChoreographerSessionDBService {
         Assert.isTrue(!Utilities.isEmpty(message), "message is empty");
         
         try {
-			final Optional<ChoreographerSessionStep> optional = sessionStepRepository.findById(sessionStepId);
-			if (optional.isEmpty()) {
+			final Optional<ChoreographerSessionStep> sessionStepOpt = sessionStepRepository.findById(sessionStepId);
+			if (sessionStepOpt.isEmpty()) {
 				worklogAndThrow("Session step status change has been failed", new InvalidParameterException("Session step with id " + sessionStepId + " not exists"));
 			}
-			ChoreographerSessionStep sessionStep = optional.get();
+			ChoreographerSessionStep sessionStep = sessionStepOpt.get();
 			
 			if (status != sessionStep.getStatus()) {
 				sessionStep.setStatus(status);
 				sessionStep.setMessage(message.trim());
 				
 				sessionStep = sessionStepRepository.saveAndFlush(sessionStep);
+				final ChoreographerSession session = sessionStep.getSession();
+				final ChoreographerStep step = sessionStep.getStep();
 				
 				final String exception = status == ChoreographerSessionStepStatus.ABORTED ? message : null;
-				worklog(sessionStep.getSession().getPlan().getName(), sessionStep.getStep().getAction().getName(), sessionStep.getStep().getName(), sessionStep.getSession().getId(),
+				worklog(session.getPlan().getName(), step.getAction().getName(), step.getName(), session.getId(), session.getExecutionNumber(),
 						"Session step (id: " + sessionStepId + ") status has been changed to " + status, exception);
 			}
 			
@@ -367,8 +444,10 @@ public class ChoreographerSessionDBService {
 			ChoreographerSessionStep sessionStep = sessionStepOpt.get();
 			sessionStep.setExecutor(executorOpt.get());
 			sessionStep = sessionStepRepository.saveAndFlush(sessionStep);
+			final ChoreographerSession session = sessionStep.getSession();
+			final ChoreographerStep step = sessionStep.getStep();
 			
-			worklog(sessionStep.getSession().getPlan().getName(), sessionStep.getStep().getAction().getName(), sessionStep.getStep().getName(), sessionStep.getStep().getId(),
+			worklog(session.getPlan().getName(), step.getAction().getName(), step.getName(), step.getId(), session.getExecutionNumber(),
 					"The executor of session step (id: " + sessionStepId + ") has been changed to executor with id " + executorId, null);
 			
 			return sessionStep;
@@ -394,9 +473,9 @@ public class ChoreographerSessionDBService {
 				throw new InvalidParameterException("Step with id " + stepId + " not exists");
 			}
 			
-			final Optional<ChoreographerSessionStep> sessionStepOpt = sessionStepRepository.findBySessionAndStep(sessionOpt.get(), stepOpt.get());
+			final Optional<ChoreographerSessionStep> sessionStepOpt = sessionStepRepository.findBySessionAndStepAndExecutionNumber(sessionOpt.get(), stepOpt.get(), sessionOpt.get().getExecutionNumber());
 			if (sessionStepOpt.isEmpty()) {
-				throw new InvalidParameterException("Session step with session id " + sessionId + " and step id " + stepId + " not exists");
+				throw new InvalidParameterException("Session step with session id " + sessionId + " and step id " + stepId + " and execution number " + sessionOpt.get().getExecutionNumber() + " not exists");
 			}
 
 			return sessionStepOpt.get();
@@ -433,12 +512,12 @@ public class ChoreographerSessionDBService {
 		logger.debug("getSessionStepById started...");
 	
 		try {
-			final Optional<ChoreographerSessionStep> optional = sessionStepRepository.findById(id);
-			if (optional.isEmpty()) {
+			final Optional<ChoreographerSessionStep> sessionStepOpt = sessionStepRepository.findById(id);
+			if (sessionStepOpt.isEmpty()) {
 				throw new InvalidParameterException("Session step with id " + id + " not exists");
 			}
 
-			return optional.get();
+			return sessionStepOpt.get();
 	    } catch (final InvalidParameterException ex) {
 	    	throw ex;
 	    } catch (final Exception ex) {
@@ -452,12 +531,12 @@ public class ChoreographerSessionDBService {
 		logger.debug("getAllSessionStepBySessionId started...");
 	
 		try {
-			final Optional<ChoreographerSession> optional = sessionRepository.findById(sessionId);
-			if (optional.isEmpty()) {
+			final Optional<ChoreographerSession> sessionOpt = sessionRepository.findById(sessionId);
+			if (sessionOpt.isEmpty()) {
 				throw new InvalidParameterException("Session with id " + sessionId + " not exists");
 			}
 			
-			return sessionStepRepository.findAllBySession(optional.get());
+			return sessionStepRepository.findAllBySession(sessionOpt.get());
 	    } catch (final InvalidParameterException ex) {
 	    	throw ex;
 	    } catch (final Exception ex) {
@@ -505,11 +584,11 @@ public class ChoreographerSessionDBService {
 			final ChoreographerSessionStep schema = new ChoreographerSessionStep();
 			schema.setStatus(status);
 			if (sessionId != null) {
-				final Optional<ChoreographerSession> optional = sessionRepository.findById(sessionId);
-				if (optional.isEmpty()) {
+				final Optional<ChoreographerSession> sessionOpt = sessionRepository.findById(sessionId);
+				if (sessionOpt.isEmpty()) {
 					throw new InvalidParameterException("Session with id " + sessionId + " not exists"); 
 				}
-				schema.setSession(optional.get());
+				schema.setSession(sessionOpt.get());
 			}
 			
 			final ExampleMatcher matcher = ExampleMatcher.matching()
@@ -580,16 +659,16 @@ public class ChoreographerSessionDBService {
 	}
 	
    	//-------------------------------------------------------------------------------------------------  
-  	public void worklog(final String planName, final Long sessionId, final String message, final String exception) {
-		worklog(planName, null, null, sessionId, message, exception);
+  	public void worklog(final String planName, final Long sessionId, final Long executionNumber, final String message, final String exception) {
+		worklog(planName, null, null, sessionId, executionNumber, message, exception);
 	}
   
   	//-------------------------------------------------------------------------------------------------  
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-  	public void worklog(final String planName, final String actionName, final String stepName, final Long sessionId, final String message, final String exception) {
+  	public void worklog(final String planName, final String actionName, final String stepName, final Long sessionId, final Long executionNumber, final String message, final String exception) {
   		logger.debug("worklog started...");
 	  	try {
-	  		worklogRepository.saveAndFlush(new ChoreographerWorklog(planName, actionName, stepName, sessionId, message, exception));
+	  		worklogRepository.saveAndFlush(new ChoreographerWorklog(planName, actionName, stepName, sessionId, executionNumber, message, exception));
 		} catch (final Exception ex) {
 	    	logger.debug(ex.getMessage(), ex);
 	    }
@@ -597,28 +676,28 @@ public class ChoreographerSessionDBService {
   	
   	//-------------------------------------------------------------------------------------------------  
     public void worklogAndThrow(final String message, final Exception ex) throws Exception {
-		worklogAndThrow(null, null, null, null, message, ex);
+		worklogAndThrow(null, null, null, null, null, message, ex);
 	}
   	
   	//-------------------------------------------------------------------------------------------------  
-    public void worklogAndThrow(final String planName, final Long sessionId, final String message, final Exception ex) throws Exception {
-		worklogAndThrow(planName, null, null, sessionId, message, ex);
+    public void worklogAndThrow(final String planName, final Long sessionId, final Long executionNumber, final String message, final Exception ex) throws Exception {
+		worklogAndThrow(planName, null, null, sessionId, executionNumber, message, ex);
 	}
   	
   	//-------------------------------------------------------------------------------------------------
-    public void worklogAndThrow(final String planName, final String actionName, final String stepName, final Long sessionId, final String message, final Exception originalException) throws Exception {
+    public void worklogAndThrow(final String planName, final String actionName, final String stepName, final Long sessionId, final Long executionNumber, final String message, final Exception originalException) throws Exception {
   		logger.debug("worklogAndThrow started...");
-  		worklogException(planName, actionName, stepName, sessionId, message, originalException);
+  		worklogException(planName, actionName, stepName, sessionId, executionNumber, message, originalException);
   		
   		throw originalException;
   	}
     
   	//-------------------------------------------------------------------------------------------------
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void worklogException(final String planName, final String actionName, final String stepName, final Long sessionId, final String message, final Exception originalException) throws Exception {
+    public void worklogException(final String planName, final String actionName, final String stepName, final Long sessionId, final Long executionNumber, final String message, final Exception originalException) throws Exception {
   		logger.debug("worklogException started...");
   	  	try {
-  	  		worklogRepository.saveAndFlush(new ChoreographerWorklog(planName, actionName, stepName, sessionId, message, originalException.getClass().getSimpleName() + ": " + originalException.getMessage()));
+  	  		worklogRepository.saveAndFlush(new ChoreographerWorklog(planName, actionName, stepName, sessionId, executionNumber, message, originalException.getClass().getSimpleName() + ": " + originalException.getMessage()));
   		} catch (final Exception ex) {
   	    	logger.debug(ex.getMessage(), ex); 
   	    }

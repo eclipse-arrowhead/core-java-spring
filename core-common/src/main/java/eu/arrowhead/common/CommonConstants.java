@@ -332,7 +332,8 @@ public class CommonConstants {
 
 	public static final List<CoreSystemService> PUBLIC_CORE_SYSTEM_SERVICES = List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.AUTH_PUBLIC_KEY_SERVICE,
   			  																		  CoreSystemService.EVENT_PUBLISH_SERVICE, CoreSystemService.EVENT_SUBSCRIBE_SERVICE, CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE,
-																					  CoreSystemService.PROXY_SERVICE, CoreSystemService.HISTORIAN_SERVICE, CoreSystemService.CHOREOGRAPHER_SERVICE, CoreSystemService.TRANSLATOR_SERVICE,
+																					  CoreSystemService.PROXY_SERVICE, CoreSystemService.HISTORIAN_SERVICE, CoreSystemService.CHOREOGRAPHER_SERVICE, CoreSystemService.CHOREOGRAPHER_REGISTER_EXECUTOR_SERVICE,
+																					  CoreSystemService.CHOREOGRAPHER_UNREGISTER_EXECUTOR_SERVICE, CoreSystemService.TRANSLATOR_SERVICE,
 	       																			  CoreSystemService.CONFIGURATION_SERVICE, CoreSystemService.CONFIGURATION_RAW_SERVICE, CoreSystemService.TIME_SERVICE);
 
 	

@@ -35,7 +35,7 @@ import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"sessionId", "stepId"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"sessionId", "stepId", "executionNumber"}))
 public class ChoreographerSessionStep {
 
     //=================================================================================================
@@ -60,6 +60,9 @@ public class ChoreographerSessionStep {
     @Column(nullable = false, columnDefinition = "varchar(" + CoreDefaults.VARCHAR_BASIC + ")")
     @Enumerated(EnumType.STRING)
     private ChoreographerSessionStepStatus status;
+    
+    @Column(nullable = false)
+    private long executionNumber;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String message;
@@ -77,11 +80,13 @@ public class ChoreographerSessionStep {
     public ChoreographerSessionStep() {}
 
     //-------------------------------------------------------------------------------------------------
-	public ChoreographerSessionStep(final ChoreographerSession session, final ChoreographerStep step, final ChoreographerExecutor executor, final ChoreographerSessionStepStatus status, final String message) {
+	public ChoreographerSessionStep(final ChoreographerSession session, final ChoreographerStep step, final ChoreographerExecutor executor, final ChoreographerSessionStepStatus status,
+									final long executionNumber, final String message) {
     	this.session = session;
     	this.step = step;
     	this.executor = executor;
         this.status = status;
+        this.executionNumber = executionNumber;
         this.message = message;
     }
 
@@ -91,7 +96,8 @@ public class ChoreographerSessionStep {
     public ChoreographerStep getStep() { return step; }
     public ChoreographerExecutor getExecutor() { return executor; }
     public ChoreographerSessionStepStatus getStatus() { return status; }
-    public String getMessage() { return message; }
+    public long getExecutionNumber() { return executionNumber; }
+	public String getMessage() { return message; }
     public ZonedDateTime getStartedAt() { return startedAt; }
     public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
@@ -99,8 +105,9 @@ public class ChoreographerSessionStep {
     public void setId(final long id) { this.id = id; }
     public void setSession(final ChoreographerSession session) { this.session = session; }
     public void setStep(final ChoreographerStep step) { this.step = step; }
-    public void setExecutor(ChoreographerExecutor executor) { this.executor = executor;	}
+    public void setExecutor(final ChoreographerExecutor executor) { this.executor = executor;	}
     public void setStatus(final ChoreographerSessionStepStatus status) { this.status = status; }
+    public void setExecutionNumber(final long executionNumber) { this.executionNumber = executionNumber; }
     public void setMessage(final String message) { this.message = message; }
     public void setStartedAt(final ZonedDateTime startedAt) { this.startedAt = startedAt; }
     public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }

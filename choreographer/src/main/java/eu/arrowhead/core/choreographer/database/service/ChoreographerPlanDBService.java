@@ -28,7 +28,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
@@ -42,13 +41,13 @@ import eu.arrowhead.common.database.repository.ChoreographerPlanRepository;
 import eu.arrowhead.common.database.repository.ChoreographerSessionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerStepNextStepConnectionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerStepRepository;
-import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.ChoreographerActionRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanListResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerSessionStatus;
 import eu.arrowhead.common.dto.shared.ChoreographerStepRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -268,15 +267,19 @@ public class ChoreographerPlanDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<ChoreographerStep> collectStepsFromPlan(final ChoreographerPlan plan) {
+	public List<ChoreographerStep> collectStepsFromPlan(final long planId) {
 		logger.debug("collectStepsPlan started...");
-		Assert.notNull(plan, "Plan is null.");
 
 		try {
-			choreographerPlanRepository.refresh(plan);
-			final List<ChoreographerAction> actions = choreographerActionRepository.findByPlan(plan);
-			
+			final Optional<ChoreographerPlan> planOpt = choreographerPlanRepository.findById(planId);
+			if (planOpt.isEmpty()) {
+				throw new InvalidParameterException("Plan with id of '" + planId + "' doesn't exist!");
+			}
+			final List<ChoreographerAction> actions = choreographerActionRepository.findByPlan(planOpt.get());			
 			return actions.isEmpty() ? List.of() : choreographerStepRepository.findByActionIn(actions);
+			
+		} catch (final InvalidParameterException ex) {
+			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG, ex);
@@ -284,14 +287,19 @@ public class ChoreographerPlanDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<ChoreographerStep> getFirstSteps(final ChoreographerAction action) {
+	public List<ChoreographerStep> getFirstSteps(final long actionId) {
 		logger.debug("getFirstSteps started...");
-		Assert.notNull(action, "Action is null.");
 		
 		try {
-			choreographerActionRepository.refresh(action);
+			final Optional<ChoreographerAction> actionOpt = choreographerActionRepository.findById(actionId);
+			if (actionOpt.isEmpty()) {
+				throw new InvalidParameterException("Action with id of " + actionId + " doesn't exists");
+			}
 			
-			return choreographerStepRepository.findByActionAndFirstStep(action, true);
+			return choreographerStepRepository.findByActionAndFirstStep(actionOpt.get(), true);
+			
+		} catch (final InvalidParameterException ex) {
+			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG, ex);

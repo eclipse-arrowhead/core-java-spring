@@ -22,9 +22,11 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerExecutor;
@@ -68,6 +70,9 @@ public class ChoreographerPlanExecutionChecker {
 	@Autowired
 	private ExecutorSelector executorSelector;
 	
+	@Value(CoreCommonConstants.$CHOREOGRAPHER_MAX_PLAN_ITERATION_WD)
+	private Long maxIteration;
+	
 	private final Logger logger = LogManager.getLogger(ChoreographerPlanExecutionChecker.class);
 	
 	//=================================================================================================
@@ -79,31 +84,40 @@ public class ChoreographerPlanExecutionChecker {
 		
 		final List<String> errors = basicChecks(request);
 		final Long planId = request == null ? null : request.getPlanId();
+		final Long quantity = request == null ? null : request.getQuantity();
 		
-		return errors.isEmpty() ? checkPlanForExecution(request.isAllowInterCloud(), request.getPlanId(), false) : new ChoreographerRunPlanResponseDTO(planId, errors, false);
+		return errors.isEmpty() ? checkPlanForExecution(request.isAllowInterCloud(), request.getPlanId(), quantity, false) : new ChoreographerRunPlanResponseDTO(planId, quantity, errors, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerRunPlanResponseDTO checkPlanForExecution(final boolean allowInterCloud, final long planId) {
+	public ChoreographerRunPlanResponseDTO checkPlanForExecution(final boolean allowInterCloud, final long planId, final long quantity) {
 		logger.debug("checkPlanForExecution started...");
-		return checkPlanForExecution(allowInterCloud, planId, true);
+		return checkPlanForExecution(allowInterCloud, planId, quantity, true);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ChoreographerRunPlanResponseDTO checkPlanForExecution(final boolean allowInterCloud, final long planId, final boolean dependencyCheck) { 
+	public ChoreographerRunPlanResponseDTO checkPlanForExecution(final boolean allowInterCloud, final long planId, final long quantity, final boolean dependencyCheck) { 
 		logger.debug("checkPlanForExecution started...");
 		
 		ChoreographerPlan plan = null;
-		List<String> errors = new ArrayList<>();
+		final List<String> errors = new ArrayList<>();
 		
 		// existence check
 		try {
 			plan = planDBService.getPlanById(planId);
 		} catch (final InvalidParameterException ex) {
-			return new ChoreographerRunPlanResponseDTO(planId, List.of(ex.getMessage()), false);
+			return new ChoreographerRunPlanResponseDTO(planId, quantity, List.of(ex.getMessage()), false);
 		}
 		
-		final List<ChoreographerStep> steps = planDBService.collectStepsFromPlan(plan);
+		// iteration check
+		if (quantity <= 0) {
+			errors.add("Quantity must be greater than 0.");
+		}
+		if (quantity > maxIteration) {
+			errors.add("Quantity could not be greater than " + maxIteration + ".");
+		}
+		
+		final List<ChoreographerStep> steps = planDBService.collectStepsFromPlan(plan.getId());
 			
 		// executor check
 		final List<ChoreographerStep> stepsWithExecutors = checkAvailableExecutorsInDB(steps, errors);
@@ -118,7 +132,7 @@ public class ChoreographerPlanExecutionChecker {
 			needInterCloudForExecutors = checkExecutorDependencies(stepsWithExecutors, allowInterCloud, errors);
 		}
 		
-		return new ChoreographerRunPlanResponseDTO(planId, errors, needInterCloudForSteps || needInterCloudForExecutors);
+		return new ChoreographerRunPlanResponseDTO(planId, quantity, errors, needInterCloudForSteps || needInterCloudForExecutors);
 	}
 
 	//=================================================================================================

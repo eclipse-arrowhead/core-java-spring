@@ -30,7 +30,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 
 import eu.arrowhead.common.CoreDefaults;
-import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
+import eu.arrowhead.common.dto.shared.ChoreographerSessionStatus;
 
 @Entity
 public class ChoreographerSession {
@@ -45,10 +45,19 @@ public class ChoreographerSession {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "planId", referencedColumnName = "id", nullable = false)
     private ChoreographerPlan plan;
-
+    
     @Column(nullable = false, columnDefinition = "varchar(" + CoreDefaults.VARCHAR_BASIC + ")")
     @Enumerated(EnumType.STRING)
     private ChoreographerSessionStatus status;
+    
+    @Column(nullable = false)
+    private long quantityDone = 0;
+    
+    @Column(nullable = false)
+    private long quantityGoal = 1;
+    
+    @Column(nullable = false)
+    private long executionNumber = 0;
     
     private String notifyUri;
 
@@ -65,9 +74,10 @@ public class ChoreographerSession {
     public ChoreographerSession() {}
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerSession(final ChoreographerPlan plan, final ChoreographerSessionStatus status, final String notifyUri) {
+    public ChoreographerSession(final ChoreographerPlan plan, final ChoreographerSessionStatus status, final long quantityGoal, final String notifyUri) {
         this.plan = plan;
         this.status = status;
+        this.quantityGoal = quantityGoal;
         this.notifyUri = notifyUri;
     }
 
@@ -75,7 +85,10 @@ public class ChoreographerSession {
     public long getId() { return id; }
     public ChoreographerPlan getPlan() { return plan; }
     public ChoreographerSessionStatus getStatus() { return status; }
-    public String getNotifyUri() { return notifyUri; }
+    public long getQuantityDone() { return quantityDone; }
+    public long getQuantityGoal() { return quantityGoal; }
+	public long getExecutionNumber() { return executionNumber; }
+	public String getNotifyUri() { return notifyUri; }
     public ZonedDateTime getStartedAt() { return startedAt; }
     public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
@@ -83,7 +96,10 @@ public class ChoreographerSession {
     public void setId(final long id) { this.id = id; }
     public void setPlan(final ChoreographerPlan plan) { this.plan = plan; }
     public void setStatus(final ChoreographerSessionStatus status) { this.status = status; }
-    public void setNotifyUri(String notifyUri) { this.notifyUri = notifyUri; }
+    public void setQuantityDone(final long quantityDone) { this.quantityDone = quantityDone; }
+    public void setQuantityGoal(final long quantityGoal) { this.quantityGoal = quantityGoal; }
+    public void setExecutionNumber(final long executionNumber) { this.executionNumber = executionNumber; }
+    public void setNotifyUri(final String notifyUri) { this.notifyUri = notifyUri; }
     public void setStartedAt(final ZonedDateTime startedAt) { this.startedAt = startedAt; }
     public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
  

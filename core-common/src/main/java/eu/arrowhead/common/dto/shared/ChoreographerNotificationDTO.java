@@ -19,8 +19,6 @@ import java.io.Serializable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
-
 public class ChoreographerNotificationDTO implements Serializable {
 	
 	//=================================================================================================

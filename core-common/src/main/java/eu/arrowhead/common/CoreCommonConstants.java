@@ -40,7 +40,7 @@ public class CoreCommonConstants {
 	public static final String SR_QUERY_ALL = "service.registry.query.all.uri";
 	public static final String SR_QUERY_BY_SERVICE_DEFINITION_LIST_URI = "service.registry.query.services.by.service.definition.list.uri";
 	public static final String SR_REGISTER_SYSTEM_URI = "service.registry.register.system.uri";
-	public static final String SR_UNREGISTER_SYSTEM_URI = "service.registry.register.system.uri";
+	public static final String SR_UNREGISTER_SYSTEM_URI = "service.registry.unregister.system.uri";
 	public static final String SR_PULL_CONFIG_URI = "service.registry.pull.config.uri";
 	public static final String REQUIRED_URI_LIST = "required.uri.list";
 	public static final String URI_SUFFIX = "-uri";
@@ -277,6 +277,9 @@ public class CoreCommonConstants {
 	public static final String $RELAY_TEST_MESSAGE_SIZE_WD = "${" + RELAY_TEST_MESSAGE_SIZE + ":" + CoreDefaults.DEFAULT_RELAY_TEST_MESSAGE_SIZE + "}";
 	public static final String RELAY_TEST_LOG_MEASUREMENTS_IN_DB = "relay.test.log_measurements_in_db";
 	public static final String $RELAY_TEST_LOG_MEASUREMENTS_IN_DB_WD = "${" + RELAY_TEST_LOG_MEASUREMENTS_IN_DB + ":" + CoreDefaults.DEFAULT_RELAY_TEST_LOG_MEASUREMENTS_IN_DB + "}";
+	
+	public static final String CHOREOGRAPHER_MAX_PLAN_ITERATION = "max_plan_iteration";
+	public static final String $CHOREOGRAPHER_MAX_PLAN_ITERATION_WD = "${" + CHOREOGRAPHER_MAX_PLAN_ITERATION + ":" + CoreDefaults.DEFAULT_CHOREOGRAPHER_MAX_PLAN_ITERATION + "}";
 	
 	public static final String CERTIFICATE_FORMAT = "X.509";
 

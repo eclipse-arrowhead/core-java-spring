@@ -24,14 +24,15 @@ public class ChoreographerWorklogResponseDTO implements Serializable {
 	//=================================================================================================
     // members
 
-    private static final long serialVersionUID = 1163490391868818182L;
+	private static final long serialVersionUID = -1278815996356098724L;
 	
-    private long id;
+	private long id;
     private String entryDate;
     private String planName;
     private String actionName;
     private String stepName;
     private Long sessionId;
+    private Long executionNumber;
     private String message;
     private String exception;
     
@@ -43,13 +44,14 @@ public class ChoreographerWorklogResponseDTO implements Serializable {
     
     //-------------------------------------------------------------------------------------------------
 	public ChoreographerWorklogResponseDTO(final long id, final String entryDate, final String planName, final String actionName, final String stepName, final Long sessionId,
-										   final String message, final String exception) {
+										   final Long executionNumber, final String message, final String exception) {
 		this.id = id;
 		this.entryDate = entryDate;
 		this.planName = planName;
 		this.actionName = actionName;
 		this.stepName = stepName;
 		this.sessionId = sessionId;
+		this.executionNumber = executionNumber;
 		this.message = message;
 		this.exception = exception;
 	}
@@ -61,6 +63,7 @@ public class ChoreographerWorklogResponseDTO implements Serializable {
 	public String getActionName() { return actionName; }
 	public String getStepName() { return stepName; }
 	public Long getSessionId() { return sessionId; }
+	public Long getExecutionNumber() { return executionNumber; }
 	public String getMessage() { return message; }
 	public String getException() { return exception; }
 	
@@ -71,6 +74,7 @@ public class ChoreographerWorklogResponseDTO implements Serializable {
 	public void setActionName(final String actionName) { this.actionName = actionName; }
 	public void setStepName(final String stepName) { this.stepName = stepName; }
 	public void setSessionId(final Long sessionId) { this.sessionId = sessionId; }
+	public void setExecutionNumber(final Long executionNumber) { this.executionNumber = executionNumber; }
 	public void setMessage(final String message) { this.message = message; } 
 	public void setException(final String exception) { this.exception = exception; }
 	

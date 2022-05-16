@@ -52,6 +52,7 @@ import eu.arrowhead.common.dto.shared.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerRunPlanRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerRunPlanResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerSessionStatus;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerPlanDBService;
@@ -78,12 +79,15 @@ public class ChoreographerPlanController {
 	private static final String FALSE = "false";
     private static final String REQUEST_PARRAM_ALLOW_INTER_CLOUD = "allowInterCloud";
     private static final String PATH_VARIABLE_ID = "id";
+    private static final int DEFAULT_SESSION_QUANTITY = 1;
     private static final String ID_NOT_VALID_ERROR_MESSAGE = "ID must be greater than 0.";
+    private static final String MANUAL_ABORT_MESSAGE = "Manual abort";
 
     private static final String PLAN_MGMT_URI = CoreCommonConstants.MGMT_URI + "/plan";
     private static final String PLAN_MGMT_BY_ID_URI = PLAN_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
     private static final String SESSION_MGMT_URI = CoreCommonConstants.MGMT_URI + "/session";
     private static final String START_SESSION_MGMT_URI = SESSION_MGMT_URI + "/start";
+    private static final String ABORT_SESSION_MGMT_BY_ID_URI = SESSION_MGMT_URI + "/abort" + "/{" + PATH_VARIABLE_ID + "}";
     private static final String CHECK_PLAN_MGMT_BY_ID_URI = CoreCommonConstants.MGMT_URI + "/check-plan/{" + PATH_VARIABLE_ID + "}";
 
     private static final String GET_PlAN_MGMT_HTTP_200_MESSAGE = "Plan returned.";
@@ -100,6 +104,9 @@ public class ChoreographerPlanController {
 
     private static final String START_SESSION_HTTP_200_MESSAGE = "Initiated plan execution with given id(s).";
     private static final String START_PLAN_HTTP_400_MESSAGE = "Could not start plan with given id(s).";
+    
+    private static final String ABORT_SESSION_HTTP_200_MESSAGE = "Initiated session abortion with given id.";
+    private static final String ABORT_SESSION_HTTP_400_MESSAGE = "Could not abort session with given id.";
 
     private final Logger logger = LogManager.getLogger(ChoreographerPlanController.class);
 
@@ -114,6 +121,9 @@ public class ChoreographerPlanController {
 
     @Autowired
     private ChoreographerPlanExecutionChecker planChecker;
+    
+    @Autowired
+    private ChoreographerService choreographerService;
 
     @Autowired
     private JmsTemplate jms;
@@ -246,8 +256,8 @@ public class ChoreographerPlanController {
         	if (!Utilities.isEmpty(response.getErrorMessages())) {
         		results.add(response);
         	} else {
-        		final ChoreographerSession session = sessionDBService.initiateSession(request.getPlanId(), createNotifyUri(request));
-        		results.add(new ChoreographerRunPlanResponseDTO(request.getPlanId(), session.getId(), response.getNeedInterCloud()));
+        		final ChoreographerSession session = sessionDBService.initiateSession(request.getPlanId(), request.getQuantity(), createNotifyUri(request));
+        		results.add(new ChoreographerRunPlanResponseDTO(request.getPlanId(), session.getId(), session.getQuantityGoal(), response.getNeedInterCloud()));
 			   
         		logger.debug("Sending a message to {}.", ChoreographerService.START_SESSION_DESTINATION);
         		jms.convertAndSend(ChoreographerService.START_SESSION_DESTINATION, new ChoreographerStartSessionDTO(session.getId(), request.getPlanId(), request.isAllowInterCloud(), request.getChooseOptimalExecutor()));
@@ -255,6 +265,30 @@ public class ChoreographerPlanController {
         }
            
         return results;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Initiate the abortion of the specified session.", response = Void.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    @ApiResponses (value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = ABORT_SESSION_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = ABORT_SESSION_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @DeleteMapping(path = ABORT_SESSION_MGMT_BY_ID_URI)
+    public void abortSession(@PathVariable final Long id) {
+    	logger.debug("New abort session request received with id: {}.", id);
+    	
+    	if (id < 1) {
+            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + ABORT_SESSION_MGMT_BY_ID_URI);
+        }
+    	
+    	final ChoreographerSession session = sessionDBService.getSessionById(id);
+    	if (session.getStatus() == ChoreographerSessionStatus.DONE) {
+			throw new BadPayloadException("Session with id " + id + " couldn't be aborted due to its DONE status");
+		}
+    	
+    	choreographerService.abortSession(id, null, MANUAL_ABORT_MESSAGE);
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -274,7 +308,7 @@ public class ChoreographerPlanController {
             throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + CHECK_PLAN_MGMT_BY_ID_URI);
         }
 
-        final ChoreographerRunPlanResponseDTO result = planChecker.checkPlanForExecution(gatekeeperIsPresent && allowIntercloud, id);
+        final ChoreographerRunPlanResponseDTO result = planChecker.checkPlanForExecution(gatekeeperIsPresent && allowIntercloud, id, DEFAULT_SESSION_QUANTITY);
         logger.debug("Check report for plan with id: {} successfully retrieved!", id);
 
         return new ChoreographerCheckPlanResponseDTO(id, result.getErrorMessages(), result.getNeedInterCloud());

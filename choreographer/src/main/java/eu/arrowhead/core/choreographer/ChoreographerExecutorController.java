@@ -145,7 +145,7 @@ public class ChoreographerExecutorController {
     })
     @PostMapping(path = CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_REGISTER, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
-    @ResponseBody public ChoreographerExecutorResponseDTO registerExecutor(final HttpServletRequest servletRequest, @RequestBody final ChoreographerExecutorRequestDTO request) { //TODO junit
+    @ResponseBody public ChoreographerExecutorResponseDTO registerExecutor(final HttpServletRequest servletRequest, @RequestBody final ChoreographerExecutorRequestDTO request) {
     	logger.debug("registerExecutor started...");
     	return executorService.registerExecutorSystem(request, CommonConstants.CHOREOGRAPHER_URI + CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_REGISTER, servletRequest);
     }
@@ -159,7 +159,7 @@ public class ChoreographerExecutorController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @DeleteMapping(CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER)
-    public void unregisterExecutor(@RequestParam(name = CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_NAME, required = true) final String executorName) { //TODO junit
+    public void unregisterExecutor(@RequestParam(name = CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_NAME, required = true) final String executorName) {
         logger.debug("New Executor delete request received with name={}", executorName);        
         executorService.unregisterExecutorSystem(executorName, CommonConstants.CHOREOGRAPHER_URI + CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER);
         logger.debug("Executor successfully deleted");

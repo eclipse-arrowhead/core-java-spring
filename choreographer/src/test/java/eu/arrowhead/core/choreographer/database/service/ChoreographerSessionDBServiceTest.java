@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.hibernate.HibernateException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -42,6 +43,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
@@ -59,8 +61,8 @@ import eu.arrowhead.common.database.repository.ChoreographerSessionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerSessionStepRepository;
 import eu.arrowhead.common.database.repository.ChoreographerStepRepository;
 import eu.arrowhead.common.database.repository.ChoreographerWorklogRepository;
-import eu.arrowhead.common.dto.internal.ChoreographerSessionStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
+import eu.arrowhead.common.dto.shared.ChoreographerSessionStatus;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
@@ -94,25 +96,34 @@ public class ChoreographerSessionDBServiceTest {
 	@Mock
 	private ChoreographerWorklogRepository worklogRepository;
 	
+	private final long maxIteration = 2;
+	
 	//=================================================================================================
     // methods
 
 	//-------------------------------------------------------------------------------------------------
+	@Before
+	public void setUp() {
+		ReflectionTestUtils.setField(dbService, "maxIteration", maxIteration);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testInitiateSession() {
 		final long planId = 1;
+		final long quantityGoal = 1;
 		final String notifyUri = "/notify";
 		
 		final ChoreographerPlan plan = new ChoreographerPlan("test-plan");		
 		when(planRepository.findById(anyLong())).thenReturn(Optional.of(plan));
 		final ArgumentCaptor<ChoreographerSession> sessionCaptor = ArgumentCaptor.forClass(ChoreographerSession.class);
-		final ChoreographerSession expected = new ChoreographerSession(plan, ChoreographerSessionStatus.INITIATED, notifyUri);
+		final ChoreographerSession expected = new ChoreographerSession(plan, ChoreographerSessionStatus.INITIATED, quantityGoal, notifyUri);
 		expected.setId(10);
 		when(sessionRepository.saveAndFlush(sessionCaptor.capture())).thenReturn(expected);
 		final ArgumentCaptor<ChoreographerWorklog> worklogCaptor = ArgumentCaptor.forClass(ChoreographerWorklog.class);
 		when(worklogRepository.saveAndFlush(worklogCaptor.capture())).thenReturn(new ChoreographerWorklog());
 		
-		final ChoreographerSession result = dbService.initiateSession(planId, notifyUri);
+		final ChoreographerSession result = dbService.initiateSession(planId, quantityGoal, notifyUri);
 		
 		final ChoreographerSession sessionCaptured = sessionCaptor.getValue();
 		assertEquals(expected.getPlan().getName(), sessionCaptured.getPlan().getName());
@@ -134,9 +145,42 @@ public class ChoreographerSessionDBServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitiateSession_ZeroQuantity() {
+		try {
+			dbService.initiateSession(1L, 0, "/notify");
+			
+		} catch (final IllegalArgumentException ex) {
+			verify(planRepository, never()).findById(anyLong());
+			verify(worklogRepository, never()).saveAndFlush(any());
+			verify(sessionRepository, never()).saveAndFlush(any());
+			assertEquals("quantity must be positive", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitiateSession_NegativeQuantity() {
+		try {
+			dbService.initiateSession(1L, -1, "/notify");
+			
+		} catch (final IllegalArgumentException ex) {
+			verify(planRepository, never()).findById(anyLong());
+			verify(worklogRepository, never()).saveAndFlush(any());
+			verify(sessionRepository, never()).saveAndFlush(any());
+			assertEquals("quantity must be positive", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testInitiateSession_PlanNotExists() {
 		final long planId = 1;
+		final long quantityGoal = 2;
 		final String notifyUri = "/notify";
 		
 		when(planRepository.findById(anyLong())).thenReturn(Optional.empty());
@@ -144,11 +188,38 @@ public class ChoreographerSessionDBServiceTest {
 		when(worklogRepository.saveAndFlush(worklogCaptor.capture())).thenReturn(new ChoreographerWorklog());
 		
 		try {
-			dbService.initiateSession(planId, notifyUri);			
+			dbService.initiateSession(planId, quantityGoal, notifyUri);			
 		} catch (final InvalidParameterException ex) {
 			final ChoreographerWorklog workLogCaptured = worklogCaptor.getValue();
-			assertNotNull(workLogCaptured.getMessage());
-			assertNotNull(workLogCaptured.getException());
+			assertEquals("Initiating plan has been failed", workLogCaptured.getMessage());
+			assertEquals("InvalidParameterException: Plan with id 1 not exists", workLogCaptured.getException());
+			
+			verify(planRepository, times(1)).findById(eq(planId));
+			verify(worklogRepository, times(1)).saveAndFlush(any(ChoreographerWorklog.class));
+			verify(sessionRepository, never()).saveAndFlush(any());
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitiateSession_GreaterThanAllowedQuantiy() {
+		final long planId = 1;
+		final long quantityGoal = 3;
+		final String notifyUri = "/notify";
+		final ChoreographerPlan plan = new ChoreographerPlan("test-plan");
+		
+		when(planRepository.findById(anyLong())).thenReturn(Optional.of(plan));
+		final ArgumentCaptor<ChoreographerWorklog> worklogCaptor = ArgumentCaptor.forClass(ChoreographerWorklog.class);
+		when(worklogRepository.saveAndFlush(worklogCaptor.capture())).thenReturn(new ChoreographerWorklog());
+		
+		try {
+			dbService.initiateSession(planId, quantityGoal, notifyUri);			
+		} catch (final InvalidParameterException ex) {
+			final ChoreographerWorklog workLogCaptured = worklogCaptor.getValue();
+			assertEquals(plan.getName(), workLogCaptured.getPlanName());
+			assertEquals("Initiating plan has been failed", workLogCaptured.getMessage());
+			assertEquals("InvalidParameterException: Requested quantity (3) is more than allowed (2)", workLogCaptured.getException());
 			
 			verify(planRepository, times(1)).findById(eq(planId));
 			verify(worklogRepository, times(1)).saveAndFlush(any(ChoreographerWorklog.class));
@@ -161,12 +232,13 @@ public class ChoreographerSessionDBServiceTest {
 	@Test(expected = ArrowheadException.class)
 	public void testInitiateSession_DatabaseException() {
 		final long planId = 1;
+		final long quantityGoal = 1;
 		final String notifyUri = "/notify";
 		
 		when(planRepository.findById(anyLong())).thenThrow(new HibernateException("test"));
 		
 		try {
-			dbService.initiateSession(planId, notifyUri);			
+			dbService.initiateSession(planId, quantityGoal, notifyUri);			
 		} catch (final ArrowheadException ex) {			
 			verify(planRepository, times(1)).findById(eq(planId));
 			verify(worklogRepository, never()).saveAndFlush(any());
@@ -255,6 +327,218 @@ public class ChoreographerSessionDBServiceTest {
 			verify(worklogRepository, never()).saveAndFlush(any());
 			throw ex;
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testIncreaseSessionQuantityDone() {
+		final long sessionId = 2;
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(sessionId);
+		session.setPlan(new ChoreographerPlan("test"));
+		session.setQuantityGoal(1);
+		
+		when(sessionRepository.findById(eq(sessionId))).thenReturn(Optional.of(session));
+		final ArgumentCaptor<ChoreographerSession> sessionCaptor = ArgumentCaptor.forClass(ChoreographerSession.class);
+		when(sessionRepository.saveAndFlush(sessionCaptor.capture())).thenReturn(session);
+		final ArgumentCaptor<ChoreographerWorklog> worklogCaptor = ArgumentCaptor.forClass(ChoreographerWorklog.class);
+		when(worklogRepository.saveAndFlush(worklogCaptor.capture())).thenReturn(new ChoreographerWorklog());
+		
+		final ChoreographerSession result = dbService.increaseSessionQuantityDone(sessionId);
+		
+		assertEquals(session, sessionCaptor.getValue());
+		assertEquals(session, result);
+		assertEquals(1, result.getQuantityDone());
+		
+		final ChoreographerWorklog workLogCaptured = worklogCaptor.getValue();
+		assertEquals(session.getPlan().getName(), workLogCaptured.getPlanName());
+		assertEquals(session.getId(), workLogCaptured.getSessionId().longValue());
+		assertEquals("Session quantityDone has been changed to 1", workLogCaptured.getMessage());
+		assertNull(workLogCaptured.getException());
+		
+		verify(sessionRepository, times(1)).findById(eq(sessionId));
+		verify(sessionRepository, times(1)).saveAndFlush(any(ChoreographerSession.class));
+		verify(worklogRepository, times(1)).saveAndFlush(any(ChoreographerWorklog.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testIncreaseSessionQuantityDone_NoSession() {
+		final long sessionId = 2;
+		
+		when(sessionRepository.findById(eq(sessionId))).thenReturn(Optional.empty());
+		final ArgumentCaptor<ChoreographerWorklog> worklogCaptor = ArgumentCaptor.forClass(ChoreographerWorklog.class);
+		when(worklogRepository.saveAndFlush(worklogCaptor.capture())).thenReturn(new ChoreographerWorklog());
+		
+		try {
+			dbService.increaseSessionQuantityDone(sessionId);
+			
+		} catch (final InvalidParameterException ex) {
+			final ChoreographerWorklog workLogCaptured = worklogCaptor.getValue();
+			assertEquals("Session quantityDone change has been failed", workLogCaptured.getMessage());
+			assertEquals("InvalidParameterException: Session with id 2 not exists", workLogCaptured.getException());
+			
+			verify(sessionRepository, times(1)).findById(eq(sessionId));
+			verify(sessionRepository, never()).saveAndFlush(any());
+			verify(worklogRepository, times(1)).saveAndFlush(any(ChoreographerWorklog.class));
+
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testIncreaseSessionQuantityDone_GreaterQuantityThanGoal() {
+		final long sessionId = 2;
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(sessionId);
+		session.setPlan(new ChoreographerPlan("test"));
+		session.setQuantityDone(1);
+		session.setQuantityGoal(1);
+		
+		when(sessionRepository.findById(eq(sessionId))).thenReturn(Optional.of(session));
+		final ArgumentCaptor<ChoreographerWorklog> worklogCaptor = ArgumentCaptor.forClass(ChoreographerWorklog.class);
+		when(worklogRepository.saveAndFlush(worklogCaptor.capture())).thenReturn(new ChoreographerWorklog());
+		
+		try {
+			dbService.increaseSessionQuantityDone(sessionId);
+			
+		} catch (final InvalidParameterException ex) {
+			final ChoreographerWorklog workLogCaptured = worklogCaptor.getValue();
+			assertEquals(session.getPlan().getName(), workLogCaptured.getPlanName());
+			assertEquals(session.getId(), workLogCaptured.getSessionId().longValue());
+			assertEquals("Session quantityDone is invalid", workLogCaptured.getMessage());
+			assertEquals("InvalidParameterException: Session quantityDone is greater than quantityGoal", workLogCaptured.getException());
+			
+			verify(sessionRepository, times(1)).findById(eq(sessionId));
+			verify(sessionRepository, never()).saveAndFlush(any(ChoreographerSession.class));
+			verify(worklogRepository, times(1)).saveAndFlush(any(ChoreographerWorklog.class));
+
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testIncreaseSessionQuantityDone_DatabaseException() {
+		when(sessionRepository.findById(anyLong())).thenThrow(new HibernateException("test"));		
+		
+		try {
+			dbService.increaseSessionQuantityDone(2);
+			
+		} catch (final ArrowheadException ex) {
+			verify(sessionRepository, times(1)).findById(eq(2L));
+			verify(sessionRepository, never()).saveAndFlush(any());
+			verify(worklogRepository, never()).saveAndFlush(any(ChoreographerWorklog.class));
+
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testIncreaseExecutionNumber() {
+		final long sessionId = 2;
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(sessionId);
+		session.setPlan(new ChoreographerPlan("test"));
+		session.setQuantityGoal(1);
+		
+		when(sessionRepository.findById(eq(sessionId))).thenReturn(Optional.of(session));
+		final ArgumentCaptor<ChoreographerSession> sessionCaptor = ArgumentCaptor.forClass(ChoreographerSession.class);
+		when(sessionRepository.saveAndFlush(sessionCaptor.capture())).thenReturn(session);
+		final ArgumentCaptor<ChoreographerWorklog> worklogCaptor = ArgumentCaptor.forClass(ChoreographerWorklog.class);
+		when(worklogRepository.saveAndFlush(worklogCaptor.capture())).thenReturn(new ChoreographerWorklog());
+		
+		final ChoreographerSession result = dbService.increaseExecutionNumber(sessionId);
+		
+		assertEquals(session, sessionCaptor.getValue());
+		assertEquals(session, result);
+		assertEquals(1, result.getExecutionNumber());
+		
+		final ChoreographerWorklog workLogCaptured = worklogCaptor.getValue();
+		assertEquals(session.getPlan().getName(), workLogCaptured.getPlanName());
+		assertEquals(session.getId(), workLogCaptured.getSessionId().longValue());
+		assertEquals("Session executionNumber has been changed to 1", workLogCaptured.getMessage());
+		assertNull(workLogCaptured.getException());
+		
+		verify(sessionRepository, times(1)).findById(eq(sessionId));
+		verify(sessionRepository, times(1)).saveAndFlush(any(ChoreographerSession.class));
+		verify(worklogRepository, times(1)).saveAndFlush(any(ChoreographerWorklog.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testIncreaseExecutionNumber_NoSession() {
+		final long sessionId = 2;
+		
+		when(sessionRepository.findById(eq(sessionId))).thenReturn(Optional.empty());
+		final ArgumentCaptor<ChoreographerWorklog> worklogCaptor = ArgumentCaptor.forClass(ChoreographerWorklog.class);
+		when(worklogRepository.saveAndFlush(worklogCaptor.capture())).thenReturn(new ChoreographerWorklog());
+		
+		try {
+			dbService.increaseExecutionNumber(sessionId);
+			
+		} catch (final InvalidParameterException ex) {
+			final ChoreographerWorklog workLogCaptured = worklogCaptor.getValue();
+			assertEquals("Session executionNumber change has been failed", workLogCaptured.getMessage());
+			assertEquals("InvalidParameterException: Session with id 2 not exists", workLogCaptured.getException());
+			
+			verify(sessionRepository, times(1)).findById(eq(sessionId));
+			verify(sessionRepository, never()).saveAndFlush(any());
+			verify(worklogRepository, times(1)).saveAndFlush(any(ChoreographerWorklog.class));
+
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testIncreaseExecutionNumber_GreaterExecutionNumThanGoal() {
+		final long sessionId = 2;
+		final ChoreographerSession session = new ChoreographerSession();
+		session.setId(sessionId);
+		session.setPlan(new ChoreographerPlan("test"));
+		session.setExecutionNumber(1);
+		session.setQuantityGoal(1);
+		
+		when(sessionRepository.findById(eq(sessionId))).thenReturn(Optional.of(session));
+		final ArgumentCaptor<ChoreographerWorklog> worklogCaptor = ArgumentCaptor.forClass(ChoreographerWorklog.class);
+		when(worklogRepository.saveAndFlush(worklogCaptor.capture())).thenReturn(new ChoreographerWorklog());
+		
+		try {
+			dbService.increaseExecutionNumber(sessionId);
+			
+		} catch (final InvalidParameterException ex) {
+			final ChoreographerWorklog workLogCaptured = worklogCaptor.getValue();
+			assertEquals(session.getPlan().getName(), workLogCaptured.getPlanName());
+			assertEquals(session.getId(), workLogCaptured.getSessionId().longValue());
+			assertEquals("Session executionNumber is invalid", workLogCaptured.getMessage());
+			assertEquals("InvalidParameterException: Session executionNumber is greater than quantityGoal", workLogCaptured.getException());
+			
+			verify(sessionRepository, times(1)).findById(eq(sessionId));
+			verify(sessionRepository, never()).saveAndFlush(any(ChoreographerSession.class));
+			verify(worklogRepository, times(1)).saveAndFlush(any(ChoreographerWorklog.class));
+
+			throw ex;
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testIncreaseExecutionNumber_DatabaseException() {
+		when(sessionRepository.findById(anyLong())).thenThrow(new HibernateException("test"));		
+		
+		try {
+			dbService.increaseExecutionNumber(2);
+			
+		} catch (final ArrowheadException ex) {
+			verify(sessionRepository, times(1)).findById(eq(2L));
+			verify(sessionRepository, never()).saveAndFlush(any());
+			verify(worklogRepository, never()).saveAndFlush(any(ChoreographerWorklog.class));
+
+			throw ex;
+		}		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -736,7 +1020,7 @@ public class ChoreographerSessionDBServiceTest {
 		sessionStep.setStatus(ChoreographerSessionStepStatus.RUNNING);
 		
 		when(sessionRepository.findById(anyLong())).thenReturn(Optional.of(session));
-		when(sessionStepRepository.findBySessionAndStep(any(), any())).thenReturn(Optional.of(sessionStep));
+		when(sessionStepRepository.findBySessionAndStepAndExecutionNumber(any(), any(), anyLong())).thenReturn(Optional.of(sessionStep));
 		when(sessionStepRepository.findById(anyLong())).thenReturn(Optional.of(sessionStep));
 		final ArgumentCaptor<ChoreographerSessionStep> sessionStepCaptor = ArgumentCaptor.forClass(ChoreographerSessionStep.class);
 		when(sessionStepRepository.saveAndFlush(sessionStepCaptor.capture())).thenReturn(sessionStep);
@@ -752,7 +1036,7 @@ public class ChoreographerSessionDBServiceTest {
 		assertEquals(message, result.getMessage());
 		
 		verify(sessionRepository, times(1)).findById(eq(sessionId));
-		verify(sessionStepRepository, times(1)).findBySessionAndStep(eq(session), eq(step));
+		verify(sessionStepRepository, times(1)).findBySessionAndStepAndExecutionNumber(eq(session), eq(step), anyLong());
 		verify(sessionStepRepository, times(1)).findById(eq(sessionStep.getId()));
 		verify(sessionStepRepository, times(1)).saveAndFlush(eq(sessionStep));
 		verify(worklogRepository, times(1)).saveAndFlush(any(ChoreographerWorklog.class));
@@ -775,7 +1059,7 @@ public class ChoreographerSessionDBServiceTest {
 			
 		} catch (final InvalidParameterException ex) {
 			verify(sessionRepository, times(1)).findById(eq(sessionId));
-			verify(sessionStepRepository, never()).findBySessionAndStep(any(), any());
+			verify(sessionStepRepository, never()).findBySessionAndStepAndExecutionNumber(any(), any(), anyLong());
 			verify(sessionStepRepository, never()).findById(any());
 			verify(sessionStepRepository, never()).saveAndFlush(any());
 			verify(worklogRepository, times(1)).saveAndFlush(any(ChoreographerWorklog.class));
@@ -797,14 +1081,14 @@ public class ChoreographerSessionDBServiceTest {
 		session.setId(sessionId);
 		
 		when(sessionRepository.findById(anyLong())).thenReturn(Optional.of(session));
-		when(sessionStepRepository.findBySessionAndStep(any(), any())).thenReturn(Optional.empty());
+		when(sessionStepRepository.findBySessionAndStepAndExecutionNumber(any(), any(), anyLong())).thenReturn(Optional.empty());
 		
 		try {
 			dbService.changeSessionStepStatus(sessionId, step, newStatus, message);
 			
 		} catch (final InvalidParameterException ex) {
 			verify(sessionRepository, times(1)).findById(eq(sessionId));
-			verify(sessionStepRepository, times(1)).findBySessionAndStep(eq(session), eq(step));
+			verify(sessionStepRepository, times(1)).findBySessionAndStepAndExecutionNumber(eq(session), eq(step), anyLong());
 			verify(sessionStepRepository, never()).findById(any());
 			verify(sessionStepRepository, never()).saveAndFlush(any());
 			verify(worklogRepository, times(1)).saveAndFlush(any(ChoreographerWorklog.class));
@@ -829,7 +1113,7 @@ public class ChoreographerSessionDBServiceTest {
 			
 		} catch (final ArrowheadException ex) {
 			verify(sessionRepository, times(1)).findById(eq(sessionId));
-			verify(sessionStepRepository, never()).findBySessionAndStep(any(), any());
+			verify(sessionStepRepository, never()).findBySessionAndStepAndExecutionNumber(any(), any(), anyLong());
 			verify(sessionStepRepository, never()).findById(any());
 			verify(sessionStepRepository, never()).saveAndFlush(any());
 			verify(worklogRepository, never()).saveAndFlush(any(ChoreographerWorklog.class));
@@ -930,7 +1214,7 @@ public class ChoreographerSessionDBServiceTest {
 		
 		when(sessionRepository.findById(anyLong())).thenReturn(Optional.of(session));
 		when(stepRepository.findById(anyLong())).thenReturn(Optional.of(step));
-		when(sessionStepRepository.findBySessionAndStep(any(), any())).thenReturn(Optional.of(returnValue));
+		when(sessionStepRepository.findBySessionAndStepAndExecutionNumber(any(), any(), anyLong())).thenReturn(Optional.of(returnValue));
 		
 		final ChoreographerSessionStep result = dbService.getSessionStepBySessionIdAndStepId(sessionId, stepId);
 		
@@ -939,7 +1223,7 @@ public class ChoreographerSessionDBServiceTest {
 		
 		verify(sessionRepository, times(1)).findById(eq(sessionId));
 		verify(stepRepository, times(1)).findById(eq(stepId));
-		verify(sessionStepRepository, times(1)).findBySessionAndStep(eq(session), eq(step));
+		verify(sessionStepRepository, times(1)).findBySessionAndStepAndExecutionNumber(eq(session), eq(step), anyLong());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -956,7 +1240,7 @@ public class ChoreographerSessionDBServiceTest {
 		} catch (final InvalidParameterException ex) {
 			verify(sessionRepository, times(1)).findById(eq(sessionId));
 			verify(stepRepository, never()).findById(anyLong());
-			verify(sessionStepRepository, never()).findBySessionAndStep(any(), any());
+			verify(sessionStepRepository, never()).findBySessionAndStepAndExecutionNumber(any(), any(), anyLong());
 			throw ex;
 		}		
 	}
@@ -979,7 +1263,7 @@ public class ChoreographerSessionDBServiceTest {
 		} catch (final InvalidParameterException ex) {
 			verify(sessionRepository, times(1)).findById(eq(sessionId));
 			verify(stepRepository, times(1)).findById(eq(stepId));
-			verify(sessionStepRepository, never()).findBySessionAndStep(any(), any());
+			verify(sessionStepRepository, never()).findBySessionAndStepAndExecutionNumber(any(), any(), anyLong());
 			throw ex;
 		}				
 	}
@@ -997,7 +1281,7 @@ public class ChoreographerSessionDBServiceTest {
 		
 		when(sessionRepository.findById(anyLong())).thenReturn(Optional.of(session));
 		when(stepRepository.findById(anyLong())).thenReturn(Optional.of(step));
-		when(sessionStepRepository.findBySessionAndStep(any(), any())).thenReturn(Optional.empty());
+		when(sessionStepRepository.findBySessionAndStepAndExecutionNumber(any(), any(), anyLong())).thenReturn(Optional.empty());
 		
 		try {
 			dbService.getSessionStepBySessionIdAndStepId(sessionId, stepId);
@@ -1005,7 +1289,7 @@ public class ChoreographerSessionDBServiceTest {
 		} catch (final InvalidParameterException ex) {
 			verify(sessionRepository, times(1)).findById(eq(sessionId));
 			verify(stepRepository, times(1)).findById(eq(stepId));
-			verify(sessionStepRepository, times(1)).findBySessionAndStep(eq(session), eq(step));
+			verify(sessionStepRepository, times(1)).findBySessionAndStepAndExecutionNumber(any(), any(), anyLong());
 			throw ex;
 		}		
 	}
@@ -1024,7 +1308,7 @@ public class ChoreographerSessionDBServiceTest {
 		} catch (final ArrowheadException ex) {
 			verify(sessionRepository, times(1)).findById(eq(sessionId));
 			verify(stepRepository, never()).findById(anyLong());
-			verify(sessionStepRepository, never()).findBySessionAndStep(any(), any());
+			verify(sessionStepRepository, never()).findBySessionAndStepAndExecutionNumber(any(), any(), anyLong());
 			throw ex;
 		}		
 	}
@@ -1541,13 +1825,14 @@ public class ChoreographerSessionDBServiceTest {
 		final String actionName = "test-action";
 		final String stepName = "test-step";
 		final Long sessionId = 5L;
+		final Long executionNum = 47L;
 		final String message = "message";
 		final String exception = "exception";
 		
 		final ArgumentCaptor<ChoreographerWorklog> captor = ArgumentCaptor.forClass(ChoreographerWorklog.class);
 		when(worklogRepository.saveAndFlush(captor.capture())).thenReturn(new ChoreographerWorklog());
 		
-		dbService.worklog(planName, actionName, stepName, sessionId, message, exception);
+		dbService.worklog(planName, actionName, stepName, sessionId, executionNum, message, exception);
 		
 		final ChoreographerWorklog captured = captor.getValue();
 		assertEquals(sessionId, captured.getSessionId());
@@ -1555,6 +1840,7 @@ public class ChoreographerSessionDBServiceTest {
 		assertEquals(actionName, captured.getActionName());
 		assertEquals(stepName, captured.getStepName());
 		assertEquals(sessionId, captured.getSessionId());
+		assertEquals(executionNum, captured.getExecutionNumber());
 		assertEquals(exception, captured.getException());
 	}
 	
@@ -1565,6 +1851,7 @@ public class ChoreographerSessionDBServiceTest {
 		final String actionName = "test-action";
 		final String stepName = "test-step";
 		final Long sessionId = 5L;
+		final Long executionNum = 47L;
 		final String message = "message";
 		final InvalidParameterException exception = new InvalidParameterException("exception");
 		
@@ -1572,7 +1859,7 @@ public class ChoreographerSessionDBServiceTest {
 		when(worklogRepository.saveAndFlush(captor.capture())).thenReturn(new ChoreographerWorklog());
 		
 		try {
-			dbService.worklogException(planName, actionName, stepName, sessionId, message, exception);
+			dbService.worklogException(planName, actionName, stepName, sessionId, executionNum, message, exception);
 			
 		} catch (final Exception ex) {
 			final ChoreographerWorklog captured = captor.getValue();
@@ -1581,6 +1868,7 @@ public class ChoreographerSessionDBServiceTest {
 			assertEquals(actionName, captured.getActionName());
 			assertEquals(stepName, captured.getStepName());
 			assertEquals(sessionId, captured.getSessionId());
+			assertEquals(executionNum, captured.getExecutionNumber());
 			assertTrue(captured.getException().contains(exception.getClass().getSimpleName()));
 			assertTrue(captured.getException().contains(ex.getMessage()));
 			assertTrue(ex instanceof InvalidParameterException);

@@ -35,7 +35,7 @@ public interface ChoreographerSessionStepRepository extends RefreshableRepositor
 	
 	//-------------------------------------------------------------------------------------------------
 	public boolean existsByExecutorAndStatusIn(final ChoreographerExecutor executor, final Set<ChoreographerSessionStepStatus> statuses);
-	public Optional<ChoreographerSessionStep> findBySessionAndStep(final ChoreographerSession session, final ChoreographerStep step);
+	public Optional<ChoreographerSessionStep> findBySessionAndStepAndExecutionNumber(final ChoreographerSession session, final ChoreographerStep step, final long executionNumber);
 	public List<ChoreographerSessionStep> findBySessionAndStepIn(final ChoreographerSession session, final Set<ChoreographerStep> steps);
 	public List<ChoreographerSessionStep> findAllBySession(final ChoreographerSession session);
 	public List<ChoreographerSessionStep> findAllBySessionAndStep_Action(final ChoreographerSession session, final ChoreographerAction action);
