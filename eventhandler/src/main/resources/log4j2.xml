@@ -4,6 +4,7 @@
         <Property name="LOG_PATTERN">
             %d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex
         </Property>
+		<Property name="SYSTEM_NAME">EVENTHANDLER</Property>
 		<Property name="JDBC_LEVEL">INFO</Property>
 		<Property name="CONSOLE_FILE_LEVEL">INFO</Property>
 		<Property name="LOG_DIR">.</Property>
@@ -11,6 +12,7 @@
     <Appenders>
         <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
             <PatternLayout pattern="${LOG_PATTERN}"/>
+ 			<ThresholdFilter level="${CONSOLE_FILE_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
         </Console>
 		<RollingFile name="FileAppender" fileName="${LOG_DIR}/eventhandler.log" filePattern="${LOG_DIR}/eventhandler-%d{yyyy-MM-dd}-%i.log">
 	    	<PatternLayout>
@@ -20,15 +22,17 @@
 	        	<SizeBasedTriggeringPolicy size="100MB" />
 	    	</Policies>
 	    	<DefaultRolloverStrategy max="10" />
+ 			<ThresholdFilter level="${CONSOLE_FILE_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
 		</RollingFile>
 		<JDBC name="MySQLDatabase" tableName="logs">
          	<ConnectionFactory class="eu.arrowhead.common.log4j2.JDBCConnectionFactoryForLog4J2" method="getConnection" />
          	<Column name="log_id" pattern="%u" />
          	<Column name="entry_date" isEventTimestamp="true" />
          	<Column name="logger" pattern="%logger" />
+         	<Column name="system_name" literal="'${SYSTEM_NAME}'" />
          	<Column name="log_level" pattern="%level" />
          	<Column name="message" pattern="%m" />
-         	<Column name="exception" pattern="%throwable " />
+         	<Column name="exception" pattern="%throwable" />
 			<ThresholdFilter level="${JDBC_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
       </JDBC>
     </Appenders>
@@ -37,10 +41,16 @@
             <AppenderRef ref="ConsoleAppender" /> <!-- comment out this one in production environment -->
             <AppenderRef ref="FileAppender" />
         </Root>
-		<AsyncLogger name="eu.arrowhead" level="${JDBC_LEVEL}" additivity="true">
-            <AppenderRef ref="MySQLDatabase" />			
+ 		<AsyncLogger name="eu.arrowhead" level="ALL" additivity="true">
+            <AppenderRef ref="MySQLDatabase"  />			
     	</AsyncLogger>
-		<Logger name="eu.arrowhead.common" level="${CONSOLE_FILE_LEVEL}" additivity="true"></Logger>
-		<Logger name="eu.arrowhead.core" level="${CONSOLE_FILE_LEVEL}" additivity="true"></Logger>		
+		<Logger name="eu.arrowhead.core" level="ALL" additivity="true"></Logger>		
+		<Logger name="eu.arrowhead.common" level="ALL" additivity="true"></Logger>
+ 		<AsyncLogger name="org" level="WARN" additivity="true">
+            <AppenderRef ref="MySQLDatabase"  />			
+    	</AsyncLogger>
+ 		<AsyncLogger name="com" level="WARN" additivity="true">
+            <AppenderRef ref="MySQLDatabase"  />			
+    	</AsyncLogger>		
     </Loggers>
 </Configuration>

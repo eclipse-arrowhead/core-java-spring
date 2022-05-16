@@ -14,6 +14,7 @@
 
 package eu.arrowhead.core.choreographer;
 
+import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerPlanDBService;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerSessionDBService;
 import eu.arrowhead.core.choreographer.service.ChoreographerExecutorService;
@@ -80,5 +81,12 @@ public class ChoreographerServiceTestContext {
 	@Primary // This bean is primary only in test context
 	public ChoreographerService mockChoreographerService() {
 		return Mockito.mock(ChoreographerService.class);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean
+	@Primary // This bean is primary only in test context
+	public CommonDBService mockCommonDBService() {
+		return Mockito.mock(CommonDBService.class);
 	}
 }

@@ -110,7 +110,7 @@ public class GatekeeperControllerCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testGetCloudsWithoutParameterWithoutParameter() throws Exception {
+	public void testGetCloudsWithoutParameter() throws Exception {
 		final int amountOfClouds = 5;
 		final CloudWithRelaysListResponseDTO dto = createCloudWithRelaysListResponseDTOForDBMocking(amountOfClouds, RelayType.GATEKEEPER_RELAY, RelayType.GATEWAY_RELAY, false);
 		

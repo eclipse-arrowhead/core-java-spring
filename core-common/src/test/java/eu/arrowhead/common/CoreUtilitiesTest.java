@@ -14,9 +14,12 @@
 
 package eu.arrowhead.common;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.boot.logging.LogLevel;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -87,5 +90,109 @@ public class CoreUtilitiesTest {
 		final ValidatedPageParams vpp = CoreUtilities.validatePageParameters(1, 15, "ASC", "origin");
 		Assert.assertEquals(1, vpp.getValidatedPage());
 		Assert.assertEquals(15, vpp.getValidatedSize());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetLogLevelsMaxLevelNull() {
+		final List<LogLevel> logLevels = CoreUtilities.getLogLevels(null, null);
+		Assert.assertNull(logLevels);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetLogLevelsMaxLevelEmpty() {
+		final List<LogLevel> logLevels = CoreUtilities.getLogLevels("", null);
+		Assert.assertNull(logLevels);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = BadPayloadException.class)
+	public void testGetLogLevelsMaxLevelInvalid() {
+		try {
+			CoreUtilities.getLogLevels("unknown", null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Defined log level is not exists.", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetLogLevelsMaxLevelOff() {
+		final List<LogLevel> logLevels = CoreUtilities.getLogLevels("off", null);
+		Assert.assertEquals(1, logLevels.size());
+		Assert.assertEquals(LogLevel.OFF, logLevels.get(0));
+	}
+	
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetLogLevelsMaxLevelFatal() {
+		final List<LogLevel> logLevels = CoreUtilities.getLogLevels("fatal", null);
+		Assert.assertEquals(2, logLevels.size());
+		Assert.assertEquals(LogLevel.FATAL, logLevels.get(0));
+		Assert.assertEquals(LogLevel.OFF, logLevels.get(1));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetLogLevelsMaxLevelError() {
+		final List<LogLevel> logLevels = CoreUtilities.getLogLevels("error", null);
+		Assert.assertEquals(3, logLevels.size());
+		Assert.assertEquals(LogLevel.ERROR, logLevels.get(0));
+		Assert.assertEquals(LogLevel.FATAL, logLevels.get(1));
+		Assert.assertEquals(LogLevel.OFF, logLevels.get(2));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetLogLevelsMaxLevelWarn() {
+		final List<LogLevel> logLevels = CoreUtilities.getLogLevels("warn", null);
+		Assert.assertEquals(4, logLevels.size());
+		Assert.assertEquals(LogLevel.WARN, logLevels.get(0));
+		Assert.assertEquals(LogLevel.ERROR, logLevels.get(1));
+		Assert.assertEquals(LogLevel.FATAL, logLevels.get(2));
+		Assert.assertEquals(LogLevel.OFF, logLevels.get(3));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetLogLevelsMaxLevelInfo() {
+		final List<LogLevel> logLevels = CoreUtilities.getLogLevels("info", null);
+		Assert.assertEquals(5, logLevels.size());
+		Assert.assertEquals(LogLevel.INFO, logLevels.get(0));
+		Assert.assertEquals(LogLevel.WARN, logLevels.get(1));
+		Assert.assertEquals(LogLevel.ERROR, logLevels.get(2));
+		Assert.assertEquals(LogLevel.FATAL, logLevels.get(3));
+		Assert.assertEquals(LogLevel.OFF, logLevels.get(4));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetLogLevelsMaxLevelDebug() {
+		final List<LogLevel> logLevels = CoreUtilities.getLogLevels("debug", null);
+		Assert.assertEquals(6, logLevels.size());
+		Assert.assertEquals(LogLevel.DEBUG, logLevels.get(0));
+		Assert.assertEquals(LogLevel.INFO, logLevels.get(1));
+		Assert.assertEquals(LogLevel.WARN, logLevels.get(2));
+		Assert.assertEquals(LogLevel.ERROR, logLevels.get(3));
+		Assert.assertEquals(LogLevel.FATAL, logLevels.get(4));
+		Assert.assertEquals(LogLevel.OFF, logLevels.get(5));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetLogLevelsMaxLevelTrace() {
+		final List<LogLevel> logLevels = CoreUtilities.getLogLevels("trace", null);
+		Assert.assertEquals(7, logLevels.size());
+		Assert.assertEquals(LogLevel.TRACE, logLevels.get(0));
+		Assert.assertEquals(LogLevel.DEBUG, logLevels.get(1));
+		Assert.assertEquals(LogLevel.INFO, logLevels.get(2));
+		Assert.assertEquals(LogLevel.WARN, logLevels.get(3));
+		Assert.assertEquals(LogLevel.ERROR, logLevels.get(4));
+		Assert.assertEquals(LogLevel.FATAL, logLevels.get(5));
+		Assert.assertEquals(LogLevel.OFF, logLevels.get(6));
 	}
 }

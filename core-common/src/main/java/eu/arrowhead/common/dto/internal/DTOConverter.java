@@ -52,6 +52,7 @@ import eu.arrowhead.common.database.entity.Device;
 import eu.arrowhead.common.database.entity.DeviceRegistry;
 import eu.arrowhead.common.database.entity.EventType;
 import eu.arrowhead.common.database.entity.ForeignSystem;
+import eu.arrowhead.common.database.entity.Logs;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
 import eu.arrowhead.common.database.entity.OrchestratorStoreFlexible;
 import eu.arrowhead.common.database.entity.QoSInterDirectMeasurement;
@@ -1319,7 +1320,30 @@ public class DTOConverter {
 		return trustedKeysResponseDTO;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public static LogEntryDTO convertLogsToLogEntryDTO(final Logs log) {
+		Assert.notNull(log, "log is null");
+		
+		return new LogEntryDTO(log.getLogId(),
+							   Utilities.convertZonedDateTimeToUTCString(log.getEntryDate()),
+							   log.getLogger(),
+							   log.getLogLevel() != null ? log.getLogLevel().name() : "null",
+							   log.getSystem() != null ? log.getSystem().name() : "null",
+							   log.getMessage(),
+							   log.getException());
+	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public static LogEntryListResponseDTO convertLogsPageToLogEntryListResponseDTO(final Page<Logs> logs) {
+		Assert.notNull(logs, "logs page is null");
+		
+		final List<LogEntryDTO> data = new ArrayList<>(logs.getSize());
+		for (final Logs log : logs.getContent()) {
+			data.add(convertLogsToLogEntryDTO(log));
+		}
+		
+		return new LogEntryListResponseDTO(data, logs.getTotalElements());
+	}
 	
 	//=================================================================================================
 	// assistant methods
