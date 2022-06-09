@@ -5,12 +5,12 @@
         <artifactId>core</artifactId>
         <version>${revision}</version>
     </parent>
-  	
+
     <artifactId>arrowhead-translator</artifactId>
     <packaging>jar</packaging>
     <name>Arrowhead Translator</name>
     <description>Arrowhead Translator core service</description>
-  	
+
     <dependencies>
         <dependency>
             <groupId>eu.arrowhead</groupId>
@@ -18,32 +18,125 @@
             <version>${revision}</version>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>9.4.45.v20220203</version>
+            <type>jar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-client</artifactId>
+            <version>9.4.45.v20220203</version>
+            <type>jar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlet</artifactId>
+            <version>9.4.45.v20220203</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-util</artifactId>
+            <version>9.4.45.v20220203</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-io</artifactId>
+            <version>9.4.45.v20220203</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-http</artifactId>
+            <version>9.4.45.v20220203</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-webapp</artifactId>
+            <version>9.4.45.v20220203</version>
+            <type>jar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty.websocket</groupId>
+            <artifactId>websocket-server</artifactId>
+            <version>9.4.45.v20220203</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.websocket</groupId>
+            <artifactId>websocket-api</artifactId>
+            <version>9.4.45.v20220203</version>
+            <scope>provided</scope>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.eclipse.jetty.websocket</groupId>
+            <artifactId>websocket-servlet</artifactId>
+            <version>9.4.45.v20220203</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty.websocket</groupId>
+            <artifactId>websocket-client</artifactId>
+            <version>9.4.45.v20220203</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty.websocket</groupId>
+            <artifactId>websocket-common</artifactId>
+            <version>9.4.45.v20220203</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+            <version>1.2.5</version>
+            <type>jar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.11.0</version>
+            <type>jar</type>
+        </dependency>
+
+        <dependency>
             <groupId>org.eclipse.californium</groupId>
             <artifactId>californium-core</artifactId>
-            <version>2.0.0-M12</version>
-        </dependency>	
+            <version>2.7.0</version>
+        </dependency>
+
+        
         <dependency>
-            <groupId>commons-net</groupId>
-            <artifactId>commons-net</artifactId>
-            <version>3.6</version>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20180130</version>
+            <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.4.10</version>
+            <groupId>com.upokecenter</groupId>
+            <artifactId>cbor</artifactId>
+            <version>4.5.2</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore-nio</artifactId>
-            <version>4.4.10</version>
+            <groupId>com.moandjiezana.toml</groupId>
+            <artifactId>toml4j</artifactId>
+            <version>0.7.2</version>
+            <type>jar</type>
         </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.6</version>
-        </dependency>
-    </dependencies> 
-  	
+
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -72,7 +165,7 @@
                     </execution>
                 </executions>
             </plugin>
-	      	
+
             <plugin>
                 <artifactId>jdeb</artifactId>
                 <groupId>org.vafer</groupId>
@@ -99,13 +192,13 @@
                                         <filemode>755</filemode>
                                     </mapper>
                                 </data>
-	                			
+
                                 <data>
                                     <type>link</type>
                                     <linkName>/usr/share/arrowhead/translator/${project.artifactId}.jar</linkName>
                                     <linkTarget>/usr/share/arrowhead/translator/${project.build.finalName}.jar</linkTarget>
                                 </data>
-	                			
+
                                 <data>
                                     <type>file</type>
                                     <src>${project.build.directory}/log4j2.xml</src>
@@ -115,7 +208,7 @@
                                         <filemode>644</filemode>
                                     </mapper>
                                 </data>
-	                			
+
                                 <data>
                                     <type>file</type>
                                     <src>${project.build.directory}/application.properties</src>
@@ -125,13 +218,13 @@
                                         <filemode>644</filemode>
                                     </mapper>
                                 </data>
-	                			
+
                                 <data>
                                     <type>link</type>
                                     <linkName>/usr/share/arrowhead/translator/application.properties</linkName>
                                     <linkTarget>/etc/arrowhead/systems/translator/application.properties</linkTarget>
                                 </data>
-	                			
+
                                 <data>
                                     <type>file</type>
                                     <src>${project.basedir}/src/deb/arrowhead-translator.service</src>
@@ -141,7 +234,7 @@
                                         <filemode>644</filemode>
                                     </mapper>
                                 </data>
-	                			
+
                                 <data>
                                     <type>file</type>
                                     <src>${project.basedir}/../scripts/translator_privileges.sql</src>

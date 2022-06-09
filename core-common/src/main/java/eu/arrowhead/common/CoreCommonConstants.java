@@ -120,6 +120,13 @@ public class CoreCommonConstants {
 	public static final String REQUEST_PARAM_DIRECTION = "direction";
 	public static final String REQUEST_PARAM_SORT_FIELD = "sort_field";
 	public static final String REQUEST_PARAM_SERVICE_DEFINITION = "service_definition";
+
+	public static final String COAP_SERVER_ADDRESS_ENABLED = "coap.server.enabled";
+	public static final String $COAP_SERVER_ADDRESS_ENABLED = "${" + COAP_SERVER_ADDRESS_ENABLED + ":false}";
+	public static final String COAP_SERVER_ADDRESS = "coap.server.address";
+	public static final String $COAP_SERVER_ADDRESS = "${" + COAP_SERVER_ADDRESS + ":0.0.0.0}";
+	public static final String COAP_SERVER_PORT = "coap.server.port";
+	public static final String $COAP_SERVER_PORT = "${" + COAP_SERVER_PORT + ":0}";
 	
 	public static final long CONVERSION_MILLISECOND_TO_SECOND = 1000;
 	public static final long CONVERSION_MILLISECOND_TO_MINUTE = 60000;

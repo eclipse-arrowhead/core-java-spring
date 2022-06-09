@@ -23,6 +23,18 @@
       <version>${bouncy.castle.version}</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+        <groupId>org.eclipse.californium</groupId>
+        <artifactId>californium-core</artifactId>
+        <version>2.2.3</version>
+        <type>jar</type>
+    </dependency>
+    <dependency>
+        <groupId>org.eclipse.californium</groupId>
+        <artifactId>scandium</artifactId>
+        <version>2.2.3</version>
+        <type>jar</type>
+    </dependency>
   </dependencies>
 
   <build>
