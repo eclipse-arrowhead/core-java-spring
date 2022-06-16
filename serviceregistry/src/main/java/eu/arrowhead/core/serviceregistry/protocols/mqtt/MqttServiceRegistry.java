@@ -142,19 +142,21 @@ public class MqttServiceRegistry implements MqttCallback, Runnable {
       MqttConnectOptions connOpts = new MqttConnectOptions();
       connOpts.setCleanSession(true);
       connOpts.setUserName(mqttBrokerUsername);
-			connOpts.setPassword(mqttBrokerPassword.toCharArray());
+      connOpts.setPassword(mqttBrokerPassword.toCharArray());
 
       connOpts.setConnectionTimeout(60);
-			connOpts.setKeepAliveInterval(60);
+      connOpts.setKeepAliveInterval(60);
       connOpts.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1);
 
       SSLSocketFactory socketFactory = null;
-      try {
-        socketFactory = SslUtil.getSslSocketFactory(mqttBrokerCAFile, mqttBrokerCertFile, mqttBrokerKeyFile, "");
-      } catch (Exception e) {
-        logger.info("Could not open certificates: " + e.toString());
+      if (!Utilities.isEmpty(mqttBrokerCAFile) && !Utilities.isEmpty(mqttBrokerCertFile) && Utilities.isEmpty(mqttBrokerKeyFile)) {
+        try {
+          socketFactory = SslUtil.getSslSocketFactory(mqttBrokerCAFile, mqttBrokerCertFile, mqttBrokerKeyFile, "");
+        } catch (Exception e) {
+          logger.info("Could not open certificates: " + e.toString());
+        }
       }
-			connOpts.setSocketFactory(socketFactory);
+      connOpts.setSocketFactory(socketFactory);
       
       client.setCallback(this);
       client.connect(connOpts);
@@ -174,7 +176,11 @@ public class MqttServiceRegistry implements MqttCallback, Runnable {
       try {
         if (client == null) {
           persistence = new MemoryPersistence();
-          client = new MqttClient("ssl://" + mqttBrokerAddress + ":" + mqttBrokerPort, mqttSystemName, persistence);
+      	  if (!Utilities.isEmpty(mqttBrokerCAFile) && !Utilities.isEmpty(mqttBrokerCertFile) && Utilities.isEmpty(mqttBrokerKeyFile)) {
+            client = new MqttClient("ssl://" + mqttBrokerAddress + ":" + mqttBrokerPort, mqttSystemName, persistence);
+	  } else {
+            client = new MqttClient("tcp://" + mqttBrokerAddress + ":" + mqttBrokerPort, mqttSystemName, persistence);
+	  }
         }
         if (!client.isConnected()) {
           connectBroker();
