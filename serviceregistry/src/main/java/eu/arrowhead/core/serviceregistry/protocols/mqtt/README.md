@@ -3,14 +3,20 @@
 
 ### Installation
 On Debian-based systems, install the Mosquitto MQTT broker with the following command
+```
 > sudo apt-get install mosquitto mosquitto-clients
+```
 
 ### Configuration
 To setup username and password for all clients, first create a password file
+```
 > sudo touch /etc/mosquitto/passwords.dat
+```
 
 Then add user(s) for each core system:
+```
 > sudo mosquitto_password /etc/mosquitto/passwords.dat serviceregistry secretpassword
+```
 
 Remember to use strong username and password combinations.
 Then add a custom configuration to Mosquitto to disable anonymoues logins. Edit /etc/mosquitto/conf.d/broker.conf and add the following lines:
