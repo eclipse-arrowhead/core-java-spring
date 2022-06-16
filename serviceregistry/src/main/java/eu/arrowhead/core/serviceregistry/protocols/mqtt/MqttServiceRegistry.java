@@ -118,7 +118,6 @@ public class MqttServiceRegistry implements MqttCallback, Runnable {
     if (mqttBrokerEnabled) {
       logger.info("Starting MQTT protocol");
 
-      System.out.println("Username: " + mqttBrokerUsername);
       if(Utilities.isEmpty(mqttBrokerUsername) || Utilities.isEmpty(mqttBrokerPassword)) {
         logger.info("Missing MQTT broker username or password! Using anonymoues login.");
       }
@@ -147,15 +146,16 @@ public class MqttServiceRegistry implements MqttCallback, Runnable {
       connOpts.setKeepAliveInterval(60);
       connOpts.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1);
 
-      SSLSocketFactory socketFactory = null;
-      if (!Utilities.isEmpty(mqttBrokerCAFile) && !Utilities.isEmpty(mqttBrokerCertFile) && Utilities.isEmpty(mqttBrokerKeyFile)) {
+      if (!Utilities.isEmpty(mqttBrokerCAFile) && !Utilities.isEmpty(mqttBrokerCertFile) && !Utilities.isEmpty(mqttBrokerKeyFile)) {
+      	SSLSocketFactory socketFactory = null;
         try {
           socketFactory = SslUtil.getSslSocketFactory(mqttBrokerCAFile, mqttBrokerCertFile, mqttBrokerKeyFile, "");
         } catch (Exception e) {
           logger.info("Could not open certificates: " + e.toString());
         }
+
+      	connOpts.setSocketFactory(socketFactory);
       }
-      connOpts.setSocketFactory(socketFactory);
       
       client.setCallback(this);
       client.connect(connOpts);
@@ -175,7 +175,7 @@ public class MqttServiceRegistry implements MqttCallback, Runnable {
       try {
         if (client == null) {
           persistence = new MemoryPersistence();
-      	  if (!Utilities.isEmpty(mqttBrokerCAFile) && !Utilities.isEmpty(mqttBrokerCertFile) && Utilities.isEmpty(mqttBrokerKeyFile)) {
+      	  if (!Utilities.isEmpty(mqttBrokerCAFile) && !Utilities.isEmpty(mqttBrokerCertFile) && !Utilities.isEmpty(mqttBrokerKeyFile)) {
             client = new MqttClient("ssl://" + mqttBrokerAddress + ":" + mqttBrokerPort, mqttSystemName, persistence);
 	  } else {
             client = new MqttClient("tcp://" + mqttBrokerAddress + ":" + mqttBrokerPort, mqttSystemName, persistence);
