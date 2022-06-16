@@ -30,12 +30,14 @@ Restart the broker with:
 
 Edit application.properties in the target/ folder and make sure these lines are there (edit username and password to match prev. steps):
 
-\# MQTT broker parameters
+```
+# MQTT broker parameters
 mqtt.broker.enabled=true
 mqtt.broker.address=127.0.0.1
 mqtt.broker.port=1883
 mqtt.broker.username=serviceregistry
 mqtt.broker.password=secretpassword
+```
 
 ## Testing
 The Mosquitto broker stores log entries in /var/log/mosquitto/mosquitto.log
