@@ -29,6 +29,7 @@ Restart the broker with:
 ```
 
 Edit application.properties in the target/ folder and make sure these lines are there (edit username and password to match prev. steps):
+
 \# MQTT broker parameters
 mqtt.broker.enabled=true
 mqtt.broker.address=127.0.0.1
