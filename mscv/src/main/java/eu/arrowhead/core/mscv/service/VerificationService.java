@@ -150,7 +150,7 @@ public class VerificationService {
     }
 
     @Transactional(readOnly = true)
-    protected VerificationEntryList findListById(final Long id) {
+    public VerificationEntryList findListById(final Long id) {
         try {
             logger.debug("findListById({}) started", id);
             Assert.notNull(id, ID_NULL_ERROR_MESSAGE);
@@ -162,7 +162,7 @@ public class VerificationService {
     }
 
     @Transactional
-    protected VerificationEntryList findOrCreateSuitableList(final Target target, final Layer layer) {
+    public VerificationEntryList findOrCreateSuitableList(final Target target, final Layer layer) {
         try {
             logger.debug("findSuitableList({}) started", target);
             Assert.notNull(target, TARGET_NULL_ERROR_MESSAGE);

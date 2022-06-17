@@ -21,6 +21,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+
 import eu.arrowhead.common.database.entity.mscv.Script;
 import eu.arrowhead.common.database.entity.mscv.SshTarget;
 import eu.arrowhead.common.database.entity.mscv.Target;
@@ -46,6 +49,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import static eu.arrowhead.core.mscv.MscvMain.MSCV_EXECUTOR_SERVICE;
@@ -67,20 +71,22 @@ public final class SshExecutionHandler implements ExecutionHandler<SshTarget> {
     private final CompletionService<Queue<VerificationResultDetail>> completionService;
     private final SshClient sshClient;
     private final ExecutorService executorService;
+    private final EntityManager entityManager;
 
     @Autowired
     public SshExecutionHandler(final MscvDefaults mscvDefaults,
                                final UpdatingAcceptAllKeyVerifier acceptAllKeyVerifier,
                                final KeyPairFileStorage keyPairFileStorage,
                                @Qualifier(MSCV_EXECUTOR_SERVICE) final ExecutorService executorService,
-                               final SshClient sshClient) {
+                               final SshClient sshClient, final EntityManager entityManager) {
         super();
         this.executorService = executorService;
+        this.entityManager = entityManager;
         logger.info("Creating {} with script base paths in {}", getClass().getSimpleName(), mscvDefaults.getDefaultPath());
         this.mscvDefaults = mscvDefaults;
         this.acceptAllKeyVerifier = acceptAllKeyVerifier;
         this.keyPairFileStorage = keyPairFileStorage;
-        this.completionService = new ExecutorCompletionService(executorService);
+        this.completionService = new ExecutorCompletionService<>(executorService);
         this.sshClient = sshClient;
     }
 
@@ -88,8 +94,10 @@ public final class SshExecutionHandler implements ExecutionHandler<SshTarget> {
     public void deferVerification(final VerificationExecutionRepository executionRepo, final VerificationExecutionDetailRepository executionDetailRepo,
                                   final VerificationResult execution, final List<VerificationResultDetail> detailList) {
         executorService.submit(() -> {
+            final EntityTransaction transaction = entityManager.getTransaction();
             try {
                 logger.info("Running verification of {}", execution.getTarget());
+                transaction.begin();
                 performVerification(execution, detailList);
             } catch (MscvException e) {
                 execution.setResult(SuccessIndicator.ERROR);
@@ -99,6 +107,7 @@ public final class SshExecutionHandler implements ExecutionHandler<SshTarget> {
                 executionDetailRepo.flush();
                 executionRepo.saveAndFlush(execution);
                 logger.info("Finished verification of {} with result: {}", execution.getTarget(), execution.getResult());
+                transaction.commit();
             }
         });
     }
