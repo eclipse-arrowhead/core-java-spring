@@ -87,7 +87,7 @@ public class EventService {
     }
 
     @Transactional
-    public void createExecuteEvent(final Sensor sensor, final AbstractSensorData data) {
+    public void createExecuteEvent(final Sensor sensor, final AbstractSensorData<?> data) {
         createEvent(sensor, data, GamsPhase.EXECUTE, EventType.PLAN, 0L, ChronoUnit.SECONDS);
     }
 
@@ -138,33 +138,39 @@ public class EventService {
         createFailureEvent(wrapper.getSourceEvent(), message.substring(0, 64));
     }
 
-    protected boolean hasLoad() {
+    @Transactional
+    public boolean hasLoad() {
         return repository.countValid() >= properties.getQueueSize();
     }
 
-    protected Iterable<Event> loadEvent(final int limit) {
+    @Transactional
+    public Iterable<Event> loadEvent(final int limit) {
         return repository.findValidEvent(ProcessingState.PERSISTED, ProcessingState.IN_QUEUE, limit);
     }
 
-    protected void persisted(final Event event) {
+    @Transactional
+    public void persisted(final Event event) {
         event.setState(ProcessingState.PERSISTED);
         repository.saveAndFlush(event);
         logger.debug("Persisted {}", event::shortToString);
     }
 
-    protected void processing(final Event event) {
+    @Transactional
+    public void processing(final Event event) {
         event.setState(ProcessingState.PROCESSING);
         repository.saveAndFlush(event);
         logger.debug("Processing {}", event::shortToString);
     }
 
-    protected void processed(final Event event) {
+    @Transactional
+    public void processed(final Event event) {
         event.setState(ProcessingState.PROCESSED);
         repository.saveAndFlush(event);
         logger.debug("Processed {}", event::shortToString);
     }
 
-    protected void expireEvents() {
+    @Transactional
+    public void expireEvents() {
         repository.expireEvents();
     }
 
