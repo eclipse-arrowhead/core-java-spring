@@ -26,4 +26,3 @@ wget https://raw.githubusercontent.com/eclipse-arrowhead/core-java-spring/master
 wget https://raw.githubusercontent.com/eclipse-arrowhead/core-java-spring/master/scripts/datamanager_privileges.sql
 wget https://raw.githubusercontent.com/eclipse-arrowhead/core-java-spring/master/scripts/configuration_privileges.sql
 wget https://raw.githubusercontent.com/eclipse-arrowhead/core-java-spring/master/scripts/plant_description_engine_privileges.sql
-
