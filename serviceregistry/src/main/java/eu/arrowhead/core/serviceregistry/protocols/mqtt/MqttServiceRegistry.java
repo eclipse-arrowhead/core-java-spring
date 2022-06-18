@@ -1,3 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2022 ThingWave AB
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   ThingWave - design and implementation
+ *   Arrowhead Consortia - conceptualization
+ ********************************************************************************/
+
 package eu.arrowhead.core.serviceregistry.protocols.mqtt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -220,20 +234,9 @@ public class MqttServiceRegistry implements MqttCallback, Runnable {
 
     switch (topic) {
       case ECHO_TOPIC:
-        logger.info(request.getMethod() + " echo(): " + new String(message.getPayload(), StandardCharsets.UTF_8));
-        if (!request.getMethod().toLowerCase().equals("get")) {
-          return;
-        }
-        try {
-          response = new MqttResponseDTO("200", "text/plain", "Got it");
-          MqttMessage resp = new MqttMessage(Utilities.toJson(response).getBytes());
-          resp.setQos(2);
-          client.publish(request.getReplyTo(), resp);
-          return;
-        } catch (MqttException mex) {
-          logger.info("echo(): Couldn't reply " + mex.toString());
-        }
-        break;
+	handleEcho(topic, message, request);
+        return;
+      
       case REGISTER_TOPIC:
 
         try {
@@ -252,8 +255,7 @@ public class MqttServiceRegistry implements MqttCallback, Runnable {
             try {
               Utilities.parseUTCStringToLocalZonedDateTime(serviceRegistryRequestDTO.getEndOfValidity().trim());
             } catch (final DateTimeParseException ex) {
-              throw new Exception("End of validity is specified in the wrong format. Please provide UTC time using "
-                  + "ISO 8601  pattern.");
+              throw new Exception("End of validity is specified in the wrong format. Please provide UTC time using an ISO 8601  pattern.");
             }
           }
 
@@ -348,7 +350,6 @@ public class MqttServiceRegistry implements MqttCallback, Runnable {
           client.publish(request.getReplyTo(), resp);
           return;
         } catch (Exception e) {
-
         }
 
         break;
@@ -369,7 +370,23 @@ public class MqttServiceRegistry implements MqttCallback, Runnable {
 
   @Override
   public void deliveryComplete(IMqttDeliveryToken token) {
-
   }
 
+  private boolean handleEcho(String topic, MqttMessage message, MqttRequestDTO request) {
+    logger.info(request.getMethod() + " echo(): " + new String(message.getPayload(), StandardCharsets.UTF_8));
+    if (!request.getMethod().toLowerCase().equals("get")) {
+      return false;
+    }
+
+    try {
+      MqttResponseDTO response = new MqttResponseDTO("200", "text/plain", new String("Got it"));
+      MqttMessage resp = new MqttMessage(Utilities.toJson(response).getBytes());
+      resp.setQos(2);
+      client.publish(request.getReplyTo(), resp);
+      return true;
+    } catch (MqttException mex) {
+      logger.info("echo(): Couldn't reply " + mex.toString());
+    } 
+    return false;
+  }
 }
