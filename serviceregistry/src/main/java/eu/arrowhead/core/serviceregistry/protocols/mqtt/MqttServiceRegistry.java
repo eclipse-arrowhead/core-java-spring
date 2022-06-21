@@ -28,6 +28,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.internal.ServiceDefinitionRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
@@ -122,6 +123,7 @@ public class MqttServiceRegistry implements MqttCallback, Runnable {
   final String QUERY_TOPIC = "ah/serviceregistry/query";
 
   Thread t = null;
+  ObjectMapper mapper;
 
   // =================================================================================================
   // methods
@@ -140,6 +142,9 @@ public class MqttServiceRegistry implements MqttCallback, Runnable {
         logger.info("Missing MQTT broker certificate/key files! Running without encryption");
       }
       
+      mapper = new ObjectMapper();
+      mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
       t = new Thread(this);
       t.start();
     }
@@ -218,12 +223,9 @@ public class MqttServiceRegistry implements MqttCallback, Runnable {
   public void messageArrived(String topic, MqttMessage message) {
     MqttRequestDTO request = null;
     MqttResponseDTO response = null;
-    ObjectMapper mapper;
 
     try {
       // request = Utilities.fromJson(message.toString(), MqttRequestDTO.class);
-      mapper = new ObjectMapper();
-      mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       request = mapper.readValue(message.toString(), MqttRequestDTO.class);
     } catch (Exception ae) {
       logger.info("Could not convert MQTT message to REST request!");
@@ -234,125 +236,22 @@ public class MqttServiceRegistry implements MqttCallback, Runnable {
 
     switch (topic) {
       case ECHO_TOPIC:
+
 	handleEcho(topic, message, request);
         return;
       
       case REGISTER_TOPIC:
-
-        try {
-          logger.info("register(): " + new String(message.getPayload(), StandardCharsets.UTF_8));
-          if (!request.getMethod().toLowerCase().equals("post")) {
-            return;
-          }
-
-          ServiceRegistryRequestDTO serviceRegistryRequestDTO = mapper.convertValue(request.getPayload(), ServiceRegistryRequestDTO.class);
-
-          if (Utilities.isEmpty(serviceRegistryRequestDTO.getServiceDefinition())) {
-            throw new Exception("Service definition is null or blank");
-          }
-
-          if (!Utilities.isEmpty(serviceRegistryRequestDTO.getEndOfValidity())) {
-            try {
-              Utilities.parseUTCStringToLocalZonedDateTime(serviceRegistryRequestDTO.getEndOfValidity().trim());
-            } catch (final DateTimeParseException ex) {
-              throw new Exception("End of validity is specified in the wrong format. Please provide UTC time using an ISO 8601  pattern.");
-            }
-          }
-
-          ServiceSecurityType securityType = null;
-          if (serviceRegistryRequestDTO.getSecure() != null) {
-            for (final ServiceSecurityType type : ServiceSecurityType.values()) {
-              if (type.name().equalsIgnoreCase(serviceRegistryRequestDTO.getSecure())) {
-                securityType = type;
-                break;
-              }
-            }
-
-            if (securityType == null) {
-              throw new Exception("Security type is not valid.");
-            }
-          } else {
-            securityType = ServiceSecurityType.NOT_SECURE;
-          }
-
-          if (securityType != ServiceSecurityType.NOT_SECURE && serviceRegistryRequestDTO.getProviderSystem().getAuthenticationInfo() == null) {
-            throw new Exception("Security type is in conflict with the availability of the authentication info.");
-          }
-
-          //logger.info("SRREQ:: " + serviceRegistryRequestDTO.toString());
-          response = new MqttResponseDTO("200", "application/json", null);
-          response.setPayload(serviceRegistryDBService.registerServiceResponse(serviceRegistryRequestDTO));
-          MqttMessage resp = new MqttMessage(mapper.writeValueAsString(response).getBytes());
-          resp.setQos(2);
-          client.publish(request.getReplyTo(), resp);
-          return;
-
-        } catch (Exception e) {
-          logger.info("Could not register: " + e.toString());
-
-        }
-        break;
+	
+	handleRegister(topic, message, request);
+        return;
       case UNREGISTER_TOPIC:
-        logger.info("unregister(): " + message.toString());
-        if (!request.getMethod().equalsIgnoreCase("delete")) {
-          return;
-        }
 
-        try {
-          String serviceDefinition = request.getQueryParameters().get("serviceDefinition");
-          String providerName = request.getQueryParameters().get("providerName");
-          String providerAddress = request.getQueryParameters().get("providerAddress");
-          int providerPort = Integer.parseInt(request.getQueryParameters().get("providerPort"));
-          String serviceUri = request.getQueryParameters().get("serviceUri");
-
-          if (Utilities.isEmpty(serviceDefinition)) {
-            throw new Exception("Service definition is blank");
-          }
-
-          if (Utilities.isEmpty(providerName)) {
-            throw new Exception("Name of the provider system is blank");
-          }
-
-          if (Utilities.isEmpty(providerAddress)) {
-            throw new Exception("Address of the provider system is blank");
-          }
-
-          if (providerPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || providerPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-            throw new Exception("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
-          }
-          serviceRegistryDBService.removeServiceRegistry(serviceDefinition, providerName, providerAddress, providerPort, serviceUri);
-
-          return;
-        } catch (Exception e) {
-          logger.info("illegal request: " + e.toString());
-        }
-
-        break;
+	handleUnregister(topic, message, request);
+        return;
       case QUERY_TOPIC:
-        logger.info("query(): " + message.toString());
-        if (!request.getMethod().toLowerCase().equals("post")) {
-          return;
-        }
 
-        try {
-          ServiceQueryFormDTO serviceQueryFormDTO = mapper.convertValue(request.getPayload(),
-              ServiceQueryFormDTO.class);
-
-          if (Utilities.isEmpty(serviceQueryFormDTO.getServiceDefinitionRequirement())) {
-            throw new Exception("Service definition requirement is null or blank");
-          }
-
-          //logger.info("SRQUERY:: " + serviceQueryFormDTO.toString());
-          response = new MqttResponseDTO("200", "application/json", null);
-          response.setPayload(serviceRegistryDBService.queryRegistry(serviceQueryFormDTO));
-          MqttMessage resp = new MqttMessage(mapper.writeValueAsString(response).getBytes());
-          resp.setQos(2);
-          client.publish(request.getReplyTo(), resp);
-          return;
-        } catch (Exception e) {
-        }
-
-        break;
+	handleQuery(topic, message, request);
+        return;
       default:
         logger.info("Received message to unsupported topic");
     }
@@ -388,5 +287,136 @@ public class MqttServiceRegistry implements MqttCallback, Runnable {
       logger.info("echo(): Couldn't reply " + mex.toString());
     } 
     return false;
+  }
+
+  //-------------------------------------------------------------------------------------------------
+  private boolean handleRegister(String topic, MqttMessage message, MqttRequestDTO request) {
+    MqttResponseDTO response = null;
+
+    try {
+      //logger.info("register(): " + new String(message.getPayload(), StandardCharsets.UTF_8));
+      if (!request.getMethod().toLowerCase().equals("post")) {
+	return false;
+      }
+
+      ServiceRegistryRequestDTO serviceRegistryRequestDTO = mapper.convertValue(request.getPayload(), ServiceRegistryRequestDTO.class);
+
+      if (Utilities.isEmpty(serviceRegistryRequestDTO.getServiceDefinition())) {
+	throw new Exception("Service definition is null or blank");
+      }
+
+      if (!Utilities.isEmpty(serviceRegistryRequestDTO.getEndOfValidity())) {
+	try {
+	  Utilities.parseUTCStringToLocalZonedDateTime(serviceRegistryRequestDTO.getEndOfValidity().trim());
+	} catch (final DateTimeParseException ex) {
+	  throw new Exception("End of validity is specified in the wrong format. Please provide UTC time using an ISO 8601  pattern.");
+	}
+      }
+
+      ServiceSecurityType securityType = null;
+      if (serviceRegistryRequestDTO.getSecure() != null) {
+	for (final ServiceSecurityType type : ServiceSecurityType.values()) {
+	  if (type.name().equalsIgnoreCase(serviceRegistryRequestDTO.getSecure())) {
+	    securityType = type;
+	    break;
+	  }
+	}
+
+	if (securityType == null) {
+	  throw new Exception("Security type is not valid.");
+	}
+      } else {
+	securityType = ServiceSecurityType.NOT_SECURE;
+      }
+
+      if (securityType != ServiceSecurityType.NOT_SECURE && serviceRegistryRequestDTO.getProviderSystem().getAuthenticationInfo() == null) {
+	throw new Exception("Security type is in conflict with the availability of the authentication info.");
+      }
+
+      //logger.info("SRREQ:: " + serviceRegistryRequestDTO.toString());
+      response = new MqttResponseDTO("200", "application/json", null);
+      response.setPayload(serviceRegistryDBService.registerServiceResponse(serviceRegistryRequestDTO));
+      MqttMessage resp = new MqttMessage(mapper.writeValueAsString(response).getBytes());
+      resp.setQos(2);
+      client.publish(request.getReplyTo(), resp);
+      return true;
+
+    } catch (Exception e) {
+      logger.info("Could not register: " + e.toString());
+      return false;
+    } 
+  }
+
+  //-------------------------------------------------------------------------------------------------
+  private boolean handleUnregister(String topic, MqttMessage message, MqttRequestDTO request) {
+    MqttResponseDTO response = null;
+
+    logger.info("unregister(): " + message.toString());
+    if (!request.getMethod().equalsIgnoreCase("delete")) {
+      return false;
+    }
+
+    try {
+      String serviceDefinition = request.getQueryParameters().get("serviceDefinition");
+      String providerName = request.getQueryParameters().get("providerName");
+      String providerAddress = request.getQueryParameters().get("providerAddress");
+      int providerPort = Integer.parseInt(request.getQueryParameters().get("providerPort"));
+      String serviceUri = request.getQueryParameters().get("serviceUri");
+
+      if (Utilities.isEmpty(serviceDefinition)) {
+	throw new Exception("Service definition is blank");
+      }
+
+      if (Utilities.isEmpty(providerName)) {
+	throw new Exception("Name of the provider system is blank");
+      }
+
+      if (Utilities.isEmpty(providerAddress)) {
+	throw new Exception("Address of the provider system is blank");
+      }
+
+      if (providerPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || providerPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+	throw new Exception("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
+      }
+      serviceRegistryDBService.removeServiceRegistry(serviceDefinition, providerName, providerAddress, providerPort, serviceUri);
+      logger.debug("{} successfully removed its service {} ({})", providerName, serviceDefinition, serviceUri);
+
+      return true;
+    } catch (Exception e) {
+      logger.info("illegal request: " + e.toString());
+      return false;
+    }
+  }
+
+  //-------------------------------------------------------------------------------------------------
+  private boolean handleQuery(String topic, MqttMessage message, MqttRequestDTO request) {
+    MqttResponseDTO response = null;
+  
+    logger.debug("Service query request received");
+    //logger.info("query(): " + message.toString());
+    if (!request.getMethod().toLowerCase().equals("post")) {
+      return false;
+    }
+
+    try {
+      ServiceQueryFormDTO form = mapper.convertValue(request.getPayload(), ServiceQueryFormDTO.class);
+
+      if (Utilities.isEmpty(form.getServiceDefinitionRequirement())) {
+	throw new Exception("Service definition requirement is null or blank");
+      }
+
+      //logger.info("SRQUERY:: " + serviceQueryFormDTO.toString());
+      response = new MqttResponseDTO("200", "application/json", null);
+      final ServiceQueryResultDTO result = serviceRegistryDBService.queryRegistry(form);
+      logger.debug("Return {} providers for service {}", result.getServiceQueryData().size(), form.getServiceDefinitionRequirement());
+      response.setPayload(result);
+      MqttMessage resp = new MqttMessage(mapper.writeValueAsString(response).getBytes());
+      resp.setQos(2);
+      client.publish(request.getReplyTo(), resp);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+
   }
 }
