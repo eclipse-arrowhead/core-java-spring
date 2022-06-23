@@ -40,7 +40,8 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	
 	private static final CoreSystem[] allowedCoreSystemsForQuery = { CoreSystem.ORCHESTRATOR, CoreSystem.GATEKEEPER, CoreSystem.CERTIFICATEAUTHORITY, CoreSystem.EVENTHANDLER,
 																	 CoreSystem.AUTHORIZATION, CoreSystem.QOSMONITOR, CoreSystem.ONBOARDINGCONTROLLER, CoreSystem.DEVICEREGISTRY,
-															         CoreSystem.SYSTEMREGISTRY, CoreSystem.PLANTDESCRIPTIONENGINE, CoreSystem.CHOREOGRAPHER, CoreSystem.HAWKBITCONFIGURATIONMANAGER };
+															         CoreSystem.SYSTEMREGISTRY, CoreSystem.PLANTDESCRIPTIONENGINE, CoreSystem.CHOREOGRAPHER, CoreSystem.HAWKBITCONFIGURATIONMANAGER,
+															         CoreSystem.MSCV };
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemId = { CoreSystem.ORCHESTRATOR };
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemDTO = { CoreSystem.ORCHESTRATOR };
 	private static final CoreSystem[] allowedCoreSystemsForQueryAll = { CoreSystem.QOSMONITOR, CoreSystem.GATEKEEPER };
