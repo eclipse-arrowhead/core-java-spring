@@ -9,7 +9,7 @@
   	<artifactId>arrowhead-onboarding</artifactId>
   	<packaging>jar</packaging>
   	<name>Arrowhead Onboarding Controller</name>
-  	<description>SQL-based Onboarding Controller core service</description>
+  	<description>Onboarding Controller core service</description>
   	
   	<dependencies>
 	    <dependency>

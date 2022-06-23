@@ -45,6 +45,7 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_SYSTEMREGISTRY = "System Registry";
 	public static final String CORE_SYSTEM_DEVICEREGISTRY = "Device Registry";
 	public static final String CORE_SYSTEM_ONBOARDING = "Onboarding Controller";
+	public static final String CORE_SYSTEM_MSCV = "Monitoring and Standard Compliance Verification";
 	public static final String CORE_SYSTEM_GAMS = "Generic Autonomic Management System";
 
 	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION = "token-generation";
@@ -61,7 +62,7 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_ORCH_QOS_RESERVATIONS = "orchestration-qos-reservations";
 	public static final String CORE_SERVICE_ORCH_QOS_TEMPORARY_LOCK = "orchestration-qos-temporary-lock";
 	public static final String CORE_SERVICE_ORCH_QOS_CONFIRM_RESERVATION = "orchestration-qos-confirm-reservation";
-	
+
 	public static final String CORE_SERVICE_GATEKEEPER_GSD = "global-service-discovery";
 	public static final String CORE_SERVICE_GATEKEEPER_ICN = "inter-cloud-negotiations";
 	public static final String CORE_SERVICE_GATEKEEPER_PULL_CLOUDS = "pull-clouds";
@@ -69,7 +70,7 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_GATEKEEPER_COLLECT_ACCESS_TYPES = "collect-access-types";
 	public static final String CORE_SERVICE_GATEKEEPER_RELAY_TEST = "gatekeeper-relay-test";
 	public static final String CORE_SERVICE_GATEKEEPER_GET_CLOUD = "gatekeeper-get-cloud";
-	
+
 	public static final String CORE_SERVICE_GATEWAY_PUBLIC_KEY = "gw-public-key";
 	public static final String CORE_SERVICE_GATEWAY_CONNECT_CONSUMER = "gw-connect-consumer";
 	public static final String CORE_SERVICE_GATEWAY_CONNECT_PROVIDER = "gw-connect-provider";
@@ -97,20 +98,23 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_CERTIFICATEAUTHORITY_CHECK_TRUSTED_KEY = "ca-check-trusted-key";
 	public static final String CORE_SERVICE_CERTIFICATEAUTHORITY_ADD_TRUSTED_KEY = "ca-add-trusted-key";
 	public static final String CORE_SERVICE_CERTIFICATEAUTHORITY_DELETE_TRUSTED_KEY = "ca-delete-trusted-key";
-	
+
 	public static final String CORE_SERVICE_QOSMONITOR_INTRA_PING_MEASUREMENT = "qos-monitor-intra-ping-measurement";
 	public static final String CORE_SERVICE_QOSMONITOR_INTRA_PING_MEDIAN_MEASUREMENT = "qos-monitor-intra-ping-median-measurement";
 	public static final String CORE_SERVICE_QOSMONITOR_INTER_DIRECT_PING_MEASUREMENT = "qos-monitor-inter-direct-ping-measurement";
 	public static final String CORE_SERVICE_QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENT = "qos-monitor-inter-relay-echo-measurement";
-	public static final String CORE_SERVICE_QOSMONITOR_PUBLIC_KEY = "qos-monitor-public-key";
+public static final String CORE_SERVICE_QOSMONITOR_PUBLIC_KEY = "qos-monitor-public-key";
 	public static final String CORE_SERVICE_QOSMONITOR_JOIN_RELAY_TEST = "qos-monitor-join-relay-test";
 	public static final String CORE_SERVICE_QOSMONITOR_INIT_RELAY_TEST = "qos-monitor-init-relay-test";
-
 	public static final String CORE_SERVICE_SERVICEREGISTRY_REGISTER = "service-register";
 	public static final String CORE_SERVICE_SERVICEREGISTRY_UNREGISTER = "service-unregister";
 	public static final String CORE_SERVICE_SERVICEREGISTRY_REGISTER_SYSTEM = "register-system";
 	public static final String CORE_SERVICE_SERVICEREGISTRY_UNREGISTER_SYSTEM = "unregister-system";
 	public static final String CORE_SERVICE_SERVICEREGISTRY_PULL_SYSTEMS = "pull-systems";
+
+	public static final String CORE_SERVICE_MSCV_VERIFICATION = "standard-verification";
+	public static final String CORE_SERVICE_MSCV_PUBLIC_KEY = "standard-verification-public-key";
+	public static final String CORE_SERVICE_MSCV_LOGIN = "standard-verification-remote-login";
 
 	public static final String CORE_SERVICE_SYSTEMREGISTRY_REGISTER = "system-register";
 	public static final String CORE_SERVICE_SYSTEMREGISTRY_UNREGISTER = "system-unregister";
@@ -237,7 +241,7 @@ public class CommonConstants {
 	public static final String OP_ORCH_QOS_ENABLED_URI = "/qos_enabled";
 	public static final String OP_ORCH_QOS_RESERVATIONS_URI = "/qos_reservations";
 	public static final String OP_ORCH_QOS_TEMPORARY_LOCK_URI = "/qos_temporary_lock";
-	
+
 	public static final String ORCHESTRATION_FLAG_MATCHMAKING = "matchmaking";
 	public static final String ORCHESTRATION_FLAG_METADATA_SEARCH = "metadataSearch";
 	public static final String ORCHESTRATION_FLAG_ONLY_PREFERRED = "onlyPreferred";
@@ -297,6 +301,12 @@ public class CommonConstants {
     public static final String TRANSLATOR_URI = "/translator";
     public static final String OP_TRANSLATOR_FIWARE_URI = "/v2";
     public static final String OP_TRANSLATOR_PLUGIN_URI = "/plugin";
+
+	public static final String MSCV_URI = "/mscv";
+	public static final String OP_MSCV_EXECUTE_URI = "/execute";
+	public static final String OP_MSCV_EVENT_CALLBACK_URI = "/event_callback";
+	public static final String OP_MSCV_LOGIN_URI = "/login";
+	public static final String OP_MSCV_PUBLIC_KEY_URI = "/publickey";
 
 	public static final String OP_GAMS_SERVICE_URI = "";
 	public static final String OP_GAMS_SENSOR_SERVICE_URI = "/{gams_uid}/sensor";
@@ -402,8 +412,9 @@ public class CommonConstants {
 	public static final String OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME = "system_name";
 	public static final String OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS = "address";
 	public static final String OP_EVENTHANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT = "port";
-	
-	//=================================================================================================
+
+
+    //=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------

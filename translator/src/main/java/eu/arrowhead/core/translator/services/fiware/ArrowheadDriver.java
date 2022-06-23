@@ -185,9 +185,6 @@ public class ArrowheadDriver {
     //-------------------------------------------------------------------------------------------------
     private String getServiceUri(String entityId, String serviceName) {
         return String.format("/translator/plugin/service/%s/%s",
-                /*sslProperties.isSslEnabled() ? "https" : "http",
-                myIpAddress,
-                translatorPort,*/
                 entityId,
                 serviceName
         );

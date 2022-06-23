@@ -9,7 +9,7 @@
   	<artifactId>arrowhead-deviceregistry</artifactId>
   	<packaging>jar</packaging>
   	<name>Arrowhead Device Registry</name>
-  	<description>SQL-based Device Registry core service</description>
+  	<description>Device Registry core service</description>
   	
   	<dependencies>
 	    <dependency>

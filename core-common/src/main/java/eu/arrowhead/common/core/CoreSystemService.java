@@ -98,7 +98,7 @@ public enum CoreSystemService {
 	
 	// QoS Monitor services
 
-	QOSMONITOR_INTRA_PING_MEASUREMENT_SERVICE(CommonConstants.CORE_SERVICE_QOSMONITOR_INTRA_PING_MEASUREMENT, CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTRA_PING_MEASUREMENT + 
+	QOSMONITOR_INTRA_PING_MEASUREMENT_SERVICE(CommonConstants.CORE_SERVICE_QOSMONITOR_INTRA_PING_MEASUREMENT, CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTRA_PING_MEASUREMENT +
 										 	   CommonConstants.OP_QOSMONITOR_INTRA_PING_MEASUREMENT_SUFFIX),
 	QOSMONITOR_INTRA_PING_MEDIAN_MEASUREMENT_SERVICE(CommonConstants.CORE_SERVICE_QOSMONITOR_INTRA_PING_MEDIAN_MEASUREMENT, CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTRA_PING_MEDIAN_MEASUREMENT),
 	QOSMONITOR_INTER_DIRECT_PING_MEASUREMENT_SERVICE(CommonConstants.CORE_SERVICE_QOSMONITOR_INTER_DIRECT_PING_MEASUREMENT, CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTER_DIRECT_PING_MEASUREMENT),
@@ -135,7 +135,13 @@ public enum CoreSystemService {
     SERVICEREGISTRY_REGISTER_SYSTEM(CommonConstants.CORE_SERVICE_SERVICEREGISTRY_REGISTER_SYSTEM, CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI),
     SERVICEREGISTRY_UNREGISTER_SYSTEM(CommonConstants.CORE_SERVICE_SERVICEREGISTRY_UNREGISTER_SYSTEM, CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI),
     SERVICEREGISTRY_PULL_SYSTEMS(CommonConstants.CORE_SERVICE_SERVICEREGISTRY_PULL_SYSTEMS,
-								 CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_PULL_SYSTEMS_URI),
+										CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_PULL_SYSTEMS_URI),
+
+	// Monitoring and Standard Verification Services
+	MSCV_VERIFICATION_SERVICE(CommonConstants.CORE_SERVICE_MSCV_VERIFICATION, CommonConstants.MSCV_URI + CommonConstants.OP_MSCV_EXECUTE_URI),
+	MSCV_PUBLIC_KEY_SERVICE(CommonConstants.CORE_SERVICE_MSCV_PUBLIC_KEY, CommonConstants.MSCV_URI + CommonConstants.OP_MSCV_PUBLIC_KEY_URI),
+	MSCV_LOGIN_SERVICE(CommonConstants.CORE_SERVICE_MSCV_LOGIN, CommonConstants.MSCV_URI + CommonConstants.OP_MSCV_LOGIN_URI);
+
 
 	GAMS_SERVICE(CommonConstants.CORE_SERVICE_GAMS_SERVICE, CommonConstants.GAMS_URI + CommonConstants.OP_GAMS_SERVICE_URI),
 	GAMS_SENSOR_SERVICE(CommonConstants.CORE_SERVICE_GAMS_SENSOR_SERVICE, CommonConstants.GAMS_URI + CommonConstants.OP_GAMS_SENSOR_SERVICE_URI);
@@ -148,7 +154,7 @@ public enum CoreSystemService {
 	private final String serviceDefinition;
 	private final String serviceUri;
 	private final List<InterfaceData> interfaces;
-	
+
 	//=================================================================================================
 	// methods
 	
@@ -164,7 +170,7 @@ public enum CoreSystemService {
 	private CoreSystemService(final String serviceDefinition, final String serviceUri) {
 		this(serviceDefinition, serviceUri, null);
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private CoreSystemService(final String serviceDefinition, final String serviceUri, final List<InterfaceData> interfaces) {
 		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "Service definition is null or blank");
@@ -174,27 +180,27 @@ public enum CoreSystemService {
 		this.serviceUri = serviceUri;
 		this.interfaces = interfaces == null || interfaces.isEmpty() ? null : interfaces;
 	}
-	
+
 	//=================================================================================================
 	// nested classes
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public static class InterfaceData {
-		
+
 		//=================================================================================================
 		// members
-		
+
 		private final String protocol;
 		private final String format;
-		
+
 		//=================================================================================================
 		// methods
-		
+
 		//-------------------------------------------------------------------------------------------------
 		public InterfaceData(final String protocol, final String format) {
 			Assert.isTrue(!Utilities.isEmpty(protocol), "protocol is invalid");
 			Assert.isTrue(!Utilities.isEmpty(format), "format is invalid");
-			
+
 			this.protocol = protocol.toUpperCase().trim();
 			this.format = format.toUpperCase().trim();
 		}

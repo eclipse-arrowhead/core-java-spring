@@ -51,6 +51,7 @@ public class Defaults {
 	public static final int DEFAULT_CERTIFICATE_AUTHORITY_PORT = 8448;
     public static final int DEFAULT_GENERIC_AUTONOMIC_MANAGEMENT_PORT = 8502;
 	public static final int DEFAULT_TRANSLATOR_PORT = 8462;
+    public static final int DEFAULT_MSCV_PORT = 8501;
 	public static final int DEFAULT_PLANT_DESCRIPTION_ENGINE_PORT = 8432;
 	public static final int DEFAULT_HAWKBIT_CONFIGURATION_MANAGER_PORT = 8447;
 
