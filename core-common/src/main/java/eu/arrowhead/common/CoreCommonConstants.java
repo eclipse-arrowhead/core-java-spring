@@ -63,12 +63,12 @@ public class CoreCommonConstants {
 	public static final String OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_ID_URI = "/query/system/{" + COMMON_FIELD_NAME_ID + "}";
 	public static final String OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_DTO_URI = "/query/system";
 	public static final String OP_SERVICEREGISTRY_QUERY_ALL_SERVICE_URI = "/query/all";
-	public static final String OP_SERVICEREGISTRY_MULTI_QUERY_URI = CommonConstants.OP_SERVICEREGISTRY_QUERY_URI + "/multi";	
+	public static final String OP_SERVICEREGISTRY_MULTI_QUERY_URI = CommonConstants.OP_SERVICEREGISTRY_QUERY_URI + "/multi";
 		
 	public static final String ORCHESTRATOR_STORE_MGMT_URI = "/mgmt/store";
 	public static final String ORCHESTRATOR_STORE_FLEXIBLE_MGMT_URI = "/mgmt/store/flexible";
 	public static final String ORCHESTRATOR_STORE_FLEXIBLE_BY_ID_MGMT_URI = ORCHESTRATOR_STORE_FLEXIBLE_MGMT_URI + "/{" + COMMON_FIELD_NAME_ID + "}";
-	
+
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
 	public static final String SWAGGER_HTTP_200_MESSAGE = "Core service is available";
@@ -114,8 +114,11 @@ public class CoreCommonConstants {
 	public static final String $URI_CRAWLER_INTERVAL_WD = "${" + URI_CRAWLER_INTERVAL + ":" + CoreDefaults.DEFAULT_URI_CRAWLER_INTERVAL + "}";
 	public static final String AUTH_TOKEN_TTL_IN_MINUTES = "auth_token_ttl_in_minutes";
 	public static final String $AUTH_TOKEN_TTL_IN_MINUTES_WD = "${" + AUTH_TOKEN_TTL_IN_MINUTES + ":" + CoreDefaults.DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES + "}";
-	
-	public static final String REQUEST_PARAM_PAGE = "page";
+
+	public static final String PARAM_VERIFICATION_INTERVAL = "mscv.defaultVerificationInterval"; // in seconds
+	public static final String $VERIFICATION_INTERVAL_WD = "${" + PARAM_VERIFICATION_INTERVAL + ":" + CoreDefaults.DEFAULT_VERIFICATION_INTERVAL + "}";
+
+    public static final String REQUEST_PARAM_PAGE = "page";
 	public static final String REQUEST_PARAM_ITEM_PER_PAGE = "item_per_page";
 	public static final String REQUEST_PARAM_DIRECTION = "direction";
 	public static final String REQUEST_PARAM_SORT_FIELD = "sort_field";
@@ -174,7 +177,7 @@ public class CoreCommonConstants {
 	public static final String CLOUD_MATCHMAKER = "cloudMatchmaker";
 	
 	public static final String PING_MONITOR = "pingMonitor";
-	
+
 	public static final int TOP_PRIORITY = 1;
 	
 	public static final String QOSMANAGER = "qosManager";
@@ -278,7 +281,7 @@ public class CoreCommonConstants {
 	public static final String FIWARE_SERVER_PORT = "fiware.server.port";
 	public static final String $FIWARE_SERVER_PORT = "${" + FIWARE_SERVER_PORT + ":0}";
 
-	// MQTT 
+	// MQTT
 	public static final String MQTT_BROKER_ENABLED = "mqtt.broker.enabled";
 	public static final String $MQTT_BROKER_ENABLED = "${" + MQTT_BROKER_ENABLED + ":false}";
 	public static final String MQTT_BROKER_ADDRESS = "mqtt.broker.address";

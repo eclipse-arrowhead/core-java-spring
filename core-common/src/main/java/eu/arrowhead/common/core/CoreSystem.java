@@ -34,7 +34,7 @@ public enum CoreSystem {
 																	 CoreSystemService.SERVICEREGISTRY_REGISTER_SYSTEM,
 																	 CoreSystemService.SERVICEREGISTRY_UNREGISTER_SYSTEM,
 																	 CoreSystemService.SERVICEREGISTRY_PULL_SYSTEMS)),
-	
+
     SYSTEMREGISTRY(Defaults.DEFAULT_SYSTEMREGISTRY_PORT, List.of(CoreSystemService.SYSTEMREGISTRY_REGISTER_SERVICE,
     															   CoreSystemService.SYSTEMREGISTRY_UNREGISTER_SERVICE,
     															   CoreSystemService.SYSTEMREGISTRY_ONBOARDING_WITH_NAME_SERVICE,
@@ -44,7 +44,7 @@ public enum CoreSystem {
     															   CoreSystemService.DEVICEREGISTRY_UNREGISTER_SERVICE,
     															   CoreSystemService.DEVICEREGISTRY_ONBOARDING_WITH_NAME_SERVICE,
     															   CoreSystemService.DEVICEREGISTRY_ONBOARDING_WITH_CSR_SERVICE)),
-    
+
     ONBOARDINGCONTROLLER(Defaults.DEFAULT_ONBOARDING_PORT, List.of(CoreSystemService.ONBOARDING_WITH_CERTIFICATE_AND_NAME_SERVICE,
 														    		CoreSystemService.ONBOARDING_WITH_SHARED_SECRET_AND_NAME_SERVICE,
 														    		CoreSystemService.ONBOARDING_WITH_CERTIFICATE_AND_CSR_SERVICE,
@@ -81,7 +81,7 @@ public enum CoreSystem {
     DATAMANAGER(Defaults.DEFAULT_DATAMANAGER_PORT, List.of(CoreSystemService.PROXY_SERVICE, CoreSystemService.HISTORIAN_SERVICE)),
 
 	TIMEMANAGER(Defaults.DEFAULT_TIMEMANAGER_PORT, List.of(CoreSystemService.TIME_SERVICE)),
-	
+
 	GATEWAY(Defaults.DEFAULT_GATEWAY_PORT, List.of(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE,
 												   CoreSystemService.GATEWAY_PROVIDER_SERVICE,
 												   CoreSystemService.GATEWAY_CONSUMER_SERVICE)),
@@ -111,11 +111,15 @@ public enum CoreSystem {
 	TRANSLATOR(Defaults.DEFAULT_TRANSLATOR_PORT, List.of(CoreSystemService.TRANSLATOR_SERVICE,
 												   CoreSystemService.TRANSLATOR_FIWARE_SERVICE,
 												   CoreSystemService.TRANSLATOR_PLUGIN_SERVICE)),
-	
+
+	MSCV(Defaults.DEFAULT_MSCV_PORT, List.of(CoreSystemService.MSCV_VERIFICATION_SERVICE,
+											 CoreSystemService.MSCV_PUBLIC_KEY_SERVICE,
+											 CoreSystemService.MSCV_LOGIN_SERVICE)),
+
 	PLANTDESCRIPTIONENGINE(Defaults.DEFAULT_PLANT_DESCRIPTION_ENGINE_PORT, List.of()), //TODO add PDE services
-	
+
 	HAWKBITCONFIGURATIONMANAGER(Defaults.DEFAULT_HAWKBIT_CONFIGURATION_MANAGER_PORT, List.of());
-	
+
 	//=================================================================================================
 	// members
 	

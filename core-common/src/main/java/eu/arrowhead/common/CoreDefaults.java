@@ -29,7 +29,7 @@ public class CoreDefaults {
 	public static final boolean DEFAULT_USE_NETWORK_ADDRESS_DETECTOR = false;
 	public static final String DEFAULT_FILTER_PROXY_ADDRESSES = "";
 	public static final boolean DEFAULT_ALLOW_SELF_ADDRESSING = false;
-	public static final boolean DEFAULT_ALLOW_NON_ROUTABLE_ADDRESSING = false;	
+	public static final boolean DEFAULT_ALLOW_NON_ROUTABLE_ADDRESSING = false;
 	public static final int DEFAULT_URI_CRAWLER_INTERVAL = 30;
 	public static final int DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES = -1; // never expires
 	public static final int DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES_WITH_QOS_ENABLED = 60; // when QoS enabled, we want to make sure that tokens expires eventually
@@ -63,19 +63,19 @@ public class CoreDefaults {
 	public static final int DEFAULT_GATEWAY_MIN_PORT = 8000;
 	public static final int DEFAULT_GATEWAY_MAX_PORT = 8100;
 	public static final int DEFAULT_GATEWAY_PROVIDER_SIDE_MAX_REQUEST_PER_SOCKET = 50;
-	
+
 	public static final boolean DEFAULT_EVENTHANDLER_TTL_SCHEDULED = false;
 	public static final int DEFAULT_EVENTHANDLER_TTL_INTERVAL_MINUTES = 17;
 	public static final int DEFAULT_EVENTHANDLER_MAX_RETRY_CONNECT_AUTH = 3;
 	public static final int DEFAULT_EVENTHANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC = 10;
-	
+
 	public static final long DEFAULT_TIME_STAMP_TOLERANCE_SECONDS = 120;
 	public static final int DEFAULT_EVENTHANDLER_MAX_EXPRESS_SUBSCRIBERS = 10;
 	
-	public static final int DEFAULT_PING_TTL_INTERVAL_MINUTES = 10;	
+	public static final int DEFAULT_PING_TTL_INTERVAL_MINUTES = 10;
 	public static final int DEFAULT_CLOUD_PING_TTL_INTERVAL_MINUTES = 10;
 	public static final int DEFAULT_RELAY_ECHO_TTL_INTERVAL_MINUTES = 10;
-	
+
 	public static final boolean DEFAULT_QOS_ENABLED = false;
 	public static final int DEFAULT_QOS_RESERVATION_CHECK_INTERVAL = 60; // in seconds
 	public static final int DEFAULT_QOS_TEMPORARY_LOCK_DURATION = 60; // in seconds
@@ -102,8 +102,9 @@ public class CoreDefaults {
 	public static final int DEFAULT_RELAY_TEST_MESSAGE_SIZE = 2048; // in bytes
 	public static final boolean DEFAULT_RELAY_TEST_LOG_MEASUREMENTS_IN_DB = true;
 
-	
-	//=================================================================================================
+    public static final int DEFAULT_VERIFICATION_INTERVAL = 3600; // in seconds
+
+    //=================================================================================================
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------

@@ -9,6 +9,7 @@ sed -i 's/source /& docker-entrypoint-initdb.d\/privileges\//g' create_empty_arr
 
 mkdir privileges
 cd privileges
+
 wget https://raw.githubusercontent.com/eclipse-arrowhead/core-java-spring/master/scripts/authorization_privileges.sql
 wget https://raw.githubusercontent.com/eclipse-arrowhead/core-java-spring/master/scripts/certificate_authority_privileges.sql
 wget https://raw.githubusercontent.com/eclipse-arrowhead/core-java-spring/master/scripts/choreographer_privileges.sql
@@ -26,3 +27,4 @@ wget https://raw.githubusercontent.com/eclipse-arrowhead/core-java-spring/master
 wget https://raw.githubusercontent.com/eclipse-arrowhead/core-java-spring/master/scripts/datamanager_privileges.sql
 wget https://raw.githubusercontent.com/eclipse-arrowhead/core-java-spring/master/scripts/configuration_privileges.sql
 wget https://raw.githubusercontent.com/eclipse-arrowhead/core-java-spring/master/scripts/plant_description_engine_privileges.sql
+wget https://raw.githubusercontent.com/eclipse-arrowhead/core-java-spring/master/scripts/msvc_privileges.sql

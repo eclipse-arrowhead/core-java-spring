@@ -39,6 +39,7 @@
 	    <module>systemregistry</module>
 	    <module>deviceregistry</module>
 	    <module>onboarding</module>
+		<module>mscv</module>
 	    <module>qos-monitor</module>
 	    <module>translator</module>
 		<module>plantdescriptionengine</module>
