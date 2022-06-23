@@ -1,0 +1,153 @@
+[
+  ["router", {
+    "id": "{{ .Release.Name }}.Example.Router",
+    "mode": "standalone",
+    "workerThreads": 3
+  }],
+
+  ["authServicePlugin", {
+    "name": "Hono Auth",
+    "host": "{{ .Release.Name }}-service-auth",
+    "port": 5671,
+    "sslProfile": "internal"
+  }],
+
+  ["sslProfile", {
+    "name": "server",
+    "protocols": "TLSv1.2",
+    "caCertFile": "/qpid/truststore.pem",
+    "certFile": "/qpid/router-cert.pem",
+    "privateKeyFile": "/qpid/router-key.pem",
+    "uidFormat": "ou"
+  }],
+
+  ["listener", {
+    "sslProfile": "server",
+    "requireSsl": true,
+    "host": "0.0.0.0",
+    "port": 5671,
+    "linkCapacity": 100,
+    "authenticatePeer": true,
+    "saslMechanisms": "EXTERNAL"
+  }],
+
+  ["listener", {
+    "host": "0.0.0.0",
+    "port": 5672,
+    "linkCapacity": 100,
+    "authenticatePeer": true,
+    "saslMechanisms": "PLAIN",
+    "saslPlugin": "Hono Auth"
+  }],
+
+  ["sslProfile", {
+    "name": "internal",
+    "protocols": "TLSv1.2",
+    "caCertFile": "/qpid/truststore.pem",
+    "certFile": "/qpid/router-cert.pem",
+    "privateKeyFile": "/qpid/router-key.pem",
+    "uidFormat": "ou"
+  }],
+
+  ["listener", {
+    "sslProfile": "internal",
+    "requireSsl": true,
+    "host": "0.0.0.0",
+    "port": 5673,
+    "linkCapacity": 100,
+    "authenticatePeer": true,
+    "saslMechanisms": "EXTERNAL"
+  }],
+
+  ["listener", {
+    "host": "0.0.0.0",
+    "port": 8088,
+    "http": true
+  }],
+
+  ["sslProfile", {
+    "name": "broker-profile",
+    "caCertFile": "/etc/hono/trusted-certs.pem",
+    "protocols": "TLSv1.2"
+  }],
+
+  ["connector", {
+    "name": "broker-connection",
+    "sslProfile": "broker-profile",
+    "role": "route-container",
+    "port": 5671,
+    "saslMechanisms": "PLAIN",
+    "saslUsername": "artemis",
+    "saslPassword": "file:/etc/hono/broker-password",
+    "host": "{{ .Release.Name }}-artemis",
+    "verifyHostname": false
+  }],
+
+  ["linkRoute", {
+    "prefix": "event/",
+    "direction": "in",
+    "connection": "broker-connection"
+  }],
+
+  ["linkRoute", {
+    "prefix": "event/",
+    "direction": "out",
+    "connection": "broker-connection"
+  }],
+
+  ["address", {
+    "prefix": "telemetry/",
+    "distribution": "balanced"
+  }],
+
+  ["address", {
+    "prefix": "event/",
+    "distribution": "balanced"
+  }],
+
+  ["policy", {
+    "maxConnections": 1000,
+    "enableVhostPolicy": true,
+    "defaultVhost": "hono"
+  }],
+
+  ["vhost", {
+      "hostname": "hono",
+      "maxConnections": 500,
+      "maxConnectionsPerUser": 20,
+      "maxConnectionsPerHost": 10,
+      "groups": {
+        "$default": {
+          "users": "arrowhead.eu;AHT",
+          "remoteHosts": "*",
+          "sources": "telemetry/*, event/*, command_response/*",
+          "targets": "command/*",
+          "maxSessionWindow": 3276800,
+          "maxSessions": 10
+        }
+      }
+  }],
+
+  ["vhost", {
+      "hostname": "hono-internal",
+      "maxConnections": 50,
+      "groups": {
+        "Adapters": {
+          "users": "arrowhead.eu;AHT",
+          "remoteHosts": "*",
+          "maxSessions": 4,
+          "maxSessionWindow": 8192000,
+          "maxMessageSize": 131072,
+          "allowUserIdProxy": true,
+          "allowAnonymousSender": true,
+          "sources": "command_internal/*, command/*",
+          "targets": "telemetry/*, event/*, command_internal/*, command_response/*"
+        }
+      }
+  }],
+
+  ["log", {
+    "module": "DEFAULT",
+    "enable": "info+"
+  }]
+]

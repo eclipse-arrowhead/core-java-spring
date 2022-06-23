@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: router-config
+data:
+  qdrouterd.json: |
+{{ tpl ( .Files.Get "static/router/qdrouterd.json" ) . | b64enc | indent 4 }}

@@ -121,6 +121,7 @@ Please be aware, that versions starting from 4.1.3 are __NOT__ backwards compati
             * [Management](#choreographer_endpoints_mgmt)
     13. [Plant Description Engine](#plant-description-engine)
     14. [HawkBit Configuration Manager](#hawkbit_configuration_manager)
+    15. [Device Hub with Eclipse Hono](#device_hub)
 		
 <a name="quickstart" />
 
@@ -8413,3 +8414,8 @@ The PDE consumes the following services:
 
 The HawkBit configuration manager is responsible for managing software rollouts and configuration updates to the actual hardware devices.
 This implementation is based on [Eclipse HawkBit](https://www.eclipse.org/hawkbit/) and is explained in more detail [here](./hawkbit-configuration-manager/README.md).
+
+# Device Hub with Eclipse Hono
+<a name="device_hub" />
+
+The Device Hub allows devices to publish telemetry information and events or receive commands using various protocols like HTTP, MQTT, or CoAP. In turn, other applications can consume this information from a single Hub using a single protocol (AMQP 1.0) without individually interacting with each device protocol directly. The Device Hub is an integration of Eclipse Hono with the Arrowhead core systems. For more details, see the [description](./device-hub/README.md) and example [configuration files](./device-hub/hono-deployment/) for a Helm Chart [in the Device Hub folder](./device-hub/).
