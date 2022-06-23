@@ -40,6 +40,7 @@
 	    <module>deviceregistry</module>
 	    <module>onboarding</module>
 		<module>mscv</module>
+		<module>gams</module>
 	    <module>qos-monitor</module>
 	    <module>translator</module>
 		<module>plantdescriptionengine</module>

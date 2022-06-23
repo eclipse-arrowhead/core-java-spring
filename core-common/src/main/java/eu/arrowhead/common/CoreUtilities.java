@@ -14,13 +14,12 @@
 
 package eu.arrowhead.common;
 
+import eu.arrowhead.common.exception.BadPayloadException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
-
-import eu.arrowhead.common.exception.BadPayloadException;
 
 public class CoreUtilities {
 	
@@ -113,6 +112,10 @@ public class CoreUtilities {
 
 		public Pageable createPageable(final String... properties) {
 			return PageRequest.of(validatedPage, validatedSize, validatedDirection, properties);
+		}
+
+		public Pageable createPageRequest(final String validatedSortField) {
+			return PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField);
 		}
 	}
 }

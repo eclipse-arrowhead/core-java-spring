@@ -14,12 +14,12 @@
 
 package eu.arrowhead.common;
 
+import java.util.List;
+
 import eu.arrowhead.common.core.CoreSystemService;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.jws.AlgorithmIdentifiers;
-
-import java.util.List;
 
 public class CommonConstants {
 
@@ -46,6 +46,7 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_DEVICEREGISTRY = "Device Registry";
 	public static final String CORE_SYSTEM_ONBOARDING = "Onboarding Controller";
 	public static final String CORE_SYSTEM_MSCV = "Monitoring and Standard Compliance Verification";
+	public static final String CORE_SYSTEM_GAMS = "Generic Autonomic Management System";
 
 	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION = "token-generation";
 	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "auth-public-key";
@@ -134,6 +135,9 @@ public static final String CORE_SERVICE_QOSMONITOR_PUBLIC_KEY = "qos-monitor-pub
     public static final String CORE_SERVICE_TRANSLATOR_FIWARE = "translation-fiware-service";
     public static final String CORE_SERVICE_TRANSLATOR_PLUGIN = "translation-plugin-service";
 
+	public static final String CORE_SERVICE_GAMS_SERVICE = "gams-service";
+	public static final String CORE_SERVICE_GAMS_SENSOR_SERVICE = "gams-sensor-service";
+
 	public static final String COMMON_FIELD_NAME_ID = "id";
 	
 	public static final String ARROWHEAD_CONTEXT = "arrowheadContext";
@@ -168,7 +172,9 @@ public static final String CORE_SERVICE_QOSMONITOR_PUBLIC_KEY = "qos-monitor-pub
 	public static final String $SERVICEREGISTRY_ADDRESS_WD = "${" + SERVICEREGISTRY_ADDRESS + ":" + Defaults.DEFAULT_SERVICEREGISTRY_ADDRESS + "}";
 	public static final String SERVICEREGISTRY_PORT = "sr_port";
 	public static final String $SERVICEREGISTRY_PORT_WD = "${" + SERVICEREGISTRY_PORT + ":" + Defaults.DEFAULT_SERVICEREGISTRY_PORT + "}";
-	
+
+	public static final String GAMS_URI = "/gams";
+
 	public static final String ONBOARDING_URI = "/onboarding";
 	public static final String ONBOARDING_AUTH_WITH_CERTIFICATE_URI = "/certificate";
 	public static final String ONBOARDING_AUTH_WITH_SHARED_SECRET_URI = "/sharedsecret";
@@ -302,6 +308,9 @@ public static final String CORE_SERVICE_QOSMONITOR_PUBLIC_KEY = "qos-monitor-pub
 	public static final String OP_MSCV_LOGIN_URI = "/login";
 	public static final String OP_MSCV_PUBLIC_KEY_URI = "/publickey";
 
+	public static final String OP_GAMS_SERVICE_URI = "";
+	public static final String OP_GAMS_SENSOR_SERVICE_URI = "/{gams_uid}/sensor";
+
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
 	public static final String SWAGGER_HTTP_200_MESSAGE = "Core service is available";
@@ -314,10 +323,11 @@ public static final String CORE_SERVICE_QOSMONITOR_PUBLIC_KEY = "qos-monitor-pub
 	
 	public static final String ECHO_URI = "/echo";
 
-	public static final List<CoreSystemService> PUBLIC_CORE_SYSTEM_SERVICES = List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.AUTH_PUBLIC_KEY_SERVICE,
-  			  																		  CoreSystemService.EVENT_PUBLISH_SERVICE, CoreSystemService.EVENT_SUBSCRIBE_SERVICE, CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE,
+	public static final List<CoreSystemService> PUBLIC_CORE_SYSTEM_SERVICES = List.of(CoreSystemService.ORCHESTRATION_SERVICE,
+																					  CoreSystemService.AUTH_PUBLIC_KEY_SERVICE,
+																					  CoreSystemService.EVENT_PUBLISH_SERVICE, CoreSystemService.EVENT_SUBSCRIBE_SERVICE, CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE,
 																					  CoreSystemService.PROXY_SERVICE, CoreSystemService.HISTORIAN_SERVICE, CoreSystemService.CHOREOGRAPHER_SERVICE, CoreSystemService.TRANSLATOR_SERVICE,
-	       																			  CoreSystemService.CONFIGURATION_SERVICE, CoreSystemService.CONFIGURATION_RAW_SERVICE, CoreSystemService.TIME_SERVICE);
+																					  CoreSystemService.CONFIGURATION_SERVICE, CoreSystemService.CONFIGURATION_RAW_SERVICE, CoreSystemService.TIME_SERVICE);
 
 	
 	public static final String HTTP_CLIENT_CONNECTION_TIMEOUT = "http.client.connection.timeout";

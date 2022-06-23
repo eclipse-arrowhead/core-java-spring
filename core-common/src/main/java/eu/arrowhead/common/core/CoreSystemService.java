@@ -140,8 +140,12 @@ public enum CoreSystemService {
 	// Monitoring and Standard Verification Services
 	MSCV_VERIFICATION_SERVICE(CommonConstants.CORE_SERVICE_MSCV_VERIFICATION, CommonConstants.MSCV_URI + CommonConstants.OP_MSCV_EXECUTE_URI),
 	MSCV_PUBLIC_KEY_SERVICE(CommonConstants.CORE_SERVICE_MSCV_PUBLIC_KEY, CommonConstants.MSCV_URI + CommonConstants.OP_MSCV_PUBLIC_KEY_URI),
-	MSCV_LOGIN_SERVICE(CommonConstants.CORE_SERVICE_MSCV_LOGIN, CommonConstants.MSCV_URI + CommonConstants.OP_MSCV_LOGIN_URI);
+	MSCV_LOGIN_SERVICE(CommonConstants.CORE_SERVICE_MSCV_LOGIN, CommonConstants.MSCV_URI + CommonConstants.OP_MSCV_LOGIN_URI),
 
+
+	GAMS_SERVICE(CommonConstants.CORE_SERVICE_GAMS_SERVICE, CommonConstants.GAMS_URI + CommonConstants.OP_GAMS_SERVICE_URI),
+	GAMS_SENSOR_SERVICE(CommonConstants.CORE_SERVICE_GAMS_SENSOR_SERVICE, CommonConstants.GAMS_URI + CommonConstants.OP_GAMS_SENSOR_SERVICE_URI);
+	
 	//TODO: additional services 
 	
 	//=================================================================================================

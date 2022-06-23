@@ -87,6 +87,11 @@ CREATE USER IF NOT EXISTS 'translator'@'localhost' IDENTIFIED BY 'wozYpV58G0HUkb
 CREATE USER IF NOT EXISTS 'translator'@'%' IDENTIFIED BY 'wozYpV58G0HUkbL';
 source translator_privileges.sql
 
+-- GAMS
+CREATE USER IF NOT EXISTS 'gams'@'localhost' IDENTIFIED BY 'Kvtmcxrp5fxUCk4';
+CREATE USER IF NOT EXISTS 'gams'@'%' IDENTIFIED BY 'Kvtmcxrp5fxUCk4';
+source gams_privileges.sql
+
 -- Plant Description Engine
 CREATE USER IF NOT EXISTS 'plant_description_engine'@'localhost' IDENTIFIED BY 'ivJ2y9qWCpTmzr0';
 CREATE USER IF NOT EXISTS 'plant_description_engine'@'%' IDENTIFIED BY 'ivJ2y9qWCpTmzr0';

@@ -90,7 +90,7 @@ public enum CoreSystem {
 
     CONFIGURATION(Defaults.DEFAULT_CONFIGURATION_PORT, List.of(CoreSystemService.CONFIGURATION_SERVICE,
                                                                CoreSystemService.CONFIGURATION_RAW_SERVICE)),
-	
+
 	QOSMONITOR(Defaults.DEFAULT_QOSMONITOR_PORT, List.of(CoreSystemService.QOSMONITOR_INTRA_PING_MEASUREMENT_SERVICE,
 														   CoreSystemService.QOSMONITOR_INTRA_PING_MEDIAN_MEASUREMENT_SERVICE,
 														   CoreSystemService.QOSMONITOR_INTER_DIRECT_PING_MEASUREMENT_SERVICE,
@@ -107,7 +107,7 @@ public enum CoreSystem {
 																				CoreSystemService.CERTIFICATEAUTHORITY_CHECK_TRUSTED_KEY_SERVICE,
 																				CoreSystemService.CERTIFICATEAUTHORITY_ADD_TRUSTED_KEY_SERVICE,
 																				CoreSystemService.CERTIFICATEAUTHORITY_DELETE_TRUSTED_KEY_SERVICE)),
-																				
+
 	TRANSLATOR(Defaults.DEFAULT_TRANSLATOR_PORT, List.of(CoreSystemService.TRANSLATOR_SERVICE,
 												   CoreSystemService.TRANSLATOR_FIWARE_SERVICE,
 												   CoreSystemService.TRANSLATOR_PLUGIN_SERVICE)),
@@ -118,6 +118,11 @@ public enum CoreSystem {
 
 	PLANTDESCRIPTIONENGINE(Defaults.DEFAULT_PLANT_DESCRIPTION_ENGINE_PORT, List.of()), //TODO add PDE services
 
+
+
+	GAMS(Defaults.DEFAULT_GENERIC_AUTONOMIC_MANAGEMENT_PORT, List.of(CoreSystemService.GAMS_SERVICE,
+																	 CoreSystemService.GAMS_SENSOR_SERVICE)),
+	
 	HAWKBITCONFIGURATIONMANAGER(Defaults.DEFAULT_HAWKBIT_CONFIGURATION_MANAGER_PORT, List.of());
 
 	//=================================================================================================
