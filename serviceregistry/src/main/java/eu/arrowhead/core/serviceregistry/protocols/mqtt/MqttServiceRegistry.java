@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.SslUtil;
@@ -47,6 +48,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Component;
+import eu.arrowhead.common.exception.ArrowheadException;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -82,6 +84,9 @@ public class MqttServiceRegistry implements MqttCallback, Runnable {
 
   @Value(CoreCommonConstants.$MQTT_BROKER_PORT)
   private int mqttBrokerPort;
+
+  @Autowired
+  private SSLProperties sslProperties;
 
   @Value(CoreCommonConstants.$MQTT_BROKER_USERNAME)
   private String mqttBrokerUsername;
@@ -165,17 +170,27 @@ public class MqttServiceRegistry implements MqttCallback, Runnable {
       connOpts.setKeepAliveInterval(60);
       connOpts.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1);
 
-      if (!Utilities.isEmpty(mqttBrokerCAFile) && !Utilities.isEmpty(mqttBrokerCertFile) && !Utilities.isEmpty(mqttBrokerKeyFile)) {
+      /*if (!Utilities.isEmpty(mqttBrokerCAFile) && !Utilities.isEmpty(mqttBrokerCertFile) && !Utilities.isEmpty(mqttBrokerKeyFile)) {
       	SSLSocketFactory socketFactory = null;
         try {
-          socketFactory = SslUtil.getSslSocketFactory(mqttBrokerCAFile, mqttBrokerCertFile, mqttBrokerKeyFile, "");
+          socketFactory = SslUtil.getSSLSocketFactory(mqttBrokerCAFile, mqttBrokerCertFile, mqttBrokerKeyFile, "");
         } catch (Exception e) {
           logger.info("Could not open certificates: " + e.toString());
         }
 
       	connOpts.setSocketFactory(socketFactory);
+      }*/
+
+      if (sslProperties.isSslEnabled()) {
+	try {
+	  SSLSocketFactory socketFactory = null;
+	  socketFactory = SslUtil.getSSLSocketFactory(sslProperties);
+	  connOpts.setSocketFactory(socketFactory);
+	} catch (Exception e) {
+	  logger.info("Could not load certificate: " + e.toString());
+	}
       }
-      
+
       client.setCallback(this);
       client.connect(connOpts);
 
@@ -294,7 +309,7 @@ public class MqttServiceRegistry implements MqttCallback, Runnable {
     MqttResponseDTO response = null;
 
     try {
-      //logger.info("register(): " + new String(message.getPayload(), StandardCharsets.UTF_8));
+      logger.info("register(): " + new String(message.getPayload(), StandardCharsets.UTF_8));
       if (!request.getMethod().toLowerCase().equals("post")) {
 	return false;
       }
@@ -333,7 +348,7 @@ public class MqttServiceRegistry implements MqttCallback, Runnable {
 	throw new Exception("Security type is in conflict with the availability of the authentication info.");
       }
 
-      //logger.info("SRREQ:: " + serviceRegistryRequestDTO.toString());
+      logger.info("SRREQ:: " + serviceRegistryRequestDTO.toString());
       response = new MqttResponseDTO("200", "application/json", null);
       response.setPayload(serviceRegistryDBService.registerServiceResponse(serviceRegistryRequestDTO));
       MqttMessage resp = new MqttMessage(mapper.writeValueAsString(response).getBytes());
