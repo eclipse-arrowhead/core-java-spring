@@ -126,9 +126,9 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_ONBOARDING_WITH_SHARED_SECRET_AND_NAME = "onboarding-with-shared-secret-and-name";
 	public static final String CORE_SERVICE_ONBOARDING_WITH_SHARED_SECRET_AND_CSR = "onboarding-with-shared-secret-and-csr";
 
-    public static final String CORE_SERVICE_TRANSLATOR = "translation-service";
-    public static final String CORE_SERVICE_TRANSLATOR_FIWARE = "translation-fiware-service";
-    public static final String CORE_SERVICE_TRANSLATOR_PLUGIN = "translation-plugin-service";
+	public static final String CORE_SERVICE_TRANSLATOR = "translation-service";
+	public static final String CORE_SERVICE_TRANSLATOR_FIWARE = "translation-fiware-service";
+	public static final String CORE_SERVICE_TRANSLATOR_PLUGIN = "translation-plugin-service";
 
 	public static final String COMMON_FIELD_NAME_ID = "id";
 	
@@ -288,9 +288,9 @@ public class CommonConstants {
 	public static final String TIMEMANAGER_URI = "/timemanager";
 	public static final String OP_TIMEMANAGER_TIME = "/time";
 
-    public static final String TRANSLATOR_URI = "/translator";
-    public static final String OP_TRANSLATOR_FIWARE_URI = "/v2";
-    public static final String OP_TRANSLATOR_PLUGIN_URI = "/plugin";
+	public static final String TRANSLATOR_URI = "/translator";
+	public static final String OP_TRANSLATOR_FIWARE_URI = "/v2";
+	public static final String OP_TRANSLATOR_PLUGIN_URI = "/plugin";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";

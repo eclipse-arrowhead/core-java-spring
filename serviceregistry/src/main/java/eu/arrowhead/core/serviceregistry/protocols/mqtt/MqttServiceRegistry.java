@@ -143,9 +143,9 @@ public class MqttServiceRegistry implements MqttCallback, Runnable {
         logger.info("Missing MQTT broker username or password! Using anonymoues login.");
       }
 
-      if(Utilities.isEmpty(mqttBrokerCAFile) || Utilities.isEmpty(mqttBrokerCertFile) || Utilities.isEmpty(mqttBrokerKeyFile)) {
+      /*if(Utilities.isEmpty(mqttBrokerCAFile) || Utilities.isEmpty(mqttBrokerCertFile) || Utilities.isEmpty(mqttBrokerKeyFile)) {
         logger.info("Missing MQTT broker certificate/key files! Running without encryption");
-      }
+      }*/
       
       mapper = new ObjectMapper();
       mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
