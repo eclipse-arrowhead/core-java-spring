@@ -107,10 +107,6 @@ public class MqttOrchestrator implements MqttCallback, Runnable {
         logger.info("Missing MQTT broker username or password! Using anonymoues login.");
       }
 
-      /*if(Utilities.isEmpty(mqttBrokerCAFile) || Utilities.isEmpty(mqttBrokerCertFile) || Utilities.isEmpty(mqttBrokerKeyFile)) {
-        logger.info("Missing MQTT broker certificate/key files!");
-      }*/
-      
       mapper = new ObjectMapper();
       mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -134,14 +130,6 @@ public class MqttOrchestrator implements MqttCallback, Runnable {
       connOpts.setConnectionTimeout(60);
       connOpts.setKeepAliveInterval(60);
       connOpts.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1);
-
-      /*SSLSocketFactory socketFactory = null;
-      try {
-        socketFactory = SslUtil.getSSLSocketFactory(mqttBrokerCAFile, mqttBrokerCertFile, mqttBrokerKeyFile, "");
-      } catch (Exception e) {
-        logger.info("Could not open certificates: " + e.toString());
-      }
-      connOpts.setSocketFactory(socketFactory);*/
 
       if (sslProperties.isSslEnabled()) {
 	try {
