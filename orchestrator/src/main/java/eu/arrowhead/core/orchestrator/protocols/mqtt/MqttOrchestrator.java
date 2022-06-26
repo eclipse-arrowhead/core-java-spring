@@ -275,74 +275,15 @@ public class MqttOrchestrator implements MqttCallback, Runnable {
 
     switch (topic) {
       case ECHO_TOPIC:
-        logger.info("ah/orchestration/echo(): " + new String(message.getPayload(), StandardCharsets.UTF_8));
-        if (!request.getMethod().equalsIgnoreCase("get")) {
-          return;
-        }
-        try {
-          response = new MqttResponseDTO("200", "text/plain", "Got it");
-          MqttMessage resp = new MqttMessage(Utilities.toJson(response).getBytes());
-          resp.setQos(2);
-          client.publish(request.getReplyTo(), resp);
-        } catch (MqttException mex) {
-          logger.info("echo(): Couldn't reply " + mex.toString());
-        }
-        break;
+
+        handleEcho(topic, message, request);
+        return;
+
       case ORCHESTRATION_TOPIC:
-        logger.info("ah/orchestration(): " + new String(message.getPayload(), StandardCharsets.UTF_8));
-        if (!request.getMethod().equalsIgnoreCase("post")) {
-          return;
-        }
 
-        try {
-          OrchestrationFormRequestDTO orchRequest = mapper.convertValue(request.getPayload(),
-              OrchestrationFormRequestDTO.class);
+        handleOrchestration(topic, message, request);
+        return;
 
-          final String origin = CommonConstants.ORCHESTRATOR_URI + CommonConstants.CORE_SERVICE_ORCH_PROCESS;
-          checkOrchestratorFormRequestDTO(orchRequest, origin);
-
-          if (orchRequest.getOrchestrationFlags().getOrDefault(Flag.EXTERNAL_SERVICE_REQUEST, false)) {
-            if (!gatekeeperIsPresent) {
-              throw new Exception("External service request, Gatekeeper is not present.");
-            }
-            response = new MqttResponseDTO("200", "application/json", null);
-            response.setPayload(orchestratorService.externalServiceRequest(orchRequest));
-            MqttMessage resp = new MqttMessage(mapper.writeValueAsString(response).getBytes());
-            resp.setQos(2);
-            client.publish(request.getReplyTo(), resp);
-          } else if (orchRequest.getOrchestrationFlags().getOrDefault(Flag.TRIGGER_INTER_CLOUD, false)) {
-            if (!gatekeeperIsPresent) {
-              throw new Exception("External service request, Gatekeeper is not present.");
-            }
-            response = new MqttResponseDTO("200", "application/json", null);
-            response.setPayload(orchestratorService.triggerInterCloud(orchRequest));
-            MqttMessage resp = new MqttMessage(mapper.writeValueAsString(response).getBytes());
-            resp.setQos(2);
-            client.publish(request.getReplyTo(), resp);
-          } else if (!orchRequest.getOrchestrationFlags().getOrDefault(Flag.OVERRIDE_STORE, false)) {
-            response = new MqttResponseDTO("200", "application/json", null);
-            response.setPayload(orchestratorService.orchestrationFromStore(orchRequest));
-            MqttMessage resp = new MqttMessage(mapper.writeValueAsString(response).getBytes());
-            resp.setQos(2);
-            client.publish(request.getReplyTo(), resp);
-          } else {
-            response = new MqttResponseDTO("200", "application/json", null);
-            response.setPayload(orchestratorService.dynamicOrchestration(orchRequest));
-            MqttMessage resp = new MqttMessage(mapper.writeValueAsString(response).getBytes());
-            resp.setQos(2);
-            client.publish(request.getReplyTo(), resp);
-          }
-
-        } catch (Exception ex) {
-          try {
-            response = new MqttResponseDTO("500", "text/plain", null);
-            MqttMessage resp = new MqttMessage(mapper.writeValueAsString(response).getBytes());
-            resp.setQos(2);
-            client.publish(request.getReplyTo(), resp);
-          } catch (Exception mex) {
-          }
-        }
-        break;
       case ORCHESTRATION_BY_ID_TOPIC:
         logger.info("orchestration/id(): " + new String(message.getPayload(), StandardCharsets.UTF_8));
         if (!request.getMethod().toLowerCase().equals("post")) {
@@ -377,4 +318,91 @@ public class MqttOrchestrator implements MqttCallback, Runnable {
 
   }
 
+  //-------------------------------------------------------------------------------------------------
+  private boolean handleEcho(String topic, MqttMessage message, MqttRequestDTO request) {
+    logger.info(request.getMethod() + " echo(): " + new String(message.getPayload(), StandardCharsets.UTF_8));
+    if (!request.getMethod().toLowerCase().equals("get")) {
+      return false;
+    }
+
+    try {
+      MqttResponseDTO response = new MqttResponseDTO("200", "text/plain", new String("Got it"));
+      MqttMessage resp = new MqttMessage(Utilities.toJson(response).getBytes());
+      resp.setQos(2);
+      client.publish(request.getReplyTo(), resp);
+      return true;
+    } catch (MqttException mex) {
+      logger.info("echo(): Couldn't reply " + mex.toString());
+    } 
+    return false;
+  }
+
+  //-------------------------------------------------------------------------------------------------
+  private boolean handleOrchestration(String topic, MqttMessage message, MqttRequestDTO request) {
+    MqttResponseDTO response = null;
+  
+    logger.info("ah/orchestration(): " + new String(message.getPayload(), StandardCharsets.UTF_8));
+        if (!request.getMethod().equalsIgnoreCase("post")) {
+          return false;
+        }
+
+        try {
+          OrchestrationFormRequestDTO orchRequest = mapper.convertValue(request.getPayload(),
+              OrchestrationFormRequestDTO.class);
+
+          final String origin = CommonConstants.ORCHESTRATOR_URI + CommonConstants.CORE_SERVICE_ORCH_PROCESS;
+          checkOrchestratorFormRequestDTO(orchRequest, origin);
+
+          if (orchRequest.getOrchestrationFlags().getOrDefault(Flag.EXTERNAL_SERVICE_REQUEST, false)) {
+            if (!gatekeeperIsPresent) {
+              throw new Exception("External service request, Gatekeeper is not present.");
+            }
+            response = new MqttResponseDTO("200", "application/json", null);
+            response.setPayload(orchestratorService.externalServiceRequest(orchRequest));
+            MqttMessage resp = new MqttMessage(mapper.writeValueAsString(response).getBytes());
+            resp.setQos(2);
+            client.publish(request.getReplyTo(), resp);
+
+	    return true;
+          } else if (orchRequest.getOrchestrationFlags().getOrDefault(Flag.TRIGGER_INTER_CLOUD, false)) {
+            if (!gatekeeperIsPresent) {
+              throw new Exception("External service request, Gatekeeper is not present.");
+            }
+            response = new MqttResponseDTO("200", "application/json", null);
+            response.setPayload(orchestratorService.triggerInterCloud(orchRequest));
+            MqttMessage resp = new MqttMessage(mapper.writeValueAsString(response).getBytes());
+            resp.setQos(2);
+            client.publish(request.getReplyTo(), resp);
+
+	    return true;
+          } else if (!orchRequest.getOrchestrationFlags().getOrDefault(Flag.OVERRIDE_STORE, false)) {
+            response = new MqttResponseDTO("200", "application/json", null);
+            response.setPayload(orchestratorService.orchestrationFromStore(orchRequest));
+            MqttMessage resp = new MqttMessage(mapper.writeValueAsString(response).getBytes());
+            resp.setQos(2);
+            client.publish(request.getReplyTo(), resp);
+
+	    return true;
+          } else {
+            response = new MqttResponseDTO("200", "application/json", null);
+            response.setPayload(orchestratorService.dynamicOrchestration(orchRequest));
+            MqttMessage resp = new MqttMessage(mapper.writeValueAsString(response).getBytes());
+            resp.setQos(2);
+            client.publish(request.getReplyTo(), resp);
+
+	    return true;
+          }
+
+        } catch (Exception ex) {
+          try {
+            response = new MqttResponseDTO("500", "text/plain", null);
+            MqttMessage resp = new MqttMessage(mapper.writeValueAsString(response).getBytes());
+            resp.setQos(2);
+            client.publish(request.getReplyTo(), resp);
+          } catch (Exception mex) {
+          }
+	}
+
+	return false;
+  }
 }

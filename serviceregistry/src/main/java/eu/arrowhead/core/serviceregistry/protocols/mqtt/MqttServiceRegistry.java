@@ -271,6 +271,7 @@ public class MqttServiceRegistry implements MqttCallback, Runnable {
   public void deliveryComplete(IMqttDeliveryToken token) {
   }
 
+  //-------------------------------------------------------------------------------------------------
   private boolean handleEcho(String topic, MqttMessage message, MqttRequestDTO request) {
     logger.info(request.getMethod() + " echo(): " + new String(message.getPayload(), StandardCharsets.UTF_8));
     if (!request.getMethod().toLowerCase().equals("get")) {
