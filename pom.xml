@@ -39,9 +39,12 @@
 	    <module>systemregistry</module>
 	    <module>deviceregistry</module>
 	    <module>onboarding</module>
+		<module>mscv</module>
+		<module>gams</module>
 	    <module>qos-monitor</module>
 	    <module>translator</module>
 		<module>plantdescriptionengine</module>
+		<module>hawkbit-configuration-manager</module>
 	    <module>deb-installer</module>
 	    <module>docker-all</module>
   	</modules>
@@ -215,6 +218,7 @@
 				<artifactId>gson</artifactId>
 				<version>${google.gson.version}</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>commons-net</groupId>
 			<artifactId>commons-net</artifactId>

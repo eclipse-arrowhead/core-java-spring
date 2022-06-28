@@ -1,75 +1,90 @@
 package eu.arrowhead.core.translator.services.translator;
 
-import eu.arrowhead.core.translator.services.translator.common.TranslatorSetup;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.arrowhead.core.translator.services.translator.common.TranslatorHubAccess;
-import eu.arrowhead.core.translator.services.translator.common.TranslatorDef.EndPoint;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import org.springframework.stereotype.Service;
+
+import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.core.translator.services.translator.common.TranslatorHubDTO;
+import eu.arrowhead.core.translator.services.translator.common.TranslatorSetupDTO;
+import eu.arrowhead.core.translator.services.translator.common.Translation.Protocol;
 
 @Service
 public class TranslatorService {
+  // =================================================================================================
+  // members
+  private final Logger logger = LogManager.getLogger(TranslatorService.class);
+  private final Map<Integer, TranslatorHub> hubs = new HashMap<>();
 
-    //=================================================================================================
-    // members
-    private final Logger logger = LogManager.getLogger(TranslatorService.class);
-    private final Map<Integer, TranslatorHub> hubs = new HashMap<>();
+  // =================================================================================================
+  // methods
+  // -------------------------------------------------------------------------------------------------
+  public void start() {
+    logger.info("Starting Translator Service");
+  }
 
-    //=================================================================================================
-    // methods
-    //-------------------------------------------------------------------------------------------------
-    public void start() {
-        logger.debug("Starting TranslatorService");
-    }
+  // -------------------------------------------------------------------------------------------------
+  public TranslatorHubDTO createTranslatorHub(TranslatorSetupDTO setup) {
+    int id = checkSetupDTO(setup);
+    if (hubs.containsKey(id))
+      throw new ArrowheadException("This Translator Hub already exists", HttpStatus.SC_CONFLICT);
+    TranslatorHub hub = new TranslatorHub(id, setup);
+    hubs.put(id, hub);
+    return hub.getDTO();
+  }
 
-    //-------------------------------------------------------------------------------------------------
-    public TranslatorHubAccess createTranslationHub(TranslatorSetup setup, String outgoingIp) throws Exception {
-        logger.debug("create Translation Hub");
-        logger.debug("ip: " + outgoingIp);
-        logger.debug("setup: " + new ObjectMapper().writeValueAsString(setup));
+  // -------------------------------------------------------------------------------------------------
+  public TranslatorHubDTO getTranslatorHubDTO(int id) {
+    if (!hubs.containsKey(id))
+      throw new ArrowheadException(String.format("Translator Hub id %d does NOT exists", id), HttpStatus.SC_CONFLICT);
+    return hubs.get(id).getDTO();
+  }
 
-        EndPoint consumerEP = new EndPoint(setup.getConsumerName(), setup.getConsumerAddress());
-        EndPoint producerEP = new EndPoint(setup.getProducerName(), setup.getProducerAddress());
+  // -------------------------------------------------------------------------------------------------
+  public void deleteHub(int id) {
+    if (!hubs.containsKey(id))
+      throw new ArrowheadException(String.format("Translator Hub id %d does NOT exists", id), HttpStatus.SC_CONFLICT);
+    // Get hub
+    TranslatorHub hub = hubs.get(id);
+    // remove it
+    hubs.remove(id);
 
-        if (consumerEP.isLocal() || producerEP.isLocal()) {
-            logger.warn("Not valid ip address, we need absolute address, not relative (as 127.0.0.1 or localhost)");
-            throw new Exception("Not valid ip address, we need absolute address, not relative (as 127.0.0.1 or localhost)");
-        } else {
+  }
 
-            int translatorId = (producerEP.getName() + consumerEP.getName()).hashCode();
-            if (!hubs.isEmpty() && hubs.containsKey(translatorId)) {
-                logger.debug("Hub already exists!");
-                TranslatorHub existingHub = hubs.get(translatorId);
-                return new TranslatorHubAccess(existingHub.getTranslatorId(), outgoingIp, existingHub.getHubPort());
-            } else {
-                logger.debug("Creating a new Hub: ClientSpoke type:" + consumerEP.getProtocol() + " ServerSpoke type: " + producerEP.getProtocol());
-                TranslatorHub hub = new TranslatorHub(translatorId, consumerEP, producerEP);
-                hubs.put(translatorId, hub);
-                return new TranslatorHubAccess(hub.getTranslatorId(), outgoingIp, hub.getHubPort());
-            }
-        }
-    }
+  // -------------------------------------------------------------------------------------------------
+  public ArrayList<TranslatorHubDTO> getHubsList() {
+    ArrayList<TranslatorHubDTO> list = new ArrayList<TranslatorHubDTO>();
+    hubs.entrySet().forEach((entry) -> {
+      list.add(entry.getValue().getDTO());
+    });
+    return list;
+  }
 
-    //-------------------------------------------------------------------------------------------------
-    public ArrayList<TranslatorHubAccess> getAllHubs(String localOutgoingIp) {
-        ArrayList<TranslatorHubAccess> response = new ArrayList<>();
-        hubs.entrySet().forEach((entry) -> {
-            response.add(new TranslatorHubAccess(entry.getValue().getTranslatorId(), localOutgoingIp, entry.getValue().getHubPort()));
-        });
-        return response;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    public TranslatorHubAccess getHub(int translatorId, String localOutgoingIp) throws Exception {
-        TranslatorHub hub = hubs.get(translatorId);
-        if (hub == null) {
-            throw new Exception("Not Found");
-        }
-        return new TranslatorHubAccess(translatorId, localOutgoingIp, hub.getHubPort());
-    }
-
+  // =================================================================================================
+  // assistant methods
+  // -------------------------------------------------------------------------------------------------
+  private int checkSetupDTO(TranslatorSetupDTO setup) {
+    if (setup == null)
+      throw new ArrowheadException("Empty TranslatorSetupDTO", HttpStatus.SC_BAD_REQUEST);
+    if (setup.getIn() == null)
+      throw new ArrowheadException("Empty In Interface", HttpStatus.SC_BAD_REQUEST);
+    if (setup.getIn().getProtocol() == null || setup.getOut().getProtocol() == Protocol.UNKOWN)
+      throw new ArrowheadException("Empty In Interface Protocol", HttpStatus.SC_BAD_REQUEST);
+    if (setup.getOut() == null)
+      throw new ArrowheadException("Empty Out Interface", HttpStatus.SC_BAD_REQUEST);
+    if (setup.getOut().getIp() == null)
+      throw new ArrowheadException("Empty Out Interface Ip Address", HttpStatus.SC_BAD_REQUEST);
+    if (setup.getOut().getPort() < 1 || setup.getIn().getPort() > 65535)
+      throw new ArrowheadException("Wrong Out Interface Port number", HttpStatus.SC_BAD_REQUEST);
+    if (setup.getOut().getProtocol() == null || setup.getOut().getProtocol() == Protocol.UNKOWN)
+      throw new ArrowheadException("Empty Out Interface Protocol", HttpStatus.SC_BAD_REQUEST);
+    return (setup.getIn().getProtocol() + setup.getOut().getIp() + setup.getOut().getPort()
+        + setup.getOut().getProtocol()).hashCode();
+  }
 }

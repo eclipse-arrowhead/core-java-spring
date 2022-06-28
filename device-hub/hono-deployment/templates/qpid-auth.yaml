@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: qpid-auth
+type: Opaque
+data:
+  truststore.pem: {{ .Files.Get "static/certs/local-cloud.pem" | b64enc }}
+  adapter-cert.pem: {{ .Files.Get "static/certs/adapter-cert.pem" | b64enc }}
+  adapter-key.pem: {{ .Files.Get "static/certs/adapter-key.pem" | b64enc }}
+  router-cert.pem: {{ .Files.Get "static/certs/router-cert.pem" | b64enc }}
+  router-key.pem: {{ .Files.Get "static/certs/router-key.pem" | b64enc }}

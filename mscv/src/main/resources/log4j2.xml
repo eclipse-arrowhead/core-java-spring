@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+    <Properties>
+        <Property name="LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex
+        </Property>
+		<Property name="JDBC_LEVEL">INFO</Property>
+		<Property name="ARROWHEAD_CONSOLE_FILE_LEVEL">DEBUG</Property>
+		<Property name="CONSOLE_FILE_LEVEL">INFO</Property>
+		<Property name="LOG_DIR">.</Property>
+    </Properties>
+	<Appenders>
+        <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+		<RollingFile name="FileAppender" fileName="${LOG_DIR}/mscv.log" filePattern="${LOG_DIR}/mscv-%d{yyyy-MM-dd}-%i.log">
+	    	<PatternLayout>
+	        	<Pattern>${LOG_PATTERN}</Pattern>
+	    	</PatternLayout>
+	    	<Policies>
+	        	<SizeBasedTriggeringPolicy size="100MB" />
+	    	</Policies>
+	    	<DefaultRolloverStrategy max="10" />
+		</RollingFile>
+		<JDBC name="MySQLDatabase" tableName="logs">
+         	<ConnectionFactory class="eu.arrowhead.common.log4j2.JDBCConnectionFactoryForLog4J2" method="getConnection" />
+         	<Column name="log_id" pattern="%u" />
+         	<Column name="entry_date" isEventTimestamp="true" />
+         	<Column name="logger" pattern="%logger" />
+         	<Column name="log_level" pattern="%level" />
+         	<Column name="message" pattern="%m" />
+         	<Column name="exception" pattern="%throwable " />
+			<ThresholdFilter level="${JDBC_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+		</JDBC>
+    </Appenders>
+    <Loggers>
+		<Root level="WARN">
+            <AppenderRef ref="ConsoleAppender" /> <!-- comment out this one in production environment -->
+            <AppenderRef ref="FileAppender" />
+        </Root>
+		<AsyncLogger name="eu.arrowhead" level="${JDBC_LEVEL}" additivity="true">
+            <AppenderRef ref="MySQLDatabase" />			
+    	</AsyncLogger>
+		<Logger name="eu.arrowhead.common" level="${ARROWHEAD_CONSOLE_FILE_LEVEL}" additivity="true"/>
+		<Logger name="eu.arrowhead.core" level="${ARROWHEAD_CONSOLE_FILE_LEVEL}" additivity="true"/>
+		<Logger name="org.springframework.web" level="${CONSOLE_FILE_LEVEL}" additivity="true"/>
+		<Logger name="org.springframework.security" level="${CONSOLE_FILE_LEVEL}" additivity="true"/>
+		<Logger name="org.quartz" level="${CONSOLE_FILE_LEVEL}" additivity="true"/>
+    </Loggers>
+</Configuration>

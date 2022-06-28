@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.authorization.address }}
+spec:
+  selector:
+    app: authorization
+  ports:
+    - port: {{ .Values.authorization.port }}
+      targetPort: {{ .Values.authorization.port }}
+  type: ClusterIP

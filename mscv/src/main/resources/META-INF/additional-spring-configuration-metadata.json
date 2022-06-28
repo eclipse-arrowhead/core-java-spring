@@ -1,0 +1,104 @@
+{
+  "properties": [
+    {
+      "name": "disable.hostname.verifier",
+      "type": "java.lang.Boolean",
+      "description": "A description for 'disable.hostname.verifier'."
+    },
+    {
+      "name": "log_all_request_and_response",
+      "type": "java.lang.Boolean",
+      "description": "A description for 'log_all_request_and_response'."
+    },
+    {
+      "name": "core_system_name",
+      "type": "java.lang.String",
+      "description": "A description for 'core_system_name'."
+    },
+    {
+      "name": "domain.name",
+      "type": "java.lang.String",
+      "description": "A description for 'domain.name'."
+    },
+    {
+      "name": "domain.port",
+      "type": "java.lang.Integer",
+      "description": "A description for 'domain.port'."
+    },
+    {
+      "name": "sr_address",
+      "type": "java.lang.String",
+      "description": "Service Registry address."
+    },
+    {
+      "name": "sr_port",
+      "type": "java.lang.Integer",
+      "description": "Service Registry port."
+    },
+    {
+      "name": "mscv.list-name",
+      "type": "java.lang.String",
+      "description": "The name of the default verification list, which will be executed unless otherwise defined."
+    },
+    {
+      "name": "mscv.mip-weight",
+      "type": "java.lang.Short",
+      "description": "The weight of all MIPs in the compliance algorithm."
+    },
+    {
+      "name": "mscv.verification-interval",
+      "type": "java.lang.Long",
+      "description": "The verification interval of a specific List in minutes."
+    },
+    {
+      "name": "mscv.os",
+      "type": "eu.arrowhead.common.dto.shared.mscv.OS",
+      "description": "Assumed Operating System."
+    },
+    {
+      "name": "mscv.ssh.port",
+      "type": "java.lang.Integer",
+      "description": "Default SSH port."
+    },
+    {
+      "name": "mscv.ssh.connect-timeout",
+      "type": "java.lang.Long",
+      "description": "The timeout (in seconds) for connecting to SSH targets."
+    },
+    {
+      "name": "mscv.ssh.auth-timeout",
+      "type": "java.lang.Long",
+      "description": "The timeout (in seconds) for authentication on SSH targets."
+    },
+    {
+      "name": "mscv.ssh.private-key-file",
+      "type": "java.io.File",
+      "description": "The path to the SSH private key file."
+    },
+    {
+      "name": "mscv.ssh.public-key-file",
+      "type": "java.io.File",
+      "description": "The path to the SSH public key file."
+    },
+    {
+      "name": "mscv.ssh.key-pair-file",
+      "type": "java.io.File",
+      "description": "The path to a file which contains a KeyPair."
+    },
+    {
+      "name": "mscv.ssh.private-key-password",
+      "type": "java.lang.String",
+      "description": "The password of the private key file. If there is no password, the property 'mscv.ssh.empty-password' must be set to true."
+    },
+    {
+      "name": "mscv.ssh.empty-password",
+      "type": "java.lang.Boolean",
+      "description": "Indicates if the private key needs a password."
+    },
+    {
+      "name": "mscv.scripts-path",
+      "type": "java.lang.String",
+      "description": "The default path for scripts."
+    }
+  ]
+}

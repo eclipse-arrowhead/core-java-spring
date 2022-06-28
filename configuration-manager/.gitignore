@@ -1,0 +1,10 @@
+# Ignore Maven build output directory
+target
+
+# Custom files
+.settings
+.classpath
+bin
+.project
+lombok.config
+.vscode

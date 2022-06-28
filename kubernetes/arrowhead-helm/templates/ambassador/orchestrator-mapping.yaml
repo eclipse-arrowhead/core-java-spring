@@ -1,0 +1,7 @@
+apiVersion: getambassador.io/v3alpha1
+kind: TCPMapping
+metadata:
+  name: orchestrator-mapping
+spec:
+  port: 3002
+  service: {{ printf "%s:%v" .Values.orchestrator.address .Values.orchestrator.port }}

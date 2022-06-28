@@ -63,7 +63,7 @@ public class DeviceRegistryController {
 
 	//=================================================================================================
 	// members
-	
+
     private static final String DEVICEREGISTRY_REGISTER_DESCRIPTION = "Registers a device";
     private static final String DEVICEREGISTRY_REGISTER_201_MESSAGE = "Device registered";
     private static final String DEVICEREGISTRY_REGISTER_400_MESSAGE = "Could not register device";
@@ -79,7 +79,7 @@ public class DeviceRegistryController {
     private static final String DEVICEREGISTRY_QUERY_BY_DEVICE_DTO_DESCRIPTION = "Return Device by requested dto";
     private static final String DEVICEREGISTRY_QUERY_BY_DEVICE_DTO_200_MESSAGE = "Consumer Device data by requestDTO returned";
     private static final String DEVICEREGISTRY_QUERY_BY_DEVICE_DTO_400_MESSAGE = "Could not query Device Registry by Consumer device requestDTO";
-    
+
     private final Logger logger = LogManager.getLogger(DeviceRegistryController.class);
     private final DeviceRegistryDBService deviceRegistryDBService;
     private final SecurityUtilities securityUtilities;
@@ -96,7 +96,7 @@ public class DeviceRegistryController {
     	this.securityUtilities = securityUtilities;
     	this.validation = new Validation();
     }
-    
+
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return an echo message with the purpose of testing the core device availability", response = String.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
     @ApiResponses(value = {
@@ -225,7 +225,7 @@ public class DeviceRegistryController {
 
     //=================================================================================================
     // assistant methods
-    
+
     //-------------------------------------------------------------------------------------------------
 	private String getBaseOrigin() {
         return CommonConstants.DEVICEREGISTRY_URI;

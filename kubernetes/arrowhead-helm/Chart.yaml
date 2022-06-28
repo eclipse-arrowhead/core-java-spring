@@ -1,0 +1,14 @@
+apiVersion: v2
+name: arrowhead
+description: A Helm chart for the Arrowhead core systems
+
+type: application
+
+version: 1.0.0
+
+appVersion: 4.4.0
+
+dependencies:
+  - name: emissary-ingress
+    version: 7.2.0
+    repository: https://app.getambassador.io

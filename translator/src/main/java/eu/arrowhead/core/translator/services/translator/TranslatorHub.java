@@ -1,128 +1,120 @@
 package eu.arrowhead.core.translator.services.translator;
 
-import eu.arrowhead.core.translator.services.translator.common.TranslatorDef.EndPoint;
-import eu.arrowhead.core.translator.services.translator.spokes.BaseSpokeConsumer;
-import eu.arrowhead.core.translator.services.translator.spokes.CoapConsumerSpoke;
-import eu.arrowhead.core.translator.services.translator.spokes.CoapProducerSpoke;
-import eu.arrowhead.core.translator.services.translator.spokes.HttpConsumerSpoke;
-import eu.arrowhead.core.translator.services.translator.spokes.HttpProducerSpoke;
-
-import eu.arrowhead.common.exception.ArrowheadException;
-
-import java.net.URI;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import eu.arrowhead.core.translator.services.translator.spokes.BaseSpokeProducer;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
+import java.net.ServerSocket;
+import java.net.URI;
+import java.util.Random;
+
 import org.apache.http.HttpStatus;
 
+import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.core.translator.services.translator.common.TranslatorHubDTO;
+import eu.arrowhead.core.translator.services.translator.common.TranslatorSetupDTO;
+import eu.arrowhead.core.translator.services.translator.protocols.CoapIn;
+import eu.arrowhead.core.translator.services.translator.protocols.CoapOut;
+import eu.arrowhead.core.translator.services.translator.protocols.HttpIn;
+import eu.arrowhead.core.translator.services.translator.protocols.HttpOut;
+import eu.arrowhead.core.translator.services.translator.protocols.MqttIn;
+import eu.arrowhead.core.translator.services.translator.protocols.MqttOut;
+import eu.arrowhead.core.translator.services.translator.protocols.ProtocolIn;
+import eu.arrowhead.core.translator.services.translator.protocols.ProtocolOut;
+import eu.arrowhead.core.translator.services.translator.protocols.WsIn;
+import eu.arrowhead.core.translator.services.translator.protocols.WsOut;
+
 public class TranslatorHub {
+  // =================================================================================================
+  // members
+  private final int id;
+  private final TranslatorSetupDTO setup;
+  private ProtocolIn protocolIn;
+  private ProtocolOut protocolOut;
 
-    //=================================================================================================
-    // members
-    private final Logger logger = LogManager.getLogger(TranslatorHub.class);
-    private final int id;
-    private final BaseSpokeProducer pSpoke;
-    private final BaseSpokeConsumer cSpoke;
-    private final String hubIp = "0.0.0.0";
-    private final int hubPort;
+  public TranslatorHub(int id, TranslatorSetupDTO setup) {
+    this.setup = setup;
+    this.id = id;
+    startHub();
+  }
 
-    public TranslatorHub(int id, EndPoint pSpokeConsumer, EndPoint cSpokeProvider) throws ArrowheadException {
-        this.id = id;
-        checkEndpoint(pSpokeConsumer);
-        checkEndpoint(cSpokeProvider);
+  // =================================================================================================
+  // methods
+  // -------------------------------------------------------------------------------------------------
+  public TranslatorHubDTO getDTO() {
+    return new TranslatorHubDTO(id, setup.getIn(), setup.getOut());
+  }
 
-        try {
+  // =================================================================================================
+  // assistant methods
+  // -------------------------------------------------------------------------------------------------
+  private void startHub() {
+    try {
+      switch (setup.getIn().getProtocol()) {
+        case COAP:
+          setup.getIn().setPort(getAvailablePort());
+          protocolIn = new CoapIn(new URI("coap://0.0.0.0:" + setup.getIn().getPort()));
+          break;
+        case HTTP:
+          setup.getIn().setPort(getAvailablePort());
+          protocolIn = new HttpIn(new URI("http://0.0.0.0:" + setup.getIn().getPort()));
+          break;
+        case MQTT:
+          setup.getIn().setPort(getRandomNumber());
+          protocolIn = new MqttIn(new URI("tcp://127.0.0.1:" + setup.getIn().getPort()));
+          break;
+        case WS:
+          setup.getIn().setPort(getAvailablePort());
+          protocolIn = new WsIn(new URI("ws://0.0.0.0:" + setup.getIn().getPort()));
+          break;
+        default:
+          throw new ArrowheadException("Unknown Protocol In: " + setup.getIn().getProtocol(),
+              HttpStatus.SC_INTERNAL_SERVER_ERROR);
+      }
 
-            switch (pSpokeConsumer.getProtocol()) {
-                case coap:
-                    pSpoke = new CoapProducerSpoke(hubIp);
-                    hubPort = new URI(pSpoke.getAddress()).getPort();
-                    break;
-                case http:
-                    pSpoke = new HttpProducerSpoke(hubIp, "/*");
-                    hubPort = new URI(pSpoke.getAddress()).getPort();
-                    break;
-                default:
-                    throw new ArrowheadException("Unknown protocol " + pSpokeConsumer.getProtocol(), HttpStatus.SC_BAD_REQUEST);
-            }
+      switch (setup.getOut().getProtocol()) {
+        case COAP:
+          protocolOut = new CoapOut(new URI("coap://" + setup.getOut().getIp() + ":" + setup.getOut().getPort()));
+          break;
+        case HTTP:
+          protocolOut = new HttpOut(new URI("http://" + setup.getOut().getIp() + ":" + setup.getOut().getPort()));
+          break;
+        case MQTT:
+          protocolOut = new MqttOut(new URI("tcp://" + setup.getOut().getIp() + ":" + setup.getOut().getPort()));
+          break;
+        case WS:
+          protocolOut = new WsOut(new URI("ws://" + setup.getOut().getIp() + ":" + setup.getOut().getPort()));
+          break;
+        default:
+          throw new ArrowheadException("Unknown Protocol Out: " + setup.getOut().getProtocol(),
+              HttpStatus.SC_INTERNAL_SERVER_ERROR);
+      }
 
-            switch (cSpokeProvider.getProtocol()) {
-                case coap:
-                    cSpoke = new CoapConsumerSpoke(cSpokeProvider.getHostIpAddress());
-                    break;
-                case http:
-                    cSpoke = new HttpConsumerSpoke(cSpokeProvider.getHostIpAddress());
-                    break;
-                default:
-                    throw new ArrowheadException("Unknown protocol " + cSpokeProvider.getProtocol(), HttpStatus.SC_BAD_REQUEST);
-            }
-        } catch (URISyntaxException ex) {
-            throw new ArrowheadException("Wrong URI Syntax", HttpStatus.SC_BAD_REQUEST, ex.getLocalizedMessage());
-        } catch (IOException | InterruptedException ex) {
-            throw new ArrowheadException(ex.getMessage(), HttpStatus.SC_INTERNAL_SERVER_ERROR);
-        }
+      protocolIn.setProtocolOut(protocolOut);
+      protocolIn.setContentType(setup.getIn().getContentType());
+      protocolOut.setProtocolIn(protocolIn);
+      protocolOut.setContentType(setup.getOut().getContentType());
 
-        // link the spoke connections 
-        pSpoke.setNextSpoke(cSpoke);
-        cSpoke.setNextSpoke(pSpoke);
-
-        // Activity Monitor
-        ScheduledExecutorService sesPrintReport = Executors.newSingleThreadScheduledExecutor();
-        sesPrintReport.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                activityMonitor();
-            }
-        }, 1, 1, TimeUnit.MINUTES);
+    } catch (Exception ex) {
+      throw new ArrowheadException("Problems to start a hub: " + ex.getLocalizedMessage(),
+          HttpStatus.SC_INTERNAL_SERVER_ERROR);
     }
 
-    //=================================================================================================
-    // methods
-    //-------------------------------------------------------------------------------------------------
-    public int getTranslatorId() {
-        return id;
+  }
+
+  // -------------------------------------------------------------------------------------------------
+  private int getAvailablePort() {
+    try {
+      ServerSocket ss = new ServerSocket(0);
+      int port = ss.getLocalPort();
+      ss.close();
+      return port;
+    } catch (IOException ex) {
+      throw new ArrowheadException("Problems to start a empty port: " + ex.getLocalizedMessage(),
+          HttpStatus.SC_INTERNAL_SERVER_ERROR);
     }
 
-    //-------------------------------------------------------------------------------------------------
-    public int getHubPort() {
-        return hubPort;
-    }
+  }
 
-    //=================================================================================================
-    // assistant methods
-    //-------------------------------------------------------------------------------------------------
-    private void activityMonitor() {
-        if ((cSpoke.getLastActivity() > 0) || (pSpoke.getLastActivity() > 0)) {
-            logger.info(String.format("activityMonitor [%d] - Active", id));
-            cSpoke.clearActivity();
-            pSpoke.clearActivity();
-        } else {
-            logger.info(String.format("activityMonitor [%d] - No Active", id));
-        }
-    }
-
-    private void checkEndpoint(EndPoint endpoint) {
-        if (endpoint == null) {
-            throw new ArrowheadException("Null endpoint", HttpStatus.SC_BAD_REQUEST);
-        }
-        if (endpoint.getHostIpAddress() == null) {
-            throw new ArrowheadException("No Host IpAddress", HttpStatus.SC_BAD_REQUEST);
-        }
-        if (endpoint.getName() == null) {
-            throw new ArrowheadException("No name", HttpStatus.SC_BAD_REQUEST);
-        }
-        if (endpoint.getPort() <= 0 || endpoint.getPort() > 65535) {
-            throw new ArrowheadException("No valid Port", HttpStatus.SC_BAD_REQUEST);
-        }
-        if (endpoint.getProtocol() == null) {
-            throw new ArrowheadException("No Protocol", HttpStatus.SC_BAD_REQUEST);
-        }
-    }
-
+  // -------------------------------------------------------------------------------------------------
+  private int getRandomNumber() {
+    return new Random().nextInt(10000);
+  }
 }
