@@ -1,4 +1,3 @@
-
 # Arrowhead Framework 4.5.0
 
 [Arrowhead](http://www.arrowhead.eu/) (and its continuation, [Productive4.0](https://productive40.eu/)) is an ambitious holistic innovation project,

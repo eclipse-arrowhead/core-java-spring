@@ -4,7 +4,7 @@ rm -rf sql
 
 mkdir sql
 cd sql
-wget https://raw.githubusercontent.com/eclipse-arrowhead/core-java-spring/master/scripts/create_empty_arrowhead_db.sql
+curl -O https://raw.githubusercontent.com/eclipse-arrowhead/core-java-spring/master/scripts/create_empty_arrowhead_db.sql
 sed -i 's/source /& docker-entrypoint-initdb.d\/privileges\//g' create_empty_arrowhead_db.sql
 
 mkdir privileges
