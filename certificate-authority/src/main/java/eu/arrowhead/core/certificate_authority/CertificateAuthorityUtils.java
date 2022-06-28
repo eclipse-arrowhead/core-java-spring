@@ -102,9 +102,9 @@ public class CertificateAuthorityUtils {
         try {
             final KeyStore keystore = KeyStore.getInstance(caProperties.getCloudKeyStoreType());
             keystore.load(caProperties.getCloudKeyStorePath()
-                                       .getInputStream(),
+                                      .getInputStream(),
                           caProperties.getCloudKeyStorePassword()
-                                       .toCharArray());
+                                      .toCharArray());
             return keystore;
         } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
             throw new ServiceConfigurationError("Cannot open cloud keystore: " + e.getMessage());

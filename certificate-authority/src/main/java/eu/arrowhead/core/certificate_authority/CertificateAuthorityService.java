@@ -14,6 +14,7 @@
 
 package eu.arrowhead.core.certificate_authority;
 
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.CaCertificate;
 import eu.arrowhead.common.dto.internal.AddTrustedKeyRequestDTO;
@@ -106,7 +107,7 @@ public class CertificateAuthorityService {
             final String endOfValidityString = Utilities.convertZonedDateTimeToUTCString(endOfValidity);
             final String now = Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now());
             return new CertificateCheckResponseDTO(request.getVersion(), now, endOfValidityString, certCN,
-                    certSerial, IssuedCertificateStatus.UNKNOWN);
+                                                   certSerial, IssuedCertificateStatus.UNKNOWN);
         }
     }
 
@@ -124,7 +125,7 @@ public class CertificateAuthorityService {
                                                                         caProperties.getCloudKeyPassword());
 
         final X509Certificate clientCertificate = CertificateAuthorityUtils.buildCertificate(csr, cloudPrivateKey,
-                cloudCertificate, caProperties, random);
+                                                                                             cloudCertificate, caProperties, random);
         final List<String> encodedCertificateChain = CertificateAuthorityUtils
                 .buildEncodedCertificateChain(clientCertificate, cloudCertificate, rootCertificate);
 
@@ -137,7 +138,7 @@ public class CertificateAuthorityService {
                 Utilities.parseUTCStringToLocalZonedDateTime(request.getValidAfter()), now, caProperties);
 
         final CaCertificate caCert = certificateDbService.saveCertificateInfo(clientCommonName, serialNumber, requesterCN,
-                validAfter, validBefore);
+                                                                              validAfter, validBefore);
 
         return new CertificateSigningResponseDTO(caCert.getId(), encodedCertificateChain);
     }

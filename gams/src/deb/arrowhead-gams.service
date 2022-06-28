@@ -1,0 +1,15 @@
+[Unit]
+Description=arrowhead-gams
+After=network.target
+
+[Service]
+WorkingDirectory=/etc/arrowhead/systems/gams
+ExecStart=/usr/bin/java -Dlog4j.configurationFile=file:/etc/arrowhead/systems/gams/log4j2.xml -jar /usr/share/arrowhead/gams/arrowhead-gams.jar
+ExecStartPost=/bin/bash -c 'sleep 10'
+TimeoutStopSec=5
+Type=simple
+User=arrowhead
+Group=arrowhead
+
+[Install]
+WantedBy=default.target

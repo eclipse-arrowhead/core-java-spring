@@ -1,0 +1,10 @@
+Package: arrowhead-mscv
+Version: [[version]]
+Section: contrib/java
+Priority: optional
+Architecture: all
+Maintainer: Mario Zsilak <mario.zsilak@forschung-burgenland.at>
+Homepage: http://www.arrowhead.eu
+Description: Arrowhead Monitoring and Standard Compliance Verification
+Distribution: development
+Depends: java-runtime-headless, openssl, virtual-mysql-server, arrowhead-core-common

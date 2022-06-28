@@ -43,6 +43,7 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.CoreEventHandlerConstants;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.SecurityUtilities;
 import eu.arrowhead.common.Utilities;
@@ -53,6 +54,8 @@ import eu.arrowhead.common.database.repository.DeviceRepository;
 import eu.arrowhead.common.database.repository.SystemRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.drivers.CertificateAuthorityDriver;
+import eu.arrowhead.common.drivers.DriverUtilities;
+import eu.arrowhead.common.drivers.EventDriver;
 import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.DeviceListResponseDTO;
@@ -64,6 +67,7 @@ import eu.arrowhead.common.dto.shared.CertificateCreationResponseDTO;
 import eu.arrowhead.common.dto.shared.CertificateType;
 import eu.arrowhead.common.dto.shared.DeviceRequestDTO;
 import eu.arrowhead.common.dto.shared.DeviceResponseDTO;
+import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemQueryFormDTO;
 import eu.arrowhead.common.dto.shared.SystemQueryResultDTO;
 import eu.arrowhead.common.dto.shared.SystemRegistryOnboardingWithCsrRequestDTO;
@@ -105,6 +109,8 @@ public class SystemRegistryDBService {
     private final NetworkAddressPreProcessor networkAddressPreProcessor;
     private final SpecialNetworkAddressTypeDetector networkAddressTypeDetector;
     private final NetworkAddressVerifier networkAddressVerifier;
+    private final DriverUtilities driverUtilities;
+    private final EventDriver eventDriver;
 
     @Value(CoreCommonConstants.$SYSTEMREGISTRY_PING_TIMEOUT_WD)
     private int pingTimeout;
@@ -119,21 +125,25 @@ public class SystemRegistryDBService {
     							   final DeviceRepository deviceRepository,
     							   final SecurityUtilities securityUtilities,
     							   final CertificateAuthorityDriver caDriver,
+    							   final DriverUtilities driverUtilities,
     							   final CommonNamePartVerifier cnVerifier,
     							   final NetworkAddressPreProcessor networkAddressPreProcessor,
     							   final SpecialNetworkAddressTypeDetector networkAddressTypeDetector,
-    							   final NetworkAddressVerifier networkAddressVerifier) {
+    							   final NetworkAddressVerifier networkAddressVerifier,
+    							   final EventDriver eventDriver) {
     	this.systemRegistryRepository = systemRegistryRepository;
     	this.systemRepository = systemRepository;
     	this.deviceRepository = deviceRepository;
     	this.securityUtilities = securityUtilities;
     	this.caDriver = caDriver;
+        this.driverUtilities = driverUtilities;
+        this.eventDriver = eventDriver;
     	this.cnVerifier = cnVerifier;
     	this.networkAddressPreProcessor = networkAddressPreProcessor;
     	this.networkAddressTypeDetector = networkAddressTypeDetector;
     	this.networkAddressVerifier = networkAddressVerifier;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
     public SystemResponseDTO getSystemById(final long systemId) {
         logger.debug("getSystemById started...");
@@ -246,8 +256,13 @@ public class SystemRegistryDBService {
                 throw new InvalidParameterException(COULD_NOT_DELETE_SYSTEM_ERROR_MESSAGE);
             }
 
+            final Optional<SystemRegistry> optional = systemRegistryRepository.findById(id);
+
             systemRepository.deleteById(id);
             systemRepository.flush();
+
+            optional.ifPresent(this::publishUnregister);
+
         } catch (final InvalidParameterException ex) {
             throw ex;
         } catch (final Exception ex) {
@@ -312,7 +327,7 @@ public class SystemRegistryDBService {
             if (Utilities.notEmpty(authenticationInfo)) {
                 system.setAuthenticationInfo(authenticationInfo);
             }
-            
+
             if (metadata != null) {
             	system.setMetadata(Utilities.map2Text(metadata));
             }
@@ -485,6 +500,9 @@ public class SystemRegistryDBService {
             final Device deviceDb = findOrCreateDevice(request.getProvider());
 
             final SystemRegistry srEntry = createSystemRegistry(systemDb, deviceDb, endOfValidity, metadataStr, version);
+
+            publishRegister(request);
+
             return DTOConverter.convertSystemRegistryToSystemRegistryResponseDTO(srEntry);
         } catch (final DateTimeParseException ex) {
             logger.debug(ex.getMessage(), ex);
@@ -576,7 +594,7 @@ public class SystemRegistryDBService {
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
-    
+
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
     public SystemRegistryListResponseDTO getSystemRegistryEntriesBySystemName(final String systemName, final CoreUtilities.ValidatedPageParams pageParameters,
@@ -612,6 +630,8 @@ public class SystemRegistryDBService {
 
         systemRegistryRepository.deleteInBatch(entries);
         systemRegistryRepository.flush();
+
+        entries.forEach(this::publishUnregister);
     }
 
 
@@ -765,7 +785,58 @@ public class SystemRegistryDBService {
 
     //=================================================================================================
     // assistant methods
-	
+
+    //-------------------------------------------------------------------------------------------------
+    private void publishRegister(final SystemRegistryRequestDTO requestDTO) {
+        try {
+            eventDriver.publish(
+                    new EventPublishRequestDTO(CoreEventHandlerConstants.REGISTER_SYSTEM_EVENT,
+                                               driverUtilities.getCoreSystemRequestDTO(),
+                                               null,
+                                               eventDriver.convert(requestDTO),
+                                               Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now())
+                    )
+            );
+        } catch (final Exception e) {
+            logger.warn("Unable to publish register event: {}", e.getMessage());
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    private void publishUnregister(final SystemRegistry systemRegistry) {
+        try {
+            final var device = systemRegistry.getDevice();
+            final var system = systemRegistry.getSystem();
+
+            final var deviceRequestDTO = new DeviceRequestDTO(device.getDeviceName(),
+                                                              device.getAddress(),
+                                                              device.getMacAddress(),
+                                                              device.getAuthenticationInfo());
+
+            final var systemRequestDTO = new SystemRequestDTO(system.getSystemName(),
+                                                              system.getAddress(),
+                                                              system.getPort(),
+                                                              system.getAuthenticationInfo(),
+                                                              Utilities.text2Map(system.getMetadata()));
+
+            final var requestDTO = new SystemRegistryRequestDTO(systemRequestDTO,
+                                                                deviceRequestDTO,
+                                                                Utilities.convertZonedDateTimeToUTCString(systemRegistry.getEndOfValidity()),
+                                                                Utilities.text2Map(systemRegistry.getMetadata()),
+                                                                systemRegistry.getVersion());
+            eventDriver.publish(
+                    new EventPublishRequestDTO(CoreEventHandlerConstants.UNREGISTER_SYSTEM_EVENT,
+                                               driverUtilities.getCoreSystemRequestDTO(),
+                                               null,
+                                               eventDriver.convert(requestDTO),
+                                               Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now())
+                    )
+            );
+        } catch (final Exception e) {
+            logger.warn("Unable to publish unregister event: {}", e.getMessage());
+        }
+    }
+
     //-------------------------------------------------------------------------------------------------
     private System getSystemByNameAndAddressAndPort(final String systemName, final String address, final int port) {
         final String dbSystemName = Utilities.lowerCaseTrim(systemName);
@@ -875,10 +946,11 @@ public class SystemRegistryDBService {
         logger.debug("validateNonNullSystemParameters started...");
 
         final String normalizedAddress = networkAddressPreProcessor.normalize(address);
-        
+
         validateNonNullParameters(systemName, normalizedAddress);
+
         final AddressType addressType = networkAddressTypeDetector.detectAddressType(normalizedAddress);
-        
+
         if (!cnVerifier.isValid(systemName)) {
         	throw new InvalidParameterException("System name" + INVALID_FORMAT_ERROR_MESSAGE);
         }
@@ -1027,7 +1099,7 @@ public class SystemRegistryDBService {
             provider = optSystem.get();
             final String metadataStr = Utilities.map2Text(metadata);
             if (!Objects.equals(authenticationInfo, provider.getAuthenticationInfo()) ||
-                !Objects.equals(validatedAddress, provider.getAddress()) || 
+                !Objects.equals(validatedAddress, provider.getAddress()) ||
                 !Objects.equals(metadataStr, provider.getMetadata())) { // authentication info or system has changed
                 provider.setAuthenticationInfo(authenticationInfo);
                 provider.setAddress(validatedAddress);
@@ -1135,7 +1207,7 @@ public class SystemRegistryDBService {
         networkAddressVerifier.verify(address);
         final String macAddress = Utilities.firstNotNullIfExists(request.getDeviceName(), device.getDeviceName());
         final String authenticationInfo = Utilities.firstNotNullIfExists(request.getAuthenticationInfo(), device.getAuthenticationInfo());
-        
+
         return findOrCreateDevice(name, address, macAddress, authenticationInfo);
     }
 
@@ -1148,7 +1220,7 @@ public class SystemRegistryDBService {
         final int port = request.getPort() > 0 ? request.getPort() : system.getPort();
         final String authenticationInfo = Utilities.firstNotNullIfExists(request.getAuthenticationInfo(), system.getAuthenticationInfo());
         final Map<String,String> metadata = request.getMetadata() != null ? request.getMetadata() : Utilities.text2Map(system.getMetadata());
-        
+
         return findOrCreateSystem(name, address, port, authenticationInfo, metadata);
     }
 

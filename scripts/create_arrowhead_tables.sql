@@ -548,7 +548,7 @@ CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement` (
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `fk_intra_measurement` FOREIGN KEY (`measurement_id`) REFERENCES `qos_intra_measurement` (`id`) ON DELETE CASCADE,
 	UNIQUE KEY `unique_intra_measurement` (`measurement_id`)
-	
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement_log` (
@@ -567,7 +567,7 @@ CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement_log` (
 	`measured_at` timestamp NOT NULL,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-	
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement_log_details` (
@@ -586,7 +586,7 @@ CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement_log_details` (
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `fk_intra_measurement_log` FOREIGN KEY (`measurement_log_id`) REFERENCES `qos_intra_ping_measurement_log` (`id`) ON DELETE CASCADE
-	
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- QoS Monitor
@@ -625,7 +625,7 @@ CREATE TABLE IF NOT EXISTS `qos_inter_direct_ping_measurement` (
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `fk_inter_direct_measurement` FOREIGN KEY (`measurement_id`) REFERENCES `qos_inter_direct_measurement` (`id`) ON DELETE CASCADE,
 	UNIQUE KEY `unique_measurement` (`measurement_id`)
-	
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `qos_inter_direct_ping_measurement_log` (
@@ -644,7 +644,7 @@ CREATE TABLE IF NOT EXISTS `qos_inter_direct_ping_measurement_log` (
 	`measured_at` timestamp NOT NULL,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-	
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `qos_inter_direct_ping_measurement_log_details` (
@@ -663,7 +663,7 @@ CREATE TABLE IF NOT EXISTS `qos_inter_direct_ping_measurement_log_details` (
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `fk_inter_direct_ping_measurement_log` FOREIGN KEY (`measurement_log_id`) REFERENCES `qos_inter_direct_ping_measurement_log` (`id`) ON DELETE CASCADE
- 
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `qos_inter_relay_measurement` (
@@ -700,7 +700,7 @@ CREATE TABLE IF NOT EXISTS `qos_inter_relay_echo_measurement` (
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `fk_inter_relay_measurement` FOREIGN KEY (`measurement_id`) REFERENCES `qos_inter_relay_measurement` (`id`) ON DELETE CASCADE,
 	UNIQUE KEY `unique_inter_relay_echo_measurement` (`measurement_id`)
-	
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `qos_inter_relay_echo_measurement_log` (
@@ -716,7 +716,7 @@ CREATE TABLE IF NOT EXISTS `qos_inter_relay_echo_measurement_log` (
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `fk_inter_relay_echo_measurement_log` FOREIGN KEY (`measurement_id`) REFERENCES `qos_inter_relay_measurement` (`id`) ON DELETE CASCADE
-	
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- QoS Manager
@@ -764,6 +764,286 @@ CREATE TABLE IF NOT EXISTS `ca_trusted_key` (
   UNIQUE KEY `unique_hash` (`hash`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
 
+-- MSVC
+CREATE TABLE IF NOT EXISTS `mscv_target`
+(
+    `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `name` varchar(64) UNIQUE NOT NULL,
+    `os`   varchar(16)        NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `mscv_ssh_target`
+(
+    `id`        bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `address`   varchar(255) NOT NULL,
+    `port`      integer      NOT NULL,
+    `username`   varchar(64),
+    `auth_info`  varchar(255),
+    CONSTRAINT `fk_parent_target` FOREIGN KEY (`id`) REFERENCES `mscv_target` (`id`) ON DELETE CASCADE,
+    UNIQUE KEY `u_address_port` (`address`, `port`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `mscv_mip_category`
+(
+    `id`           bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `name`         varchar(64) UNIQUE NOT NULL,
+    `abbreviation` varchar(5) UNIQUE  NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `mscv_mip_domain`
+(
+    `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `name` varchar(64) UNIQUE NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `mscv_standard`
+(
+    `id`             bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `identification` varchar(16) UNIQUE NOT NULL,
+    `name`           varchar(64) UNIQUE NOT NULL,
+    `description`    text,
+    `reference_uri`  varchar(255)       NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `mscv_mip`
+(
+    `id`          bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `ext_id`      integer(11)        NOT NULL,
+    `name`        varchar(64) UNIQUE NOT NULL,
+    `description` text,
+    `standard_id` bigint             NOT NULL,
+    `category_id` bigint             NOT NULL,
+    `domain_id`   bigint             NOT NULL,
+    CONSTRAINT `fk_standard` FOREIGN KEY (`standard_id`) REFERENCES `mscv_standard` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_category` FOREIGN KEY (`category_id`) REFERENCES `mscv_mip_category` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_domain` FOREIGN KEY (`domain_id`) REFERENCES `mscv_mip_domain` (`id`) ON DELETE CASCADE,
+    UNIQUE KEY `u_mip_category_ext_id` (`ext_id`, `category_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `mscv_mip_verification_list`
+(
+    `id`                    bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `name`                  varchar(64) NOT NULL,
+    `description`           varchar(255),
+    `verification_interval` bigint(20)  NOT NULL,
+    `layer`                 varchar(16) NOT NULL,
+    UNIQUE KEY `u_verification_list_name_layer` (`name`, `layer`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `mscv_mip_verification_entry`
+(
+    `id`                   bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `mip_id`               bigint   NOT NULL,
+    `weight`               smallint NOT NULL,
+    `verification_list_id` bigint   NOT NULL,
+    CONSTRAINT `fk_entry_mip` FOREIGN KEY (`mip_id`) REFERENCES `mscv_mip` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_entry_verification_list` FOREIGN KEY (`verification_list_id`) REFERENCES `mscv_mip_verification_list` (`id`) ON DELETE CASCADE,
+    UNIQUE KEY `u_entry_mip_list` (`mip_id`, `verification_list_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `mscv_script`
+(
+    `id`     bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `layer`  varchar(16)  NOT NULL,
+    `os`     varchar(16)  NOT NULL,
+    `path`   varchar(255) NOT NULL,
+    `mip_id` bigint       NOT NULL,
+    CONSTRAINT `fk_script_mip` FOREIGN KEY (`mip_id`) REFERENCES `mscv_mip` (`id`) ON DELETE CASCADE,
+    UNIQUE KEY `u_script_layer_os_mip` (`layer`, `os`, `mip_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `mscv_verification_result`
+(
+    `id`                     bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `execution_date`         TIMESTAMP   NOT NULL,
+    `result`                 VARCHAR(16) NOT NULL,
+    `verification_list_id`   bigint      NOT NULL,
+    `verification_target_id` bigint      NOT NULL,
+    CONSTRAINT `fk_execution_verification_list` FOREIGN KEY (`verification_list_id`) REFERENCES `mscv_mip_verification_list` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_execution_target` FOREIGN KEY (`verification_target_id`) REFERENCES `mscv_target` (`id`) ON DELETE CASCADE,
+    UNIQUE KEY `u_verification_set_target_date` (`verification_list_id`, `verification_target_id`, `execution_date`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `mscv_verification_detail_result`
+(
+    `id`                    bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `result`                varchar(16) NOT NULL,
+    `details`               varchar(255),
+    `verification_entry_id` bigint      NOT NULL,
+    `execution_id`          bigint      NOT NULL,
+    `script_id`             bigint      NOT NULL,
+    CONSTRAINT `fk_details_mip_entry` FOREIGN KEY (`verification_entry_id`) REFERENCES `mscv_mip_verification_entry` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_details_execution` FOREIGN KEY (`execution_id`) REFERENCES mscv_verification_result (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_details_script` FOREIGN KEY (`script_id`) REFERENCES `mscv_script` (`id`) ON DELETE CASCADE,
+    UNIQUE KEY `u_details_execution_mip` (`verification_entry_id`, `execution_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `MSCV_QRTZ_JOB_DETAILS`
+(
+    `SCHED_NAME`        VARCHAR(120) NOT NULL,
+    `JOB_NAME`          VARCHAR(200) NOT NULL,
+    `JOB_GROUP`         VARCHAR(200) NOT NULL,
+    `DESCRIPTION`       VARCHAR(250) NULL,
+    `JOB_CLASS_NAME`    VARCHAR(250) NOT NULL,
+    `IS_DURABLE`        VARCHAR(1)   NOT NULL,
+    `IS_NONCONCURRENT`  VARCHAR(1)   NOT NULL,
+    `IS_UPDATE_DATA`    VARCHAR(1)   NOT NULL,
+    `REQUESTS_RECOVERY` VARCHAR(1)   NOT NULL,
+    `JOB_DATA`          BLOB         NULL,
+    PRIMARY KEY (`SCHED_NAME`, `JOB_NAME`, `JOB_GROUP`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `MSCV_QRTZ_TRIGGERS`
+(
+    `SCHED_NAME`     VARCHAR(120) NOT NULL,
+    `TRIGGER_NAME`   VARCHAR(200) NOT NULL,
+    `TRIGGER_GROUP`  VARCHAR(200) NOT NULL,
+    `JOB_NAME`       VARCHAR(200) NOT NULL,
+    `JOB_GROUP`      VARCHAR(200) NOT NULL,
+    `DESCRIPTION`    VARCHAR(250) NULL,
+    `NEXT_FIRE_TIME` BIGINT(13)   NULL,
+    `PREV_FIRE_TIME` BIGINT(13)   NULL,
+    `PRIORITY`       INTEGER      NULL,
+    `TRIGGER_STATE`  VARCHAR(16)  NOT NULL,
+    `TRIGGER_TYPE`   VARCHAR(8)   NOT NULL,
+    `START_TIME`     BIGINT(13)   NOT NULL,
+    `END_TIME`       BIGINT(13)   NULL,
+    `CALENDAR_NAME`  VARCHAR(200) NULL,
+    `MISFIRE_INSTR`  SMALLINT(2)  NULL,
+    `JOB_DATA`       BLOB         NULL,
+    PRIMARY KEY (`SCHED_NAME`, `TRIGGER_NAME`, `TRIGGER_GROUP`),
+    FOREIGN KEY (`SCHED_NAME`, `JOB_NAME`, `JOB_GROUP`)
+        REFERENCES `MSCV_QRTZ_JOB_DETAILS` (`SCHED_NAME`, `JOB_NAME`, `JOB_GROUP`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `MSCV_QRTZ_SIMPLE_TRIGGERS`
+(
+    `SCHED_NAME`      VARCHAR(120) NOT NULL,
+    `TRIGGER_NAME`    VARCHAR(200) NOT NULL,
+    `TRIGGER_GROUP`   VARCHAR(200) NOT NULL,
+    `REPEAT_COUNT`    BIGINT(7)    NOT NULL,
+    `REPEAT_INTERVAL` BIGINT(12)   NOT NULL,
+    `TIMES_TRIGGERED` BIGINT(10)   NOT NULL,
+    PRIMARY KEY (`SCHED_NAME`, `TRIGGER_NAME`, `TRIGGER_GROUP`),
+    FOREIGN KEY (`SCHED_NAME`, `TRIGGER_NAME`, `TRIGGER_GROUP`)
+        REFERENCES `MSCV_QRTZ_TRIGGERS` (`SCHED_NAME`, `TRIGGER_NAME`, `TRIGGER_GROUP`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `MSCV_QRTZ_CRON_TRIGGERS`
+(
+    `SCHED_NAME`      VARCHAR(120) NOT NULL,
+    `TRIGGER_NAME`    VARCHAR(200) NOT NULL,
+    `TRIGGER_GROUP`   VARCHAR(200) NOT NULL,
+    `CRON_EXPRESSION` VARCHAR(200) NOT NULL,
+    `TIME_ZONE_ID`    VARCHAR(80),
+    PRIMARY KEY (`SCHED_NAME`, `TRIGGER_NAME`, `TRIGGER_GROUP`),
+    FOREIGN KEY (`SCHED_NAME`, `TRIGGER_NAME`, `TRIGGER_GROUP`)
+        REFERENCES `MSCV_QRTZ_TRIGGERS` (`SCHED_NAME`, `TRIGGER_NAME`, `TRIGGER_GROUP`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `MSCV_QRTZ_SIMPROP_TRIGGERS`
+(
+    `SCHED_NAME`    VARCHAR(120)   NOT NULL,
+    `TRIGGER_NAME`  VARCHAR(200)   NOT NULL,
+    `TRIGGER_GROUP` VARCHAR(200)   NOT NULL,
+    `STR_PROP_1`    VARCHAR(512)   NULL,
+    `STR_PROP_2`    VARCHAR(512)   NULL,
+    `STR_PROP_3`    VARCHAR(512)   NULL,
+    `INT_PROP_1`    INT            NULL,
+    `INT_PROP_2`    INT            NULL,
+    `LONG_PROP_1`   BIGINT         NULL,
+    `LONG_PROP_2`   BIGINT         NULL,
+    `DEC_PROP_1`    NUMERIC(13, 4) NULL,
+    `DEC_PROP_2`    NUMERIC(13, 4) NULL,
+    `BOOL_PROP_1`   VARCHAR(1)     NULL,
+    `BOOL_PROP_2`   VARCHAR(1)     NULL,
+    PRIMARY KEY (`SCHED_NAME`, `TRIGGER_NAME`, `TRIGGER_GROUP`),
+    FOREIGN KEY (`SCHED_NAME`, `TRIGGER_NAME`, `TRIGGER_GROUP`)
+        REFERENCES `MSCV_QRTZ_TRIGGERS` (`SCHED_NAME`, `TRIGGER_NAME`, `TRIGGER_GROUP`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `MSCV_QRTZ_BLOB_TRIGGERS`
+(
+    `SCHED_NAME`    VARCHAR(120) NOT NULL,
+    `TRIGGER_NAME`  VARCHAR(200) NOT NULL,
+    `TRIGGER_GROUP` VARCHAR(200) NOT NULL,
+    `BLOB_DATA`     BLOB         NULL,
+    PRIMARY KEY (`SCHED_NAME`, `TRIGGER_NAME`, `TRIGGER_GROUP`),
+    FOREIGN KEY (`SCHED_NAME`, `TRIGGER_NAME`, `TRIGGER_GROUP`)
+        REFERENCES `MSCV_QRTZ_TRIGGERS` (`SCHED_NAME`, `TRIGGER_NAME`, `TRIGGER_GROUP`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `MSCV_QRTZ_CALENDARS`
+(
+    `SCHED_NAME`    VARCHAR(120) NOT NULL,
+    `CALENDAR_NAME` VARCHAR(200) NOT NULL,
+    `CALENDAR`      BLOB         NOT NULL,
+    PRIMARY KEY (`SCHED_NAME`, `CALENDAR_NAME`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `MSCV_QRTZ_PAUSED_TRIGGER_GRPS`
+(
+    `SCHED_NAME`    VARCHAR(120) NOT NULL,
+    `TRIGGER_GROUP` VARCHAR(200) NOT NULL,
+    PRIMARY KEY (`SCHED_NAME`, `TRIGGER_GROUP`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `MSCV_QRTZ_FIRED_TRIGGERS`
+(
+    `SCHED_NAME`        VARCHAR(120) NOT NULL,
+    `ENTRY_ID`          VARCHAR(95)  NOT NULL,
+    `TRIGGER_NAME`      VARCHAR(200) NOT NULL,
+    `TRIGGER_GROUP`     VARCHAR(200) NOT NULL,
+    `INSTANCE_NAME`     VARCHAR(200) NOT NULL,
+    `FIRED_TIME`        BIGINT(13)   NOT NULL,
+    `SCHED_TIME`        BIGINT(13)   NOT NULL,
+    `PRIORITY`          INTEGER      NOT NULL,
+    `STATE`             VARCHAR(16)  NOT NULL,
+    `JOB_NAME`          VARCHAR(200) NULL,
+    `JOB_GROUP`         VARCHAR(200) NULL,
+    `IS_NONCONCURRENT`  VARCHAR(1)   NULL,
+    `REQUESTS_RECOVERY` VARCHAR(1)   NULL,
+    PRIMARY KEY (`SCHED_NAME`, `ENTRY_ID`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `MSCV_QRTZ_SCHEDULER_STATE`
+(
+    `SCHED_NAME`        VARCHAR(120) NOT NULL,
+    `INSTANCE_NAME`     VARCHAR(200) NOT NULL,
+    `LAST_CHECKIN_TIME` BIGINT(13)   NOT NULL,
+    `CHECKIN_INTERVAL`  BIGINT(13)   NOT NULL,
+    PRIMARY KEY (`SCHED_NAME`, `INSTANCE_NAME`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `MSCV_QRTZ_LOCKS`
+(
+    `SCHED_NAME` VARCHAR(120) NOT NULL,
+    `LOCK_NAME`  VARCHAR(40)  NOT NULL,
+    PRIMARY KEY (`SCHED_NAME`, `LOCK_NAME`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
 -- Plant Description Engine
 
 CREATE TABLE IF NOT EXISTS `pde_rule` (
@@ -775,3 +1055,304 @@ CREATE TABLE IF NOT EXISTS `plant_description` (
   `id` bigint(20) PRIMARY KEY,
   `plant_description` mediumtext NOT NULL
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+
+-- Generic Autonomic Management System
+
+CREATE TABLE IF NOT EXISTS `gams_instance`
+(
+    `id`              bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `created_at`      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`      TIMESTAMP   NOT NULL ON UPDATE CURRENT_TIMESTAMP,
+    `uid`             BINARY(16)  NOT NULL,
+    `name`            varchar(32) NOT NULL,
+    `delay`           bigint(20)  NOT NULL DEFAULT 0,
+    `delay_time_unit` varchar(16) NOT NULL DEFAULT 'SECONDS',
+    `owner`           varchar(32),
+    `email`           varchar(32)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_sensor`
+(
+    `id`             bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `created_at`     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`     TIMESTAMP   NOT NULL ON UPDATE CURRENT_TIMESTAMP,
+    `uid`            BINARY(16)  NOT NULL,
+    `instance_id`    bigint(20)  NOT NULL,
+    `name`           varchar(40) NOT NULL,
+    `address`        varchar(16),
+    `type`           varchar(32) NOT NULL,
+    `retention_time` bigint(20)  NOT NULL DEFAULT 24,
+    `time_unit`      varchar(16) NOT NULL DEFAULT 'HOURS',
+    CONSTRAINT `fk_sensor_instance` FOREIGN KEY (`instance_id`) REFERENCES `gams_instance` (`id`) ON DELETE CASCADE,
+    UNIQUE KEY `u_sensor_name` (`instance_id`, `name`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_sensor_data`
+(
+    `id`         bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `created_at` TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `valid_till` TIMESTAMP   NOT NULL,
+    `state`      varchar(16) NOT NULL,
+    `sensor_id`  bigint(20)  NOT NULL,
+    `address`    varchar(16),
+    CONSTRAINT `fk_sensor_data_sensor` FOREIGN KEY (`sensor_id`) REFERENCES `gams_sensor` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_sensor_data_long`
+(
+    `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `data` bigint(20) NOT NULL,
+    CONSTRAINT `fk_long_data_parent` FOREIGN KEY (`id`) REFERENCES `gams_sensor_data` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_sensor_data_string`
+(
+    `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `data` varchar(64) NOT NULL,
+    CONSTRAINT `fk_string_data_parent` FOREIGN KEY (`id`) REFERENCES `gams_sensor_data` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_sensor_data_double`
+(
+    `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `data` DOUBLE PRECISION NOT NULL,
+    CONSTRAINT `fk_double_data_parent` FOREIGN KEY (`id`) REFERENCES `gams_sensor_data` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_event`
+(
+    `id`          bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `created_at`  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `valid_till`  TIMESTAMP   NOT NULL,
+    `state`       varchar(16) NOT NULL,
+    `valid_from`  TIMESTAMP   NOT NULL,
+    `sensor_id`   bigint(20)  NOT NULL,
+    `phase`       varchar(16) NOT NULL,
+    `type`        varchar(16) NOT NULL,
+    `source`      varchar(64),
+    `data`        varchar(64),
+    CONSTRAINT `fk_event_sensor` FOREIGN KEY (`sensor_id`) REFERENCES `gams_sensor` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_aggregation`
+(
+    `id`          bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `created_at`  TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`  TIMESTAMP  NOT NULL ON UPDATE CURRENT_TIMESTAMP,
+    `uid`         BINARY(16) NOT NULL,
+    `sensor_id`   bigint(20) NOT NULL,
+    `type`        varchar(8) NOT NULL,
+    `quantity`    bigint(8),
+    `validity`    bigint(20),
+    `validity_unit` varchar(16),
+    CONSTRAINT `fk_aggregation_sensor` FOREIGN KEY (`sensor_id`) REFERENCES `gams_sensor` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_counting_aggregation`
+(
+    `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `timescale`    bigint(20),
+    `timescale_unit` varchar(16),
+    CONSTRAINT `fk_counting_aggregation_parent` FOREIGN KEY (`id`) REFERENCES `gams_aggregation` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+
+CREATE TABLE IF NOT EXISTS `gams_timeout_guard`
+(
+    `id`         bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `created_at` TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP   NOT NULL ON UPDATE CURRENT_TIMESTAMP,
+    `uid`        BINARY(16)  NOT NULL,
+    `sensor_id`  bigint(20)  NOT NULL,
+    `time_value` bigint(20)  NOT NULL DEFAULT 24,
+    `time_unit`  varchar(16) NOT NULL DEFAULT 'HOURS',
+    CONSTRAINT `fk_timeout_sensor` FOREIGN KEY (`sensor_id`) REFERENCES `gams_sensor` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_analysis`
+(
+    `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP,
+    `uid`  BINARY(16) NOT NULL,
+    `sensor_id`  bigint(20)  NOT NULL,
+    `target_knowledge`  varchar(32)  NOT NULL,
+    `type`  varchar(12)  NOT NULL,
+    CONSTRAINT `fk_analysis_sensor` FOREIGN KEY (`sensor_id`) REFERENCES `gams_sensor` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_counting_analysis`
+(
+    `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `count` int(4)  NOT NULL,
+    `time_value` bigint(20)  NOT NULL DEFAULT 24,
+    `time_unit`  varchar(16) NOT NULL DEFAULT 'HOURS',
+    CONSTRAINT `fk_counting_analysis_parent` FOREIGN KEY (`id`) REFERENCES `gams_analysis` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_setpoint_analysis`
+(
+    `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `lower_set_point`  varchar(16) NOT NULL,
+    `upper_set_point`  varchar(16),
+    `inverse`  bool NOT NULL,
+    CONSTRAINT `fk_setpoint_analysis_parent` FOREIGN KEY (`id`) REFERENCES `gams_analysis` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_action`
+(
+    `id`          bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `created_at`  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`  TIMESTAMP   NOT NULL ON UPDATE CURRENT_TIMESTAMP,
+    `uid`         BINARY(16)  NOT NULL,
+    `instance_id` bigint(20)  NOT NULL,
+    `name`        varchar(32) NOT NULL,
+    `action_type`        varchar(16) NOT NULL,
+    CONSTRAINT `fk_action_instance` FOREIGN KEY (`instance_id`) REFERENCES `gams_instance` (`id`) ON DELETE CASCADE,
+    UNIQUE KEY `u_action_name` (`instance_id`, `name`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_processable_action`
+(
+    `id`             bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `knowledge_keys` varchar(128),
+    `processors`     varchar(512),
+    CONSTRAINT `fk_processable_action_parent` FOREIGN KEY (`id`) REFERENCES `gams_action` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_composite_action`
+(
+    `id`             bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `composite_type` varchar(16) NOT NULL,
+    CONSTRAINT `fk_composite_action_parent` FOREIGN KEY (`id`) REFERENCES `gams_action` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_event_action`
+(
+    `id`                bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `target_sensor_id`  bigint(20)  NOT NULL,
+    `phase`             varchar(16) NOT NULL,
+    `event_type`        varchar(16) NOT NULL,
+    CONSTRAINT `fk_event_action_parent` FOREIGN KEY (`id`) REFERENCES `gams_action` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_event_action_sensor` FOREIGN KEY (`target_sensor_id`) REFERENCES `gams_sensor` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_logging_action`
+(
+    `id`                bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `marker`             varchar(16),
+    CONSTRAINT `fk_logging_action_parent` FOREIGN KEY (`id`) REFERENCES `gams_action` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_composite_action_actions`
+(
+    `composite_action_id` bigint(20) NOT NULL,
+    `actions_id`      bigint(20) NOT NULL,
+    CONSTRAINT `fk_action_plan_id` FOREIGN KEY (`composite_action_id`) REFERENCES `gams_composite_action` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_action_id` FOREIGN KEY (`actions_id`) REFERENCES `gams_action` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_http_url_api_call`
+(
+    `id`                   bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `service_uri`          varchar(64) NOT NULL,
+    `method`               varchar(16) NOT NULL,
+    `basic_authentication` varchar(64),
+    CONSTRAINT `fk_http_url_api_parent` FOREIGN KEY (`id`) REFERENCES `gams_processable_action` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_http_body_api_call`
+(
+    `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `body` varchar(512) NOT NULL,
+    CONSTRAINT `fk_http_body_api_parent` FOREIGN KEY (`id`) REFERENCES `gams_http_url_api_call` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_action_plan`
+(
+    `id`          bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `created_at`  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`  TIMESTAMP   NOT NULL ON UPDATE CURRENT_TIMESTAMP,
+    `uid`         BINARY(16)  NOT NULL,
+    `instance_id` bigint(20)  NOT NULL,
+    `name`        varchar(32) NOT NULL,
+    `action_id`   bigint(20)  NOT NULL,
+    CONSTRAINT `fk_action_plan_instance` FOREIGN KEY (`instance_id`) REFERENCES `gams_instance` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_policy`
+(
+    `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP,
+    `uid`  BINARY(16) NOT NULL,
+    `source_knowledge`  varchar(32)  NOT NULL,
+    `target_knowledge`  varchar(32)  NOT NULL,
+    `sensor_id`  bigint(20)  NOT NULL,
+    `policy_type`        varchar(16) NOT NULL,
+    CONSTRAINT `fk_policy_sensor` FOREIGN KEY (`sensor_id`) REFERENCES `gams_sensor` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+
+CREATE TABLE IF NOT EXISTS `gams_match_policy`
+(
+    `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `match_type`        varchar(16) NOT NULL,
+    `number`        bigint(20) NOT NULL,
+    CONSTRAINT `fk_match_policy_parent` FOREIGN KEY (`id`) REFERENCES `gams_policy` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_transform_policy`
+(
+    `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `expression`        varchar(64) NOT NULL,
+    `variable`        varchar(16) NOT NULL,
+    CONSTRAINT `fk_transform_policy_parent` FOREIGN KEY (`id`) REFERENCES `gams_policy` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_api_policy`
+(
+    `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `api_call_id`        bigint(20) NOT NULL,
+    CONSTRAINT `fk_api_policy_parent` FOREIGN KEY (`id`) REFERENCES `gams_policy` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_api_policy_api` FOREIGN KEY (`api_call_id`) REFERENCES  `gams_processable_action` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `gams_knowledge`
+(
+    `id`   bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `instance_id`    bigint(20)  NOT NULL,
+    `key_`        varchar(64) NOT NULL,
+    `value_`        varchar(64) NOT NULL,
+    CONSTRAINT `fk_knowledge_instance` FOREIGN KEY (`instance_id`) REFERENCES `gams_instance` (`id`) ON DELETE CASCADE,
+    UNIQUE KEY `u_knowledge_key` (`instance_id`, `key_`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;

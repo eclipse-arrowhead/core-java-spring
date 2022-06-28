@@ -14,6 +14,20 @@
 
 package eu.arrowhead.core.systemregistry;
 
+import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.dto.shared.SystemQueryFormDTO;
+import eu.arrowhead.common.dto.shared.SystemQueryResultDTO;
+import eu.arrowhead.common.dto.shared.SystemRegistryRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
+import eu.arrowhead.core.systemregistry.database.service.SystemRegistryDBService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -98,7 +112,7 @@ public class SystemRegistryController {
     	this.networkAddressPreProcessor = networkAddressPreProcessor;
     	this.networkAddressVerifier = networkAddressVerifier;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return an echo message with the purpose of testing the core system availability", response = String.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
     @ApiResponses(value = {
@@ -125,8 +139,8 @@ public class SystemRegistryController {
     @ResponseBody
     public SystemRegistryResponseDTO registerSystem(@RequestBody final SystemRegistryRequestDTO request) {
         logger.debug("New system registration request received");
-        validation.checkSystemRegistryRequest(request, getOrigin(CommonConstants.OP_SYSTEMREGISTRY_REGISTER_URI), false);        
-        try {			
+        validation.checkSystemRegistryRequest(request, getOrigin(CommonConstants.OP_SYSTEMREGISTRY_REGISTER_URI), false);
+        try {
 			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(request.getSystem().getAddress()));
 			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(request.getProvider().getAddress()));
 		} catch (final InvalidParameterException ex) {
@@ -153,7 +167,7 @@ public class SystemRegistryController {
                                  @RequestParam(CommonConstants.OP_SYSTEMREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT) final int port) {
         logger.debug("System removal request received");
         validation.checkUnregisterSystemParameters(systemName, address, port, getOrigin(CommonConstants.OP_SYSTEMREGISTRY_UNREGISTER_URI));
-        try {			
+        try {
 			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(address));
 		} catch (final InvalidParameterException ex) {
 			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, getOrigin(CommonConstants.OP_SYSTEMREGISTRY_UNREGISTER_URI));
@@ -217,7 +231,7 @@ public class SystemRegistryController {
         logger.debug("System query by systemRequestDTO request received");
 
         validation.checkSystemRequest(request, CommonConstants.SYSTEMREGISTRY_URI + CoreCommonConstants.OP_SYSTEMREGISTRY_QUERY_BY_SYSTEM_ID_URI, false);
-        try {			
+        try {
 			networkAddressVerifier.verify(networkAddressPreProcessor.normalize(request.getAddress()));
 		} catch (final InvalidParameterException ex) {
 			throw new BadPayloadException(ex.getMessage(), HttpStatus.SC_BAD_REQUEST, CommonConstants.SYSTEMREGISTRY_URI + CoreCommonConstants.OP_SYSTEMREGISTRY_QUERY_BY_SYSTEM_ID_URI);
@@ -235,7 +249,7 @@ public class SystemRegistryController {
 
     //=================================================================================================
     // assistant methods
-    
+
     //-------------------------------------------------------------------------------------------------
 	private String getBaseOrigin() {
         return CommonConstants.SYSTEMREGISTRY_URI;
