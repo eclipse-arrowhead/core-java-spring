@@ -814,8 +814,8 @@ public class GatekeeperDBService {
 			
 			for (final Relay relay : gatewayRelays) {
 				if (relay.getType() != RelayType.GATEWAY_RELAY || !relay.getExclusive()) {
-					final String exclusivity = relay.getExclusive() ? "exclusive" : "non-exclusive";
-					throw new InvalidParameterException("Gateway dedicated relay could be only exclusive" + RelayType.GATEWAY_RELAY + " type, but not " + exclusivity + relay.getType() + " type");
+					final String exclusivity = relay.getExclusive() ? "exclusive " : "non-exclusive ";
+					throw new InvalidParameterException("Gateway dedicated relay could be only exclusive " + RelayType.GATEWAY_RELAY + " type, but not " + exclusivity + relay.getType() + " type");
 				}
 			}
 		}
