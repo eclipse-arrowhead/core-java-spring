@@ -61,7 +61,7 @@ import eu.arrowhead.common.exception.ExceptionType;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ChoreographerMain.class)
-@ContextConfiguration(classes = { ChoreographerDBServiceTestContext.class })
+@ContextConfiguration(classes = { ChoreographerServiceTestContext.class })
 public class ChoreographerControllerLogsTest {
 
 	//=================================================================================================

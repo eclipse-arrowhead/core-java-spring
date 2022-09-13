@@ -14,12 +14,14 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import org.springframework.util.Assert;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringJoiner;
+
+import org.springframework.util.Assert;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class DeviceQueryFormDTO implements Serializable {
 
@@ -60,17 +62,14 @@ public class DeviceQueryFormDTO implements Serializable {
 	public void setMinVersionRequirement(final Integer minVersionRequirement) { this.minVersionRequirement = minVersionRequirement; }
 	public void setMaxVersionRequirement(final Integer maxVersionRequirement) { this.maxVersionRequirement = maxVersionRequirement; }
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", DeviceQueryFormDTO.class.getSimpleName() + "[", "]")
-				.add("deviceNameRequirements='" + deviceNameRequirements + "'")
-				.add("addressRequirement='" + addressRequirement + "'")
-				.add("macAddressRequirement='" + macAddressRequirement + "'")
-				.add("metadataRequirements=" + metadataRequirements)
-				.add("versionRequirement=" + versionRequirement)
-				.add("minVersionRequirement=" + minVersionRequirement)
-				.add("maxVersionRequirement=" + maxVersionRequirement)
-				.toString();
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
 	}
 
 	//=================================================================================================

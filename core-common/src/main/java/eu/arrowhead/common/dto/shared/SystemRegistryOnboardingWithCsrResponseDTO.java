@@ -19,14 +19,20 @@ import java.util.Map;
 
 public class SystemRegistryOnboardingWithCsrResponseDTO extends SystemRegistryOnboardingResponseDTO implements Serializable {
 
-    //=================================================================================================
+
+	//=================================================================================================
     // members
-    private static final long serialVersionUID = 1L;
 
-    public SystemRegistryOnboardingWithCsrResponseDTO() {
-    }
+	private static final long serialVersionUID = -5751934090192200480L;
+	
+	//=================================================================================================
+	// methods
+	
+    //-------------------------------------------------------------------------------------------------
+	public SystemRegistryOnboardingWithCsrResponseDTO() {}
 
-    public SystemRegistryOnboardingWithCsrResponseDTO(final long id, final SystemResponseDTO system,
+    //-------------------------------------------------------------------------------------------------
+	public SystemRegistryOnboardingWithCsrResponseDTO(final long id, final SystemResponseDTO system,
                                                       final DeviceResponseDTO provider, final String endOfValidity,
                                                       final Map<String, String> metadata, final int version, final String createdAt,
                                                       final String updatedAt,

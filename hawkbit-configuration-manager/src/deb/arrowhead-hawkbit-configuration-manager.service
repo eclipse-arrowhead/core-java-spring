@@ -1,0 +1,16 @@
+[Unit]
+Description=arrowhead-hawkbitconfigurationmanager
+After=network.target 
+
+[Service]
+WorkingDirectory=/etc/arrowhead/systems/hawkbitconfigurationmanager
+ExecStart=/usr/bin/java -Dlog4j.configurationFile=file:/etc/arrowhead/systems/hawkbitconfigurationmanager/log4j2.xml -jar /usr/share/arrowhead/hawkbitconfigurationmanager/arrowhead-hawkbit-configuration-manager.jar 
+TimeoutStopSec=5
+Restart=on-failure
+RestartSec=20s
+Type=simple
+User=arrowhead
+Group=arrowhead
+
+[Install]
+WantedBy=default.target

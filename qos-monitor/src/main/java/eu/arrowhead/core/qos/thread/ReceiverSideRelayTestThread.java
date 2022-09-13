@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
@@ -49,6 +50,7 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 	// members
 	
 	private static final String CLOSE_MESSAGE_PREFIX = "CLOSE";
+	private static final int CLOSE_RETRY_PERIOD = 5000; // in milliseconds
 
 	private static final Logger logger = LogManager.getLogger(ReceiverSideRelayTestThread.class);
 	private static final Byte AWAKE_MESSAGE_ID = -1;
@@ -69,12 +71,14 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 	private final int testMessageSize;
 	private final long timeout; // in milliseconds
 	
-	private boolean receiver = true;
+	private boolean receiverFlag = true;
 	private final Map<Byte,long[]> testResults = new ConcurrentHashMap<>();
 	
 	private String queueId;
 	private MessageProducer sender;
 	private MessageProducer controlSender;
+	private MessageConsumer receiver;
+	private MessageConsumer controlReceiver;
 	
 	private final BlockingQueue<Byte> blockingQueue = new LinkedBlockingQueue<>();
 
@@ -109,16 +113,20 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public void init(final String queueId, final MessageProducer sender, final MessageProducer controlSender) {
+	public void init(final String queueId, final MessageProducer sender, final MessageProducer controlSender, final MessageConsumer receiver, final MessageConsumer controlReceiver) {
 		logger.debug("init started...");
 		
 		Assert.isTrue(!Utilities.isEmpty(queueId), "Queue id is null or blank.");
 		Assert.notNull(sender, "sender is null.");
 		Assert.notNull(controlSender, "controlSender is null.");
+		Assert.notNull(receiver, "receiver is null.");
+		Assert.notNull(controlReceiver, "controlReceiver is null.");
 		
 		this.queueId = queueId;
 		this.sender = sender;
 		this.controlSender = controlSender;
+		this.receiver = receiver;
+		this.controlReceiver = controlReceiver;
 		this.initialized = true;
 	}
 	
@@ -137,7 +145,7 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 				handleControlMessage(message);
 			} else {
 				final byte[] bytes = relayClient.getBytesFromMessage(message, requesterQoSMonitorPublicKey);
-				if (receiver) {
+				if (receiverFlag) {
 					relayClient.sendBytes(relaySession, sender, requesterQoSMonitorPublicKey, bytes);
 				} else {
 					final long end = System.currentTimeMillis();
@@ -272,7 +280,46 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 		logger.debug("close started...");
 		
 		relayTestDBService.finishMeasurements(requesterCloud, relay);
-		relayClient.closeConnection(relaySession);
+		
+		//Unsubscribe from the request (REQ-...) queue
+		try {
+			relayClient.unsubscribeFromQueues(receiver, controlReceiver);
+		} catch (final JMSException ex) {
+			logger.debug("Error while unsubscribing from response queues: {}", ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+		}
+		
+		//Destroy destinations (RESP-... queues) which this receiver side QoS writes on and the connection after		
+		boolean relayConnectionClosed = relayClient.isConnectionClosed(relaySession);
+		boolean requestQueuesClosed = false;
+		
+		while (!relayConnectionClosed) {
+			
+			if (!requestQueuesClosed) {
+				try {
+					requestQueuesClosed = relayClient.destroyQueues(relaySession, sender, controlSender);
+				} catch (final JMSException ex) {
+					logger.debug("Error while closing relay destination: {}", ex.getMessage());
+					logger.debug("Stacktrace:", ex);
+				}				
+			}
+			
+			if (!requestQueuesClosed) {
+				logger.debug("Relay connection is not closeable yet");
+				await(CLOSE_RETRY_PERIOD);
+				
+			} else {
+				relayClient.closeConnection(relaySession);
+				if (!relayClient.isConnectionClosed(relaySession)) {
+					logger.debug("Could not close relay connection");
+					await(CLOSE_RETRY_PERIOD);
+					
+				} else {
+					relayConnectionClosed = true;
+					logger.debug("Relay connection has been closed");					
+				}
+			}			
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -314,8 +361,8 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 		} else { // SWITCH control message
 			relayClient.validateSwitchControlMessage(message);
 			try {
-				if (receiver) {
-					receiver = false;
+				if (receiverFlag) {
+					receiverFlag = false;
 					blockingQueue.put(AWAKE_MESSAGE_ID); // to start the reverse testing
 				}
 			} catch (final InterruptedException ex) {
@@ -324,6 +371,15 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 				logger.debug("Stacktrace:", ex);
 				closeAndInterrupt();
 			}
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void await(final long milisec) {
+		try {
+			Thread.sleep(milisec);
+		} catch (final InterruptedException ex) {
+			logger.debug("Thread.sleep() is interrupted");
 		}
 	}
 }

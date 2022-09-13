@@ -16,12 +16,16 @@ package eu.arrowhead.core.gateway;
 
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -35,6 +39,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -43,6 +48,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
@@ -51,12 +57,14 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.GatewayConsumerConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
+import eu.arrowhead.common.dto.shared.ActiveSessionCloseErrorDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.core.gateway.service.ActiveSessionDTO;
 import eu.arrowhead.core.gateway.service.ActiveSessionListDTO;
+import eu.arrowhead.core.gateway.service.GatewayService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = GatewayMain.class)
@@ -67,9 +75,10 @@ public class GatewayControllerTest {
 	
 	private static final String GATEWAY_PUBLIC_KEY_URI = CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_KEY_URI;
 	private static final String GATEWAY_ACTIVE_SESSIONS_URI = CommonConstants.GATEWAY_URI + CoreCommonConstants.MGMT_URI + "/sessions";
-	private static final String GATEWAY_CLOSE_SESSIONS_URI = GATEWAY_ACTIVE_SESSIONS_URI + "/close";
+	private static final String GATEWAY_CLOSE_SESSIONS_MGMT_URI = GATEWAY_ACTIVE_SESSIONS_URI + "/close";
 	private static final String GATEWAY_CONNECT_PROVIDER_URI = CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_CONNECT_PROVIDER_URI;
 	private static final String GATEWAY_CONNECT_CONSUMER_URI = CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_CONNECT_CONSUMER_URI;
+	private static final String GATEWAY_CLOSE_SESSIONS_URI = CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_CLOSE_SESSIONS;
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -87,6 +96,9 @@ public class GatewayControllerTest {
 	
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
 	private boolean secure;
+	
+	@MockBean(name = "mockGatewayService")
+	private GatewayService gatewayService;
 	
 	//=================================================================================================
 	// methods
@@ -225,11 +237,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("queueId is null or blank.", error.getErrorMessage());
 	}
 	
@@ -262,11 +274,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("queueId is null or blank.", error.getErrorMessage());
 	}
 	
@@ -299,11 +311,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("peerName is null or blank.", error.getErrorMessage());
 	}
 	
@@ -336,11 +348,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("peerName is null or blank.", error.getErrorMessage());
 	}
 	
@@ -373,11 +385,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("serviceDefinition id is null or blank.", error.getErrorMessage());
 	}
 	
@@ -410,11 +422,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("serviceDefinition id is null or blank.", error.getErrorMessage());
 	}
 	
@@ -447,11 +459,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("requestQueue is null or blank.", error.getErrorMessage());
 	}
 	
@@ -484,11 +496,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("requestQueue is null or blank.", error.getErrorMessage());
 	}
 	
@@ -521,11 +533,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("requestControlQueue is null or blank.", error.getErrorMessage());
 	}
 	
@@ -558,11 +570,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("requestControlQueue is null or blank.", error.getErrorMessage());
 	}
 	
@@ -595,11 +607,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("responseQueue is null or blank.", error.getErrorMessage());
 	}
 	
@@ -632,11 +644,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("responseQueue is null or blank.", error.getErrorMessage());
 	}
 	
@@ -669,11 +681,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue(null);
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("responseControlQueue is null or blank.", error.getErrorMessage());
 	}
 	
@@ -706,11 +718,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("   ");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("responseControlQueue is null or blank.", error.getErrorMessage());
 	}
 	
@@ -743,11 +755,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt(null);
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("sessionStartedAt is null or blank.", error.getErrorMessage());
 	}
 	
@@ -780,11 +792,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("  ");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("sessionStartedAt is null or blank.", error.getErrorMessage());
 	}
 	
@@ -817,11 +829,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("System is null", error.getErrorMessage());
 	}
 	
@@ -854,11 +866,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("System name is null or blank", error.getErrorMessage());
 	}
 	
@@ -891,11 +903,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("System name is null or blank", error.getErrorMessage());
 	}
 	
@@ -928,11 +940,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("System address is null or blank", error.getErrorMessage());
 	}
 	
@@ -965,11 +977,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01Z01:01:01T");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("System address is null or blank", error.getErrorMessage());
 	}
 	
@@ -1002,11 +1014,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("System port is null", error.getErrorMessage());
 	}
 	
@@ -1039,11 +1051,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
@@ -1076,11 +1088,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
@@ -1115,11 +1127,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Cloud is null", error.getErrorMessage());
 	}
 	
@@ -1152,11 +1164,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Cloud operator is null or blank", error.getErrorMessage());
 	}
 		
@@ -1189,11 +1201,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Cloud operator is null or blank", error.getErrorMessage());
 	}
 	
@@ -1226,11 +1238,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Cloud name is null or blank", error.getErrorMessage());
 	}
 	
@@ -1263,11 +1275,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Cloud name is null or blank", error.getErrorMessage());
 	}	
 
@@ -1302,11 +1314,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Relay is null", error.getErrorMessage());
 	}
 	
@@ -1339,11 +1351,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Relay address is null or blank", error.getErrorMessage());
 	}
 	
@@ -1376,11 +1388,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Relay address is null or blank", error.getErrorMessage());
 	}
 	
@@ -1413,11 +1425,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Relay port is null", error.getErrorMessage());
 	}
 	
@@ -1450,11 +1462,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Relay port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
@@ -1487,11 +1499,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Relay port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
@@ -1524,11 +1536,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Relay type is null or blank", error.getErrorMessage());
 	}
 	
@@ -1561,11 +1573,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Relay type is null or blank", error.getErrorMessage());
 	}
 	
@@ -1598,11 +1610,11 @@ public class GatewayControllerTest {
 		request.setResponseControlQueue("test-response-control-queue");
 		request.setSessionStartedAt("2019-01-01T01:01:01Z");
 		
-		final MvcResult result = getCloseSession(status().isBadRequest(), request);
+		final MvcResult result = postMgmtCloseSession(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Relay type is invalid", error.getErrorMessage());
 	}
 	
@@ -1629,7 +1641,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -1660,7 +1672,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -1691,7 +1703,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -1722,7 +1734,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -1749,7 +1761,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -1780,7 +1792,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -1811,7 +1823,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -1842,7 +1854,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -1873,7 +1885,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -1904,7 +1916,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -1935,7 +1947,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -1966,7 +1978,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -1997,7 +2009,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2024,7 +2036,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2055,7 +2067,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2086,7 +2098,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2117,7 +2129,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2148,7 +2160,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2179,7 +2191,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2210,7 +2222,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2241,7 +2253,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2269,7 +2281,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(null);
 		request.setProviderCloud(null);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2300,7 +2312,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2331,7 +2343,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2362,7 +2374,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2393,7 +2405,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectProvider(status().isBadRequest(), request);
+		final MvcResult result = postConnectProvider(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2426,7 +2438,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2459,7 +2471,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2492,7 +2504,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2525,7 +2537,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2558,7 +2570,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2591,7 +2603,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2624,7 +2636,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2657,7 +2669,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2686,7 +2698,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2719,7 +2731,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2752,7 +2764,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2785,7 +2797,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2818,7 +2830,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2851,7 +2863,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2884,7 +2896,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2917,7 +2929,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2950,7 +2962,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -2979,7 +2991,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -3012,7 +3024,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -3045,7 +3057,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -3078,7 +3090,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -3111,7 +3123,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -3144,7 +3156,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -3178,7 +3190,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -3211,7 +3223,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -3241,7 +3253,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(null);
 		request.setProviderCloud(null);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -3274,7 +3286,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -3307,7 +3319,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -3340,7 +3352,7 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
@@ -3373,12 +3385,78 @@ public class GatewayControllerTest {
 		request.setConsumerCloud(cloud);
 		request.setProviderCloud(cloud);
 		
-		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final MvcResult result = postConnectConsumer(status().isBadRequest(), request);
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
 		Assert.assertEquals("Cloud name is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCloseSessionsEmptyPortList() throws Exception {
+		final MvcResult result = postCloseSession(status().isBadRequest(), List.of());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
+		Assert.assertEquals("Ports list is null or empty.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCloseSessionsPortTooLow() throws Exception {
+		final MvcResult result = postCloseSession(status().isOk(), List.of(3000));
+		final TypeReference<List<ActiveSessionCloseErrorDTO>> typeRef = new TypeReference<>() {};
+		final List<ActiveSessionCloseErrorDTO> error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), typeRef);
+		
+		Assert.assertEquals(1, error.size());
+		Assert.assertEquals(3000, error.get(0).getPort());
+		Assert.assertEquals("Invalid active session port.", error.get(0).getError());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCloseSessionsPortTooHigh() throws Exception {
+		final MvcResult result = postCloseSession(status().isOk(), List.of(8500));
+		final TypeReference<List<ActiveSessionCloseErrorDTO>> typeRef = new TypeReference<>() {};
+		final List<ActiveSessionCloseErrorDTO> error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), typeRef);
+		
+		Assert.assertEquals(1, error.size());
+		Assert.assertEquals(8500, error.get(0).getPort());
+		Assert.assertEquals("Invalid active session port.", error.get(0).getError());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCloseSessionsPortNotFound() throws Exception {
+		when(gatewayService.closeSession(8050)).thenReturn("not found");
+		
+		final MvcResult result = postCloseSession(status().isOk(), List.of(8050));
+		final TypeReference<List<ActiveSessionCloseErrorDTO>> typeRef = new TypeReference<>() {};
+		final List<ActiveSessionCloseErrorDTO> error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), typeRef);
+		
+		Assert.assertEquals(1, error.size());
+		Assert.assertEquals(8050, error.get(0).getPort());
+		Assert.assertEquals("not found", error.get(0).getError());
+		
+		verify(gatewayService, times(1)).closeSession(8050);
+	}
+	
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCloseSessionsOk() throws Exception {
+		when(gatewayService.closeSession(8050)).thenReturn(null);
+		
+		final MvcResult result = postCloseSession(status().isOk(), List.of(8050));
+		final TypeReference<List<ActiveSessionCloseErrorDTO>> typeRef = new TypeReference<>() {};
+		final List<ActiveSessionCloseErrorDTO> error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), typeRef);
+		
+		Assert.assertEquals(0, error.size());
+		
+		verify(gatewayService, times(1)).closeSession(8050);
 	}
 	
 	//=================================================================================================
@@ -3388,6 +3466,7 @@ public class GatewayControllerTest {
 	private void fillActiveSessions() {
 		for (int i = 1; i <= 31; ++i) {
 			final ActiveSessionDTO activeSessionDTO = new ActiveSessionDTO();
+			activeSessionDTO.setConsumerServerSocketPort(8000 + i);
 			activeSessionDTO.setSessionStartedAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.of(2019, 1, i, 1, 1, 1, 0, ZoneOffset.UTC)));
 			activeSessions.put("test-key-" + i, activeSessionDTO);
 		}
@@ -3412,8 +3491,8 @@ public class GatewayControllerTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private MvcResult getCloseSession(final ResultMatcher matcher, final ActiveSessionDTO request) throws Exception {
-		return this.mockMvc.perform(post((GATEWAY_CLOSE_SESSIONS_URI))
+	private MvcResult postMgmtCloseSession(final ResultMatcher matcher, final ActiveSessionDTO request) throws Exception {
+		return this.mockMvc.perform(post((GATEWAY_CLOSE_SESSIONS_MGMT_URI))
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(request))
 						   .accept(MediaType.APPLICATION_JSON))
@@ -3422,7 +3501,7 @@ public class GatewayControllerTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private MvcResult getConnectProvider(final ResultMatcher matcher, final GatewayProviderConnectionRequestDTO request) throws Exception {
+	private MvcResult postConnectProvider(final ResultMatcher matcher, final GatewayProviderConnectionRequestDTO request) throws Exception {
 		return this.mockMvc.perform(post((GATEWAY_CONNECT_PROVIDER_URI))
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(request))
@@ -3432,10 +3511,20 @@ public class GatewayControllerTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private MvcResult getConnectConsumer(final ResultMatcher matcher, final GatewayConsumerConnectionRequestDTO request) throws Exception {
+	private MvcResult postConnectConsumer(final ResultMatcher matcher, final GatewayConsumerConnectionRequestDTO request) throws Exception {
 		return this.mockMvc.perform(post((GATEWAY_CONNECT_CONSUMER_URI))
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(request))
+						   .accept(MediaType.APPLICATION_JSON))
+						   .andExpect(matcher)
+						   .andReturn();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MvcResult postCloseSession(final ResultMatcher matcher, final List<Integer> ports) throws Exception {
+		return this.mockMvc.perform(post((GATEWAY_CLOSE_SESSIONS_URI))
+						   .contentType(MediaType.APPLICATION_JSON)
+						   .content(objectMapper.writeValueAsBytes(ports))
 						   .accept(MediaType.APPLICATION_JSON))
 						   .andExpect(matcher)
 						   .andReturn();

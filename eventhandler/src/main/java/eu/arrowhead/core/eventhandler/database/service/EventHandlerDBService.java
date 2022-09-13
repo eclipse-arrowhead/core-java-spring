@@ -42,6 +42,7 @@ import eu.arrowhead.common.database.repository.SubscriptionPublisherConnectionRe
 import eu.arrowhead.common.database.repository.SubscriptionRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.shared.AddressType;
 import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.shared.SubscriptionListResponseDTO;
 import eu.arrowhead.common.dto.shared.SubscriptionRequestDTO;
@@ -50,6 +51,7 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.processor.SpecialNetworkAddressTypeDetector;
 
 @Service
 public class EventHandlerDBService {
@@ -79,6 +81,9 @@ public class EventHandlerDBService {
 	
 	@Autowired
 	private SystemRepository systemRepository;
+	
+	@Autowired
+	private SpecialNetworkAddressTypeDetector networkAddressTypeDetector;
 	
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
 	private boolean secure;
@@ -605,7 +610,8 @@ public class EventHandlerDBService {
 			}
 		} else {
 			for (final SystemResponseDTO systemResponseDTO : authorizedPublishers) {
-				final System system = new System(systemResponseDTO.getSystemName(),	systemResponseDTO.getAddress(),	systemResponseDTO.getPort(), systemResponseDTO.getAuthenticationInfo(), Utilities.map2Text(systemResponseDTO.getMetadata()));
+				final AddressType addressType = networkAddressTypeDetector.detectAddressType(systemResponseDTO.getAddress());
+				final System system = new System(systemResponseDTO.getSystemName(),	systemResponseDTO.getAddress(), addressType, systemResponseDTO.getPort(), systemResponseDTO.getAuthenticationInfo(), Utilities.map2Text(systemResponseDTO.getMetadata()));
 				system.setId(systemResponseDTO.getId());
 						
 				final SubscriptionPublisherConnection conn = new SubscriptionPublisherConnection(subscriptionEntry, system);
@@ -660,7 +666,8 @@ public class EventHandlerDBService {
 			}
 			
 			for (final SystemResponseDTO systemResponseDTO : authorizedPublishers) {
-				final System system = new System(systemResponseDTO.getSystemName(),	systemResponseDTO.getAddress(),	systemResponseDTO.getPort(), systemResponseDTO.getAuthenticationInfo(), Utilities.map2Text(systemResponseDTO.getMetadata()));
+				final AddressType addressType = networkAddressTypeDetector.detectAddressType(systemResponseDTO.getAddress());
+				final System system = new System(systemResponseDTO.getSystemName(),	systemResponseDTO.getAddress(), addressType, systemResponseDTO.getPort(), systemResponseDTO.getAuthenticationInfo(), Utilities.map2Text(systemResponseDTO.getMetadata()));
 				system.setId(systemResponseDTO.getId());
 						
 				final SubscriptionPublisherConnection conn = new SubscriptionPublisherConnection(subscriptionEntry, system);

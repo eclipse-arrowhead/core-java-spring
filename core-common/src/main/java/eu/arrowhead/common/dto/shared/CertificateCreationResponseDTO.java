@@ -15,15 +15,18 @@
 package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
-import java.util.StringJoiner;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CertificateCreationResponseDTO implements Serializable {
 
-    //=================================================================================================
+	//=================================================================================================
     // members
-    private static final long serialVersionUID = 1L;
 
-    private String certificate;
+	private static final long serialVersionUID = 6712338957176937559L;
+
+	private String certificate;
     private CertificateType certificateType;
     private KeyPairDTO keyPairDTO;
     private String certificateFormat;
@@ -31,16 +34,18 @@ public class CertificateCreationResponseDTO implements Serializable {
     //=================================================================================================
     // constructors
 
-    public CertificateCreationResponseDTO() {
-    }
+    //-------------------------------------------------------------------------------------------------
+	public CertificateCreationResponseDTO() {}
 
-    public CertificateCreationResponseDTO(final String certificate, final CertificateType certificateType, final String certificateFormat) {
+    //-------------------------------------------------------------------------------------------------
+	public CertificateCreationResponseDTO(final String certificate, final CertificateType certificateType, final String certificateFormat) {
         this.certificate = certificate;
         this.certificateType = certificateType;
         this.certificateFormat = certificateFormat;
     }
 
-    public CertificateCreationResponseDTO(final String certificate,
+    //-------------------------------------------------------------------------------------------------
+	public CertificateCreationResponseDTO(final String certificate,
                                           final CertificateType certificateType,
                                           final KeyPairDTO keyPairDTO,
                                           final String certificateFormat) {
@@ -53,45 +58,25 @@ public class CertificateCreationResponseDTO implements Serializable {
     //=================================================================================================
     // methods
 
-    public String getCertificate() {
-        return certificate;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public String getCertificate() { return certificate; }
+	public String getCertificateFormat() { return certificateFormat; }
+	public CertificateType getCertificateType() { return certificateType; }
+	public KeyPairDTO getKeyPairDTO() { return keyPairDTO; }
 
-    public void setCertificate(String certificate) {
-        this.certificate = certificate;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public void setCertificate(final String certificate) { this.certificate = certificate; }
+    public void setCertificateFormat(final String certificateFormat) { this.certificateFormat = certificateFormat; }
+    public void setCertificateType(final CertificateType certificateType) { this.certificateType = certificateType; }
+    public void setKeyPairDTO(final KeyPairDTO keyPairDTO) { this.keyPairDTO = keyPairDTO; }
 
-    public String getCertificateFormat() {
-        return certificateFormat;
-    }
-
-    public void setCertificateFormat(final String certificateFormat) {
-        this.certificateFormat = certificateFormat;
-    }
-
-    public CertificateType getCertificateType() {
-        return certificateType;
-    }
-
-    public void setCertificateType(final CertificateType certificateType) {
-        this.certificateType = certificateType;
-    }
-
-    public KeyPairDTO getKeyPairDTO() {
-        return keyPairDTO;
-    }
-
-    public void setKeyPairDTO(final KeyPairDTO keyPairDTO) {
-        this.keyPairDTO = keyPairDTO;
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", CertificateCreationResponseDTO.class.getSimpleName() + "[", "]")
-                .add("certificate='" + certificate + "'")
-                .add("certificateFormat=" + certificateFormat)
-                .add("certificateType=" + certificateType)
-                .add("keyPairDTO=" + keyPairDTO)
-                .toString();
-    }
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

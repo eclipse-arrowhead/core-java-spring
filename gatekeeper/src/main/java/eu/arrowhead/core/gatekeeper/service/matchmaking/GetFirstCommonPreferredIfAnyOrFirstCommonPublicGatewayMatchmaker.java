@@ -22,12 +22,13 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 
-public class GetFirstCommonPreferredIfAnyOrFirstCommonPublicGatewayMatchmaker implements RelayMatchmakingAlgorithm {
+public class GetFirstCommonPreferredIfAnyOrFirstCommonPublicGatewayMatchmaker implements RelayMatchmakingAlgorithm { 
 	
 	//=================================================================================================
 	// members
@@ -71,7 +72,7 @@ public class GetFirstCommonPreferredIfAnyOrFirstCommonPublicGatewayMatchmaker im
 	private Relay getFirstPreferredCommonRelay(final Set<CloudGatewayRelay> relayConnections, final List<RelayRequestDTO> relayRequests) {
 		for (final CloudGatewayRelay relayConn : relayConnections) {
 			for (final RelayRequestDTO requestedRelay : relayRequests) {				
-				if (relayConn.getRelay().getAddress().equalsIgnoreCase(requestedRelay.getAddress()) && relayConn.getRelay().getPort() == requestedRelay.getPort()) {						
+				if (relayEquals(relayConn.getRelay(), requestedRelay)) {						
 					return relayConn.getRelay();
 				}						
 			}
@@ -84,12 +85,21 @@ public class GetFirstCommonPreferredIfAnyOrFirstCommonPublicGatewayMatchmaker im
 	private Relay getFirstPublicCommonRelay(final List<Relay> relays, final List<RelayRequestDTO> relayRequests) {
 		for (final Relay relay : relays) {
 			for (final RelayRequestDTO requestedRelay : relayRequests) {				
-				if (relay.getAddress().equalsIgnoreCase(requestedRelay.getAddress()) && relay.getPort() == requestedRelay.getPort()) {						
+				if (relayEquals(relay, requestedRelay)) {						
 					return relay;
 				}						
 			}
 		}
 		
 		return null;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean relayEquals(final Relay relay, final RelayRequestDTO dto) {
+		if (!Utilities.isEmpty(relay.getAuthenticationInfo()) && !Utilities.isEmpty(dto.getAuthenticationInfo())) {
+			return relay.getAuthenticationInfo().equals(dto.getAuthenticationInfo());
+		}
+		
+		return relay.getAddress().equalsIgnoreCase(dto.getAddress()) && relay.getPort() == dto.getPort();
 	}
 }

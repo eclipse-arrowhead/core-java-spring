@@ -15,9 +15,7 @@
 package eu.arrowhead.common.database.entity;
 
 import java.time.ZonedDateTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -26,14 +24,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 
 import eu.arrowhead.common.CoreDefaults;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 public class ChoreographerPlan {
@@ -47,20 +42,12 @@ public class ChoreographerPlan {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
+    @Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC, unique = true)
     private String name;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "firstActionId", referencedColumnName = "id")
     private ChoreographerAction firstAction;
-
-    @OneToMany(mappedBy = "plan", fetch = FetchType.LAZY, orphanRemoval = true)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerAction> actions = new HashSet<>();
-
-    @OneToMany(mappedBy = "plan", fetch = FetchType.LAZY, orphanRemoval = true)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerSession> sessions = new HashSet<>();
 
     @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime createdAt;
@@ -85,8 +72,6 @@ public class ChoreographerPlan {
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
     public ChoreographerAction getFirstAction() { return firstAction; }
-    public Set<ChoreographerAction> getActions() { return actions; }
-    public Set<ChoreographerSession> getSessions() { return sessions; }
 
     //-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
@@ -94,8 +79,6 @@ public class ChoreographerPlan {
     public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
     public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
     public void setFirstAction(ChoreographerAction firstAction) { this.firstAction = firstAction; }
-    public void setActions(Set<ChoreographerAction> actions) { this.actions = actions; }
-    public void setSessions(Set<ChoreographerSession> sessions) { this.sessions = sessions; }
 
     //-------------------------------------------------------------------------------------------------
 	@PrePersist

@@ -1,0 +1,63 @@
+# Default values for hono-deployment.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+hono:
+  amqpMessagingNetworkExample:
+    dispatchRouter:
+      configPath: /router-config/qdrouterd.json
+      extraSecretMounts:
+        other:
+          secretName: qpid-auth
+          mountPath: /qpid
+        router-config:
+          secretName: router-config
+          mountPath: /router-config
+      #not found
+      applicationSaslExternal: true
+  adapters:
+    amqpMessagingNetworkSpec:
+      trustStorePath: /qpid/truststore.pem
+      keyPath: /qpid/adapter-key.pem
+      certPath: /qpid/adapter-cert.pem
+    commandAndControlSpec:
+      trustStorePath: /qpid/truststore.pem
+      keyPath: /qpid/adapter-key.pem
+      certPath: /qpid/adapter-cert.pem
+    amqp:
+      enabled: false
+    lora:
+      enabled: false
+    mqtt:
+      enabled: true
+      extraSecretMounts:
+        certs: 
+          secretName: adapter-keystore
+          mountPath: /keystore
+        qpid-certs:
+          secretName: qpid-auth
+          mountPath: /qpid
+      hono:
+        mqtt:
+          bindAddress: 0.0.0.0
+          #keyPath? 
+          keyStorePath: /keystore/mqtt-keystore.p12
+          #not found in Chart
+          keyStorePassword: hdevice-test-pw
+    http:
+      enabled: true
+      extraSecretMounts:
+        certs: 
+          secretName: adapter-keystore
+          mountPath: /keystore
+        qpid-certs:
+          secretName: qpid-auth
+          mountPath: /qpid
+      hono:
+        # looks different
+        http:
+          bindAddress: 0.0.0.0
+          keyStorePath: /keystore/http-keystore.p12
+          keyStorePassword: hdevice-test-pw

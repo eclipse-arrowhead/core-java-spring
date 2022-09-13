@@ -38,12 +38,17 @@ public class CoreCommonConstants {
 	public static final String SR_QUERY_BY_SYSTEM_ID_URI = "service.registry.query.by.system.id.uri";
 	public static final String SR_QUERY_BY_SYSTEM_DTO_URI = "service.registry.query.by.system.dto.uri";
 	public static final String SR_QUERY_ALL = "service.registry.query.all.uri";
+	public static final String SR_QUERY_BY_SERVICE_DEFINITION_LIST_URI = "service.registry.query.services.by.service.definition.list.uri";
+	public static final String SR_REGISTER_SYSTEM_URI = "service.registry.register.system.uri";
+	public static final String SR_UNREGISTER_SYSTEM_URI = "service.registry.unregister.system.uri";
+	public static final String SR_PULL_CONFIG_URI = "service.registry.pull.config.uri";
 	public static final String REQUIRED_URI_LIST = "required.uri.list";
 	public static final String URI_SUFFIX = "-uri";
 	
 	public static final String RELAY_MESSAGE_TYPE_RAW = "raw";
 	public static final String RELAY_MESSAGE_TYPE_ACK = "ack";
 	public static final String RELAY_MESSAGE_TYPE_GSD_POLL = "gsd_poll";
+	public static final String RELAY_MESSAGE_TYPE_MULTI_GSD_POLL = "multi_gsd_poll";
 	public static final String RELAY_MESSAGE_TYPE_ICN_PROPOSAL = "icn_proposal";
 	public static final String RELAY_MESSAGE_TYPE_ACCESS_TYPE = "access_type";
 	public static final String RELAY_MESSAGE_TYPE_SYSTEM_ADDRESS_LIST = "system_address_list";
@@ -71,12 +76,16 @@ public class CoreCommonConstants {
 	public static final String OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_ID_URI = "/query/system/{" + COMMON_FIELD_NAME_ID + "}";
 	public static final String OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_DTO_URI = "/query/system";
 	public static final String OP_SERVICEREGISTRY_QUERY_ALL_SERVICE_URI = "/query/all";
+
+	public static final String OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SYSTEM_ID_URI = "/query/provider/{" + COMMON_FIELD_NAME_ID + "}";
 	public static final String OP_SERVICEREGISTRY_MULTI_QUERY_URI = CommonConstants.OP_SERVICEREGISTRY_QUERY_URI + "/multi";	
+	public static final String OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI = "/query/definition";
+	public static final String OP_SERVICEREGISTRY_PULL_CONFIG_URI = "/pull-config";
 		
 	public static final String ORCHESTRATOR_STORE_MGMT_URI = "/mgmt/store";
 	public static final String ORCHESTRATOR_STORE_FLEXIBLE_MGMT_URI = "/mgmt/store/flexible";
 	public static final String ORCHESTRATOR_STORE_FLEXIBLE_BY_ID_MGMT_URI = ORCHESTRATOR_STORE_FLEXIBLE_MGMT_URI + "/{" + COMMON_FIELD_NAME_ID + "}";
-	
+
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
 	public static final String SWAGGER_HTTP_200_MESSAGE = "Core service is available";
@@ -122,12 +131,22 @@ public class CoreCommonConstants {
 	public static final String $URI_CRAWLER_INTERVAL_WD = "${" + URI_CRAWLER_INTERVAL + ":" + CoreDefaults.DEFAULT_URI_CRAWLER_INTERVAL + "}";
 	public static final String AUTH_TOKEN_TTL_IN_MINUTES = "auth_token_ttl_in_minutes";
 	public static final String $AUTH_TOKEN_TTL_IN_MINUTES_WD = "${" + AUTH_TOKEN_TTL_IN_MINUTES + ":" + CoreDefaults.DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES + "}";
-	
-	public static final String REQUEST_PARAM_PAGE = "page";
+
+	public static final String PARAM_VERIFICATION_INTERVAL = "mscv.defaultVerificationInterval"; // in seconds
+	public static final String $VERIFICATION_INTERVAL_WD = "${" + PARAM_VERIFICATION_INTERVAL + ":" + CoreDefaults.DEFAULT_VERIFICATION_INTERVAL + "}";
+
+    public static final String REQUEST_PARAM_PAGE = "page";
 	public static final String REQUEST_PARAM_ITEM_PER_PAGE = "item_per_page";
 	public static final String REQUEST_PARAM_DIRECTION = "direction";
 	public static final String REQUEST_PARAM_SORT_FIELD = "sort_field";
 	public static final String REQUEST_PARAM_SERVICE_DEFINITION = "service_definition";
+
+	public static final String COAP_SERVER_ADDRESS_ENABLED = "coap.server.enabled";
+	public static final String $COAP_SERVER_ADDRESS_ENABLED = "${" + COAP_SERVER_ADDRESS_ENABLED + ":false}";
+	public static final String COAP_SERVER_ADDRESS = "coap.server.address";
+	public static final String $COAP_SERVER_ADDRESS = "${" + COAP_SERVER_ADDRESS + ":0.0.0.0}";
+	public static final String COAP_SERVER_PORT = "coap.server.port";
+	public static final String $COAP_SERVER_PORT = "${" + COAP_SERVER_PORT + ":0}";
 	
 	public static final long CONVERSION_MILLISECOND_TO_SECOND = 1000;
 	public static final long CONVERSION_MILLISECOND_TO_MINUTE = 60000;
@@ -175,7 +194,7 @@ public class CoreCommonConstants {
 	public static final String CLOUD_MATCHMAKER = "cloudMatchmaker";
 	
 	public static final String PING_MONITOR = "pingMonitor";
-	
+
 	public static final int TOP_PRIORITY = 1;
 	
 	public static final String QOSMANAGER = "qosManager";
@@ -219,6 +238,8 @@ public class CoreCommonConstants {
 	public static final String $NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD = "${" + NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + ":" + 
 																				 CoreDefaults.DEFAULT_NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + "}";
 	
+	public static final String GATEWAY_INACTIVE_BRIDGE_TIMEOUT = "inactive_gateway_bridge_timeout";
+	public static final String $GATEWAY_INACTIVE_BRIDGE_TIMEOUT_WD = "${" + GATEWAY_INACTIVE_BRIDGE_TIMEOUT + ":" + CoreDefaults.DEFAULT_GATEWAY_INACTIVE_BRIDGE_TIMEOUT + "}";
 	public static final String GATEWAY_SOCKET_TIMEOUT = "gateway_socket_timeout";
 	public static final String $GATEWAY_SOCKET_TIMEOUT_WD = "${" + GATEWAY_SOCKET_TIMEOUT + ":" + CoreDefaults.DEFAULT_GATEWAY_SOCKET_TIMEOUT + "}";
 	public static final String GATEWAY_MIN_PORT = "min_port";
@@ -230,6 +251,11 @@ public class CoreCommonConstants {
 	
 	public static final String GATEWAY_ACTIVE_SESSION_MAP = "activeSessions";
 	public static final String GATEWAY_AVAILABLE_PORTS_QUEUE = "availableQueue";
+	public static final String GATEWAY_ACTIVE_CONSUMER_SIDE_SOCKET_THREAD_MAP = "activeConsumerSideSocketThreads";
+	public static final String GATEWAY_ACTIVE_PROVIDER_SIDE_SOCKET_THREAD_HANDLER_MAP = "activeProviderSideSocketThreadHandlers";
+	
+	public static final String CHOREOGRAPHER_IS_GATEKEEPER_PRESENT = "gatekeeper_is_present";
+	public static final String $CHOREOGRAPHER_IS_GATEKEEPER_PRESENT_WD = "${" + CHOREOGRAPHER_IS_GATEKEEPER_PRESENT + ":" + CoreDefaults.DEFAULT_CHOREOGRAPHER_IS_GATEKEEPER_PRESENT + "}";
 	
 	public static final String EVENTHANDLER_TTL_SCHEDULED = "event_handler_ttl_scheduled";
 	public static final String $EVENTHANDLER_TTL_SCHEDULED_WD = "${" + EVENTHANDLER_TTL_SCHEDULED + ":" + CoreDefaults.DEFAULT_EVENTHANDLER_TTL_SCHEDULED + "}";
@@ -271,6 +297,9 @@ public class CoreCommonConstants {
 	public static final String RELAY_TEST_LOG_MEASUREMENTS_IN_DB = "relay.test.log_measurements_in_db";
 	public static final String $RELAY_TEST_LOG_MEASUREMENTS_IN_DB_WD = "${" + RELAY_TEST_LOG_MEASUREMENTS_IN_DB + ":" + CoreDefaults.DEFAULT_RELAY_TEST_LOG_MEASUREMENTS_IN_DB + "}";
 	
+	public static final String CHOREOGRAPHER_MAX_PLAN_ITERATION = "max_plan_iteration";
+	public static final String $CHOREOGRAPHER_MAX_PLAN_ITERATION_WD = "${" + CHOREOGRAPHER_MAX_PLAN_ITERATION + ":" + CoreDefaults.DEFAULT_CHOREOGRAPHER_MAX_PLAN_ITERATION + "}";
+	
 	public static final String CERTIFICATE_FORMAT = "X.509";
 
 	// Translator-Fiware
@@ -279,7 +308,7 @@ public class CoreCommonConstants {
 	public static final String FIWARE_SERVER_PORT = "fiware.server.port";
 	public static final String $FIWARE_SERVER_PORT = "${" + FIWARE_SERVER_PORT + ":0}";
 
-	// MQTT 
+	// MQTT
 	public static final String MQTT_BROKER_ENABLED = "mqtt.broker.enabled";
 	public static final String $MQTT_BROKER_ENABLED = "${" + MQTT_BROKER_ENABLED + ":false}";
 	public static final String MQTT_BROKER_ADDRESS = "mqtt.broker.address";

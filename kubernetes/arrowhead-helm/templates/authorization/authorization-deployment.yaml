@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: authorization
+  name: {{ .Release.Name }}-authorization-deployment
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: authorization
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: authorization
+    spec:
+      containers:
+        - image: {{ .Values.authorization.image }}
+          name: authorization
+          ports:
+            - containerPort: {{ .Values.authorization.port }}
+          resources: {}
+          volumeMounts:
+            - name: {{ .Values.authorization.address }}-properties-volume
+              mountPath: /authorization/application.properties
+              subPath: application.properties
+            - name: {{ .Values.authorization.address }}-keystore-volume
+              mountPath: /authorization/keystore
+            - name: {{ .Values.authorization.address }}-truststore-volume
+              mountPath: /authorization/truststore
+      initContainers:
+        - image: busybox:1.28
+          name: wait-for-db
+          volumeMounts:
+            - name: wait-for-db
+              mountPath: /init
+          command:
+            - /bin/sh
+            - /init/wait-for-db.sh
+      volumes:
+        - name: {{ .Values.authorization.address }}-properties-volume
+          secret: 
+            secretName: {{ .Release.Name }}-authorization-properties
+        - name: wait-for-db
+          configMap:
+            name: {{ .Release.Name }}-wait-for-db
+        - name: {{ .Values.authorization.address }}-keystore-volume
+          configMap:
+            name: {{ .Release.Name }}-authorization-keystore
+        - name: {{ .Values.authorization.address }}-truststore-volume
+          configMap:
+            name: {{ .Release.Name }}-authorization-truststore
+      restartPolicy: Always

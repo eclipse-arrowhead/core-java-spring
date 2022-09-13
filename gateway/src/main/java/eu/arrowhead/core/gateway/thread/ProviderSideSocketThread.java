@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.UnknownHostException;
 import java.security.PublicKey;
+import java.time.ZonedDateTime;
 import java.util.ServiceConfigurationError;
 
 import javax.jms.JMSException;
@@ -57,6 +58,7 @@ class ProviderSideSocketThread extends Thread {
 	private SSLSocket sslProviderSocket;
 	private OutputStream outputStream;
 
+	private ZonedDateTime lastInteraction;
 	private boolean initialized = false;
 	private boolean interrupted = false;
 
@@ -91,6 +93,7 @@ class ProviderSideSocketThread extends Thread {
 		sslProviderSocket.setSoTimeout(timeout);
 		outputStream = sslProviderSocket.getOutputStream();
 		initialized = true;
+		lastInteraction = ZonedDateTime.now();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -104,6 +107,16 @@ class ProviderSideSocketThread extends Thread {
 	//-------------------------------------------------------------------------------------------------
 	public OutputStream getOutputStream() {
 		return outputStream;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ZonedDateTime getLastInteractionTime() {
+		return this.lastInteraction;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void setNowAsLastInteractionTime() {
+		this.lastInteraction = ZonedDateTime.now();
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -130,6 +143,7 @@ class ProviderSideSocketThread extends Thread {
 				if (size < 0) { // end of stream
 					closeAndInterrupt();
 				} else {
+					lastInteraction = ZonedDateTime.now();
 					final byte[] data = new byte[size];
 					System.arraycopy(buffer, 0, data, 0, size);
 					relayClient.sendBytes(relaySession, sender, consumerGatewayPublicKey, data);

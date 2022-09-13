@@ -14,20 +14,31 @@
 
 package eu.arrowhead.core.gateway;
 
+
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import eu.arrowhead.common.database.service.CommonDBService;
+import eu.arrowhead.core.gateway.service.GatewayService;
 
 @Configuration
 public class GatewayTestContext {
 	
+
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
+	@Bean
+	@Primary // This bean is primary only in test context
+	public GatewayService mockGatewayService() {
+		return Mockito.mock(GatewayService.class);
+    }
+    
+	//-------------------------------------------------------------------------------------------------
+
 	@Bean
 	@Primary // This bean is primary only in test context
 	public CommonDBService mockCommonDBService() {

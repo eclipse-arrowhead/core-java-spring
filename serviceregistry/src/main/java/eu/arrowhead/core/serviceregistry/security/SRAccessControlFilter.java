@@ -40,12 +40,15 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	
 	private static final CoreSystem[] allowedCoreSystemsForQuery = { CoreSystem.ORCHESTRATOR, CoreSystem.GATEKEEPER, CoreSystem.CERTIFICATEAUTHORITY, CoreSystem.EVENTHANDLER,
 																	 CoreSystem.AUTHORIZATION, CoreSystem.QOSMONITOR, CoreSystem.ONBOARDINGCONTROLLER, CoreSystem.DEVICEREGISTRY,
-															         CoreSystem.SYSTEMREGISTRY, CoreSystem.PLANTDESCRIPTIONENGINE, CoreSystem.CHOREOGRAPHER };
+															         CoreSystem.SYSTEMREGISTRY, CoreSystem.PLANTDESCRIPTIONENGINE, CoreSystem.CHOREOGRAPHER, CoreSystem.HAWKBITCONFIGURATIONMANAGER,
+															         CoreSystem.MSCV };
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemId = { CoreSystem.ORCHESTRATOR };
-	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemDTO = { CoreSystem.ORCHESTRATOR };
+	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemDTO = { CoreSystem.ORCHESTRATOR, CoreSystem.CHOREOGRAPHER };
 	private static final CoreSystem[] allowedCoreSystemsForQueryAll = { CoreSystem.QOSMONITOR, CoreSystem.GATEKEEPER };
-	private static final CoreSystem[] allowedCoreSystemsForRegisterSystem = { CoreSystem.PLANTDESCRIPTIONENGINE};
+	private static final CoreSystem[] allowedCoreSystemsForRegisterSystem = { CoreSystem.PLANTDESCRIPTIONENGINE, CoreSystem.CHOREOGRAPHER};
 	private static final CoreSystem[] allowedCoreSystemsForPullSystems = { CoreSystem.PLANTDESCRIPTIONENGINE};
+	private static final CoreSystem[] allowedCoreSystemsForQueryServicesBySystemId = { CoreSystem.CHOREOGRAPHER };
+	private static final CoreSystem[] allowedCoreSystemsForQueryServicesByServiceDefList = { CoreSystem.CHOREOGRAPHER };
 	
 	private static final String ID_PATH_VARIABLE = "{" + CommonConstants.COMMON_FIELD_NAME_ID + "}"; 
 	
@@ -85,6 +88,12 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		} else if (requestTarget.endsWith(CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_BY_SYSTEM_DTO_URI)) {
 			// Only dedicated core systems can use this service
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQueryBySystemDTO, requestTarget);
+		} else if (requestTarget.contains(CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SYSTEM_ID_URI.replace(ID_PATH_VARIABLE, ""))) {
+			// Only dedicated core systems can use this service
+			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQueryServicesBySystemId, requestTarget);
+		} else if (requestTarget.endsWith(CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_SERVICES_BY_SERVICE_DEFINITION_LIST_URI)) {
+			// Only dedicated core systems can use this service
+			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQueryServicesByServiceDefList, requestTarget);
 		} else if (requestTarget.endsWith(CoreCommonConstants.OP_SERVICEREGISTRY_QUERY_ALL_SERVICE_URI)) {
 			// Only dedicated core systems can use this service
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQueryAll, requestTarget);
@@ -105,6 +114,9 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICEREGISTRY_PULL_SYSTEMS_URI)) {
 			// Only dedicated core systems can use this service
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForPullSystems, requestTarget);
+		} else if (requestTarget.endsWith(CoreCommonConstants.OP_SERVICEREGISTRY_PULL_CONFIG_URI)) {
+			// Only Core Systems are allowed to pull the SR config
+			checkIfClientIsACoreSystem(clientCN, cloudCN);
 		}
 	}
 
@@ -127,7 +139,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 
 		if (!providerName.equalsIgnoreCase(clientName)) {
 			log.debug("Provider system name and certificate common name do not match! Registering denied!");
-			throw new AuthException("Provider system name(" + providerName + ") and certificate common name (" + clientCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
+			throw new AuthException("Provider system name (" + providerName + ") and certificate common name (" + clientName + ") do not match!", HttpStatus.UNAUTHORIZED.value());
 		}
 		
 		if (!isClientACoreSystem(clientCN, cloudCN)) {
@@ -152,7 +164,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		
 		if (!appSysName.equalsIgnoreCase(clientName)) {
 			log.debug("Application system name and certificate common name do not match! Unregistering denied!");
-			throw new AuthException("Application system name (" + appSysName + ") and certificate common name (" + clientCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
+			throw new AuthException("Application system name (" + appSysName + ") and certificate common name (" + clientName + ") do not match!", HttpStatus.UNAUTHORIZED.value());
 		}
 	}
 	
@@ -184,6 +196,13 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		}
 		
 		return false;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkIfClientIsACoreSystem(final String clientCN, final String cloudCN) {
+		if (!isClientACoreSystem(clientCN, cloudCN)) {
+			throw new AuthException("Only Core Systems are allowed to use this endpoint", HttpStatus.UNAUTHORIZED.value());
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -229,7 +248,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		
 		if (!applicationName.equalsIgnoreCase(clientName)) {
 			log.debug("Application system name and certificate common name do not match! Registering denied!");
-			throw new AuthException("Application system name(" + applicationName + ") and certificate common name (" + clientCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
+			throw new AuthException("Application system name(" + applicationName + ") and certificate common name (" + clientName + ") do not match!", HttpStatus.UNAUTHORIZED.value());
 		}
 	}
 

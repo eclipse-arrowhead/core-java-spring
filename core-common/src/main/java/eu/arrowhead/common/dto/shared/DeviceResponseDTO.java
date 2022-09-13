@@ -14,12 +14,13 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.StringJoiner;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonInclude(Include.NON_NULL)
 public class DeviceResponseDTO implements Serializable {
@@ -97,16 +98,13 @@ public class DeviceResponseDTO implements Serializable {
 				Objects.equals(deviceName, other.deviceName);
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", DeviceResponseDTO.class.getSimpleName() + "[", "]")
-				.add("id=" + id)
-				.add("deviceName='" + deviceName + "'")
-				.add("address='" + address + "'")
-				.add("macAddress='" + macAddress + "'")
-				.add("authenticationInfo='" + authenticationInfo + "'")
-				.add("createdAt='" + createdAt + "'")
-				.add("updatedAt='" + updatedAt + "'")
-				.toString();
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
 	}
 }

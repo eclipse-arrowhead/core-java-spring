@@ -18,14 +18,20 @@ import java.io.Serializable;
 
 public class OnboardingWithCsrResponseDTO extends OnboardingResponseDTO implements Serializable {
 
-    //=================================================================================================
+
+	//=================================================================================================
     // members
-    private static final long serialVersionUID = 1L;
 
-    public OnboardingWithCsrResponseDTO() {
-    }
+	private static final long serialVersionUID = -1696423117054488L;
 
-    public OnboardingWithCsrResponseDTO(final ServiceEndpoint deviceRegistry, final ServiceEndpoint systemRegistry,
+	//=================================================================================================
+	// methods 
+	
+	//-------------------------------------------------------------------------------------------------
+	public OnboardingWithCsrResponseDTO() {}
+
+    //-------------------------------------------------------------------------------------------------
+	public OnboardingWithCsrResponseDTO(final ServiceEndpoint deviceRegistry, final ServiceEndpoint systemRegistry,
                                         final ServiceEndpoint serviceRegistry, final ServiceEndpoint orchestrationService,
                                         final CertificateCreationResponseDTO onboardingCertificate, final String intermediateCertificate,
                                         final String rootCertificate) {

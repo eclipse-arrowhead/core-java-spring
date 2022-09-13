@@ -21,12 +21,17 @@ public class SystemRegistryOnboardingWithNameResponseDTO extends SystemRegistryO
 
     //=================================================================================================
     // members
-    private static final long serialVersionUID = 1L;
 
-    public SystemRegistryOnboardingWithNameResponseDTO() {
-    }
+	private static final long serialVersionUID = 5840472532749385568L;
+	
+	//=================================================================================================
+	// methods
 
-    public SystemRegistryOnboardingWithNameResponseDTO(final long id, final SystemResponseDTO system,
+	//-------------------------------------------------------------------------------------------------
+	public SystemRegistryOnboardingWithNameResponseDTO() {}
+
+    //-------------------------------------------------------------------------------------------------
+	public SystemRegistryOnboardingWithNameResponseDTO(final long id, final SystemResponseDTO system,
                                                        final DeviceResponseDTO provider, final String endOfValidity,
                                                        final Map<String, String> metadata, final int version, final String createdAt,
                                                        final String updatedAt,

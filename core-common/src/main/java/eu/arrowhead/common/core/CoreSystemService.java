@@ -30,11 +30,13 @@ public enum CoreSystemService {
 	AUTH_CONTROL_INTRA_SERVICE(CommonConstants.CORE_SERVICE_AUTH_CONTROL_INTRA, CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_INTRA_CHECK_URI),
 	AUTH_CONTROL_INTER_SERVICE(CommonConstants.CORE_SERVICE_AUTH_CONTROL_INTER, CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_INTER_CHECK_URI),
 	AUTH_TOKEN_GENERATION_SERVICE(CommonConstants.CORE_SERVICE_AUTH_TOKEN_GENERATION, CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_TOKEN_URI),
+	AUTH_TOKEN_GENERATION_MULTI_SERVICE(CommonConstants.CORE_SERVICE_AUTH_TOKEN_GENERATION_MULTI_SERVICE, CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_TOKEN_MULTI_SERVICE_URI),
 	AUTH_PUBLIC_KEY_SERVICE(CommonConstants.CORE_SERVICE_AUTH_PUBLIC_KEY, CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_KEY_URI),
 	AUTH_CONTROL_SUBSCRIPTION_SERVICE(CommonConstants.CORE_SERVICE_AUTH_CONTROL_SUBSCRIPTION, CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_SUBSCRIPTION_CHECK_URI),
 	
 	// Orchestrator services
 	ORCHESTRATION_SERVICE(CommonConstants.CORE_SERVICE_ORCH_PROCESS, CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS_URI),
+	ORCHESTRATION_BY_PROXY_SERVICE(CommonConstants.CORE_SERVICE_ORCH_PROCESS_BY_PROXY, CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS_BY_PROXY_URI),
 	ORCHESTRATION_CREATE_FLEXIBLE_STORE_RULES_SERVICE(CommonConstants.CORE_SERVICE_ORCH_CREATE_FLEXIBLE_STORE_RULES, CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_CREATE_FLEXIBLE_STORE_RULES_URI),
 	ORCHESTRATION_REMOVE_FLEXIBLE_STORE_RULE_SERVICE(CommonConstants.CORE_SERVICE_ORCH_REMOVE_FLEXIBLE_STORE_RULE, CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_REMOVE_FLEXIBLE_STORE_RULE_URI),
 	ORCHESTRATION_CLEAN_FLEXIBLE_STORE_SERVICE(CommonConstants.CORE_SERVICE_ORCH_CLEAN_FLEXIBLE_STORE, CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_CLEAN_FLEXIBLE_STORE_URI),
@@ -45,6 +47,7 @@ public enum CoreSystemService {
 	
 	// Gatekeeper services
 	GATEKEEPER_GLOBAL_SERVICE_DISCOVERY(CommonConstants.CORE_SERVICE_GATEKEEPER_GSD, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GSD_SERVICE),
+	GATEKEEPER_MULTI_GLOBAL_SERVICE_DISCOVERY(CommonConstants.CORE_SERVICE_GATEKEEPER_MULTI_GSD, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_MULTI_GSD_SERVICE),
 	GATEKEEPER_INTER_CLOUD_NEGOTIATION(CommonConstants.CORE_SERVICE_GATEKEEPER_ICN, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_ICN_SERVICE),
 	GATEKEEPER_PULL_CLOUDS(CommonConstants.CORE_SERVICE_GATEKEEPER_PULL_CLOUDS, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_PULL_CLOUDS_SERVICE),
 	GATEKEEPER_COLLECT_SYSTEM_ADDRESSES(CommonConstants.CORE_SERVICE_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_SERVICE),
@@ -57,6 +60,7 @@ public enum CoreSystemService {
 	GATEWAY_PUBLIC_KEY_SERVICE(CommonConstants.CORE_SERVICE_GATEWAY_PUBLIC_KEY, CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_KEY_URI),
 	GATEWAY_PROVIDER_SERVICE(CommonConstants.CORE_SERVICE_GATEWAY_CONNECT_PROVIDER, CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_CONNECT_PROVIDER_URI),
 	GATEWAY_CONSUMER_SERVICE(CommonConstants.CORE_SERVICE_GATEWAY_CONNECT_CONSUMER, CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_CONNECT_CONSUMER_URI),
+	GATEWAY_CLOSE_SESSIONS_SERVICE(CommonConstants.CORE_SERVICE_GATEWAY_CLOSE_SESSIONS, CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_CLOSE_SESSIONS),
 	
 	// Eventhandler services
 	EVENT_PUBLISH_SERVICE(CommonConstants.CORE_SERVICE_EVENTHANDLER_PUBLISH, CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_PUBLISH),
@@ -95,10 +99,12 @@ public enum CoreSystemService {
 	
     // Choreographer services
 	CHOREOGRAPHER_SERVICE(CommonConstants.CORE_SERVICE_CHOREOGRAPHER_PROCESS, CommonConstants.CHOREOGRAPHER_URI +  CommonConstants.OP_CHOREOGRAPHER_NOTIFY_STEP_DONE),
+	CHOREOGRAPHER_REGISTER_EXECUTOR_SERVICE(CommonConstants.CORE_SERVICE_CHOREOGRAPHER_REGISTER_EXECUTOR, CommonConstants.CHOREOGRAPHER_URI + CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_REGISTER),
+	CHOREOGRAPHER_UNREGISTER_EXECUTOR_SERVICE(CommonConstants.CORE_SERVICE_CHOREOGRAPHER_UNREGISTER_EXECUTOR, CommonConstants.CHOREOGRAPHER_URI + CommonConstants.OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER),
 	
 	// QoS Monitor services
 
-	QOSMONITOR_INTRA_PING_MEASUREMENT_SERVICE(CommonConstants.CORE_SERVICE_QOSMONITOR_INTRA_PING_MEASUREMENT, CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTRA_PING_MEASUREMENT + 
+	QOSMONITOR_INTRA_PING_MEASUREMENT_SERVICE(CommonConstants.CORE_SERVICE_QOSMONITOR_INTRA_PING_MEASUREMENT, CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTRA_PING_MEASUREMENT +
 										 	   CommonConstants.OP_QOSMONITOR_INTRA_PING_MEASUREMENT_SUFFIX),
 	QOSMONITOR_INTRA_PING_MEDIAN_MEASUREMENT_SERVICE(CommonConstants.CORE_SERVICE_QOSMONITOR_INTRA_PING_MEDIAN_MEASUREMENT, CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTRA_PING_MEDIAN_MEASUREMENT),
 	QOSMONITOR_INTER_DIRECT_PING_MEASUREMENT_SERVICE(CommonConstants.CORE_SERVICE_QOSMONITOR_INTER_DIRECT_PING_MEASUREMENT, CommonConstants.QOSMONITOR_URI + CommonConstants.OP_QOSMONITOR_INTER_DIRECT_PING_MEASUREMENT),
@@ -134,7 +140,17 @@ public enum CoreSystemService {
     SERVICEREGISTRY_UNREGISTER_SERVICE(CommonConstants.CORE_SERVICE_SERVICEREGISTRY_UNREGISTER, CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_URI),
     SERVICEREGISTRY_REGISTER_SYSTEM(CommonConstants.CORE_SERVICE_SERVICEREGISTRY_REGISTER_SYSTEM, CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_REGISTER_SYSTEM_URI),
     SERVICEREGISTRY_UNREGISTER_SYSTEM(CommonConstants.CORE_SERVICE_SERVICEREGISTRY_UNREGISTER_SYSTEM, CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_SYSTEM_URI),
-    SERVICEREGISTRY_PULL_SYSTEMS(CommonConstants.CORE_SERVICE_SERVICEREGISTRY_PULL_SYSTEMS, CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_PULL_SYSTEMS_URI);
+    SERVICEREGISTRY_PULL_SYSTEMS(CommonConstants.CORE_SERVICE_SERVICEREGISTRY_PULL_SYSTEMS,
+										CommonConstants.SERVICEREGISTRY_URI + CommonConstants.OP_SERVICEREGISTRY_PULL_SYSTEMS_URI),
+
+	// Monitoring and Standard Verification Services
+	MSCV_VERIFICATION_SERVICE(CommonConstants.CORE_SERVICE_MSCV_VERIFICATION, CommonConstants.MSCV_URI + CommonConstants.OP_MSCV_EXECUTE_URI),
+	MSCV_PUBLIC_KEY_SERVICE(CommonConstants.CORE_SERVICE_MSCV_PUBLIC_KEY, CommonConstants.MSCV_URI + CommonConstants.OP_MSCV_PUBLIC_KEY_URI),
+	MSCV_LOGIN_SERVICE(CommonConstants.CORE_SERVICE_MSCV_LOGIN, CommonConstants.MSCV_URI + CommonConstants.OP_MSCV_LOGIN_URI),
+
+
+	GAMS_SERVICE(CommonConstants.CORE_SERVICE_GAMS_SERVICE, CommonConstants.GAMS_URI + CommonConstants.OP_GAMS_SERVICE_URI),
+	GAMS_SENSOR_SERVICE(CommonConstants.CORE_SERVICE_GAMS_SENSOR_SERVICE, CommonConstants.GAMS_URI + CommonConstants.OP_GAMS_SENSOR_SERVICE_URI);
 	
 	//TODO: additional services 
 	
@@ -144,7 +160,7 @@ public enum CoreSystemService {
 	private final String serviceDefinition;
 	private final String serviceUri;
 	private final List<InterfaceData> interfaces;
-	
+
 	//=================================================================================================
 	// methods
 	
@@ -160,7 +176,7 @@ public enum CoreSystemService {
 	private CoreSystemService(final String serviceDefinition, final String serviceUri) {
 		this(serviceDefinition, serviceUri, null);
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private CoreSystemService(final String serviceDefinition, final String serviceUri, final List<InterfaceData> interfaces) {
 		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "Service definition is null or blank");
@@ -170,27 +186,27 @@ public enum CoreSystemService {
 		this.serviceUri = serviceUri;
 		this.interfaces = interfaces == null || interfaces.isEmpty() ? null : interfaces;
 	}
-	
+
 	//=================================================================================================
 	// nested classes
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public static class InterfaceData {
-		
+
 		//=================================================================================================
 		// members
-		
+
 		private final String protocol;
 		private final String format;
-		
+
 		//=================================================================================================
 		// methods
-		
+
 		//-------------------------------------------------------------------------------------------------
 		public InterfaceData(final String protocol, final String format) {
 			Assert.isTrue(!Utilities.isEmpty(protocol), "protocol is invalid");
 			Assert.isTrue(!Utilities.isEmpty(format), "format is invalid");
-			
+
 			this.protocol = protocol.toUpperCase().trim();
 			this.format = format.toUpperCase().trim();
 		}

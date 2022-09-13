@@ -15,6 +15,8 @@
 package eu.arrowhead.core.gatekeeper.security;
 
 import static org.junit.Assume.assumeTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.x509;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -30,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -47,6 +50,7 @@ import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 
 /**
 * IMPORTANT: These tests may fail if the certificates are changed in the src/main/resources folder. 
@@ -82,6 +86,9 @@ public class GatekeeperAccessControlFilterTest {
 	@Autowired
 	private ObjectMapper objectMapper;
 	
+	@MockBean(name = "mockCnVerifier")
+	private CommonNamePartVerifier cnVerifier;
+	
 	private MockMvc mockMvc;
 	
 	//=================================================================================================
@@ -96,7 +103,9 @@ public class GatekeeperAccessControlFilterTest {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac)
 									  .apply(springSecurity())
 									  .addFilters(gkFilter)
-									  .build();			
+									  .build();
+		
+		when(cnVerifier.isValid(anyString())).thenReturn(true);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

@@ -21,6 +21,7 @@ import javax.jms.MessageProducer;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.internal.GSDMultiPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GeneralRelayRequestDTO;
 import eu.arrowhead.common.dto.internal.ICNProposalRequestDTO;
@@ -46,7 +47,7 @@ public class GatekeeperRelayRequest {
 	//-------------------------------------------------------------------------------------------------
 	public GatekeeperRelayRequest(final MessageProducer answerSender, final PublicKey peerPublicKey, final String sessionId, final String messageType, final Object payload) {
 		Assert.notNull(answerSender, "Sender is null.");
-		Assert.notNull(peerPublicKey, "Peer publc key is null.");
+		Assert.notNull(peerPublicKey, "Peer public key is null.");
 		Assert.isTrue(!Utilities.isEmpty(sessionId), "Session id is null or blank.");
 		Assert.isTrue(!Utilities.isEmpty(messageType), "Message type is null or blank.");
 		Assert.notNull(payload, "Payload is null.");
@@ -71,6 +72,15 @@ public class GatekeeperRelayRequest {
 		}
 		
 		throw new DataNotFoundException("The request is not a GSD poll.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public GSDMultiPollRequestDTO getGSDMultiPollRequest() {
+		if (payload instanceof GSDMultiPollRequestDTO) {
+			return (GSDMultiPollRequestDTO) payload;
+		}
+		
+		throw new DataNotFoundException("The request is not a multi GSD poll.");
 	}
 	
 	//-------------------------------------------------------------------------------------------------

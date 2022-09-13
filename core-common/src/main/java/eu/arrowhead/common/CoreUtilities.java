@@ -14,11 +14,14 @@
 
 package eu.arrowhead.common;
 
+
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.logging.LogLevel;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -56,6 +59,7 @@ public class CoreUtilities {
 	
 	//-------------------------------------------------------------------------------------------------
 	public static ValidatedPageParams validatePageParameters(final Integer page, final Integer size, final String direction, final String origin) {
+		logger.debug("validatePageParameters started ...");
 		int validatedPage;
 		int validatedSize;
 
@@ -128,5 +132,13 @@ public class CoreUtilities {
 		public int getValidatedPage() { return validatedPage; }
 		public int getValidatedSize() { return validatedSize; }
 		public Direction getValidatedDirection() { return validatedDirection; }
+
+		public Pageable createPageable(final String... properties) {
+			return PageRequest.of(validatedPage, validatedSize, validatedDirection, properties);
+		}
+
+		public Pageable createPageRequest(final String validatedSortField) {
+			return PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField);
+		}
 	}
 }

@@ -16,6 +16,9 @@ package eu.arrowhead.common.dto.internal;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class OrchestratorStoreFlexibleRequestDTO {
 	
 	//=================================================================================================
@@ -59,5 +62,15 @@ public class OrchestratorStoreFlexibleRequestDTO {
 	public void setServiceDefinitionName(final String serviceDefinitionName) { this.serviceDefinitionName = serviceDefinitionName; }
 	public void setServiceInterfaceName(final String serviceInterfaceName) { this.serviceInterfaceName = serviceInterfaceName; }
 	public void setServiceMetadata(final Map<String,String> serviceMetadata) { this.serviceMetadata = serviceMetadata; }
-	public void setPriority(final Integer priority) { this.priority = priority; }	
+	public void setPriority(final Integer priority) { this.priority = priority; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

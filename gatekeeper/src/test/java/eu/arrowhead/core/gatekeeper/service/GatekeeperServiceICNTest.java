@@ -16,8 +16,11 @@ package eu.arrowhead.core.gatekeeper.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -349,11 +352,14 @@ public class GatekeeperServiceICNTest {
 		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
 		resultDTO.setProvider(new SystemResponseDTO());
 		final RelayResponseDTO relay = new RelayResponseDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
 		relay.setType(RelayType.GATEWAY_RELAY);
 		final ICNProposalResponseDTO icnResponse = new ICNProposalResponseDTO(resultDTO, relay, new GatewayProviderConnectionResponseDTO());
 		when(gatekeeperDriver.sendICNProposal(any(Cloud.class), any(ICNProposalRequestDTO.class))).thenReturn(icnResponse);
 		when(gatekeeperDriver.connectConsumer(any(GatewayConsumerConnectionRequestDTO.class))).thenReturn(33333);
 		when(gatekeeperDriver.getGatewayHost()).thenReturn("127.0.0.1");
+		when(gatekeeperDBService.getRelayByAddressAndPort(anyString(), anyInt())).thenReturn(new Relay());
 		
 		final ICNResultDTO icnResult = testingObject.initICN(form);
 		
@@ -362,6 +368,51 @@ public class GatekeeperServiceICNTest {
 		Assert.assertEquals("127.0.0.1", icnResponse.getResponse().get(0).getProvider().getAddress());
 		Assert.assertEquals(33333, icnResponse.getResponse().get(0).getProvider().getPort());
 		Assert.assertTrue(icnResult.getResponse().get(0).getWarnings().contains(OrchestratorWarnings.VIA_GATEWAY));
+		
+		verify(gatekeeperDBService, times(1)).getRelayByAddressAndPort("localhost", 1234);
+		verify(gatekeeperDBService, never()).getRelayByAuthenticationInfo(anyString());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitICNEverythingOKWithGatewayAndRelayAuthenticationInfo() {
+		final ICNRequestFormDTO form = new ICNRequestFormDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		form.setRequestedService(requestedService);
+		form.setTargetCloudId(1L);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		form.setRequesterSystem(system);
+		
+		final Cloud targetCloud = new Cloud("aitia", "testcloud1", false, true, false, "abcd");
+		targetCloud.setGatewayRelays(Set.of());
+		when(gatekeeperDBService.getCloudById(anyLong())).thenReturn(targetCloud);
+		final Cloud ownCloud = new Cloud("aitia", "testcloud2", false, false, true, "efgh");
+		when(commonDBService.getOwnCloud(anyBoolean())).thenReturn(ownCloud);
+		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
+		resultDTO.setProvider(new SystemResponseDTO());
+		final RelayResponseDTO relay = new RelayResponseDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setAuthenticationInfo("test");
+		relay.setType(RelayType.GATEWAY_RELAY);
+		final ICNProposalResponseDTO icnResponse = new ICNProposalResponseDTO(resultDTO, relay, new GatewayProviderConnectionResponseDTO());
+		when(gatekeeperDriver.sendICNProposal(any(Cloud.class), any(ICNProposalRequestDTO.class))).thenReturn(icnResponse);
+		when(gatekeeperDriver.connectConsumer(any(GatewayConsumerConnectionRequestDTO.class))).thenReturn(33333);
+		when(gatekeeperDriver.getGatewayHost()).thenReturn("127.0.0.1");
+		when(gatekeeperDBService.getRelayByAuthenticationInfo("test")).thenReturn(new Relay());
+		
+		final ICNResultDTO icnResult = testingObject.initICN(form);
+		
+		Assert.assertEquals(1, icnResult.getResponse().size());
+		Assert.assertEquals(CoreSystem.GATEWAY.name().toLowerCase(), icnResponse.getResponse().get(0).getProvider().getSystemName());
+		Assert.assertEquals("127.0.0.1", icnResponse.getResponse().get(0).getProvider().getAddress());
+		Assert.assertEquals(33333, icnResponse.getResponse().get(0).getProvider().getPort());
+		Assert.assertTrue(icnResult.getResponse().get(0).getWarnings().contains(OrchestratorWarnings.VIA_GATEWAY));
+
+		verify(gatekeeperDBService, never()).getRelayByAddressAndPort(anyString(), anyInt());
+		verify(gatekeeperDBService, times(1)).getRelayByAuthenticationInfo("test");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1217,6 +1268,6 @@ public class GatekeeperServiceICNTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private RelayRequestDTO getTestRelayDTO() {
-		return new RelayRequestDTO("localhost", 1234, true, true, RelayType.GATEWAY_RELAY.name());
+		return new RelayRequestDTO("localhost", 1234, null, true, true, RelayType.GATEWAY_RELAY.name());
 	}
 }

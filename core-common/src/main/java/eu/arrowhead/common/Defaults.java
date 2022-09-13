@@ -19,6 +19,8 @@ public class Defaults {
 	//=================================================================================================
 	// members
 	
+	public static final int DEFAULT_VERSION = 1;
+	
 	public static final boolean DEFAULT_SSL_SERVER_ENABLED = true;
 	public static final boolean DEFAULT_WEBSOCKETS_ENABLED = false;
 	public static final String DEFAULT_KEYSTORE_TYPE = "PKCS12";
@@ -48,8 +50,12 @@ public class Defaults {
 	public static final int DEFAULT_CHOREOGRAPHER_PORT = 8457;
 	public static final int DEFAULT_CERTIFICATEAUTHORITY_PORT = 8448;
     public static final int DEFAULT_CONFIGURATION_PORT = 8459;
+	public static final int DEFAULT_CERTIFICATE_AUTHORITY_PORT = 8448;
+    public static final int DEFAULT_GENERIC_AUTONOMIC_MANAGEMENT_PORT = 8502;
 	public static final int DEFAULT_TRANSLATOR_PORT = 8462;
+    public static final int DEFAULT_MSCV_PORT = 8501;
 	public static final int DEFAULT_PLANT_DESCRIPTION_ENGINE_PORT = 8432;
+	public static final int DEFAULT_HAWKBIT_CONFIGURATION_MANAGER_PORT = 8447;
 
     // HTTP client defaults
     public static final int DEFAULT_CONNECTION_TIMEOUT = 30000;

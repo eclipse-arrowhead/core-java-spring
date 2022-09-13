@@ -492,18 +492,18 @@ public class GatekeeperDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S3655")
-	public Relay getRelayByAddressAndPort(String address, final int port) {
+	public Relay getRelayByAddressAndPort(final String address, final int port) {
 		logger.debug("getRelayByAddressAndPort started...");
 		
 		try {
 			if (Utilities.isEmpty(address)) {
 				throw new InvalidParameterException("Address is empty");
 			}
-			address = address.toLowerCase().trim();
+			final String _address = address.toLowerCase().trim();
 				
-			final Optional<Relay> relayOpt = relayRepository.findByAddressAndPort(address, port);
+			final Optional<Relay> relayOpt = relayRepository.findByAddressAndPort(_address, port);
 			if (relayOpt.isEmpty()) {
-				throw new InvalidParameterException("Relay with the following address and port not exists: " + address + ", " + port);
+				throw new InvalidParameterException("Relay with the following address and port not exists: " + _address + ", " + port);
 			}
 			
 			return relayOpt.get();			
@@ -513,6 +513,29 @@ public class GatekeeperDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Relay getRelayByAuthenticationInfo(final String authenticationInfo) { 
+		logger.debug("getRelayByAuthenticationInfo started...");
+		
+		try {
+			if (Utilities.isEmpty(authenticationInfo)) {
+				throw new InvalidParameterException("Authentication info is empty");
+			}
+				
+			final Optional<Relay> relayOpt = relayRepository.findByAuthenticationInfo(authenticationInfo);
+			if (relayOpt.isEmpty()) {
+				throw new InvalidParameterException("Relay with the following authentication info not exists: " + authenticationInfo);
+			}
+			
+			return relayOpt.get();			
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -543,11 +566,12 @@ public class GatekeeperDBService {
 	
 	//-------------------------------------------------------------------------------------------------	
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public List<Relay> registerBulkRelays(final List<RelayRequestDTO> dtoList) {
+	public List<Relay> registerBulkRelays(final List<RelayRequestDTO> dtoList) { 
 		logger.debug("registerBulkRelays started...");
 		
 		try {
 			final Map<String, Relay> relaysToSave = new HashMap<>();
+			final Set<String> authenticationInfos = new HashSet<>();
 			
 			if (dtoList == null || dtoList.isEmpty()) {
 				throw new InvalidParameterException("List of RelayRequestDTO is null or empty");
@@ -558,16 +582,24 @@ public class GatekeeperDBService {
 					throw new InvalidParameterException("List of RelayRequestDTO contains null element");
 				}
 				
-				validateRelayParameters(true, dto.getAddress(), dto.getPort(), dto.isExclusive(), dto.getType());
+				validateRelayParameters(true, dto.getAddress(), dto.getPort(), dto.getAuthenticationInfo(), dto.isExclusive(), dto.getType());
+				
+				if (!Utilities.isEmpty(dto.getAuthenticationInfo())) {
+					if (authenticationInfos.contains(dto.getAuthenticationInfo())) {
+						throw new InvalidParameterException("List of RelayRequestDTO contains the following authentication info multiple times: " + dto.getAuthenticationInfo());
+					}
+					
+					authenticationInfos.add(dto.getAuthenticationInfo());
+				}
 				
 				final String address = dto.getAddress().toLowerCase().trim();
 				final String uniqueConstraint = address  + ":" + dto.getPort();
 				
 				if (relaysToSave.containsKey(uniqueConstraint)) {
-					throw new InvalidParameterException("List of RelayRequestDTO contains uinque constraint violation: " + address + " address with " + dto.getPort() + " port");
+					throw new InvalidParameterException("List of RelayRequestDTO contains unique constraint violation: " + address + " address with " + dto.getPort() + " port");
 				}
 				
-				relaysToSave.put(uniqueConstraint, new Relay(address, dto.getPort(), dto.isSecure(), dto.isExclusive(), Utilities.convertStringToRelayType(dto.getType())));
+				relaysToSave.put(uniqueConstraint, new Relay(address, dto.getPort(), dto.getAuthenticationInfo(), dto.isSecure(), dto.isExclusive(), Utilities.convertStringToRelayType(dto.getType())));
 			}
 			
 			final List<Relay> savedRelays = relayRepository.saveAll(relaysToSave.values());
@@ -584,10 +616,10 @@ public class GatekeeperDBService {
 	
 	//-------------------------------------------------------------------------------------------------	
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public RelayResponseDTO updateRelayByIdResponse(final long id, final String address, final int port, final boolean isSecure, final boolean isExclusive, final RelayType type) {
+	public RelayResponseDTO updateRelayByIdResponse(final long id, final String address, final int port, final String authenticationInfo, final boolean isSecure, final boolean isExclusive, final RelayType type) { 
 		logger.debug("updateRelayByIdResponse started...");
 		
-		final Relay entry = updateRelayById(id, address, port, isSecure, isExclusive, type);
+		final Relay entry = updateRelayById(id, address, port, authenticationInfo, isSecure, isExclusive, type);
 		
 		return DTOConverter.convertRelayToRelayResponseDTO(entry);
 	}
@@ -595,7 +627,7 @@ public class GatekeeperDBService {
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S3655")
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public Relay updateRelayById(final long id, final String address, final int port, final boolean isSecure, final boolean isExclusive, RelayType type) {
+	public Relay updateRelayById(final long id, final String address, final int port, final String authenticationInfo, final boolean isSecure, final boolean isExclusive, RelayType type) { 
 		logger.debug("updateRelayById started...");
 		
 		try {
@@ -617,14 +649,21 @@ public class GatekeeperDBService {
 				throw new InvalidParameterException("Type of relay couldn't be updated");
 			}
 			
-			validateRelayParameters(false, address, port, isExclusive, type.toString());
+			validateRelayParameters(false, address, port, authenticationInfo, isExclusive, type.toString());
+			
+			final String _authenticationInfo = Utilities.isEmpty(authenticationInfo) ? null : authenticationInfo;
+			
+			if (_authenticationInfo != null && !_authenticationInfo.equals(relay.getAuthenticationInfo())) {
+				checkAuthenticationInfoUniqueConstraintOfRelayTable(_authenticationInfo);
+			}
 			
 			if (!relay.getAddress().equalsIgnoreCase(address) || relay.getPort() != port) {
-				checkUniqueConstraintOfRelayTable(address, port);
+				checkAddressPortUniqueConstraintOfRelayTable(address, port);
 			}
 			
 			relay.setAddress(address);
 			relay.setPort(port);
+			relay.setAuthenticationInfo(_authenticationInfo);
 			relay.setSecure(isSecure);
 			relay.setExclusive(isExclusive);
 			relay.setType(type);
@@ -732,7 +771,7 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	private void validateRelayParameters(final boolean withUniqueConstraintCheck, String address, final Integer port, Boolean exclusive, final String type) {
+	private void validateRelayParameters(final boolean withUniqueConstraintCheck, String address, final Integer port, final String authenticationInfo, Boolean exclusive, final String type) {
 		logger.debug("validateRelayParameters started...");
 		
 		if (Utilities.isEmpty(address)) {
@@ -762,16 +801,29 @@ public class GatekeeperDBService {
 		}
 		
 		if (withUniqueConstraintCheck) {
-			checkUniqueConstraintOfRelayTable(address, port);
+			checkAddressPortUniqueConstraintOfRelayTable(address, port);
+			
+			if (!Utilities.isEmpty(authenticationInfo)) {
+				checkAuthenticationInfoUniqueConstraintOfRelayTable(authenticationInfo);
+			}
 		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	private void checkUniqueConstraintOfRelayTable(final String address, final int port) {
-		logger.debug("checkUniqueConstraintOfRelayTable started...");
+	private void checkAddressPortUniqueConstraintOfRelayTable(final String address, final int port) {
+		logger.debug("checkAddressPortUniqueConstraintOfRelayTable started...");
 		
 		if (relayRepository.existsByAddressAndPort(address, port)) {
 			throw new InvalidParameterException("Relay with the following address and port already exists: " + address + ", " + port);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	private void checkAuthenticationInfoUniqueConstraintOfRelayTable(final String authenticationInfo) {
+		logger.debug("checkAuthenticationInfoUniqueConstraintOfRelayTable started...");
+		
+		if (relayRepository.existsByAuthenticationInfo(authenticationInfo)) {
+			throw new InvalidParameterException("Relay with the following authentication info already exists: " + authenticationInfo);
 		}
 	}
 	

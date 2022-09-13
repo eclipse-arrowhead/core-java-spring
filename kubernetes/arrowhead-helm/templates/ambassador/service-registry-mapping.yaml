@@ -1,0 +1,7 @@
+apiVersion: getambassador.io/v3alpha1
+kind: TCPMapping
+metadata:
+  name: service-registry-mapping
+spec:
+  port: 3000
+  service: {{ printf "%s:%v" .Values.serviceRegistry.address .Values.serviceRegistry.port }}

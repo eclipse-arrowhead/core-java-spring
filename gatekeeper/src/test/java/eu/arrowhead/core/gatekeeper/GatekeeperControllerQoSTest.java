@@ -17,6 +17,7 @@ package eu.arrowhead.core.gatekeeper;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -58,6 +59,7 @@ import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 import eu.arrowhead.core.gatekeeper.service.GatekeeperService;
 import eu.arrowhead.core.gatekeeper.service.GatekeeperServiceTestContext;
@@ -89,6 +91,9 @@ public class GatekeeperControllerQoSTest {
 	@MockBean(name = "mockGatekeeperDBService") 
 	private GatekeeperDBService gatekeeperDBService;
 	
+	@MockBean(name = "mockCnVerifier")
+	private CommonNamePartVerifier cnVerifier;
+	
 	//=================================================================================================
 	// methods
 	
@@ -96,6 +101,7 @@ public class GatekeeperControllerQoSTest {
 	@Before
 	public void setup() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+		when(cnVerifier.isValid(anyString())).thenReturn(true);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

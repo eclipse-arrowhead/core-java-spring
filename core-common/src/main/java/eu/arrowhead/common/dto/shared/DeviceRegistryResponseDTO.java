@@ -14,13 +14,14 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
-import java.util.StringJoiner;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonInclude(Include.NON_NULL)
 public class DeviceRegistryResponseDTO implements Serializable {
@@ -41,13 +42,11 @@ public class DeviceRegistryResponseDTO implements Serializable {
 	//=================================================================================================
 	// methods
 
-
-	public DeviceRegistryResponseDTO() {
-	}
+	//-------------------------------------------------------------------------------------------------
+	public DeviceRegistryResponseDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public DeviceRegistryResponseDTO(final long id, final DeviceResponseDTO device, final String endOfValidity,
-									 final Map<String, String> metadata, final int version, final String createdAt, final String updatedAt) {
+	public DeviceRegistryResponseDTO(final long id, final DeviceResponseDTO device, final String endOfValidity, final Map<String, String> metadata, final int version, final String createdAt, final String updatedAt) {
 		this.id = id;
 		this.device = device;
 		this.endOfValidity = endOfValidity;
@@ -75,6 +74,7 @@ public class DeviceRegistryResponseDTO implements Serializable {
 	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public boolean equals(final Object o) {
 		if (this == o) { return true; }
@@ -89,21 +89,19 @@ public class DeviceRegistryResponseDTO implements Serializable {
 				updatedAt.equals(that.updatedAt);
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public int hashCode() {
 		return Objects.hash(id, device, endOfValidity, metadata, version, createdAt, updatedAt);
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", DeviceRegistryResponseDTO.class.getSimpleName() + "[", "]")
-				.add("id=" + id)
-				.add("device=" + device)
-				.add("endOfValidity='" + endOfValidity + "'")
-				.add("metadata=" + metadata)
-				.add("version=" + version)
-				.add("createdAt='" + createdAt + "'")
-				.add("updatedAt='" + updatedAt + "'")
-				.toString();
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
 	}
 }

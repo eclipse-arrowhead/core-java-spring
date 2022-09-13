@@ -14,26 +14,31 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ChoreographerStepResponseDTO implements Serializable {
 
 	//=================================================================================================
 	// members
 	
-	private static final long serialVersionUID = 3665162578177568728L;
-
+	private static final long serialVersionUID = 1643826656433118530L;
+	
 	private long id;
     private String name;
-    private String serviceName;
-    private String metadata;
-    private String parameters;
+    private String serviceDefinition;
+    private Integer minVersion;
+    private Integer maxVersion;
+    private Map<String,String> staticParameters;
     private int quantity;
-    private List<ChoreographerNextStepResponseDTO> nextSteps;
+    private ChoreographerServiceQueryFormDTO srTemplate;
+    private List<String> nextStepNames;
     private String createdAt;
     private String updatedAt;
 
@@ -44,15 +49,17 @@ public class ChoreographerStepResponseDTO implements Serializable {
 	public ChoreographerStepResponseDTO() {}
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerStepResponseDTO(final long id, final String name, final String serviceName, final String metadata, final String parameters,
-                                        final List<ChoreographerNextStepResponseDTO> nextSteps, final int quantity, final String createdAt, final String updatedAt) {
+    public ChoreographerStepResponseDTO(final long id, final String name, final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final Map<String, String> staticParameters, final int quantity,
+    									final ChoreographerServiceQueryFormDTO srTemplate, final List<String> nextStepNames, final String createdAt, final String updatedAt) {
         this.id = id;
         this.name = name;
-        this.serviceName = serviceName;
-        this.metadata = metadata;
-        this.parameters = parameters;
-        this.nextSteps = nextSteps;
+        this.serviceDefinition = serviceDefinition;
+        this.minVersion = minVersion;
+        this.maxVersion = maxVersion;
+        this.staticParameters = staticParameters;
         this.quantity = quantity;
+        this.srTemplate = srTemplate;
+        this.nextStepNames = nextStepNames;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -60,22 +67,36 @@ public class ChoreographerStepResponseDTO implements Serializable {
     //-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
 	public String getName() { return name; }
-	public String getServiceName() { return serviceName; }
-    public String getMetadata() { return metadata; }
-    public String getParameters() { return parameters; }
-    public List<ChoreographerNextStepResponseDTO> getNextSteps() { return nextSteps; }
+	public String getServiceDefinition() { return serviceDefinition; }
+	public Integer getMinVersion() { return minVersion; }
+	public Integer getMaxVersion() { return maxVersion; }
+	public Map<String,String> getStaticParameters() { return staticParameters; }
     public int getQuantity() { return quantity; }
+    public ChoreographerServiceQueryFormDTO getSrTemplate() { return srTemplate; }
+    public List<String> getNextStepNames() { return nextStepNames; }
     public String getCreatedAt() { return createdAt; }
 	public String getUpdatedAt() { return updatedAt; }
 
-    //-------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
     public void setName(final String name) { this.name = name; }
-    public void setServiceName(String serviceName) { this.serviceName = serviceName; }
-    public void setMetadata(String metadata) { this.metadata = metadata; }
-    public void setParameters(String parameters) { this.parameters = parameters; }
-    public void setNextSteps(final List<ChoreographerNextStepResponseDTO> nextSteps) { this.nextSteps = nextSteps; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
+    public void setMinVersion(final Integer minVersion) { this.minVersion = minVersion; }
+    public void setMaxVersion(final Integer maxVersion) { this.maxVersion = maxVersion; }
+    public void setSrTemplate(final ChoreographerServiceQueryFormDTO srTemplate) { this.srTemplate = srTemplate; }
+    public void setNextStepNames(final List<String> nextStepNames) { this.nextStepNames = nextStepNames; }
+    public void setStaticParameters(final Map<String,String> staticParameters) { this.staticParameters = staticParameters; }
+    public void setQuantity(final int quantity) { this.quantity = quantity; }
     public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
     public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
+    
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

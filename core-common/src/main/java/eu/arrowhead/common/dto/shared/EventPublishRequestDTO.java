@@ -17,6 +17,9 @@ package eu.arrowhead.common.dto.shared;
 import java.io.Serializable;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class EventPublishRequestDTO implements Serializable {
 	
 	//=================================================================================================
@@ -56,6 +59,16 @@ public class EventPublishRequestDTO implements Serializable {
 	public void setEventType(final String eventType) { this.eventType = eventType; }
 	public void setSource(final SystemRequestDTO subscriberSystem) { this.source = subscriberSystem; }
 	public void setMetaData(final Map<String,String> metaData) { this.metaData = metaData; }
-	public void setPayload(final String startDate) { this.payload = startDate; }
-	public void setTimeStamp(final String endDate) { this.timeStamp = endDate; }
+	public void setPayload(final String payload) { this.payload = payload; }
+	public void setTimeStamp(final String timeStamp) { this.timeStamp = timeStamp; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

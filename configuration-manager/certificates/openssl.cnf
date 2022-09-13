@@ -1,0 +1,13 @@
+[req]
+req_extensions = req_ext
+distinguished_name = req_distinguished_name
+
+[req_distinguished_name]
+
+[ req_ext ]
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+IP.1 = <IP address>

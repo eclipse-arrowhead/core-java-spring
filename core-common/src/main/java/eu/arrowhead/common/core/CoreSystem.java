@@ -34,7 +34,7 @@ public enum CoreSystem {
 																	 CoreSystemService.SERVICEREGISTRY_REGISTER_SYSTEM,
 																	 CoreSystemService.SERVICEREGISTRY_UNREGISTER_SYSTEM,
 																	 CoreSystemService.SERVICEREGISTRY_PULL_SYSTEMS)),
-	
+
     SYSTEMREGISTRY(Defaults.DEFAULT_SYSTEMREGISTRY_PORT, List.of(CoreSystemService.SYSTEMREGISTRY_REGISTER_SERVICE,
     															   CoreSystemService.SYSTEMREGISTRY_UNREGISTER_SERVICE,
     															   CoreSystemService.SYSTEMREGISTRY_ONBOARDING_WITH_NAME_SERVICE,
@@ -44,7 +44,7 @@ public enum CoreSystem {
     															   CoreSystemService.DEVICEREGISTRY_UNREGISTER_SERVICE,
     															   CoreSystemService.DEVICEREGISTRY_ONBOARDING_WITH_NAME_SERVICE,
     															   CoreSystemService.DEVICEREGISTRY_ONBOARDING_WITH_CSR_SERVICE)),
-    
+
     ONBOARDINGCONTROLLER(Defaults.DEFAULT_ONBOARDING_PORT, List.of(CoreSystemService.ONBOARDING_WITH_CERTIFICATE_AND_NAME_SERVICE,
 														    		CoreSystemService.ONBOARDING_WITH_SHARED_SECRET_AND_NAME_SERVICE,
 														    		CoreSystemService.ONBOARDING_WITH_CERTIFICATE_AND_CSR_SERVICE,
@@ -57,6 +57,7 @@ public enum CoreSystem {
 															   CoreSystemService.AUTH_CONTROL_SUBSCRIPTION_SERVICE)),
 	
 	ORCHESTRATOR(Defaults.DEFAULT_ORCHESTRATOR_PORT, List.of(CoreSystemService.ORCHESTRATION_SERVICE,
+															 CoreSystemService.ORCHESTRATION_BY_PROXY_SERVICE,
 															 CoreSystemService.ORCHESTRATION_CREATE_FLEXIBLE_STORE_RULES_SERVICE,
 															 CoreSystemService.ORCHESTRATION_REMOVE_FLEXIBLE_STORE_RULE_SERVICE,
 															 CoreSystemService.ORCHESTRATION_CLEAN_FLEXIBLE_STORE_SERVICE,
@@ -66,6 +67,7 @@ public enum CoreSystem {
 															 CoreSystemService.ORCHESTRATION_QOS_CONFIRM_RESERVATION_SERVICE)),
 	
 	GATEKEEPER(Defaults.DEFAULT_GATEKEEPER_PORT, List.of(CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY,
+														 CoreSystemService.GATEKEEPER_MULTI_GLOBAL_SERVICE_DISCOVERY,
 														 CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION,
 														 CoreSystemService.GATEKEEPER_PULL_CLOUDS,
 														 CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES,
@@ -81,16 +83,19 @@ public enum CoreSystem {
     DATAMANAGER(Defaults.DEFAULT_DATAMANAGER_PORT, List.of(CoreSystemService.PROXY_SERVICE, CoreSystemService.HISTORIAN_SERVICE)),
 
 	TIMEMANAGER(Defaults.DEFAULT_TIMEMANAGER_PORT, List.of(CoreSystemService.TIME_SERVICE)),
-	
+
 	GATEWAY(Defaults.DEFAULT_GATEWAY_PORT, List.of(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE,
 												   CoreSystemService.GATEWAY_PROVIDER_SERVICE,
-												   CoreSystemService.GATEWAY_CONSUMER_SERVICE)),
+												   CoreSystemService.GATEWAY_CONSUMER_SERVICE,
+												   CoreSystemService.GATEWAY_CLOSE_SESSIONS_SERVICE)),
 	
-	CHOREOGRAPHER(Defaults.DEFAULT_CHOREOGRAPHER_PORT, List.of(CoreSystemService.CHOREOGRAPHER_SERVICE)),
+	CHOREOGRAPHER(Defaults.DEFAULT_CHOREOGRAPHER_PORT, List.of(CoreSystemService.CHOREOGRAPHER_SERVICE,
+			                                                   CoreSystemService.CHOREOGRAPHER_REGISTER_EXECUTOR_SERVICE,
+			                                                   CoreSystemService.CHOREOGRAPHER_UNREGISTER_EXECUTOR_SERVICE)),
 
     CONFIGURATION(Defaults.DEFAULT_CONFIGURATION_PORT, List.of(CoreSystemService.CONFIGURATION_SERVICE,
                                                                CoreSystemService.CONFIGURATION_RAW_SERVICE)),
-	
+
 	QOSMONITOR(Defaults.DEFAULT_QOSMONITOR_PORT, List.of(CoreSystemService.QOSMONITOR_INTRA_PING_MEASUREMENT_SERVICE,
 														   CoreSystemService.QOSMONITOR_INTRA_PING_MEDIAN_MEASUREMENT_SERVICE,
 														   CoreSystemService.QOSMONITOR_INTER_DIRECT_PING_MEASUREMENT_SERVICE,
@@ -107,13 +112,24 @@ public enum CoreSystem {
 																				CoreSystemService.CERTIFICATEAUTHORITY_CHECK_TRUSTED_KEY_SERVICE,
 																				CoreSystemService.CERTIFICATEAUTHORITY_ADD_TRUSTED_KEY_SERVICE,
 																				CoreSystemService.CERTIFICATEAUTHORITY_DELETE_TRUSTED_KEY_SERVICE)),
-																				
+
 	TRANSLATOR(Defaults.DEFAULT_TRANSLATOR_PORT, List.of(CoreSystemService.TRANSLATOR_SERVICE,
 												   CoreSystemService.TRANSLATOR_FIWARE_SERVICE,
 												   CoreSystemService.TRANSLATOR_PLUGIN_SERVICE)),
+
+	MSCV(Defaults.DEFAULT_MSCV_PORT, List.of(CoreSystemService.MSCV_VERIFICATION_SERVICE,
+											 CoreSystemService.MSCV_PUBLIC_KEY_SERVICE,
+											 CoreSystemService.MSCV_LOGIN_SERVICE)),
+
+	PLANTDESCRIPTIONENGINE(Defaults.DEFAULT_PLANT_DESCRIPTION_ENGINE_PORT, List.of()), //TODO add PDE services
+
+
+
+	GAMS(Defaults.DEFAULT_GENERIC_AUTONOMIC_MANAGEMENT_PORT, List.of(CoreSystemService.GAMS_SERVICE,
+																	 CoreSystemService.GAMS_SENSOR_SERVICE)),
 	
-	PLANTDESCRIPTIONENGINE(Defaults.DEFAULT_PLANT_DESCRIPTION_ENGINE_PORT, List.of()); //TODO add PDE services
-	
+	HAWKBITCONFIGURATIONMANAGER(Defaults.DEFAULT_HAWKBIT_CONFIGURATION_MANAGER_PORT, List.of());
+
 	//=================================================================================================
 	// members
 	

@@ -19,6 +19,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -161,7 +163,7 @@ public class GatekeeperControllerRelayTest {
 	@Test
 	public void testGetRelayByIdWithExistingId() throws Exception {
 		final int requestedId = 1;
-		final RelayResponseDTO relayResponseDTO = new RelayResponseDTO(requestedId, "testAddress", 10000, true, false, RelayType.GENERAL_RELAY, "", "");
+		final RelayResponseDTO relayResponseDTO = new RelayResponseDTO(requestedId, "testAddress", 10000, null, true, false, RelayType.GENERAL_RELAY, "", "");
 		
 		when(gatekeeperDBService.getRelayByIdResponse(anyLong())).thenReturn(relayResponseDTO);
 		
@@ -190,7 +192,7 @@ public class GatekeeperControllerRelayTest {
 	public void testGetRelayByAddressAndPortWithExistingEntry() throws Exception {
 		final String testAddress = "testAddress";
 		final int testPort = 10000;
-		final RelayResponseDTO relayResponseDTO = new RelayResponseDTO(1L, testAddress, testPort, true, false, RelayType.GENERAL_RELAY, "", "");
+		final RelayResponseDTO relayResponseDTO = new RelayResponseDTO(1L, testAddress, testPort, null, true, false, RelayType.GENERAL_RELAY, "", "");
 		
 		when(gatekeeperDBService.getRelayByAddressAndPortResponse(any(), anyInt())).thenReturn(relayResponseDTO);
 		
@@ -240,8 +242,8 @@ public class GatekeeperControllerRelayTest {
 		final boolean testExclusive = false;
 		final String testType = "GENERAL_RELAY";
 		
-		final List<RelayRequestDTO> requestDTOList = List.of(new RelayRequestDTO(testAddress, testPort, testSecure, testExclusive, testType));
-		final RelayListResponseDTO responseDTOList = new RelayListResponseDTO(List.of(new RelayResponseDTO(1, testAddress, testPort, testSecure, testExclusive,
+		final List<RelayRequestDTO> requestDTOList = List.of(new RelayRequestDTO(testAddress, testPort, null, testSecure, testExclusive, testType));
+		final RelayListResponseDTO responseDTOList = new RelayListResponseDTO(List.of(new RelayResponseDTO(1, testAddress, testPort, null, testSecure, testExclusive,
 																					  Utilities.convertStringToRelayType(testType), "", "")), 1);
 		when(gatekeeperDBService.registerBulkRelaysResponse(any())).thenReturn(responseDTOList); 
 		
@@ -283,7 +285,7 @@ public class GatekeeperControllerRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRegisterRelaysWithNullAddress() throws Exception {
-		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO(null, 10000, true, false, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO(null, 10000, null, true, false, "GENERAL_RELAY"));
 		
 		this.mockMvc.perform(post(RELAYS_MGMT_URI)
 					.content(objectMapper.writeValueAsBytes(dtoList))
@@ -295,7 +297,7 @@ public class GatekeeperControllerRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRegisterRelaysWithEmptyAddress() throws Exception {
-		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("   ", 10000, true, false, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("   ", 10000, null, true, false, "GENERAL_RELAY"));
 		
 		this.mockMvc.perform(post(RELAYS_MGMT_URI)
 					.content(objectMapper.writeValueAsBytes(dtoList))
@@ -307,7 +309,7 @@ public class GatekeeperControllerRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRegisterRelaysWithNullPort() throws Exception {
-		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", null, true, false, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", null, null, true, false, "GENERAL_RELAY"));
 		
 		this.mockMvc.perform(post(RELAYS_MGMT_URI)
 					.content(objectMapper.writeValueAsBytes(dtoList))
@@ -319,7 +321,7 @@ public class GatekeeperControllerRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRegisterRelaysWithPortOutOfRangeMin() throws Exception {
-		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MIN - 1, true, false, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MIN - 1, null, true, false, "GENERAL_RELAY"));
 		
 		this.mockMvc.perform(post(RELAYS_MGMT_URI)
 					.content(objectMapper.writeValueAsBytes(dtoList))
@@ -331,7 +333,7 @@ public class GatekeeperControllerRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRegisterRelaysWithPortOutOfRangeMax() throws Exception {
-		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, true, false, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, null, true, false, "GENERAL_RELAY"));
 		
 		this.mockMvc.perform(post(RELAYS_MGMT_URI)
 					.content(objectMapper.writeValueAsBytes(dtoList))
@@ -343,7 +345,7 @@ public class GatekeeperControllerRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRegisterRelaysWithInvalidRelayType() throws Exception {
-		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", 10000, true, false, "invalid"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", 10000, null, true, false, "invalid"));
 		
 		this.mockMvc.perform(post(RELAYS_MGMT_URI)
 					.content(objectMapper.writeValueAsBytes(dtoList))
@@ -355,7 +357,7 @@ public class GatekeeperControllerRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRegisterRelaysWithExclusiveGatekeeperRelayType() throws Exception {
-		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", 10000, true, true, "GATEKEEPER_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", 10000, null, true, true, "GATEKEEPER_RELAY"));
 		
 		this.mockMvc.perform(post(RELAYS_MGMT_URI)
 					.content(objectMapper.writeValueAsBytes(dtoList))
@@ -367,7 +369,7 @@ public class GatekeeperControllerRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRegisterRelaysWithExclusiveGeneralRelayType() throws Exception {
-		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", 10000, true, true, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", 10000, null, true, true, "GENERAL_RELAY"));
 		
 		this.mockMvc.perform(post(RELAYS_MGMT_URI)
 					.content(objectMapper.writeValueAsBytes(dtoList))
@@ -389,9 +391,9 @@ public class GatekeeperControllerRelayTest {
 		final boolean testExclusive = false;
 		final String testType = "GENERAL_RELAY";
 		
-		final RelayRequestDTO requestDTO = new RelayRequestDTO(testAddress, testPort, testSecure, testExclusive, testType);
-		final RelayResponseDTO responseDTO = new RelayResponseDTO(testId, testAddress, testPort, testSecure, testExclusive, Utilities.convertStringToRelayType(testType), "", "");
-		when(gatekeeperDBService.updateRelayByIdResponse(anyLong(), any(), anyInt(), anyBoolean(), anyBoolean(), any())).thenReturn(responseDTO); 
+		final RelayRequestDTO requestDTO = new RelayRequestDTO(testAddress, testPort, null, testSecure, testExclusive, testType);
+		final RelayResponseDTO responseDTO = new RelayResponseDTO(testId, testAddress, testPort, null, testSecure, testExclusive, Utilities.convertStringToRelayType(testType), "", "");
+		when(gatekeeperDBService.updateRelayByIdResponse(anyLong(), anyString(), anyInt(), isNull(), anyBoolean(), anyBoolean(), any())).thenReturn(responseDTO); 
 		
 		final MvcResult response = this.mockMvc.perform(put(RELAYS_MGMT_URI + "/" + testId)
 											   .content(objectMapper.writeValueAsBytes(requestDTO))
@@ -408,7 +410,7 @@ public class GatekeeperControllerRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUpdateRelayByIdWithInvalidId() throws Exception {
-		final RelayRequestDTO relayRequestDTO = new RelayRequestDTO("1.1.1.1", 10000, true, false, "GENERAL_RELAY");
+		final RelayRequestDTO relayRequestDTO = new RelayRequestDTO("1.1.1.1", 10000, null, true, false, "GENERAL_RELAY");
 		
 		this.mockMvc.perform(put(RELAYS_MGMT_URI + "/-1")
 					.content(objectMapper.writeValueAsBytes(relayRequestDTO))
@@ -420,7 +422,7 @@ public class GatekeeperControllerRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUpdateRelayByIdWithNullAddress() throws Exception {
-		final RelayRequestDTO relayRequestDTO = new RelayRequestDTO(null, 10000, true, false, "GENERAL_RELAY");
+		final RelayRequestDTO relayRequestDTO = new RelayRequestDTO(null, 10000, null, true, false, "GENERAL_RELAY");
 		
 		this.mockMvc.perform(put(RELAYS_MGMT_URI + "/1")
 					.content(objectMapper.writeValueAsBytes(relayRequestDTO))
@@ -432,7 +434,7 @@ public class GatekeeperControllerRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUpdateRelayByIdWithEmptyAddress() throws Exception {
-	final RelayRequestDTO relayRequestDTO = new RelayRequestDTO("   ", 10000, true, false, "GENERAL_RELAY");
+	final RelayRequestDTO relayRequestDTO = new RelayRequestDTO("   ", 10000, null, true, false, "GENERAL_RELAY");
 	
 	this.mockMvc.perform(put(RELAYS_MGMT_URI + "/1")
 				.content(objectMapper.writeValueAsBytes(relayRequestDTO))
@@ -444,7 +446,7 @@ public class GatekeeperControllerRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUpdateRelayByIdWithNullPort() throws Exception {
-	final RelayRequestDTO relayRequestDTO = new RelayRequestDTO("1.1.1.1", null, true, false, "GENERAL_RELAY");
+	final RelayRequestDTO relayRequestDTO = new RelayRequestDTO("1.1.1.1", null, null, true, false, "GENERAL_RELAY");
 	
 	this.mockMvc.perform(put(RELAYS_MGMT_URI + "/1")
 				.content(objectMapper.writeValueAsBytes(relayRequestDTO))
@@ -456,7 +458,7 @@ public class GatekeeperControllerRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUpdateRelayByIdWithPortOutOfRangeMin() throws Exception {
-	final RelayRequestDTO relayRequestDTO = new RelayRequestDTO("1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MIN - 1, true, false, "GENERAL_RELAY");
+	final RelayRequestDTO relayRequestDTO = new RelayRequestDTO("1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MIN - 1, null, true, false, "GENERAL_RELAY");
 	
 	this.mockMvc.perform(put(RELAYS_MGMT_URI + "/1")
 				.content(objectMapper.writeValueAsBytes(relayRequestDTO))
@@ -468,7 +470,7 @@ public class GatekeeperControllerRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUpdateRelayByIdWithPortOutOfRangeMax() throws Exception {
-	final RelayRequestDTO relayRequestDTO = new RelayRequestDTO("1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, true, false, "GENERAL_RELAY");
+	final RelayRequestDTO relayRequestDTO = new RelayRequestDTO("1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, null, true, false, "GENERAL_RELAY");
 	
 	this.mockMvc.perform(put(RELAYS_MGMT_URI + "/1")
 				.content(objectMapper.writeValueAsBytes(relayRequestDTO))

@@ -18,35 +18,48 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotBlank;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class CertificateCheckRequestDTO implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	//=================================================================================================
+	// members
+	
+	private static final long serialVersionUID = 3925861444397769287L;
 
-    private int version;
+	private int version;
 
     @NotBlank(message = "The certificate is mandatory")
     private String certificate;
 
-    public CertificateCheckRequestDTO() {}
+    //=================================================================================================
+	// methods
+    
+    //-------------------------------------------------------------------------------------------------
+	public CertificateCheckRequestDTO() {}
 
-    public CertificateCheckRequestDTO(int version, String certificate) {
+    //-------------------------------------------------------------------------------------------------
+	public CertificateCheckRequestDTO(final int version, final String certificate) {
         this.version = version;
         this.certificate = certificate;
     }
 
-    public int getVersion() {
-        return version;
-    }
-
-    public void setVersion(int version) {
-        this.version = version;
-    }
-
-    public String getCertificate() {
-        return certificate;
-    }
-
-    public void setCertificate(String certificate) {
-        this.certificate = certificate;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public int getVersion() { return version; }
+	public String getCertificate() { return certificate; }
+	
+    //-------------------------------------------------------------------------------------------------
+	public void setVersion(final int version) { this.version = version; }
+    public void setCertificate(final String certificate) { this.certificate = certificate; }
+    
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

@@ -18,6 +18,7 @@ import java.security.PublicKey;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
@@ -50,4 +51,6 @@ public interface GatewayRelayClient extends RelayClient {
 	public void sendSwitchControlMessage(final Session session, final MessageProducer sender, final String queueId) throws JMSException;
 	public void handleCloseControlMessage(final Message msg, final Session session) throws JMSException;
 	public void validateSwitchControlMessage(final Message msg) throws JMSException;
+	public void unsubscribeFromQueues(final MessageConsumer consumer, final MessageConsumer consumerControl) throws JMSException;
+	public boolean destroyQueues(final Session session, final MessageProducer producer, final MessageProducer producerControl) throws JMSException;
 }

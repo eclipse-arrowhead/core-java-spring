@@ -202,7 +202,10 @@ public class DriverUtilities {
         logger.debug("findUriByOrchestrator started...");
 
         final UriComponents queryUri = getOrchestrationQueryUri();
-        final SystemRequestDTO requester = getCoreSystemRequestDTO();
+        final SystemRequestDTO requester = new SystemRequestDTO();
+        requester.setAddress(coreSystemProps.getCoreSystemDomainName());
+        requester.setPort(coreSystemProps.getCoreSystemDomainPort());
+        requester.setSystemName(coreSystemProps.getCoreSystemName());
 
         final ServiceQueryFormDTO serviceQueryForm = new ServiceQueryFormDTO.Builder(service.getServiceDefinition())
                 .interfaces(getInterface())

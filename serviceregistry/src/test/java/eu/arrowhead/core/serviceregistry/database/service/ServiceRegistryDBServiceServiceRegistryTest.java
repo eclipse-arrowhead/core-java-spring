@@ -56,6 +56,7 @@ import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.ServiceRegistryInterfaceConnectionRepository;
 import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
+import eu.arrowhead.common.dto.shared.AddressType;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormListDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
@@ -65,6 +66,7 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.processor.NetworkAddressPreProcessor;
+import eu.arrowhead.common.processor.SpecialNetworkAddressTypeDetector;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.common.verifier.NetworkAddressVerifier;
 import eu.arrowhead.common.verifier.ServiceInterfaceNameVerifier;
@@ -104,6 +106,9 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	
 	@Spy
 	private NetworkAddressPreProcessor networkAddressPreProcessor;
+	
+	@Spy
+	private SpecialNetworkAddressTypeDetector networkAddressTypeDetector;
 	
 	@Spy
 	private NetworkAddressVerifier networkAddressVerifier;
@@ -336,7 +341,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		dto.setEndOfValidity("not a ZoneDateTime");
 		
 		when(serviceDefinitionRepository.findByServiceDefinition(any(String.class))).thenReturn(Optional.of(new ServiceDefinition(serviceDefinitionStr)));
-		when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.of(new System(systemName, address, port, null, null)));
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.of(new System(systemName, address, AddressType.IPV4, port, null, null)));
 		
 		serviceRegistryDBService.registerServiceResponse(dto);
 	}
@@ -360,7 +365,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		dto.setSecure("invalidSecurityType");
 		
 		when(serviceDefinitionRepository.findByServiceDefinition(any(String.class))).thenReturn(Optional.of(new ServiceDefinition(serviceDefinitionStr)));
-		when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.of(new System(systemName, address, port, null, null)));
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.of(new System(systemName, address, AddressType.IPV4, port, null, null)));
 		
 		serviceRegistryDBService.registerServiceResponse(dto);
 	}
@@ -391,7 +396,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateServiceRegistryProviderNameWrongFormat() {
-		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System("invalid-system.name-", null, 0, null, null), null, null, null, null, 1, null);
+		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System("invalid-system.name-", null, null, 0, null, null), null, null, null, null, 1, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -399,7 +404,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testCreateServiceRegistryUniqueConstraintViolation() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystemAndServiceUri(any(ServiceDefinition.class), any(System.class), any(String.class))).thenReturn(Optional.of(new ServiceRegistry()));
 		
-		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System("valid-system-name", "192.168.1.103", 0, null, null), null, null, null, null, 1, null);
+		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System("valid-system-name", "192.168.1.103", AddressType.IPV4, 0, null, null), null, null, null, null, 1, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -407,7 +412,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testCreateServiceRegistrySecuredButAuthenticationInfoNotSpecified() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystemAndServiceUri(any(ServiceDefinition.class), any(System.class), any(String.class))).thenReturn(Optional.empty());
 		
-		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System("valid-system-name", null, 0, null, null), null, null, ServiceSecurityType.CERTIFICATE, null, 1, null);
+		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System("valid-system-name", null, null, 0, null, null), null, null, ServiceSecurityType.CERTIFICATE, null, 1, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -429,7 +434,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testCreateServiceRegistryInterfacesListNull() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystemAndServiceUri(any(ServiceDefinition.class), any(System.class), any(String.class))).thenReturn(Optional.empty());
 		
-		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System("valid-system-name", null, 0, null, null), null, null, ServiceSecurityType.NOT_SECURE, null, 1, null);
+		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System("valid-system-name", null, null, 0, null, null), null, null, ServiceSecurityType.NOT_SECURE, null, 1, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -437,7 +442,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testCreateServiceRegistryInterfacesListEmpty() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystemAndServiceUri(any(ServiceDefinition.class), any(System.class), any(String.class))).thenReturn(Optional.empty());
 		
-		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System("valid-system-name", null, 0, null, null), null, null, ServiceSecurityType.NOT_SECURE, null, 1, Collections.<String>emptyList());
+		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System("valid-system-name", null, null, 0, null, null), null, null, ServiceSecurityType.NOT_SECURE, null, 1, Collections.<String>emptyList());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -445,7 +450,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testCreateServiceRegistryInvalidInterface() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystemAndServiceUri(any(ServiceDefinition.class), any(System.class), any(String.class))).thenReturn(Optional.empty());
 		
-		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System("valid-system-name", null, 0, null, null), null, null, ServiceSecurityType.NOT_SECURE, null, 1, List.of("xml"));
+		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System("valid-system-name", null, null, 0, null, null), null, null, ServiceSecurityType.NOT_SECURE, null, 1, List.of("xml"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -462,7 +467,6 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 			verify(networkAddressVerifier, times(1)).verify(eq("192.168.1.103"));
 			throw ex;
 		}
-		
 	}
 	
 	//=================================================================================================
@@ -615,6 +619,48 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 			Assert.assertEquals(i + 1, result.getServiceQueryData().get(i).getId());
 		}
 	}
+
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQueryRegistryAddressTypeFilterRemovesAll() {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		form.setServiceDefinitionRequirement("testService");
+		form.setProviderAddressTypeRequirements(List.of(AddressType.IPV6));
+		final ServiceDefinition serviceDefinition = new ServiceDefinition("testservice");
+		
+		when(serviceDefinitionRepository.findByServiceDefinition("testservice")).thenReturn(Optional.of(serviceDefinition)); // also tests case insensitivity
+		when(serviceRegistryRepository.findByServiceDefinition(any(ServiceDefinition.class))).thenReturn(getTestProviders(serviceDefinition));
+		
+		final ServiceQueryResultDTO result = serviceRegistryDBService.queryRegistry(form);
+		
+		Assert.assertEquals(6, result.getUnfilteredHits());
+		Assert.assertEquals(0, result.getServiceQueryData().size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQueryRegistryAddressTypeFilterRemovesOne() {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		form.setServiceDefinitionRequirement("testService");
+		form.setProviderAddressTypeRequirements(List.of(AddressType.IPV4));
+		final ServiceDefinition serviceDefinition = new ServiceDefinition("testservice");
+		
+		final System otherProvider = new System("test_system", "localhost", AddressType.HOSTNAME, 1234, null, "systemkey=systemvalue");
+		final List<ServiceRegistry> providers = getTestProviders(serviceDefinition);
+		providers.get(providers.size() - 1).setSystem(otherProvider);
+
+		when(serviceDefinitionRepository.findByServiceDefinition("testservice")).thenReturn(Optional.of(serviceDefinition)); // also tests case insensitivity
+		when(serviceRegistryRepository.findByServiceDefinition(any(ServiceDefinition.class))).thenReturn(providers);
+		
+		final ServiceQueryResultDTO result = serviceRegistryDBService.queryRegistry(form);
+		
+		Assert.assertEquals(6, result.getUnfilteredHits());
+		Assert.assertEquals(5, result.getServiceQueryData().size());
+		for (int i = 0; i < result.getServiceQueryData().size(); ++i) {
+			Assert.assertEquals(i + 1, result.getServiceQueryData().get(i).getId());
+		}
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -739,6 +785,77 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		for (int i = 0; i < result.getServiceQueryData().size(); ++i) {
 			Assert.assertEquals(i + 1, result.getServiceQueryData().get(i).getId());
 		}
+	}
+	
+	//=================================================================================================
+	// Tests of getServiceRegistryEntriesBySystemId
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetServiceRegistryEntriesBySystemIdOk() {
+		final System system = new System();
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(system));
+		when(serviceRegistryRepository.findBySystem(eq(system))).thenReturn(new ArrayList<>());
+		serviceRegistryDBService.getServiceRegistryEntriesBySystemId(1L);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetServiceRegistryEntriesBySystemIdInvalidId() {
+		serviceRegistryDBService.getServiceRegistryEntriesBySystemId(0L);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetServiceRegistryEntriesBySystemIdSysNotExists() {
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.empty());
+		serviceRegistryDBService.getServiceRegistryEntriesBySystemId(1L);
+	}
+	
+	//=================================================================================================
+	// Tests of getServiceRegistryEntriesByServiceDefinitonList
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetServiceRegistryEntriesByServiceDefinitonListOk() {
+		final List<String> definitions = new ArrayList<>(1);
+		definitions.add("service-def");
+		final ServiceDefinition serviceDefinition = new ServiceDefinition("service-def");
+		when(serviceDefinitionRepository.findByServiceDefinition(anyString())).thenReturn(Optional.of(serviceDefinition));
+		when(serviceRegistryRepository.findByServiceDefinition(eq(serviceDefinition))).thenReturn(new ArrayList<>());
+		serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitonList(definitions);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetServiceRegistryEntriesByServiceDefinitonListWithNull() {
+		serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitonList(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetServiceRegistryEntriesByServiceDefinitonListOkWithNullDefinition() {
+		final List<String> definitions = new ArrayList<>(1);
+		definitions.add(null);
+		serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitonList(definitions);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetServiceRegistryEntriesByServiceDefinitonListOkWithBlankDefinition() {
+		final List<String> definitions = new ArrayList<>(1);
+		definitions.add(" ");
+		serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitonList(definitions);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetServiceRegistryEntriesByServiceDefinitonListServiceDefNotExists() {
+		final List<String> definitions = new ArrayList<>(1);
+		definitions.add("service-def");
+		when(serviceDefinitionRepository.findByServiceDefinition(anyString())).thenReturn(Optional.empty());
+		final List<ServiceRegistry> result = serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitonList(definitions);
+		Assert.assertEquals(0, result.size());
 	}
 	
 	//=================================================================================================
@@ -1119,7 +1236,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	private List<ServiceRegistry> getTestProviders(final ServiceDefinition definition) {
 		final List<ServiceRegistry> result = new ArrayList<ServiceRegistry>(6);
 		
-		final System provider = new System("test_system", "192.168.1.103", 1234, null, "systemkey=systemvalue");
+		final System provider = new System("test_system", "192.168.1.103", AddressType.IPV4, 1234, null, "systemkey=systemvalue");
 		final String metadataStr = "key=value, key2=value2";
 		
 		final ServiceInterface jsonInterface = new ServiceInterface("HTTP-SECURE-JSON");
@@ -1169,7 +1286,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		final List<ServiceRegistry> result = new ArrayList<ServiceRegistry>(6);
 		
 		definition.setId(1);
-		final System provider = new System("test_system", "192.168.1.103", 1234, null, "systemkey=systemvalue");
+		final System provider = new System("test_system", "192.168.1.103", AddressType.IPV4, 1234, null, "systemkey=systemvalue");
 		final String metadataStr = "key=value, key2=value2";
 		
 		
@@ -1225,7 +1342,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	private List<ServiceRegistry> getTestProvidersWithMofifyableCollections(final ServiceDefinition definition) {
 		final List<ServiceRegistry> result = new ArrayList<ServiceRegistry>(6);
 		
-		final System provider = new System("test-system", "192.168.1.103", 1234, null, "systemkey=systemvalue");
+		final System provider = new System("test-system", "192.168.1.103", AddressType.IPV4, 1234, null, "systemkey=systemvalue");
 		final String metadataStr = "key=value, key2=value2";
 		
 		final ServiceInterface jsonInterface = new ServiceInterface("HTTP-SECURE-JSON");
@@ -1461,7 +1578,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private System getValidTestProvider() {
-		final System system = new System("test-system", "192.168.1.103", 1234, null, "systemkey=systemvalue");
+		final System system = new System("test-system", "192.168.1.103", AddressType.IPV4, 1234, null, "systemkey=systemvalue");
 		system.setId(1);
 		
 		return system;
@@ -1469,7 +1586,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private System getValidTestProviderForUniqueConstraintCheck() {
-		final System system = new System("test-system", "192.168.1.103", 1234, null, "systemkey=systemvalue");
+		final System system = new System("test-system", "192.168.1.103", AddressType.IPV4, 1234, null, "systemkey=systemvalue");
 		system.setId(Integer.MAX_VALUE);
 		
 		return system;
@@ -1477,7 +1594,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private System getValidTestProviderWithAuthenticationInfo() {
-		final System system = new System("test-system", "192.168.1.103", 1234, null, "systemkey=systemvalue");
+		final System system = new System("test-system", "192.168.1.103", AddressType.IPV4, 1234, null, "systemkey=systemvalue");
 		system.setId(1);
 		system.setAuthenticationInfo("authenticationInfo");
 		

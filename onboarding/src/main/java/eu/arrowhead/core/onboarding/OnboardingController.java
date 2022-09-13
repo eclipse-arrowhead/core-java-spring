@@ -14,31 +14,23 @@
 
 package eu.arrowhead.core.onboarding;
 
-import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.CoreCommonConstants;
-import eu.arrowhead.common.CoreDefaults;
-import eu.arrowhead.common.CoreUtilities;
-import eu.arrowhead.common.Defaults;
-import eu.arrowhead.common.SSLProperties;
-import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
-import eu.arrowhead.common.core.CoreSystem;
-import eu.arrowhead.common.database.entity.Logs;
-import eu.arrowhead.common.database.service.CommonDBService;
-import eu.arrowhead.common.dto.internal.LogEntryListResponseDTO;
-import eu.arrowhead.common.dto.shared.OnboardingWithCsrRequestDTO;
-import eu.arrowhead.common.dto.shared.OnboardingWithCsrResponseDTO;
-import eu.arrowhead.common.dto.shared.OnboardingWithNameRequestDTO;
-import eu.arrowhead.common.dto.shared.OnboardingWithNameResponseDTO;
-import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.AuthException;
-import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.core.onboarding.service.OnboardingService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_CERTIFICATE_AND_CSR;
+import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_CERTIFICATE_AND_NAME;
+import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_SHARED_SECRET_AND_CSR;
+import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_SHARED_SECRET_AND_NAME;
+
+import java.security.cert.X509Certificate;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,21 +50,31 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import java.security.cert.X509Certificate;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeParseException;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
-import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_CERTIFICATE_AND_CSR;
-import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_CERTIFICATE_AND_NAME;
-import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_SHARED_SECRET_AND_CSR;
-import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_SHARED_SECRET_AND_NAME;
+import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.CoreDefaults;
+import eu.arrowhead.common.CoreUtilities;
+import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
+import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.SSLProperties;
+import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystem;
+import eu.arrowhead.common.database.entity.Logs;
+import eu.arrowhead.common.database.service.CommonDBService;
+import eu.arrowhead.common.dto.internal.LogEntryListResponseDTO;
+import eu.arrowhead.common.dto.shared.OnboardingWithCsrRequestDTO;
+import eu.arrowhead.common.dto.shared.OnboardingWithCsrResponseDTO;
+import eu.arrowhead.common.dto.shared.OnboardingWithNameRequestDTO;
+import eu.arrowhead.common.dto.shared.OnboardingWithNameResponseDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.onboarding.service.OnboardingService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @Api(tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT, CoreCommonConstants.SWAGGER_TAG_ONBOARDING})
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,

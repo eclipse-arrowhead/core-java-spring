@@ -14,6 +14,12 @@
 
 package eu.arrowhead.core.certificate_authority;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Base64;
+import java.util.ServiceConfigurationError;
+
 import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -24,12 +30,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Base64;
-import java.util.ServiceConfigurationError;
 
 import static org.junit.Assert.assertNotNull;
 

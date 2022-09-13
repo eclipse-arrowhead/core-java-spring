@@ -17,7 +17,12 @@ package eu.arrowhead.core.gateway.service;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -26,9 +31,11 @@ import java.io.Serializable;
 import java.net.Socket;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.jms.BytesMessage;
 import javax.jms.CompletionListener;
@@ -78,8 +85,11 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.UnavailableServerException;
+import eu.arrowhead.core.gateway.thread.ConsumerSideServerSocketThread;
+import eu.arrowhead.core.gateway.thread.ProviderSideSocketThreadHandler;
 import eu.arrowhead.core.gateway.thread.SSLContextFactory;
 import eu.arrowhead.relay.gateway.ConsumerSideRelayInfo;
+import eu.arrowhead.relay.gateway.ControlRelayInfo;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
 import eu.arrowhead.relay.gateway.ProviderSideRelayInfo;
 
@@ -100,6 +110,12 @@ public class GatewayServiceTest {
 	
 	@Mock
 	private ConcurrentHashMap<String,ActiveSessionDTO> activeSessions;
+	
+	@Mock
+	private ConcurrentMap<String,ConsumerSideServerSocketThread> activeConsumerSideSocketThreads;
+	
+	@Mock
+	private ConcurrentMap<String,ProviderSideSocketThreadHandler> activeProviderSideSocketThreadHandlers;
 	
 	@Mock
 	private ConcurrentLinkedQueue<Integer> availablePorts;
@@ -500,10 +516,12 @@ public class GatewayServiceTest {
 	public void testConnectProviderEverythingOK() throws JMSException, InterruptedException {
 		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
 		final MessageProducer producer = getTestMessageProducer();
+		final MessageConsumer consumer = getTestMessageConsumer();
 		
 		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
-		when(relayClient.initializeProviderSideRelay(any(Session.class), any(MessageListener.class))).thenReturn(new ProviderSideRelayInfo("peerName", "queueId", producer, producer));
+		final ProviderSideRelayInfo info = new ProviderSideRelayInfo("peerName", "queueId", producer, producer, consumer, consumer);
+		when(relayClient.initializeProviderSideRelay(any(Session.class), any(MessageListener.class))).thenReturn(info);
 		when(activeSessions.put(any(String.class), any(ActiveSessionDTO.class))).thenReturn(null);
 		when(appContext.getBean(SSLProperties.class)).thenReturn(getTestSSLPropertiesForThread());
 		
@@ -537,6 +555,7 @@ public class GatewayServiceTest {
 		final String key = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5r6P+DeDvSwMe5qWGlCoX94oNedSu7fdRpueJ9mNKfTgKwRHE8eOwVOf9By/LecfgRnlT+sf8qZbW3GG9jc+3xOPB+Q+NKJcVvLiU+nay6XZD/IbKaOcZz/pKWlQ+J6OoMQuoLSIA+IaVLuuP8Dlj8GJjKZyAxv643B16US2d6QxrkadQ/oKcnCVyBC/SnRAGALt0MHMTrY+MCU1dGqXb0i+aFmhcbMjBDYApni9bIUdOWy7+BlhnUdDATOenFBni94xZ8Or6cupYmKZLtv6rkvV/YkXM7N4m9avmTHGMU1BUVEbSjJ/6aqiTdBPaenHd6WNeFpgIoreG1vHTWpGeQIDAQAB"; 
 		
 		Assert.assertEquals(key, response.getProviderGWPublicKey());
+		verify(activeProviderSideSocketThreadHandlers, times(1)).put(eq(info.getQueueId()), any(ProviderSideSocketThreadHandler.class));
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -664,17 +683,19 @@ public class GatewayServiceTest {
 	public void testConnectConsumerEverythingOK() throws JMSException {
 		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
 		final MessageProducer producer = getTestMessageProducer();
+		final MessageConsumer consumer = getTestMessageConsumer();
 		
 		when(availablePorts.poll()).thenReturn(54321);
 		when(activeSessions.put(any(String.class), any(ActiveSessionDTO.class))).thenReturn(null);
 		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
-		when(relayClient.initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), any(String.class), any(String.class))).thenReturn(new ConsumerSideRelayInfo(producer, producer));
+		when(relayClient.initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), any(String.class), any(String.class))).thenReturn(new ConsumerSideRelayInfo(producer, producer, consumer, consumer));
 		when(appContext.getBean(SSLProperties.class)).thenReturn(getTestSSLPropertiesForThread());
 		
 		final int serverPort = testingObject.connectConsumer(request);
 		
 		Assert.assertEquals(54321, serverPort);
+		verify(activeConsumerSideSocketThreads, times(1)).put(eq(request.getQueueId()), any(ConsumerSideServerSocketThread.class));
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -689,7 +710,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName(null);
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("test-address", 1000, null, true, true, "GATEWAY_RELAY"));
 		
 		testingObject.closeSession(request);
 	}
@@ -700,7 +721,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("  ");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("test-address", 1000, null, true, true, "GATEWAY_RELAY"));
 		
 		testingObject.closeSession(request);
 	}
@@ -711,7 +732,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId(null);
-		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("test-address", 1000, null, true, true, "GATEWAY_RELAY"));
 		
 		testingObject.closeSession(request);
 	}
@@ -722,7 +743,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("  ");
-		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("test-address", 1000, null, true, true, "GATEWAY_RELAY"));
 		
 		testingObject.closeSession(request);
 	}
@@ -744,7 +765,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO(null, 1000, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO(null, 1000, null, true, true, "GATEWAY_RELAY"));
 		
 		testingObject.closeSession(request);
 	}
@@ -755,7 +776,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("  ", 1000, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("  ", 1000, null, true, true, "GATEWAY_RELAY"));
 		
 		testingObject.closeSession(request);
 	}
@@ -766,7 +787,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("test-address", null, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("test-address", null, null, true, true, "GATEWAY_RELAY"));
 		
 		testingObject.closeSession(request);
 	}
@@ -777,7 +798,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("test-address", CommonConstants.SYSTEM_PORT_RANGE_MIN - 1, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("test-address", CommonConstants.SYSTEM_PORT_RANGE_MIN - 1, null, true, true, "GATEWAY_RELAY"));
 		
 		testingObject.closeSession(request);
 	}
@@ -788,7 +809,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("test-address", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("test-address", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, null, true, true, "GATEWAY_RELAY"));
 		
 		testingObject.closeSession(request);
 	}
@@ -799,7 +820,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, null));
+		request.setRelay(new RelayRequestDTO("test-address", 1000, null, true, true, null));
 		
 		testingObject.closeSession(request);
 	}
@@ -810,7 +831,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "invalid"));
+		request.setRelay(new RelayRequestDTO("test-address", 1000, null, true, true, "invalid"));
 		
 		testingObject.closeSession(request);
 	}
@@ -821,7 +842,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("test-address", 1000, null, true, true, "GATEWAY_RELAY"));
 		
 		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenThrow(new JMSException("test"));
 		
@@ -834,7 +855,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("test-address", 1000, null, true, true, "GATEWAY_RELAY"));
 		
 		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
@@ -843,12 +864,75 @@ public class GatewayServiceTest {
 		testingObject.closeSession(request);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCloseSessionByPortActiveSessionNotFound() {
+		final ActiveSessionDTO activeSessionDTO = new ActiveSessionDTO();
+		activeSessionDTO.setConsumerServerSocketPort(1234);
+		
+		when(activeSessions.values()).thenReturn(List.of(activeSessionDTO));
+		
+		final String error = testingObject.closeSession(5678);
+		
+		Assert.assertEquals("Active session not found.", error);
+		
+		verify(activeSessions, times(1)).values();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCloseSessionByPortProblemDuringClosing() throws JMSException {
+		final ActiveSessionDTO activeSessionDTO = new ActiveSessionDTO();
+		activeSessionDTO.setPeerName("peer");
+		activeSessionDTO.setQueueId("queueId");
+		activeSessionDTO.setConsumerServerSocketPort(1234);
+		activeSessionDTO.setRelay(new RelayRequestDTO("localhost", 12345, null, true, false, RelayType.GATEWAY_RELAY.name()));
+		
+		when(activeSessions.values()).thenReturn(List.of(activeSessionDTO));
+		when(relayClient.createConnection("localhost", 12345, true)).thenThrow(JMSException.class);
+		
+		final String error = testingObject.closeSession(1234);
+		
+		Assert.assertEquals("Error while trying to connect relay at localhost:12345", error);
+		
+		verify(activeSessions, times(1)).values();
+		verify(relayClient, times(1)).createConnection("localhost", 12345, true);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCloseSessionByPortOk() throws JMSException {
+		final ActiveSessionDTO activeSessionDTO = new ActiveSessionDTO();
+		activeSessionDTO.setPeerName("peer");
+		activeSessionDTO.setQueueId("queueId");
+		activeSessionDTO.setConsumerServerSocketPort(1234);
+		activeSessionDTO.setRelay(new RelayRequestDTO("localhost", 12345, null, true, false, RelayType.GATEWAY_RELAY.name()));
+		
+		when(activeSessions.values()).thenReturn(List.of(activeSessionDTO));
+		when(relayClient.createConnection("localhost", 12345, true)).thenReturn(getTestSession());
+		when(relayClient.initializeControlRelay(any(Session.class), eq("peer"), eq("queueId"))).thenReturn(new ControlRelayInfo(getTestMessageProducer(), getTestMessageProducer()));
+		doNothing().when(relayClient).sendCloseControlMessage(any(Session.class), any(MessageProducer.class), eq("queueId"));
+		when(activeSessions.remove(anyString())).thenReturn(activeSessionDTO);
+		doNothing().when(relayClient).closeConnection(any(Session.class));
+		
+		final String error = testingObject.closeSession(1234);
+		
+		Assert.assertNull(error);
+		
+		verify(activeSessions, times(1)).values();
+		verify(relayClient, times(1)).createConnection("localhost", 12345, true);
+		verify(relayClient, times(1)).initializeControlRelay(any(Session.class), eq("peer"), eq("queueId"));
+		verify(relayClient, times(2)).sendCloseControlMessage(any(Session.class), any(MessageProducer.class), eq("queueId"));
+		verify(activeSessions, times(1)).remove(anyString());
+		verify(relayClient, times(1)).closeConnection(any(Session.class));
+	}
+		
 	//=================================================================================================
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
 	private GatewayProviderConnectionRequestDTO getTestGatewayProviderConnectionRequestDTO() {
-		final RelayRequestDTO relay = new RelayRequestDTO("localhost", 1234, false, false, RelayType.GATEWAY_RELAY.name());
+		final RelayRequestDTO relay = new RelayRequestDTO("localhost", 1234, null, false, false, RelayType.GATEWAY_RELAY.name());
 		final SystemRequestDTO consumer = new SystemRequestDTO();
 		consumer.setSystemName("consumer");
 		consumer.setAddress("abc.de");
@@ -920,20 +1004,20 @@ public class GatewayServiceTest {
 		return new MessageProducer() {
 			
 			//-------------------------------------------------------------------------------------------------
-			public void setTimeToLive(long timeToLive) throws JMSException {}
-			public void setPriority(int defaultPriority) throws JMSException {}
-			public void setDisableMessageTimestamp(boolean value) throws JMSException {}
-			public void setDisableMessageID(boolean value) throws JMSException {}
-			public void setDeliveryMode(int deliveryMode) throws JMSException {	}
-			public void setDeliveryDelay(long deliveryDelay) throws JMSException {}
-			public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
-			public void send(Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
-			public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
-			public void send(Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
-			public void send(Destination destination, Message message, CompletionListener completionListener) throws JMSException {}
-			public void send(Message message, CompletionListener completionListener) throws JMSException {}
-			public void send(Destination destination, Message message) throws JMSException {}
-			public void send(Message message) throws JMSException {}
+			public void setTimeToLive(final long timeToLive) throws JMSException {}
+			public void setPriority(final int defaultPriority) throws JMSException {}
+			public void setDisableMessageTimestamp(final boolean value) throws JMSException {}
+			public void setDisableMessageID(final boolean value) throws JMSException {}
+			public void setDeliveryMode(final int deliveryMode) throws JMSException {	}
+			public void setDeliveryDelay(final long deliveryDelay) throws JMSException {}
+			public void send(final Destination destination, final Message message, final int deliveryMode, final int priority, final long timeToLive, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Message message, final int deliveryMode, final int priority, final long timeToLive, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Destination destination, final Message message, final int deliveryMode, final int priority, final long timeToLive) throws JMSException {}
+			public void send(final Message message, final int deliveryMode, final int priority, final long timeToLive) throws JMSException {}
+			public void send(final Destination destination, final Message message, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Message message, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Destination destination, final Message message) throws JMSException {}
+			public void send(final Message message) throws JMSException {}
 			public long getTimeToLive() throws JMSException { return 0; }
 			public int getPriority() throws JMSException { return 0; }
 			public boolean getDisableMessageTimestamp() throws JMSException { return false;	}
@@ -946,8 +1030,21 @@ public class GatewayServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private MessageConsumer getTestMessageConsumer() {
+		return new MessageConsumer() {
+			public void setMessageListener(final MessageListener listener) throws JMSException {}
+			public Message receiveNoWait() throws JMSException { return null; }
+			public Message receive(final long timeout) throws JMSException { return null; }
+			public Message receive() throws JMSException { return null; }
+			public String getMessageSelector() throws JMSException {return null; }
+			public MessageListener getMessageListener() throws JMSException { return null; }
+			public void close() throws JMSException {}
+		};
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private GatewayConsumerConnectionRequestDTO getTestGatewayConsumerConnectionRequestDTO() {
-		final RelayRequestDTO relay = new RelayRequestDTO("localhost", 1234, false, false, RelayType.GATEWAY_RELAY.name());
+		final RelayRequestDTO relay = new RelayRequestDTO("localhost", 1234, null, false, false, RelayType.GATEWAY_RELAY.name());
 		final SystemRequestDTO consumer = new SystemRequestDTO();
 		consumer.setSystemName("consumer");
 		consumer.setAddress("abc.de");
