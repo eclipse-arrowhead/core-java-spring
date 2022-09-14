@@ -51,6 +51,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.database.entity.Logs;
 import eu.arrowhead.common.database.service.CommonDBService;
@@ -214,8 +215,8 @@ public class EventHandlerControllerLogsTest {
 	//-------------------------------------------------------------------------------------------------	
 	@Test
 	public void testGetLogEntriesWithAllParameters() throws Exception  {
-		final ZonedDateTime from = ZonedDateTime.of(2021, 11, 24, 15, 12, 11, 0, ZoneId.systemDefault());
-		final ZonedDateTime to = ZonedDateTime.of(2021, 11, 24, 15, 22, 11, 0, ZoneId.systemDefault());
+		final ZonedDateTime from = Utilities.parseUTCStringToLocalZonedDateTime("2021-11-24T14:12:11Z");
+		final ZonedDateTime to = Utilities.parseUTCStringToLocalZonedDateTime("2021-11-24T14:22:11Z");
 		final List<LogLevel> logLevels = List.of(LogLevel.ERROR, LogLevel.FATAL, LogLevel.OFF);
 		
 		final Logs entry = new Logs("log", from.plusSeconds(10), "logger", CoreSystem.EVENTHANDLER, LogLevel.INFO, "test", null);
