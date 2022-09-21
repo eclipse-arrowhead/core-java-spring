@@ -32,6 +32,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.core.onboarding.service.OnboardingService;
 
 @RunWith(SpringRunner.class)
@@ -49,6 +50,9 @@ public class OnboardingControllerTest {
 
     @MockBean(name = "mockOnboardingDBService")
     private OnboardingService onboardingDBService;
+    
+    @MockBean(name = "mockCommonDBService")
+    private CommonDBService commonDBService;
 
     //=================================================================================================
     // methods

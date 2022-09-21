@@ -15,51 +15,59 @@
 package eu.arrowhead.common.dto.internal;
 
 import javax.validation.constraints.NotBlank;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.Serializable;
 
 public class CertificateSigningRequestDTO implements Serializable {
 
-    private static final long serialVersionUID = -6810780579000655432L;
+	//=================================================================================================
+	// members
 
-    @NotBlank(message = "The encodedCSR is mandatory")
+	private static final long serialVersionUID = -1496033564429311716L;
+	
+	@NotBlank(message = "The encodedCSR is mandatory")
     private String encodedCSR;
     private String validAfter;
     private String validBefore;
 
-    public CertificateSigningRequestDTO() {
-    }
+    //=================================================================================================
+	// methods
+    
+    //-------------------------------------------------------------------------------------------------
+	public CertificateSigningRequestDTO() {}
 
-    public CertificateSigningRequestDTO(String encodedCSR) {
+    //-------------------------------------------------------------------------------------------------
+	public CertificateSigningRequestDTO(final String encodedCSR) {
         this.encodedCSR = encodedCSR;
     }
 
-    public CertificateSigningRequestDTO(String encodedCSR, String validAfter, String validBefore) {
+    //-------------------------------------------------------------------------------------------------
+	public CertificateSigningRequestDTO(final String encodedCSR, final String validAfter, final String validBefore) {
         this.encodedCSR = encodedCSR;
         this.validAfter = validAfter;
         this.validBefore = validBefore;
     }
 
-    public String getEncodedCSR() {
-        return encodedCSR;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public String getEncodedCSR() { return encodedCSR; }
+	public String getValidAfter() { return validAfter; }
+	public String getValidBefore() { return validBefore; }
 
-    public void setEncodedCSR(String encodedCSR) {
-        this.encodedCSR = encodedCSR;
-    }
-
-    public String getValidAfter() {
-        return validAfter;
-    }
-
-    public void setValidAfter(String validAfter) {
-        this.validAfter = validAfter;
-    }
-
-    public String getValidBefore() {
-        return validBefore;
-    }
-
-    public void setValidBefore(String validBefore) {
-        this.validBefore = validBefore;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public void setEncodedCSR(final String encodedCSR) { this.encodedCSR = encodedCSR; }
+    public void setValidAfter(final String validAfter) { this.validAfter = validAfter; }
+    public void setValidBefore(final String validBefore) { this.validBefore = validBefore; }
+    
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

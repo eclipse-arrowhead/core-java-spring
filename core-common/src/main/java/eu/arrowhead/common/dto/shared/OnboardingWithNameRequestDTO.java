@@ -14,49 +14,47 @@
 
 package eu.arrowhead.common.dto.shared;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import java.io.Serializable;
-import java.util.StringJoiner;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonInclude(Include.NON_NULL)
 public class OnboardingWithNameRequestDTO implements Serializable {
 
-    //=================================================================================================
+	//=================================================================================================
     // members
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -4222019369804191344L;
 
-    private CertificateCreationRequestDTO creationRequestDTO;
+	private CertificateCreationRequestDTO creationRequestDTO;
 
     //=================================================================================================
     // constructors
 
-    public OnboardingWithNameRequestDTO() {
-    }
-
-    public OnboardingWithNameRequestDTO(CertificateCreationRequestDTO creationRequestDTO) {
-        this.creationRequestDTO = creationRequestDTO;
-    }
-
-    //=================================================================================================
-    // methods
     //-------------------------------------------------------------------------------------------------
+	public OnboardingWithNameRequestDTO() {}
 
-    public CertificateCreationRequestDTO getCreationRequestDTO() {
-        return creationRequestDTO;
-    }
-
-    public void setCreationRequestDTO(CertificateCreationRequestDTO creationRequestDTO) {
+    //-------------------------------------------------------------------------------------------------
+	public OnboardingWithNameRequestDTO(final CertificateCreationRequestDTO creationRequestDTO) {
         this.creationRequestDTO = creationRequestDTO;
     }
 
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", OnboardingWithNameRequestDTO.class.getSimpleName() + "[", "]")
-                .add("creationRequestDTO=" + creationRequestDTO)
-                .add("parent=" + super.toString())
-                .toString();
-    }
+    //-------------------------------------------------------------------------------------------------
+    public CertificateCreationRequestDTO getCreationRequestDTO() { return creationRequestDTO; }
+
+    //-------------------------------------------------------------------------------------------------
+	public void setCreationRequestDTO(final CertificateCreationRequestDTO creationRequestDTO) { this.creationRequestDTO = creationRequestDTO; }
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

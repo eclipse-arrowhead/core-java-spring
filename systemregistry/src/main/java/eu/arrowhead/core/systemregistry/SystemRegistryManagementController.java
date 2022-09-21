@@ -20,7 +20,12 @@ import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
+import eu.arrowhead.common.core.CoreSystem;
+import eu.arrowhead.common.database.entity.Logs;
+import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.internal.DeviceListResponseDTO;
+import eu.arrowhead.common.dto.internal.LogEntryListResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemRegistryListResponseDTO;
 import eu.arrowhead.common.dto.shared.DeviceRequestDTO;
@@ -39,12 +44,16 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.logging.LogLevel;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -73,6 +82,7 @@ public class SystemRegistryManagementController {
     //=================================================================================================
     // members
 
+	private static final String LOGS_URI = "/logs";
     private static final String GET_SYSTEM_BY_ID_HTTP_200_MESSAGE = "System by requested id returned";
     private static final String GET_SYSTEM_BY_ID_HTTP_400_MESSAGE = "No Such System by requested id";
     private static final String PATH_VARIABLE_ID = "id";
@@ -120,6 +130,7 @@ public class SystemRegistryManagementController {
     private final Logger logger = LogManager.getLogger(SystemRegistryManagementController.class);
 
     private final SystemRegistryDBService systemRegistryDBService;
+    private final CommonDBService commonDBService;
     private final Validation validation;
     private final NetworkAddressPreProcessor networkAddressPreProcessor;
     private final NetworkAddressVerifier networkAddressVerifier; // cannot put into Validation.class as it must be a bean
@@ -129,12 +140,55 @@ public class SystemRegistryManagementController {
 
     //-------------------------------------------------------------------------------------------------
     @Autowired
-    public SystemRegistryManagementController(final SystemRegistryDBService systemRegistryDBService, final NetworkAddressPreProcessor networkAddressPreProcessor, final NetworkAddressVerifier networkAddressVerifier) {
+    public SystemRegistryManagementController(final SystemRegistryDBService systemRegistryDBService, final CommonDBService commonDBService, final NetworkAddressPreProcessor networkAddressPreProcessor, final NetworkAddressVerifier networkAddressVerifier) {
     	this.systemRegistryDBService = systemRegistryDBService;
+    	this.commonDBService = commonDBService;
     	this.validation = new Validation();
     	this.networkAddressPreProcessor = networkAddressPreProcessor;
     	this.networkAddressVerifier = networkAddressVerifier;
     }
+    
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return requested log entries by the given parameters", response = LogEntryListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.QUERY_LOG_ENTRIES_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.QUERY_LOG_ENTRIES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = LOGS_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public LogEntryListResponseDTO getLogEntries(
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = Logs.FIELD_NAME_ID) final String sortField,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_LOG_LEVEL, required = false) final String logLevel,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_FROM, required = false) final String from,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_TO, required = false) final String to,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_LOGGER, required = false) final String loggerStr) { 
+		logger.debug("New getLogEntries GET request received with page: {} and item_per page: {}", page, size);
+				
+		final String origin = CommonConstants.SYSTEMREGISTRY_URI + CoreCommonConstants.OP_QUERY_LOG_ENTRIES;
+		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, origin);
+		final List<LogLevel> logLevels = CoreUtilities.getLogLevels(logLevel, origin);
+		
+		try {
+			final ZonedDateTime _from = Utilities.parseUTCStringToLocalZonedDateTime(from);
+			final ZonedDateTime _to = Utilities.parseUTCStringToLocalZonedDateTime(to);
+			
+			if (_from != null && _to != null && _to.isBefore(_from)) {
+				throw new BadPayloadException("Invalid time interval", HttpStatus.SC_BAD_REQUEST, origin);
+			}
+
+			final LogEntryListResponseDTO response = commonDBService.getLogEntriesResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), validParameters.getValidatedDirection(), sortField, CoreSystem.SYSTEMREGISTRY, 
+																						   logLevels, _from, _to, loggerStr);
+			
+			logger.debug("Log entries  with page: {} and item_per page: {} retrieved successfully", page, size);
+			return response;
+		} catch (final DateTimeParseException ex) {
+			throw new BadPayloadException("Invalid time parameter", HttpStatus.SC_BAD_REQUEST, origin, ex);
+		}
+	}
     
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return system by id", response = SystemResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})

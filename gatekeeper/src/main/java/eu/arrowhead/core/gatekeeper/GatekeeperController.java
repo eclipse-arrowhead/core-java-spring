@@ -14,12 +14,15 @@
 
 package eu.arrowhead.core.gatekeeper;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.logging.LogLevel;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -40,21 +43,27 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
+import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
+import eu.arrowhead.common.database.entity.Logs;
 import eu.arrowhead.common.database.entity.Relay;
+import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudRelaysAssignmentRequestDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysAndPublicRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.GSDMultiQueryFormDTO;
+import eu.arrowhead.common.dto.internal.GSDMultiQueryResultDTO;
 import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
+import eu.arrowhead.common.dto.internal.LogEntryListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayListResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
@@ -62,6 +71,7 @@ import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.verifier.CommonNamePartVerifier;
@@ -97,9 +107,6 @@ public class GatekeeperController {
 	private static final String RELAYS_MGMT_URI =  CoreCommonConstants.MGMT_URI + "/relays";
 	private static final String RELAYS_BY_ID_MGMT_URI = RELAYS_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";	
 	private static final String RELAYS_BY_ADDRESS_AND_PORT_MGMT_URI = RELAYS_MGMT_URI + "/{" + PATH_VARIABLE_ADDRESS + "}" + "/{" + PATH_VARIABLE_PORT + "}";
-	
-	private static final String INIT_GLOBAL_SERVICE_DISCOVERY_URI = "/init_gsd";
-	private static final String INIT_INTER_CLOUD_NEGOTIATION_URI = "/init_icn";
 	
 	private static final String GET_CLOUDS_HTTP_200_MESSAGE = "Cloud entries returned";
 	private static final String GET_CLOUDS_HTTP_400_MESSAGE = "Could not retrieve Cloud entries";
@@ -151,6 +158,9 @@ public class GatekeeperController {
 	private GatekeeperService gatekeeperService;
 	
 	@Autowired
+	private CommonDBService commonDBService;
+	
+	@Autowired
 	private CommonNamePartVerifier cnVerifier;
 	
 	//=================================================================================================
@@ -166,6 +176,48 @@ public class GatekeeperController {
 	@GetMapping(path = CommonConstants.ECHO_URI)
 	public String echoService() {
 		return "Got it!";
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return requested log entries by the given parameters", response = LogEntryListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.QUERY_LOG_ENTRIES_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.QUERY_LOG_ENTRIES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = CoreCommonConstants.OP_QUERY_LOG_ENTRIES, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public LogEntryListResponseDTO getLogEntries(
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = Logs.FIELD_NAME_ID) final String sortField,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_LOG_LEVEL, required = false) final String logLevel,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_FROM, required = false) final String from,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_TO, required = false) final String to,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_LOGGER, required = false) final String loggerStr) { 
+		logger.debug("New getLogEntries GET request received with page: {} and item_per page: {}", page, size);
+				
+		final String origin = CommonConstants.GATEKEEPER_URI + CoreCommonConstants.OP_QUERY_LOG_ENTRIES;
+		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, origin);
+		final List<LogLevel> logLevels = CoreUtilities.getLogLevels(logLevel, origin);
+		
+		try {
+			final ZonedDateTime _from = Utilities.parseUTCStringToLocalZonedDateTime(from);
+			final ZonedDateTime _to = Utilities.parseUTCStringToLocalZonedDateTime(to);
+			
+			if (_from != null && _to != null && _to.isBefore(_from)) {
+				throw new BadPayloadException("Invalid time interval", HttpStatus.SC_BAD_REQUEST, origin);
+			}
+
+			final LogEntryListResponseDTO response = commonDBService.getLogEntriesResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), validParameters.getValidatedDirection(), sortField, CoreSystem.GATEKEEPER, 
+																						   logLevels, _from, _to, loggerStr);
+			
+			logger.debug("Log entries  with page: {} and item_per page: {} retrieved successfully", page, size);
+			return response;
+		} catch (final DateTimeParseException ex) {
+			throw new BadPayloadException("Invalid time parameter", HttpStatus.SC_BAD_REQUEST, origin, ex);
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -418,7 +470,7 @@ public class GatekeeperController {
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@PostMapping(path = RELAYS_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public RelayListResponseDTO registerRelays(@RequestBody final List<RelayRequestDTO> dtoList) {
+	@ResponseBody public RelayListResponseDTO registerRelays(@RequestBody final List<RelayRequestDTO> dtoList) { 
 		logger.debug("New registerRelays post request recieved");
 		final String origin = CommonConstants.GATEKEEPER_URI + RELAYS_MGMT_URI;
 		
@@ -445,7 +497,7 @@ public class GatekeeperController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PutMapping(path = RELAYS_BY_ID_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public RelayResponseDTO updateRelayById(@PathVariable(value = PATH_VARIABLE_ID) final long id, @RequestBody final RelayRequestDTO dto) {
+	@ResponseBody public RelayResponseDTO updateRelayById(@PathVariable(value = PATH_VARIABLE_ID) final long id, @RequestBody final RelayRequestDTO dto) { 
 		logger.debug("New updateRelayById put request recieved with id: {}", id);
 		final String origin = CommonConstants.GATEKEEPER_URI + RELAYS_BY_ID_MGMT_URI;
 		
@@ -454,7 +506,7 @@ public class GatekeeperController {
 		}
 		
 		validateRelayRequestDTO(dto, origin);
-		final RelayResponseDTO relayResponse = gatekeeperDBService.updateRelayByIdResponse(id, dto.getAddress(), dto.getPort(), dto.isSecure(), dto.isExclusive(),
+		final RelayResponseDTO relayResponse = gatekeeperDBService.updateRelayByIdResponse(id, dto.getAddress(), dto.getPort(), dto.getAuthenticationInfo(), dto.isSecure(), dto.isExclusive(),
 																						   Utilities.convertStringToRelayType(dto.getType()));
 		
 		logger.debug("Relay with id '{}' is successfully updated", id);
@@ -489,14 +541,33 @@ public class GatekeeperController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = INIT_GLOBAL_SERVICE_DISCOVERY_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = CommonConstants.OP_GATEKEEPER_GSD_SERVICE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public GSDQueryResultDTO initiateGlobalServiceDiscovery(@RequestBody final GSDQueryFormDTO gsdForm) throws InterruptedException {
 		logger.debug("New initiateGlobalServiceDiscovery post request received");
 		
-		validateGSDQueryFormDTO(gsdForm, CommonConstants.GATEKEEPER_URI + INIT_GLOBAL_SERVICE_DISCOVERY_URI);
+		validateGSDQueryFormDTO(gsdForm, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GSD_SERVICE);
 		final GSDQueryResultDTO gsdQueryResultDTO = gatekeeperService.initGSDPoll(gsdForm);
 		
 		logger.debug("initiateGlobalServiceDiscovery has been finished");
+		return gsdQueryResultDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return the results of a  Multi Global Service Discovery request", response = GSDMultiQueryResultDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_INIT_GSD_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_INIT_GSD_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CommonConstants.OP_GATEKEEPER_MULTI_GSD_SERVICE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public GSDMultiQueryResultDTO initiateMultiGlobalServiceDiscovery(@RequestBody final GSDMultiQueryFormDTO gsdForm) throws InterruptedException { 
+		logger.debug("New initiateMultiGlobalServiceDiscovery post request received");
+		
+		validateMultiGSDQueryFormDTO(gsdForm, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_MULTI_GSD_SERVICE);
+		final GSDMultiQueryResultDTO gsdQueryResultDTO = gatekeeperService.initMultiGSDPoll(gsdForm);
+		
+		logger.debug("initiateMultiGlobalServiceDiscovery has been finished");
 		return gsdQueryResultDTO;
 	}
 	
@@ -509,11 +580,11 @@ public class GatekeeperController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_GATEWAY_TIMEOUT, message = POST_INIT_ICN_HTTP_504_MESSAGE)
 	})
-	@PostMapping(path = INIT_INTER_CLOUD_NEGOTIATION_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = CommonConstants.OP_GATEKEEPER_ICN_SERVICE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public ICNResultDTO initiateInterCloudNegotiation(@RequestBody final ICNRequestFormDTO icnForm) {
 		logger.debug("New initiateInterCloudNegotiation request received");
 		
-		validateICNRequestFormDTO(icnForm, CommonConstants.GATEKEEPER_URI + INIT_INTER_CLOUD_NEGOTIATION_URI);
+		validateICNRequestFormDTO(icnForm, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_ICN_SERVICE);
 		final ICNResultDTO result = gatekeeperService.initICN(icnForm);
 		
 		logger.debug("Inter cloud negotiation has been finished.");
@@ -681,10 +752,10 @@ public class GatekeeperController {
 		
 		if (isOperatorInvalid || isNameInvalid || isOperatorIllFormed || isNameIllFormed) {
 			String exceptionMsg = "CloudRequestDTO is invalid due to the following reasons:";
-			exceptionMsg = isOperatorInvalid ? exceptionMsg + " operator is empty, " : exceptionMsg;
-			exceptionMsg = isOperatorIllFormed ? exceptionMsg + " operator is in wrong format, " : exceptionMsg;
-			exceptionMsg = isNameInvalid ? exceptionMsg + " name is empty, " : exceptionMsg;
-			exceptionMsg = isNameIllFormed ? exceptionMsg + " name is in wrong format, " : exceptionMsg;
+			exceptionMsg = isOperatorInvalid ? exceptionMsg + " operator is empty," : exceptionMsg;
+			exceptionMsg = isOperatorIllFormed ? exceptionMsg + " operator is in wrong format," : exceptionMsg;
+			exceptionMsg = isNameInvalid ? exceptionMsg + " name is empty," : exceptionMsg;
+			exceptionMsg = isNameIllFormed ? exceptionMsg + " name is in wrong format," : exceptionMsg;
 			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
 			
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, origin);
@@ -705,6 +776,31 @@ public class GatekeeperController {
 		
 		if (Utilities.isEmpty(gsdForm.getRequestedService().getServiceDefinitionRequirement())) {
 			throw new BadPayloadException("serviceDefinitionRequirement is empty", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (gsdForm.getPreferredClouds() != null && !gsdForm.getPreferredClouds().isEmpty()) {
+			for (final CloudRequestDTO cloudDTO : gsdForm.getPreferredClouds()) {
+				validateCloudRequestDTO(cloudDTO, origin);
+			}
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateMultiGSDQueryFormDTO(final GSDMultiQueryFormDTO gsdForm, final String origin) {
+		logger.debug("validateMultiGSDQueryFormDTO started...");
+		
+		if (gsdForm == null) {
+			throw new BadPayloadException("GSDMultiQueryFormDTO is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(gsdForm.getRequestedServices())) {
+			throw new BadPayloadException("RequestedServices list is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		for (final ServiceQueryFormDTO serviceReq : gsdForm.getRequestedServices()) {
+			if (Utilities.isEmpty(serviceReq.getServiceDefinitionRequirement())) {
+				throw new BadPayloadException("serviceDefinitionRequirement is empty", HttpStatus.SC_BAD_REQUEST, origin);
+			}
 		}
 		
 		if (gsdForm.getPreferredClouds() != null && !gsdForm.getPreferredClouds().isEmpty()) {

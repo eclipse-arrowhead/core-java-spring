@@ -19,6 +19,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+import eu.arrowhead.common.database.service.CommonDBService;
+
 @Configuration
 public class CertificateAuthorityServiceTestContext {
 
@@ -31,4 +33,11 @@ public class CertificateAuthorityServiceTestContext {
     public CertificateAuthorityService mockCertificateAuthorityService() {
         return Mockito.mock(CertificateAuthorityService.class);
     }
+    
+	//-------------------------------------------------------------------------------------------------
+	@Bean
+	@Primary // This bean is primary only in test context
+	public CommonDBService mockCommonDBService() {
+		return Mockito.mock(CommonDBService.class);
+	}
 }

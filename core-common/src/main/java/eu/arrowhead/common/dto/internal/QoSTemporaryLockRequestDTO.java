@@ -17,6 +17,9 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
@@ -49,4 +52,14 @@ public class QoSTemporaryLockRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public void setRequester(final SystemRequestDTO requester) { this.requester = requester; }
 	public void setOrList(final List<OrchestrationResultDTO> orList) { this.orList = orList; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

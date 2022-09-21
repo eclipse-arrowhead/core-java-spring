@@ -16,44 +16,50 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class TrustedKeyCheckResponseDTO implements Serializable {
+	
+	//=================================================================================================
+	// members
 
-    private static final long serialVersionUID = 1L;
-
-    private long id;
+	private static final long serialVersionUID = 6700831383393154350L;
+	
+	private long id;
     private String createdAt;
     private String description;
+    
+    //=================================================================================================
+	// methods
 
-    public TrustedKeyCheckResponseDTO() {
-    }
+    //-------------------------------------------------------------------------------------------------
+	public TrustedKeyCheckResponseDTO() {}
 
-    public TrustedKeyCheckResponseDTO(long id, String createdAt, String description) {
+    //-------------------------------------------------------------------------------------------------
+	public TrustedKeyCheckResponseDTO(final long id, final String createdAt, final String description) {
         this.id = id;
         this.createdAt = createdAt;
         this.description = description;
     }
 
-    public String getCreatedAt() {
-        return createdAt;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public String getCreatedAt() { return createdAt; }
+	public long getId() { return id; }
+	public String getDescription() { return description; }
 
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
+    public void setId(final long id) { this.id = id; }
+    public void setDescription(final String description) { this.description = description; }
+    
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

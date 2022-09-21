@@ -14,45 +14,51 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import eu.arrowhead.common.core.CoreSystemService;
-
 import java.io.Serializable;
 import java.net.URI;
-import java.util.StringJoiner;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import eu.arrowhead.common.core.CoreSystemService;
 
 public class ServiceEndpoint implements Serializable {
 
-    //=================================================================================================
+	//=================================================================================================
     // members
-    private static final long serialVersionUID = 1L;
 
-    private CoreSystemService system;
+	private static final long serialVersionUID = -8766267910533700737L;
+	
+    private CoreSystemService service;
     private URI uri;
 
-    public ServiceEndpoint() {
-        super();
-    }
+    //=================================================================================================
+	// methods 
+    
+    //-------------------------------------------------------------------------------------------------
+	public ServiceEndpoint() {}
 
-    public ServiceEndpoint(final CoreSystemService service, final URI uri) {
-        this.system = service;
+    //-------------------------------------------------------------------------------------------------
+	public ServiceEndpoint(final CoreSystemService service, final URI uri) {
+        this.service = service;
         this.uri = uri;
     }
 
-    public CoreSystemService getService() {
-        return system;
-    }
-    public void setSystem(final CoreSystemService system) { this.system = system; }
-
-    public URI getUri() {
-        return uri;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public CoreSystemService getService() { return service; }
+	public URI getUri() { return uri; }
+    
+	//-------------------------------------------------------------------------------------------------
+	public void setService(final CoreSystemService service) { this.service = service; }
     public void setUri(final URI uri) { this.uri = uri; }
 
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", ServiceEndpoint.class.getSimpleName() + "[", "]")
-                .add("system=" + system)
-                .add("uri=" + uri)
-                .toString();
-    }
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

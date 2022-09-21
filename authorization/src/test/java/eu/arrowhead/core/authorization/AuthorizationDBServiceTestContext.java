@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.core.authorization.database.service.AuthorizationDBService;
 
 @Configuration
@@ -32,5 +33,12 @@ public class AuthorizationDBServiceTestContext {
 	@Primary // This bean is primary only in test context
 	public AuthorizationDBService mockAuthorizationDBService() {
 		return Mockito.mock(AuthorizationDBService.class);
-	}	
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean
+	@Primary // This bean is primary only in test context
+	public CommonDBService mockCommonDBService() {
+		return Mockito.mock(CommonDBService.class);
+	}
 }

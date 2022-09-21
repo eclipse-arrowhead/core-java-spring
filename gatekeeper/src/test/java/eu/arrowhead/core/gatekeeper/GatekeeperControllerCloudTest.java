@@ -66,6 +66,7 @@ import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ExceptionType;
+import eu.arrowhead.common.verifier.CommonNamePartVerifier;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBServiceTestContext;
 
@@ -91,6 +92,9 @@ public class GatekeeperControllerCloudTest {
 	@MockBean(name = "mockGatekeeperDBService") 
 	private GatekeeperDBService gatekeeperDBService;
 	
+	@MockBean(name = "mockCnVerifier")
+	private CommonNamePartVerifier cnVerifier;
+	
 	//=================================================================================================
 	// methods
 	
@@ -98,6 +102,7 @@ public class GatekeeperControllerCloudTest {
 	@Before
 	public void setup() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+		when(cnVerifier.isValid(anyString())).thenReturn(true);
 	}
 	
 	//=================================================================================================
@@ -105,7 +110,7 @@ public class GatekeeperControllerCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testGetCloudsWithoutParameterWithoutParameter() throws Exception {
+	public void testGetCloudsWithoutParameter() throws Exception {
 		final int amountOfClouds = 5;
 		final CloudWithRelaysListResponseDTO dto = createCloudWithRelaysListResponseDTOForDBMocking(amountOfClouds, RelayType.GATEKEEPER_RELAY, RelayType.GATEWAY_RELAY, false);
 		
@@ -309,6 +314,8 @@ public class GatekeeperControllerCloudTest {
 		cloudRequestDTO.setGatewayRelayIds(List.of(1L));
 		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 		
+		when(cnVerifier.isValid(anyString())).thenReturn(false);
+
 		this.mockMvc.perform(post(CLOUDS_MGMT_URI)
 					.content(objectMapper.writeValueAsBytes(dtoList))
 					.contentType(MediaType.APPLICATION_JSON)
@@ -368,6 +375,8 @@ public class GatekeeperControllerCloudTest {
 		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
 		cloudRequestDTO.setGatewayRelayIds(List.of(1L));
 		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
+		
+		when(cnVerifier.isValid(anyString())).thenReturn(false);
 		
 		this.mockMvc.perform(post(CLOUDS_MGMT_URI)
 					.content(objectMapper.writeValueAsBytes(dtoList))
@@ -476,7 +485,9 @@ public class GatekeeperControllerCloudTest {
 		cloudRequestDTO.setAuthenticationInfo("testAuthenticationInfo");
 		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
 		cloudRequestDTO.setGatewayRelayIds(List.of(1L));		
-		
+
+		when(cnVerifier.isValid(anyString())).thenReturn(false);
+
 		this.mockMvc.perform(put(CLOUDS_MGMT_URI + "/1")
 					.content(objectMapper.writeValueAsBytes(cloudRequestDTO))
 					.contentType(MediaType.APPLICATION_JSON)
@@ -533,6 +544,8 @@ public class GatekeeperControllerCloudTest {
 		cloudRequestDTO.setAuthenticationInfo("testAuthenticationInfo");
 		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
 		cloudRequestDTO.setGatewayRelayIds(List.of(1L));
+		
+		when(cnVerifier.isValid(anyString())).thenReturn(false);
 				
 		this.mockMvc.perform(put(CLOUDS_MGMT_URI + "/1")
 					.content(objectMapper.writeValueAsBytes(cloudRequestDTO))

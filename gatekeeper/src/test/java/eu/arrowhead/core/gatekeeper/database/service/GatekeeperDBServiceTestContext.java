@@ -19,6 +19,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+import eu.arrowhead.common.database.service.CommonDBService;
+
 @Configuration
 public class GatekeeperDBServiceTestContext {
 	
@@ -30,5 +32,12 @@ public class GatekeeperDBServiceTestContext {
 	@Primary // This bean is primary only in test context
 	public GatekeeperDBService mockGatekeeperDBService() {
 		return Mockito.mock(GatekeeperDBService.class);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean
+	@Primary // This bean is primary only in test context
+	public CommonDBService mockCommonDBService() {
+		return Mockito.mock(CommonDBService.class);
 	}
 }

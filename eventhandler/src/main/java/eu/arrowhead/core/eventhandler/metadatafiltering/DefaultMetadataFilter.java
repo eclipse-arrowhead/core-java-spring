@@ -15,10 +15,13 @@
 package eu.arrowhead.core.eventhandler.metadatafiltering;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
+
+import eu.arrowhead.common.Utilities;
 
 public class DefaultMetadataFilter implements MetadataFilteringAlgorithm {
 
@@ -42,10 +45,23 @@ public class DefaultMetadataFilter implements MetadataFilteringAlgorithm {
 		final Map<String, String> metaDataFilterMap = params.getMetaDataFilterMap();
 		final Map<String, String> eventMetadata = params.getEventMetadata();
 		
-		for (final String filterKey : metaDataFilterMap.keySet()) {
-			if (!metaDataFilterMap.get(filterKey).equalsIgnoreCase(eventMetadata.get(filterKey))) {
+		for (final Entry<String, String> entry : metaDataFilterMap.entrySet()) {
+
+			try {
+				final String key = entry.getKey();
+				final String value = entry.getValue();
+
+				if( Utilities.isEmpty(key) || Utilities.isEmpty(value)) {
+					return false;
+				}
+
+				if (!value.equalsIgnoreCase(eventMetadata.get(key))) {
+					return false;
+				}
+			} catch (final Exception ex) {
+
 				return false;
-			}			
+			}
 		}
 		
 		return true;

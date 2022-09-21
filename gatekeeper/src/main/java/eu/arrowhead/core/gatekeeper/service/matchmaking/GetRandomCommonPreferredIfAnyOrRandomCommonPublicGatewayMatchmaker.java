@@ -24,13 +24,14 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 
-public class GetRandomCommonPreferredIfAnyOrRandomCommonPublicGatewayMatchmaker implements RelayMatchmakingAlgorithm {
+public class GetRandomCommonPreferredIfAnyOrRandomCommonPublicGatewayMatchmaker implements RelayMatchmakingAlgorithm { 
 
 	//=================================================================================================
 	// members
@@ -81,7 +82,7 @@ public class GetRandomCommonPreferredIfAnyOrRandomCommonPublicGatewayMatchmaker 
 		final List<Relay> commonRelays = new ArrayList<>();
 		for (final CloudGatewayRelay relayConn : relayConnections) {
 			for (final RelayRequestDTO requestedRelay : relayRequests) {				
-				if (relayConn.getRelay().getAddress().equalsIgnoreCase(requestedRelay.getAddress()) && relayConn.getRelay().getPort() == requestedRelay.getPort()) {						
+				if (relayEquals(relayConn.getRelay(), requestedRelay)) {						
 					commonRelays.add(relayConn.getRelay());
 				}						
 			}
@@ -101,7 +102,7 @@ public class GetRandomCommonPreferredIfAnyOrRandomCommonPublicGatewayMatchmaker 
 		
 		for (final Relay relay : relays) {
 			for (final RelayRequestDTO requestedRelay : relayRequests) {				
-				if (relay.getAddress().equalsIgnoreCase(requestedRelay.getAddress()) && relay.getPort() == requestedRelay.getPort()) {						
+				if (relayEquals(relay, requestedRelay)) {						
 					if (relay.getType() == RelayType.GATEWAY_RELAY) {
 						commonGatewayRelays.add(relay);
 					} else {
@@ -120,5 +121,14 @@ public class GetRandomCommonPreferredIfAnyOrRandomCommonPublicGatewayMatchmaker 
 		}
 		
 		return null;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean relayEquals(final Relay relay, final RelayRequestDTO dto) {
+		if (!Utilities.isEmpty(relay.getAuthenticationInfo()) && !Utilities.isEmpty(dto.getAuthenticationInfo())) {
+			return relay.getAuthenticationInfo().equals(dto.getAuthenticationInfo());
+		}
+		
+		return relay.getAddress().equalsIgnoreCase(dto.getAddress()) && relay.getPort() == dto.getPort();
 	}
 }

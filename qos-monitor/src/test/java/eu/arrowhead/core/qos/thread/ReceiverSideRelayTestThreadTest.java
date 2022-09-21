@@ -104,7 +104,8 @@ public class ReceiverSideRelayTestThreadTest {
 		testingObject = new ReceiverSideRelayTestThread(getTestApplicationContext(), relayClient, getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), publicKey, (byte) 2, 2048, 1000);
 		
 		final MessageProducer producer = getTestProducer();
-		testingObject.init("queueId", producer, producer);
+		final MessageConsumer consumer = getTestConsumer();
+		testingObject.init("queueId", producer, producer, consumer, consumer);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -196,7 +197,7 @@ public class ReceiverSideRelayTestThreadTest {
 		final ReceiverSideRelayTestThread thread =  new ReceiverSideRelayTestThread(getTestApplicationContext(), getTestClient(false), getTestSession(), new CloudResponseDTO(),  new RelayResponseDTO(), publicKey, (byte) 10,
 																				    2048, 30000);
 		
-		thread.init(null, null, null);
+		thread.init(null, getTestProducer(), getTestProducer(), getTestConsumer(), getTestConsumer());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -207,9 +208,8 @@ public class ReceiverSideRelayTestThreadTest {
 		final ReceiverSideRelayTestThread thread =  new ReceiverSideRelayTestThread(getTestApplicationContext(), getTestClient(false), getTestSession(), new CloudResponseDTO(),  new RelayResponseDTO(), publicKey, (byte) 10,
 																					2048, 30000);
 		
-		thread.init(" ", null, null);
+		thread.init(" ", getTestProducer(), getTestProducer(), getTestConsumer(), getTestConsumer());
 	}
-
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
@@ -219,7 +219,7 @@ public class ReceiverSideRelayTestThreadTest {
 		final ReceiverSideRelayTestThread thread =  new ReceiverSideRelayTestThread(getTestApplicationContext(), getTestClient(false), getTestSession(), new CloudResponseDTO(),  new RelayResponseDTO(), publicKey, (byte) 10,
 																					2048, 30000);
 		
-		thread.init("queueId", null, null);
+		thread.init("queueId", null, getTestProducer(), getTestConsumer(), getTestConsumer());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -230,8 +230,29 @@ public class ReceiverSideRelayTestThreadTest {
 		final ReceiverSideRelayTestThread thread =  new ReceiverSideRelayTestThread(getTestApplicationContext(), getTestClient(false), getTestSession(), new CloudResponseDTO(),  new RelayResponseDTO(), publicKey, (byte) 10,
 																					2048, 30000);
 		
-		final MessageProducer producer = getTestProducer();
-		thread.init("queueId", producer, null);
+		thread.init("queueId", getTestProducer(), null, getTestConsumer(), getTestConsumer());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitConsumerNull() {
+		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwms8AvBuIxqPjXmyGnqds1EIkvX/kjl+kW9a0SObsp1n/u567vbpYSa+ESZNg4KrxAHJjA8M1TvpGkq4LLrJkEUkC2WNxq3qbWQbseZrIDSpcn6C7gHObJOLjRSpGTSlRHZfncRs1h+MLApVhf6qf611mZNDgN5AqaMtBbB3UzArE3CgO0jiKzBgZGyT9RSKccjlsO6amBgZrLBY0+x6VXPJK71hwZ7/1Y2CHGsgSb20/g2P82qLYf91Eht33u01rcptsETsvGrsq6SqIKtHtmWkYMW1lWB7p2mwFpAft8llUpHewRRAU1qsKYAI6myc/sPmQuQul+4yESMSBu3KyQIDAQAB";
+		
+		final ReceiverSideRelayTestThread thread =  new ReceiverSideRelayTestThread(getTestApplicationContext(), getTestClient(false), getTestSession(), new CloudResponseDTO(),  new RelayResponseDTO(), publicKey, (byte) 10,
+																					2048, 30000);
+		
+		thread.init("queueId", getTestProducer(), getTestProducer(), null, getTestConsumer());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitControlConsumerNull() {
+		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwms8AvBuIxqPjXmyGnqds1EIkvX/kjl+kW9a0SObsp1n/u567vbpYSa+ESZNg4KrxAHJjA8M1TvpGkq4LLrJkEUkC2WNxq3qbWQbseZrIDSpcn6C7gHObJOLjRSpGTSlRHZfncRs1h+MLApVhf6qf611mZNDgN5AqaMtBbB3UzArE3CgO0jiKzBgZGyT9RSKccjlsO6amBgZrLBY0+x6VXPJK71hwZ7/1Y2CHGsgSb20/g2P82qLYf91Eht33u01rcptsETsvGrsq6SqIKtHtmWkYMW1lWB7p2mwFpAft8llUpHewRRAU1qsKYAI6myc/sPmQuQul+4yESMSBu3KyQIDAQAB";
+		
+		final ReceiverSideRelayTestThread thread =  new ReceiverSideRelayTestThread(getTestApplicationContext(), getTestClient(false), getTestSession(), new CloudResponseDTO(),  new RelayResponseDTO(), publicKey, (byte) 10,
+																					2048, 30000);
+		
+		thread.init("queueId", getTestProducer(), getTestProducer(), getTestConsumer(), null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -243,17 +264,18 @@ public class ReceiverSideRelayTestThreadTest {
 																					2048, 30000);
 		
 		final MessageProducer producer = getTestProducer();
+		final MessageConsumer consumer = getTestConsumer();
 		
 		Assert.assertFalse(thread.isInitialized());
-		thread.init("queueId", producer, producer);
+		thread.init("queueId", producer, producer, consumer, consumer);
 		Assert.assertTrue(thread.isInitialized());
-	}
-	
+	}	
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testOnMessageCloseControlMessage() {
-		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+	public void testOnMessageCloseControlMessage() throws JMSException {
+		when(relayClient.destroyQueues(any(Session.class), any(MessageProducer.class), any(MessageProducer.class))).thenReturn(true);
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false).thenReturn(true);
 		doNothing().when(relayClient).closeConnection(any(Session.class));
 		
 		testingObject.onMessage(getTestTextMessage("CLOSE", "bla-CONTROL"));
@@ -268,8 +290,8 @@ public class ReceiverSideRelayTestThreadTest {
 	public void testOnMessageSwitchControlMessage() throws JMSException {
 		doNothing().when(relayClient).validateSwitchControlMessage(any(Message.class));
 		
-		boolean receiver = (Boolean) ReflectionTestUtils.getField(testingObject, "receiver");
-		Assert.assertTrue(receiver);
+		boolean receiverFlag = (Boolean) ReflectionTestUtils.getField(testingObject, "receiverFlag");
+		Assert.assertTrue(receiverFlag);
 		
 		testingObject.onMessage(getTestTextMessage("SWITCH", "bla-CONTROL"));
 
@@ -279,19 +301,23 @@ public class ReceiverSideRelayTestThreadTest {
 		final BlockingQueue<Object> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
 		Assert.assertEquals(1, blockingQueue.size());
 
-		receiver = (Boolean) ReflectionTestUtils.getField(testingObject, "receiver");
-		Assert.assertFalse(receiver);
+		receiverFlag = (Boolean) ReflectionTestUtils.getField(testingObject, "receiverFlag");
+		Assert.assertFalse(receiverFlag);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testOnMessageException() throws JMSException {
+		when(relayClient.destroyQueues(any(Session.class), any(MessageProducer.class), any(MessageProducer.class))).thenReturn(true);
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false).thenReturn(true);
 		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenThrow(JMSException.class);
 		doNothing().when(relayClient).closeConnection(any(Session.class));
 		
 		testingObject.onMessage(getTestTextMessage("does not matter", "blabla"));
 
 		verify(relayClient, times(1)).getBytesFromMessage(any(Message.class), any(PublicKey.class));
+		verify(relayClient, times(1)).destroyQueues(any(Session.class), any(MessageProducer.class), any(MessageProducer.class));
+		verify(relayClient, times(3)).isConnectionClosed(any(Session.class));
 		verify(relayClient, times(1)).closeConnection(any(Session.class));
 		
 		final boolean interrupted = (Boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
@@ -306,7 +332,7 @@ public class ReceiverSideRelayTestThreadTest {
 		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(someBytes);
 		doNothing().when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
 		
-		ReflectionTestUtils.setField(testingObject, "receiver", true);
+		ReflectionTestUtils.setField(testingObject, "receiverFlag", true);
 		testingObject.onMessage(getTestTextMessage("does not matter", "blabla"));
 
 		verify(relayClient, times(1)).getBytesFromMessage(any(Message.class), any(PublicKey.class));
@@ -320,7 +346,7 @@ public class ReceiverSideRelayTestThreadTest {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
 		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(someBytes);
 		
-		ReflectionTestUtils.setField(testingObject, "receiver", false);
+		ReflectionTestUtils.setField(testingObject, "receiverFlag", false);
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final Map<Byte,long[]> testResults = (Map) ReflectionTestUtils.getField(testingObject, "testResults");
 		testResults.put((byte)0, new long[] { System.currentTimeMillis(), 0 });
@@ -343,7 +369,7 @@ public class ReceiverSideRelayTestThreadTest {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
 		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(someBytes);
 		
-		ReflectionTestUtils.setField(testingObject, "receiver", false);
+		ReflectionTestUtils.setField(testingObject, "receiverFlag", false);
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final Map<Byte,long[]> testResults = (Map) ReflectionTestUtils.getField(testingObject, "testResults");
 		testResults.put((byte)0, new long[] { 10, 0 });
@@ -372,6 +398,8 @@ public class ReceiverSideRelayTestThreadTest {
 	public void testRunNoTimeout() throws JMSException, InterruptedException {
 		doNothing().doThrow(ArrowheadException.class).when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
 		doNothing().when(relayTestDBService).logErrorIntoMeasurementsTable(any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyInt(), anyString(), any(Throwable.class));
+		when(relayClient.destroyQueues(any(Session.class), any(MessageProducer.class), any(MessageProducer.class))).thenReturn(true);
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false).thenReturn(true);
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		final BlockingQueue<Byte> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
@@ -386,6 +414,9 @@ public class ReceiverSideRelayTestThreadTest {
 		Assert.assertTrue(times[1] - times[0] < 1001);
 		verify(relayClient, times(2)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
 		verify(relayTestDBService, times(1)).logErrorIntoMeasurementsTable(any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyInt(), eq(null), any(Throwable.class));
+		verify(relayClient, times(1)).destroyQueues(any(Session.class), any(MessageProducer.class), any(MessageProducer.class));
+		verify(relayClient, times(4)).isConnectionClosed(any(Session.class));
+		verify(relayClient, times(1)).closeConnection(any(Session.class));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -393,6 +424,8 @@ public class ReceiverSideRelayTestThreadTest {
 	public void testRunNoTimeoutButNotWaitedMessage() throws JMSException, InterruptedException {
 		doNothing().doThrow(ArrowheadException.class).when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
 		doNothing().when(relayTestDBService).logErrorIntoMeasurementsTable(any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyInt(), anyString(), any(Throwable.class));
+		when(relayClient.destroyQueues(any(Session.class), any(MessageProducer.class), any(MessageProducer.class))).thenReturn(true);
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false).thenReturn(true);
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		final BlockingQueue<Byte> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
@@ -408,6 +441,9 @@ public class ReceiverSideRelayTestThreadTest {
 		Assert.assertTrue(times[1] - times[0] < 1001);
 		verify(relayClient, times(2)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
 		verify(relayTestDBService, times(1)).logErrorIntoMeasurementsTable(any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyInt(), eq(null), any(Throwable.class));
+		verify(relayClient, times(1)).destroyQueues(any(Session.class), any(MessageProducer.class), any(MessageProducer.class));
+		verify(relayClient, times(4)).isConnectionClosed(any(Session.class));
+		verify(relayClient, times(1)).closeConnection(any(Session.class));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -415,6 +451,8 @@ public class ReceiverSideRelayTestThreadTest {
 	public void testRunTimeout() throws JMSException, InterruptedException {
 		doNothing().doThrow(ArrowheadException.class).when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
 		doNothing().when(relayTestDBService).logErrorIntoMeasurementsTable(any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyInt(), anyString(), any(Throwable.class));
+		when(relayClient.destroyQueues(any(Session.class), any(MessageProducer.class), any(MessageProducer.class))).thenReturn(true);
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false).thenReturn(true);
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		final BlockingQueue<Byte> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
@@ -428,6 +466,9 @@ public class ReceiverSideRelayTestThreadTest {
 		Assert.assertEquals(1001, times[1] - times[0]);
 		verify(relayClient, times(2)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
 		verify(relayTestDBService, times(1)).logErrorIntoMeasurementsTable(any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyInt(), eq(null), any(Throwable.class));
+		verify(relayClient, times(1)).destroyQueues(any(Session.class), any(MessageProducer.class), any(MessageProducer.class));
+		verify(relayClient, times(4)).isConnectionClosed(any(Session.class));
+		verify(relayClient, times(1)).closeConnection(any(Session.class));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -437,6 +478,8 @@ public class ReceiverSideRelayTestThreadTest {
 		doNothing().when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
 		doNothing().when(relayTestDBService).storeMeasurements(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(Map.class));
 		doNothing().when(relayClient).sendCloseControlMessage(any(Session.class),any(MessageProducer.class), anyString());
+		when(relayClient.destroyQueues(any(Session.class), any(MessageProducer.class), any(MessageProducer.class))).thenReturn(true);
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false).thenReturn(true);
 
 		@SuppressWarnings({ "rawtypes" })
 		final BlockingQueue<Byte> blockingQueue = (BlockingQueue) ReflectionTestUtils.getField(testingObject, "blockingQueue");
@@ -449,6 +492,9 @@ public class ReceiverSideRelayTestThreadTest {
 		verify(relayClient, times(2)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
 		verify(relayTestDBService, times(1)).storeMeasurements(any(CloudResponseDTO.class), any(RelayResponseDTO.class), any(Map.class));
 		verify(relayClient, times(1)).sendCloseControlMessage(any(Session.class),any(MessageProducer.class), anyString());
+		verify(relayClient, times(1)).destroyQueues(any(Session.class), any(MessageProducer.class), any(MessageProducer.class));
+		verify(relayClient, times(3)).isConnectionClosed(any(Session.class));
+		verify(relayClient, times(1)).closeConnection(any(Session.class));
 	}
 	
 	//=================================================================================================
@@ -516,6 +562,8 @@ public class ReceiverSideRelayTestThreadTest {
 			public ConsumerSideRelayInfo initializeConsumerSideRelay(final Session session, final MessageListener listener, final String peerName, final String queueId) throws JMSException { return null; }
 			public void handleCloseControlMessage(final Message msg, final Session session) throws JMSException {}
 			public byte[] getBytesFromMessage(final Message msg, final PublicKey peerPublicKey) throws JMSException { return null; }
+			public void unsubscribeFromQueues(final MessageConsumer consumer, final MessageConsumer consumerControl) throws JMSException {}
+			public boolean destroyQueues(final Session session, final MessageProducer producer, final MessageProducer producerControl) throws JMSException { return false; }
 		};
 	}
 
@@ -566,20 +614,20 @@ public class ReceiverSideRelayTestThreadTest {
 	//-------------------------------------------------------------------------------------------------
 	private MessageProducer getTestProducer() {
 		return new MessageProducer() {
-			public void setTimeToLive(long timeToLive) throws JMSException {}
-			public void setPriority(int defaultPriority) throws JMSException {}
-			public void setDisableMessageTimestamp(boolean value) throws JMSException {}
-			public void setDisableMessageID(boolean value) throws JMSException {}
-			public void setDeliveryMode(int deliveryMode) throws JMSException {}
-			public void setDeliveryDelay(long deliveryDelay) throws JMSException {}
-			public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
-			public void send(Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
-			public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
-			public void send(Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
-			public void send(Destination destination, Message message, CompletionListener completionListener) throws JMSException {}
-			public void send(Message message, CompletionListener completionListener) throws JMSException {}
-			public void send(Destination destination, Message message) throws JMSException {}
-			public void send(Message message) throws JMSException {}
+			public void setTimeToLive(final long timeToLive) throws JMSException {}
+			public void setPriority(final int defaultPriority) throws JMSException {}
+			public void setDisableMessageTimestamp(final boolean value) throws JMSException {}
+			public void setDisableMessageID(final boolean value) throws JMSException {}
+			public void setDeliveryMode(final int deliveryMode) throws JMSException {}
+			public void setDeliveryDelay(final long deliveryDelay) throws JMSException {}
+			public void send(final Destination destination, final Message message, final int deliveryMode, final int priority, final long timeToLive, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Message message, final int deliveryMode, final int priority, final long timeToLive, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Destination destination, final Message message, final int deliveryMode, final int priority, final long timeToLive) throws JMSException {}
+			public void send(final Message message, final int deliveryMode, final int priority, final long timeToLive) throws JMSException {}
+			public void send(final Destination destination, final Message message, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Message message, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Destination destination, final Message message) throws JMSException {}
+			public void send(final Message message) throws JMSException {}
 			public long getTimeToLive() throws JMSException { return 0;	}
 			public int getPriority() throws JMSException { return 0; }
 			public boolean getDisableMessageTimestamp() throws JMSException { return false; }
@@ -592,36 +640,49 @@ public class ReceiverSideRelayTestThreadTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private MessageConsumer getTestConsumer() {
+		return new MessageConsumer() {
+			public void setMessageListener(final MessageListener listener) throws JMSException {}
+			public Message receiveNoWait() throws JMSException { return null; }			
+			public Message receive(final long timeout) throws JMSException { return null; }
+			public Message receive() throws JMSException { return null; }
+			public String getMessageSelector() throws JMSException { return null; }
+			public MessageListener getMessageListener() throws JMSException { return null; }
+			public void close() throws JMSException {}
+		};
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private TextMessage getTestTextMessage(final String message, final String queueName) {
 		return new TextMessage() {
-			public void setStringProperty(String name, String value) throws JMSException {}
-			public void setShortProperty(String name, short value) throws JMSException {}
-			public void setObjectProperty(String name, Object value) throws JMSException {}
-			public void setLongProperty(String name, long value) throws JMSException {}
-			public void setJMSType(String type) throws JMSException {}
-			public void setJMSTimestamp(long timestamp) throws JMSException {}
-			public void setJMSReplyTo(Destination replyTo) throws JMSException {}
-			public void setJMSRedelivered(boolean redelivered) throws JMSException {}
-			public void setJMSPriority(int priority) throws JMSException {}
-			public void setJMSMessageID(String id) throws JMSException {}
-			public void setJMSExpiration(long expiration) throws JMSException {}
-			public void setJMSDestination(Destination destination) throws JMSException {}
-			public void setJMSDeliveryTime(long deliveryTime) throws JMSException {}
-			public void setJMSDeliveryMode(int deliveryMode) throws JMSException {}
-			public void setJMSCorrelationIDAsBytes(byte[] correlationID) throws JMSException {}
-			public void setJMSCorrelationID(String correlationID) throws JMSException {}
-			public void setIntProperty(String name, int value) throws JMSException {}
-			public void setFloatProperty(String name, float value) throws JMSException {}
-			public void setDoubleProperty(String name, double value) throws JMSException {}
-			public void setByteProperty(String name, byte value) throws JMSException {}
-			public void setBooleanProperty(String name, boolean value) throws JMSException {}
-			public boolean propertyExists(String name) throws JMSException { return false; }
-			@SuppressWarnings("rawtypes") public boolean isBodyAssignableTo(Class c) throws JMSException { return false; }
-			public String getStringProperty(String name) throws JMSException { return null; }
-			public short getShortProperty(String name) throws JMSException { return 0; }
+			public void setStringProperty(final String name, final String value) throws JMSException {}
+			public void setShortProperty(final String name, final short value) throws JMSException {}
+			public void setObjectProperty(final String name, final Object value) throws JMSException {}
+			public void setLongProperty(final String name, final long value) throws JMSException {}
+			public void setJMSType(final String type) throws JMSException {}
+			public void setJMSTimestamp(final long timestamp) throws JMSException {}
+			public void setJMSReplyTo(final Destination replyTo) throws JMSException {}
+			public void setJMSRedelivered(final boolean redelivered) throws JMSException {}
+			public void setJMSPriority(final int priority) throws JMSException {}
+			public void setJMSMessageID(final String id) throws JMSException {}
+			public void setJMSExpiration(final long expiration) throws JMSException {}
+			public void setJMSDestination(final Destination destination) throws JMSException {}
+			public void setJMSDeliveryTime(final long deliveryTime) throws JMSException {}
+			public void setJMSDeliveryMode(final int deliveryMode) throws JMSException {}
+			public void setJMSCorrelationIDAsBytes(final byte[] correlationID) throws JMSException {}
+			public void setJMSCorrelationID(final String correlationID) throws JMSException {}
+			public void setIntProperty(final String name, final int value) throws JMSException {}
+			public void setFloatProperty(final String name, final float value) throws JMSException {}
+			public void setDoubleProperty(final String name, final double value) throws JMSException {}
+			public void setByteProperty(final String name, final byte value) throws JMSException {}
+			public void setBooleanProperty(final String name, final boolean value) throws JMSException {}
+			public boolean propertyExists(final String name) throws JMSException { return false; }
+			@SuppressWarnings("rawtypes") public boolean isBodyAssignableTo(final Class c) throws JMSException { return false; }
+			public String getStringProperty(final String name) throws JMSException { return null; }
+			public short getShortProperty(final String name) throws JMSException { return 0; }
 			@SuppressWarnings("rawtypes") public Enumeration getPropertyNames() throws JMSException { return null; }
-			public Object getObjectProperty(String name) throws JMSException { return null; }
-			public long getLongProperty(String name) throws JMSException { return 0; }
+			public Object getObjectProperty(final String name) throws JMSException { return null; }
+			public long getLongProperty(final String name) throws JMSException { return 0; }
 			public String getJMSType() throws JMSException { return null; }
 			public long getJMSTimestamp() throws JMSException {	return 0; }
 			public Destination getJMSReplyTo() throws JMSException { return null; }
@@ -634,16 +695,16 @@ public class ReceiverSideRelayTestThreadTest {
 			public int getJMSDeliveryMode() throws JMSException { return 0; }
 			public byte[] getJMSCorrelationIDAsBytes() throws JMSException { return null; }
 			public String getJMSCorrelationID() throws JMSException { return null; }
-			public int getIntProperty(String name) throws JMSException { return 0; }
-			public float getFloatProperty(String name) throws JMSException { return 0; }
-			public double getDoubleProperty(String name) throws JMSException { return 0; }
-			public byte getByteProperty(String name) throws JMSException { return 0; }
-			public boolean getBooleanProperty(String name) throws JMSException { return false; }
-			public <T> T getBody(Class<T> c) throws JMSException { return null; }
+			public int getIntProperty(final String name) throws JMSException { return 0; }
+			public float getFloatProperty(final String name) throws JMSException { return 0; }
+			public double getDoubleProperty(final String name) throws JMSException { return 0; }
+			public byte getByteProperty(final String name) throws JMSException { return 0; }
+			public boolean getBooleanProperty(final String name) throws JMSException { return false; }
+			public <T> T getBody(final Class<T> c) throws JMSException { return null; }
 			public void clearProperties() throws JMSException {}
 			public void clearBody() throws JMSException {}
 			public void acknowledge() throws JMSException {}
-			public void setText(String string) throws JMSException {}
+			public void setText(final String string) throws JMSException {}
 			public String getText() throws JMSException { return message; }
 		};
 	}

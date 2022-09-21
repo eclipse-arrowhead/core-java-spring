@@ -18,8 +18,10 @@ import java.security.InvalidParameterException;
 import java.security.PublicKey;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +33,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.logging.LogLevel;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -45,15 +48,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
+import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.Logs;
+import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.internal.GatewayConsumerConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.GatewayProviderConnectionResponseDTO;
+import eu.arrowhead.common.dto.internal.LogEntryListResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.shared.ActiveSessionCloseErrorDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -88,6 +97,9 @@ public class GatewayController {
 	
 	private static final String POST_CLOSE_SESSION_HTTP_200_MESSAGE = "Session closed";
 	private static final String POST_CLOSE_SESSION_400_MESSAGE = "Could not close session";
+
+	private static final String POST_CLOSE_SESSIONS_HTTP_200_MESSAGE = "Sessions closed";
+	private static final String POST_CLOSE_SESSIONS_400_MESSAGE = "Could not close sessions";
 	
 	private static final String GET_PUBLIC_KEY_200_MESSAGE = "Public key returned";
 	
@@ -105,6 +117,16 @@ public class GatewayController {
 	@Autowired
 	private GatewayService gatewayService;
 	
+	@Value(CoreCommonConstants.$GATEWAY_MIN_PORT_WD)
+	private int minPort;
+	
+	@Value(CoreCommonConstants.$GATEWAY_MAX_PORT_WD)
+	private int maxPort;
+
+	@Autowired
+	private CommonDBService commonDBService;
+
+	
 	//=================================================================================================
 	// methods
 
@@ -118,6 +140,48 @@ public class GatewayController {
 	@GetMapping(path = CommonConstants.ECHO_URI)
 	public String echoService() {
 		return "Got it!";
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return requested log entries by the given parameters", response = LogEntryListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.QUERY_LOG_ENTRIES_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.QUERY_LOG_ENTRIES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = CoreCommonConstants.OP_QUERY_LOG_ENTRIES, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public LogEntryListResponseDTO getLogEntries(
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = Logs.FIELD_NAME_ID) final String sortField,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_LOG_LEVEL, required = false) final String logLevel,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_FROM, required = false) final String from,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_TO, required = false) final String to,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_LOGGER, required = false) final String loggerStr) { 
+		logger.debug("New getLogEntries GET request received with page: {} and item_per page: {}", page, size);
+				
+		final String origin = CommonConstants.GATEWAY_URI + CoreCommonConstants.OP_QUERY_LOG_ENTRIES;
+		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, origin);
+		final List<LogLevel> logLevels = CoreUtilities.getLogLevels(logLevel, origin);
+		
+		try {
+			final ZonedDateTime _from = Utilities.parseUTCStringToLocalZonedDateTime(from);
+			final ZonedDateTime _to = Utilities.parseUTCStringToLocalZonedDateTime(to);
+			
+			if (_from != null && _to != null && _to.isBefore(_from)) {
+				throw new BadPayloadException("Invalid time interval", HttpStatus.SC_BAD_REQUEST, origin);
+			}
+
+			final LogEntryListResponseDTO response = commonDBService.getLogEntriesResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), validParameters.getValidatedDirection(), sortField, CoreSystem.GATEWAY, 
+																						   logLevels, _from, _to, loggerStr);
+			
+			logger.debug("Log entries  with page: {} and item_per page: {} retrieved successfully", page, size);
+			return response;
+		} catch (final DateTimeParseException ex) {
+			throw new BadPayloadException("Invalid time parameter", HttpStatus.SC_BAD_REQUEST, origin, ex);
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -184,14 +248,47 @@ public class GatewayController {
 	})
 	@PostMapping(path = CLOSE_SESSION_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public void closeActiveSession(@RequestBody final ActiveSessionDTO request) {
-		logger.debug("closeSession started...");
+		logger.debug("closeActiveSession started...");
 		
 		validateActiveSessionDTO(request, CommonConstants.GATEWAY_URI + CLOSE_SESSION_MGMT_URI);		
 		gatewayService.closeSession(request);
 		
-		logger.debug("closeSession finished...");
+		logger.debug("closeActiveSession finished...");
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Closing the requested active gateway sessions", tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_CLOSE_SESSIONS_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CLOSE_SESSIONS_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CommonConstants.OP_GATEWAY_CLOSE_SESSIONS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<ActiveSessionCloseErrorDTO> closeActiveSessions(@RequestBody final List<Integer> ports) { 
+		logger.debug("closeActiveSessions started...");
+		
+		if (Utilities.isEmpty(ports)) {
+			throw new BadPayloadException("Ports list is null or empty.", HttpStatus.SC_BAD_REQUEST, CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_CLOSE_SESSIONS);
+		}
+		
+		final List<ActiveSessionCloseErrorDTO> response = new ArrayList<>(); 
+		for (final int port : new HashSet<>(ports)) {
+			String error = validateActiveSessionPort(port);
+			
+			if (error == null) {
+				error = gatewayService.closeSession(port);
+			}
+
+			if (error != null) {
+				response.add(new ActiveSessionCloseErrorDTO(port, error));
+			}
+		}
+		
+		logger.debug("closeActiveSessions finished...");
+		return response;
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Creates a Socket and Message queue between the given Relay and Provider and return the necessary connection informations",
 				  response = GatewayProviderConnectionResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
@@ -446,5 +543,16 @@ public class GatewayController {
 		final String[] time = dateTimeSplit[1].split(":");
 		return ZonedDateTime.of(Integer.valueOf(date[0]), Integer.valueOf(date[1]), Integer.valueOf(date[2]), Integer.valueOf(time[0]), Integer.valueOf(time[1]), Integer.valueOf(time[2]), 0,
 								ZoneOffset.UTC);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private String validateActiveSessionPort(final int port) {
+		logger.debug("validateActiveSessionPort started...");
+		
+		if (port < minPort || port > maxPort) {
+			return "Invalid active session port.";
+		}
+		
+		return null;
 	}
 }

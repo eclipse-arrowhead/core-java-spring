@@ -16,6 +16,7 @@ package eu.arrowhead.relay.gatekeeper;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.Set;
 
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.relay.gatekeeper.activemq.ActiveMQGatekeeperRelayClient;
@@ -27,15 +28,19 @@ public class GatekeeperRelayClientFactory {
 	
 	//-------------------------------------------------------------------------------------------------
 	public static GatekeeperRelayClient createGatekeeperRelayClient(final String serverCommonName, final PublicKey publicKey, final PrivateKey privateKey, final SSLProperties sslProps,
-																    final long timeout) {
-		return createGatekeeperRelayClient(serverCommonName, publicKey, privateKey, sslProps, timeout, true);
+																    final long timeout, final Set<GatekeeperRelayClient> superviseAware) {
+		return createGatekeeperRelayClient(serverCommonName, publicKey, privateKey, sslProps, timeout, true, superviseAware);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public static GatekeeperRelayClient createGatekeeperRelayClient(final String serverCommonName, final PublicKey publicKey, final PrivateKey privateKey, final SSLProperties sslProps, 
-																	final long timeout, final boolean useCache) {
-		return useCache ? new GatekeeperRelayClientUsingCachedSessions(serverCommonName, publicKey, privateKey, sslProps, timeout) : 
-						  new ActiveMQGatekeeperRelayClient(serverCommonName, publicKey, privateKey, sslProps, timeout);
+																	final long timeout, final boolean useCache, final Set<GatekeeperRelayClient> superviseAware) {
+		final GatekeeperRelayClient relayClient = useCache ? new GatekeeperRelayClientUsingCachedSessions(serverCommonName, publicKey, privateKey, sslProps, timeout) : 
+						  						 			 new ActiveMQGatekeeperRelayClient(serverCommonName, publicKey, privateKey, sslProps, timeout);
+		if (superviseAware != null) {
+			superviseAware.add(relayClient);
+		}
+		return relayClient;
 	}
 
 	//=================================================================================================

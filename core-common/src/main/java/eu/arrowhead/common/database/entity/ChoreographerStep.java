@@ -17,6 +17,7 @@ package eu.arrowhead.common.database.entity;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -48,17 +49,29 @@ public class ChoreographerStep {
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false, unique = true, length = CoreDefaults.VARCHAR_BASIC)
+    @Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
     private String name;
+    
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "actionId", referencedColumnName = "id", nullable = false)
+    private ChoreographerAction action;
+    
+    private boolean firstStep = false;
+    
+    @Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
+    private String serviceDefinition;
 
-    @Column(nullable = false, unique = true, length = CoreDefaults.VARCHAR_BASIC)
-    private String serviceName;
+    @Column
+    private Integer minVersion;
+
+    @Column
+    private Integer maxVersion;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String metadata;
+    private String srTemplate;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String parameters;
+    private String staticParameters;
 
     @Column(nullable = false)
     private int quantity;
@@ -69,26 +82,13 @@ public class ChoreographerStep {
     @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private ZonedDateTime updatedAt;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "actionFirstStepId", referencedColumnName = "id")
-    private ChoreographerAction actionFirstStep;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "actionId", referencedColumnName = "id", nullable = false)
-    private ChoreographerAction action;
-
-    // SHOULD BE LAZY
-    @OneToMany (mappedBy = "stepEntry", fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany (mappedBy = "from", fetch = FetchType.EAGER, orphanRemoval = true)
     @OnDelete (action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerStepNextStepConnection> nextSteps = new HashSet<>();
+    private Set<ChoreographerStepNextStepConnection> nextStepConnections = new HashSet<>();
 
-    @OneToMany (mappedBy = "nextStepEntry", fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany (mappedBy = "to", fetch = FetchType.EAGER, orphanRemoval = true)
     @OnDelete (action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerStepNextStepConnection> steps = new HashSet<>();
-
-    @OneToMany(mappedBy = "step", fetch = FetchType.EAGER, orphanRemoval = true)
-    @OnDelete (action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerRunningStep> runningSteps = new HashSet<>();
+    private Set<ChoreographerStepNextStepConnection> previousStepConnections = new HashSet<>();
 
     //=================================================================================================
 	// methods
@@ -97,48 +97,60 @@ public class ChoreographerStep {
 	public ChoreographerStep() {}
 
     //-------------------------------------------------------------------------------------------------
-
-    public ChoreographerStep(String name, String serviceName, String metadata, String parameters, ChoreographerAction action, int quantity) {
+    public ChoreographerStep(final String name, final ChoreographerAction action, final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final String srTemplate, final String staticParameters, final int quantity) {
         this.name = name;
-        this.serviceName = serviceName;
-        this.metadata = metadata;
-        this.parameters = parameters;
         this.action = action;
+        this.serviceDefinition = serviceDefinition;
+        this.minVersion = minVersion;
+        this.maxVersion = maxVersion;
+        this.srTemplate = srTemplate;
+        this.staticParameters = staticParameters;
         this.quantity = quantity;
     }
 
     //-------------------------------------------------------------------------------------------------
-
     public long getId() { return id; }
     public String getName() { return name; }
+    public ChoreographerAction getAction() { return action; }
+    public boolean isFirstStep() { return firstStep; }
+    public String getServiceDefinition() { return serviceDefinition; }
+    public Integer getMinVersion() { return minVersion; }
+    public Integer getMaxVersion() { return maxVersion; }
+    public String getSrTemplate() { return srTemplate; }
+    public String getStaticParameters() { return staticParameters; }
+    public int getQuantity() { return quantity; }
     public ZonedDateTime getCreatedAt() { return createdAt; }
     public ZonedDateTime getUpdatedAt() { return updatedAt; }
-    public ChoreographerAction getActionFirstStep() { return actionFirstStep; }
-    public ChoreographerAction getAction() { return action; }
-    public String getServiceName() { return serviceName; }
-    public String getMetadata() { return metadata; }
-    public String getParameters() { return parameters; }
-    public Set<ChoreographerStepNextStepConnection> getNextSteps() { return nextSteps; }
-    public Set<ChoreographerStepNextStepConnection> getSteps() { return steps; }
-    public Set<ChoreographerRunningStep> getRunningSteps() { return runningSteps; }
-    public int getQuantity() { return quantity; }
+    public Set<ChoreographerStepNextStepConnection> getNextStepConnections() { return nextStepConnections; }
+    public Set<ChoreographerStepNextStepConnection> getPreviousStepConnections() { return previousStepConnections; }
+    
     //-------------------------------------------------------------------------------------------------
-
-    public void setId(long id) { this.id = id; }
-    public void setName(String name) { this.name = name; }
-    public void setCreatedAt(ZonedDateTime createdAt) { this.createdAt = createdAt; }
-    public void setUpdatedAt(ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
-    public void setActionFirstStep(ChoreographerAction actionFirstStep) { this.actionFirstStep = actionFirstStep; }
-    public void setAction(ChoreographerAction action) { this.action = action; }
-    public void setServiceName(String serviceName) { this.serviceName = serviceName; }
-    public void setMetadata(String metadata) { this.metadata = metadata; }
-    public void setParameters(String parameters) { this.parameters = parameters; }
-    public void setNextSteps(Set<ChoreographerStepNextStepConnection> nextSteps) { this.nextSteps = nextSteps; }
-    public void setSteps(Set<ChoreographerStepNextStepConnection> actionSteps) { this.steps = actionSteps; }
-    public void setRunningSteps(Set<ChoreographerRunningStep> runningSteps) { this.runningSteps = runningSteps; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
+	public Set<ChoreographerStep> getNextSteps() {
+		return nextStepConnections.stream().map(c -> c.getTo()).collect(Collectors.toSet());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Set<ChoreographerStep> getPreviousSteps() {
+		return previousStepConnections.stream().map(c -> c.getFrom()).collect(Collectors.toSet());
+	}
 
     //-------------------------------------------------------------------------------------------------
+    public void setId(final long id) { this.id = id; }
+    public void setName(final String name) { this.name = name; }
+    public void setAction(final ChoreographerAction action) { this.action = action; }
+    public void setFirstStep(final boolean firstStep) { this.firstStep = firstStep; }
+    public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
+    public void setMinVersion(final Integer minVersion) { this.minVersion = minVersion; }
+    public void setMaxVersion(final Integer maxVersion) { this.maxVersion = maxVersion; }
+    public void setSrTemplate(final String srTemplate) { this.srTemplate = srTemplate; }
+    public void setStaticParameters(final String parameters) { this.staticParameters = parameters; }
+    public void setQuantity(final int quantity) { this.quantity = quantity; }
+    public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+    public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public void setNextStepConnections(final Set<ChoreographerStepNextStepConnection> nextStepConnections) { this.nextStepConnections = nextStepConnections; }
+    public void setPreviousStepConnections(final Set<ChoreographerStepNextStepConnection> previousStepConnections) { this.previousStepConnections = previousStepConnections; }
+
+	//-------------------------------------------------------------------------------------------------
 	@PrePersist
     public void onCreate() {
         this.createdAt = ZonedDateTime.now();

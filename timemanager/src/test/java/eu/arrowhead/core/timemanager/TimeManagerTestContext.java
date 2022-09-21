@@ -1,16 +1,15 @@
 package eu.arrowhead.core.timemanager;
 
-import eu.arrowhead.common.CommonConstants;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Primary;
+
+import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.database.service.CommonDBService;
 
 @Configuration
 @ComponentScan(basePackages = CommonConstants.BASE_PACKAGE,
@@ -24,9 +23,10 @@ public class TimeManagerTestContext {
     //=================================================================================================
     // methods
 
-    public TimeManagerTestContext() {
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
+	//-------------------------------------------------------------------------------------------------
+	@Bean
+	@Primary // This bean is primary only in test context
+	public CommonDBService mockCommonDBService() {
+		return Mockito.mock(CommonDBService.class);
+	}
 }

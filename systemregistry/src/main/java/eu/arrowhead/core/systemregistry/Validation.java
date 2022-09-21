@@ -86,8 +86,8 @@ public class Validation {
             	throw new BadPayloadException(SYSTEM_NAME_WRONG_FORMAT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
             }
             
-            for (final CoreSystem coreSysteam : CoreSystem.values()) {
-                if (coreSysteam.name().equalsIgnoreCase(request.getSystemName().trim())) {
+            for (final CoreSystem coreSystem : CoreSystem.values()) {
+                if (coreSystem.name().equalsIgnoreCase(request.getSystemName().trim())) {
                     throw new BadPayloadException("System name '" + request.getSystemName() + "' is a reserved arrowhead core system name.",
                                                   HttpStatus.SC_BAD_REQUEST, origin);
                 }
@@ -175,8 +175,8 @@ public class Validation {
         }
 
         if (checkReservedCoreSystemNames) {
-            for (final CoreSystem coreSysteam : CoreSystem.values()) {
-                if (coreSysteam.name().equalsIgnoreCase(request.getSystemName().trim())) {
+            for (final CoreSystem coreSystem : CoreSystem.values()) {
+                if (coreSystem.name().equalsIgnoreCase(request.getSystemName().trim())) {
                     throw new BadPayloadException("System name '" + request.getSystemName() + "' is a reserved arrowhead core system name.",
                                                   HttpStatus.SC_BAD_REQUEST, origin);
                 }

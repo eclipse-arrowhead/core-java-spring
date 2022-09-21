@@ -12,6 +12,7 @@ import eu.arrowhead.common.database.repository.DoubleSensorDataRepository;
 import eu.arrowhead.common.database.repository.EventRepository;
 import eu.arrowhead.common.database.repository.GamsInstanceRepository;
 import eu.arrowhead.common.database.repository.KnowledgeRepository;
+import eu.arrowhead.common.database.repository.LogsRepository;
 import eu.arrowhead.common.database.repository.LongSensorDataRepository;
 import eu.arrowhead.common.database.repository.PolicyRepository;
 import eu.arrowhead.common.database.repository.SensorDataRepository;
@@ -60,6 +61,13 @@ public class GamsTestContext {
     @Primary // This bean is primary only in test context
     public CloudRepository mockCloudRepository() {
         return Mockito.mock(CloudRepository.class);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    @Bean
+    @Primary // This bean is primary only in test context
+    public LogsRepository mockLogsRepository() {
+        return Mockito.mock(LogsRepository.class);
     }
 
     //-------------------------------------------------------------------------------------------------

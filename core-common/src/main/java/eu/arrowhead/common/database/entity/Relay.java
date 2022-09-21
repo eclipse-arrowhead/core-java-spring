@@ -65,6 +65,9 @@ public class Relay {
 	@Column(nullable = false)
 	private int port;
 	
+	@Column(nullable = true)
+	private String authenticationInfo;
+	
 	@Column(nullable = false)
 	private boolean secure = false;
 	
@@ -105,6 +108,16 @@ public class Relay {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public Relay(final String address, final int port, final String authenticationInfo, final boolean secure, final boolean exclusive, final RelayType type) {
+		this.address = address;
+		this.port = port;
+		this.authenticationInfo = authenticationInfo;
+		this.secure = secure;
+		this.exclusive = exclusive;
+		this.type = type;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@PrePersist
 	public void onCreate() {
 		this.createdAt = ZonedDateTime.now();
@@ -121,6 +134,7 @@ public class Relay {
 	public long getId() { return id; }
 	public String getAddress() { return address; }
 	public int getPort() { return port; }
+	public String getAuthenticationInfo() { return authenticationInfo; }
 	public boolean getSecure() { return secure; }
 	public boolean getExclusive() { return exclusive; }
 	public RelayType getType() { return type; }
@@ -133,6 +147,7 @@ public class Relay {
 	public void setId(final long id) { this.id = id; }
 	public void setAddress(final String address) { this.address = address; }
 	public void setPort(final int port) { this.port = port; }
+	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
 	public void setSecure(final boolean secure) { this.secure = secure; }
 	public void setExclusive (final boolean exclusive) { this.exclusive = exclusive; }
 	public void setType(final RelayType type) { this.type = type; }

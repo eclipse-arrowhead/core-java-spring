@@ -11,6 +11,7 @@
  *   {Lulea University of Technology} - implementation
  *   Arrowhead Consortia - conceptualization 
  ********************************************************************************/
+
 package eu.arrowhead.core.datamanager;
 
 import java.util.Base64;

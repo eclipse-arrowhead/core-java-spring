@@ -40,6 +40,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import eu.arrowhead.common.CoreDefaults;
+import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 
 @Entity
@@ -77,7 +78,7 @@ public class ServiceRegistry {
 	private String metadata;
 	
 	@Column(nullable = true)
-	private Integer version = 1;
+	private Integer version = Defaults.DEFAULT_VERSION;
 	
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;

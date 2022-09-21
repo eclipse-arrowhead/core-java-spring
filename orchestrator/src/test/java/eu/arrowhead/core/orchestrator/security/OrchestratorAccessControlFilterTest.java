@@ -71,6 +71,7 @@ public class OrchestratorAccessControlFilterTest {
 	private static final String ORCH_FLEX_STORE_CREATE = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_CREATE_FLEXIBLE_STORE_RULES_URI;
 	private static final String ORCH_FLEX_STORE_REMOVE = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_REMOVE_FLEXIBLE_STORE_RULE_URI.replace("{id}", "5");
 	private static final String ORCH_FLEX_STORE_CLEAN = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_CLEAN_FLEXIBLE_STORE_URI;
+	private static final String ORCH_ORCHESTRATION_BY_PROXY = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS_BY_PROXY_URI;
 	
 	@Autowired
 	private ApplicationContext appContext;
@@ -135,7 +136,7 @@ public class OrchestratorAccessControlFilterTest {
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(requestDTO))
 					.accept(MediaType.APPLICATION_JSON))
-					.andExpect(status().isBadRequest()); //Bad request result means that the request gone through the filter
+					.andExpect(status().isBadRequest()); // Bad request result means that the request gone through the filter
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -165,7 +166,7 @@ public class OrchestratorAccessControlFilterTest {
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(requestDTO))
 					.accept(MediaType.APPLICATION_JSON))
-					.andExpect(status().isBadRequest()); //Bad request result means that the request gone through the filter
+					.andExpect(status().isBadRequest()); // Bad request result means that the request gone through the filter
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -231,7 +232,7 @@ public class OrchestratorAccessControlFilterTest {
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(new QoSTemporaryLockRequestDTO()))
 					.accept(MediaType.APPLICATION_JSON))
-					.andExpect(status().isBadRequest()); //Bad request result means that the request gone through the filter
+					.andExpect(status().isBadRequest()); // Bad request result means that the request gone through the filter
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -255,7 +256,7 @@ public class OrchestratorAccessControlFilterTest {
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(new QoSReservationRequestDTO(null, null, null)))
 					.accept(MediaType.APPLICATION_JSON))
-					.andExpect(status().isBadRequest()); //Bad request result means that the request gone through the filter
+					.andExpect(status().isBadRequest()); // Bad request result means that the request gone through the filter
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -279,7 +280,7 @@ public class OrchestratorAccessControlFilterTest {
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(List.of(new OrchestratorStoreFlexibleRequestDTO())))
 					.accept(MediaType.APPLICATION_JSON))
-					.andExpect(status().isBadRequest()); //Bad request result means that the request gone through the filter
+					.andExpect(status().isBadRequest()); // Bad request result means that the request gone through the filter
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -300,7 +301,7 @@ public class OrchestratorAccessControlFilterTest {
 		this.mockMvc.perform(delete(ORCH_FLEX_STORE_REMOVE)
 				    .secure(true)
 					.with(x509("certificates/plantdescriptionengine.pem")))
-					.andExpect(status().isBadRequest()); //Bad request result means that the request gone through the filter
+					.andExpect(status().isBadRequest()); // Bad request result means that the request gone through the filter
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -318,7 +319,7 @@ public class OrchestratorAccessControlFilterTest {
 		this.mockMvc.perform(delete(ORCH_FLEX_STORE_CLEAN)
 				    .secure(true)
 					.with(x509("certificates/plantdescriptionengine.pem")))
-					.andExpect(status().isBadRequest()); //Bad request result means that the request gone through the filter
+					.andExpect(status().isBadRequest()); // Bad request result means that the request gone through the filter
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -328,6 +329,30 @@ public class OrchestratorAccessControlFilterTest {
 				    .secure(true)
 					.with(x509("certificates/provider.pem")))
 					.andExpect(status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationByProxyWithChoreographer() throws Exception {
+		this.mockMvc.perform(post(ORCH_ORCHESTRATION_BY_PROXY)
+				    .secure(true)
+				    .with(x509("certificates/choreographer.pem"))
+				    .contentType(MediaType.APPLICATION_JSON)
+				    .content(objectMapper.writeValueAsBytes(new OrchestrationFormRequestDTO()))
+				    .accept(MediaType.APPLICATION_JSON))
+				    .andExpect(status().isBadRequest()); // Bad request result means the the request gone through the filter
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationByProxyWithNotChoreographer() throws Exception {
+		this.mockMvc.perform(post(ORCH_ORCHESTRATION_BY_PROXY)
+				    .secure(true)
+				    .with(x509("certificates/provider.pem"))
+				    .contentType(MediaType.APPLICATION_JSON)
+				    .content(objectMapper.writeValueAsBytes(new OrchestrationFormRequestDTO()))
+				    .accept(MediaType.APPLICATION_JSON))
+				    .andExpect(status().isUnauthorized()); 
 	}
 	
 	//=================================================================================================

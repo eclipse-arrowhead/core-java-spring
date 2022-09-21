@@ -14,10 +14,12 @@
 
 package eu.arrowhead.common.database.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
 
+import eu.arrowhead.common.database.entity.ChoreographerAction;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
 
 @Repository
@@ -27,6 +29,8 @@ public interface ChoreographerStepRepository extends RefreshableRepository<Chore
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-    public Optional<ChoreographerStep> findByName(final String name);
-    public Optional<ChoreographerStep> findByNameAndActionId(final String name, final long actionId);
+    public Optional<ChoreographerStep> findByNameAndAction(final String name, final ChoreographerAction action);
+    public List<ChoreographerStep> findByAction(final ChoreographerAction action);
+    public List<ChoreographerStep> findByActionIn(final List<ChoreographerAction> actions);
+    public List<ChoreographerStep> findByActionAndFirstStep(final ChoreographerAction action, final boolean firstStep);
 }

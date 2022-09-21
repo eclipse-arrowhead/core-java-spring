@@ -39,6 +39,7 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.common.dto.shared.AddressType;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
@@ -65,7 +66,7 @@ public class ServiceEndOfValidityCheckTaskTest {
 		
 		final ZonedDateTime now = ZonedDateTime.now();		
 		final ServiceDefinition serviceDefinition = new ServiceDefinition("testService");
-		final System testSystem = new System("testSystem", "testAddress", 1, "testAuthenticationInfo", null);
+		final System testSystem = new System("testSystem", "testAddress", AddressType.HOSTNAME, 1, "testAuthenticationInfo", null);
 		
 		final ServiceRegistry pastTTL = new ServiceRegistry(serviceDefinition, testSystem, "testUri", now.minusMinutes(10), ServiceSecurityType.TOKEN, "", 1);
 		pastTTL.setId(1);

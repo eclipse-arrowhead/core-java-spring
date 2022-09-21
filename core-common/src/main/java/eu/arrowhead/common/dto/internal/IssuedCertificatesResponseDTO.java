@@ -18,36 +18,48 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class IssuedCertificatesResponseDTO implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
-    private long count;
+	//=================================================================================================
+	// members
+	
+	private static final long serialVersionUID = 4396879474104394462L;
+	
+	private long count;
     private List<IssuedCertificateDTO> issuedCertificates;
 
-    public IssuedCertificatesResponseDTO() {
+    //=================================================================================================
+	// methods
+    
+    //-------------------------------------------------------------------------------------------------
+	public IssuedCertificatesResponseDTO() {
         setIssuedCertificates(new ArrayList<>());
     }
 
-    public IssuedCertificatesResponseDTO(List<IssuedCertificateDTO> certificates, long count) {
+    //-------------------------------------------------------------------------------------------------
+	public IssuedCertificatesResponseDTO(final List<IssuedCertificateDTO> certificates, final long count) {
         setIssuedCertificates(certificates);
         this.count = count;
     }
 
-    public List<IssuedCertificateDTO> getIssuedCertificates() {
-        return issuedCertificates;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public List<IssuedCertificateDTO> getIssuedCertificates() { return issuedCertificates; }
+	public long getCount() { return count; }
 
-    public void setIssuedCertificates(List<IssuedCertificateDTO> issuedCertificates) {
-        this.issuedCertificates = issuedCertificates;
-    }
-
-    public long getCount() {
-        return count;
-    }
-
-    public void setCount(long count) {
-        this.count = count;
-    }
-
+    //-------------------------------------------------------------------------------------------------
+	public void setIssuedCertificates(final List<IssuedCertificateDTO> issuedCertificates) { this.issuedCertificates = issuedCertificates; }
+    public void setCount(final long count) { this.count = count; }
+    
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

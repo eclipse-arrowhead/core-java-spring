@@ -17,6 +17,9 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class OrchestratorStoreModifyPriorityRequestDTO implements Serializable {
 
 	//=================================================================================================
@@ -42,4 +45,14 @@ public class OrchestratorStoreModifyPriorityRequestDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setPriorityMap(final Map<Long,Integer> priorityMap) { this.priorityMap = priorityMap; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }
