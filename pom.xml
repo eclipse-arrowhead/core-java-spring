@@ -50,7 +50,7 @@
   	</modules>
   	
 	<properties>
-		<base.version>4.4.1</base.version>
+		<base.version>4.6.0</base.version>
 		<revision>${base.version}</revision>
 		<java.version>11</java.version>
 		<mvn.clean.version>3.1.0</mvn.clean.version>
