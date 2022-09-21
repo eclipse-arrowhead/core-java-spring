@@ -339,7 +339,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
+		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, null, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
@@ -376,7 +376,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
+		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, null, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
@@ -414,7 +414,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
+		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, null, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		response.setMaxResponseTime(relayTestValue);
@@ -454,7 +454,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
+		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, null, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		response.setMaxResponseTime(relayTestValue);
@@ -486,7 +486,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
+		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, null, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
@@ -516,7 +516,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
+		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, null, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
@@ -554,7 +554,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
+		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, null, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		response.setMeanResponseTimeWithoutTimeout(relayTestValue);
@@ -594,7 +594,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
+		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, null, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		response.setMeanResponseTimeWithoutTimeout(relayTestValue);
@@ -626,7 +626,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
+		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, null, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
@@ -656,7 +656,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
+		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, null, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
@@ -694,7 +694,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
+		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, null, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		response.setJitterWithoutTimeout(relayTestValue);
@@ -734,7 +734,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
+		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, null, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		response.setJitterWithoutTimeout(relayTestValue);
@@ -766,7 +766,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
+		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, null, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
@@ -796,7 +796,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
+		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, null, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
@@ -839,7 +839,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
+		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, null, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		response.setReceived(relayReceivedTestValue);
@@ -885,7 +885,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
+		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, null, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		response.setReceived(relayReceivedTestValue);
@@ -918,7 +918,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
+		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, null, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
@@ -948,7 +948,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
+		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, null, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		final QoSInterRelayEchoMeasurementListResponseDTO responseList = new QoSInterRelayEchoMeasurementListResponseDTO(List.of(response), 1);
@@ -991,7 +991,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
+		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, null, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		response.setReceivedAll(relayReceivedTestValue);
@@ -1037,7 +1037,7 @@ public class PingRequirementsVerifierInterCloudRelayTest {
 		
 		final QoSInterRelayEchoMeasurementResponseDTO response = new QoSInterRelayEchoMeasurementResponseDTO();
 		final QoSInterRelayMeasurementResponseDTO measurement = new QoSInterRelayMeasurementResponseDTO();
-		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, true, false, RelayType.GENERAL_RELAY, null, null));
+		measurement.setRelay(new RelayResponseDTO(5L, "10.10.10.10", 10000, null, true, false, RelayType.GENERAL_RELAY, null, null));
 		response.setMeasurement(measurement);
 		response.setId(1L);
 		response.setReceivedAll(relayReceivedTestValue);

@@ -403,12 +403,6 @@ public class ActiveMQGatewayRelayClientTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testHandleCloseControlMessageSessionNull() throws JMSException {
-		testObject.handleCloseControlMessage(new ActiveMQTextMessage(), null);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
 	@Test(expected = JMSException.class)
 	public void testHandleCloseControlMessageInvalidMessageClass() throws JMSException {
 		testObject.handleCloseControlMessage(new ActiveMQObjectMessage(), getTestSession());

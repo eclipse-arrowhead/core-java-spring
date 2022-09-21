@@ -206,7 +206,7 @@ public class CoapOrchestrator {
                 } else {
                     exchange.respond(
                             ResponseCode.CONTENT,
-                            mapper.writeValueAsString(orchestratorService.dynamicOrchestration(request)),
+                            mapper.writeValueAsString(orchestratorService.dynamicOrchestration(request, false)),
                             MediaTypeRegistry.APPLICATION_JSON);
                     return;
                 }

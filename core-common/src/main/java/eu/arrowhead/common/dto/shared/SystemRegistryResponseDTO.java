@@ -17,10 +17,11 @@ package eu.arrowhead.common.dto.shared;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
-import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonInclude(Include.NON_NULL)
 public class SystemRegistryResponseDTO implements Serializable {
@@ -41,9 +42,11 @@ public class SystemRegistryResponseDTO implements Serializable {
 
 	//=================================================================================================
 	// methods
-	public SystemRegistryResponseDTO() {
-	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public SystemRegistryResponseDTO() {}
 
+	//-------------------------------------------------------------------------------------------------
 	public SystemRegistryResponseDTO(final long id, final SystemResponseDTO system, final DeviceResponseDTO provider, final String endOfValidity,
 									 final Map<String, String> metadata, final int version, final String createdAt, final String updatedAt) {
 		this.id = id;
@@ -76,10 +79,15 @@ public class SystemRegistryResponseDTO implements Serializable {
 	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public boolean equals(final Object o) {
-		if (this == o) { return true; }
-		if (o == null || getClass() != o.getClass()) { return false; }
+		if (this == o) { 
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
 		final SystemRegistryResponseDTO that = (SystemRegistryResponseDTO) o;
 		return id == that.id &&
 				version == that.version &&
@@ -91,22 +99,19 @@ public class SystemRegistryResponseDTO implements Serializable {
 				updatedAt.equals(that.updatedAt);
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public int hashCode() {
 		return Objects.hash(id, system, provider, endOfValidity, metadata, version, createdAt, updatedAt);
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", SystemRegistryResponseDTO.class.getSimpleName() + "[", "]")
-				.add("id=" + id)
-				.add("system=" + system)
-				.add("provider=" + provider)
-				.add("endOfValidity='" + endOfValidity + "'")
-				.add("metadata=" + metadata)
-				.add("version=" + version)
-				.add("createdAt='" + createdAt + "'")
-				.add("updatedAt='" + updatedAt + "'")
-				.toString();
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
 	}
 }

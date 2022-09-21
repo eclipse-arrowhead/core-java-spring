@@ -14,13 +14,15 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import org.springframework.util.Assert;
-
 import java.io.Serializable;
 import java.util.Map;
-import java.util.StringJoiner;
+
+import org.springframework.util.Assert;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonInclude(Include.NON_NULL)
 public abstract class SystemRegistryOnboardingResponseDTO extends SystemRegistryResponseDTO implements Serializable {
@@ -28,16 +30,18 @@ public abstract class SystemRegistryOnboardingResponseDTO extends SystemRegistry
     //=================================================================================================
     // members
 
-    private static final long serialVersionUID = -635438605292398404L;
+    private static final long serialVersionUID = 1L;
+    
     private CertificateCreationResponseDTO certificateResponse;
 
     //=================================================================================================
     // methods
 
-    public SystemRegistryOnboardingResponseDTO() {
-    }
+    //-------------------------------------------------------------------------------------------------
+	public SystemRegistryOnboardingResponseDTO() {}
 
-    public SystemRegistryOnboardingResponseDTO(final long id, final SystemResponseDTO system, final DeviceResponseDTO provider,
+    //-------------------------------------------------------------------------------------------------
+	public SystemRegistryOnboardingResponseDTO(final long id, final SystemResponseDTO system, final DeviceResponseDTO provider,
                                                final String endOfValidity, final Map<String, String> metadata, final int version, final String createdAt,
                                                final String updatedAt, final CertificateCreationResponseDTO certificateResponse) {
         super(id, system, provider, endOfValidity, metadata, version, createdAt, updatedAt);
@@ -45,24 +49,23 @@ public abstract class SystemRegistryOnboardingResponseDTO extends SystemRegistry
     }
 
     //-------------------------------------------------------------------------------------------------
-    public CertificateCreationResponseDTO getCertificateResponse() {
-        return certificateResponse;
-    }
+    public CertificateCreationResponseDTO getCertificateResponse() { return certificateResponse; }
 
-    public void setCertificateResponse(final CertificateCreationResponseDTO certificateResponse) {
-        this.certificateResponse = certificateResponse;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public void setCertificateResponse(final CertificateCreationResponseDTO certificateResponse) { this.certificateResponse = certificateResponse; }
 
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", SystemRegistryOnboardingResponseDTO.class.getSimpleName() + "[", "]")
-                .add("certificateResponse=" + certificateResponse)
-                .add("parent=" + super.toString())
-                .toString();
-    }
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 
-    public void load(final SystemRegistryResponseDTO dto)
-    {
+    //-------------------------------------------------------------------------------------------------
+	public void load(final SystemRegistryResponseDTO dto) {
         Assert.notNull(dto, "SystemRegistryResponseDTO must not be null");
 
         this.setId(dto.getId());

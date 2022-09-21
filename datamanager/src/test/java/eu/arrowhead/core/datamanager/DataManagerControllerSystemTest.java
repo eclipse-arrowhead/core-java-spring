@@ -25,7 +25,7 @@ import eu.arrowhead.common.dto.shared.DataManagerSystemsResponseDTO;
 import eu.arrowhead.core.datamanager.database.service.DataManagerDBService;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = DataManagerMain.class)
 @ContextConfiguration(classes = {DataManagerTestContext.class})
 public class DataManagerControllerSystemTest {
 

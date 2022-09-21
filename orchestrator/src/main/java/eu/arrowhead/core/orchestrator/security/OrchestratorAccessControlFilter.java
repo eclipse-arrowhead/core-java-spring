@@ -55,6 +55,10 @@ public class OrchestratorAccessControlFilter extends CoreSystemAccessControlFilt
 			// Only the local PlantDescriptionEngine can use these methods
 			final CoreSystem[] allowedCoreSystems = { CoreSystem.PLANTDESCRIPTIONENGINE };
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystems, requestTarget);
+		} else if (requestTarget.contains(CommonConstants.OP_ORCH_PROCESS_BY_PROXY_URI)) { 
+			// Only the local Choreographer can use this method
+			final CoreSystem[] allowedCoreSystems = { CoreSystem.CHOREOGRAPHER };
+			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystems, requestTarget);
 		} else if (Utilities.isEmpty(requestJSON)) {
 			// If request body is empty (example: GET..../orchestrator/{systemId}), than everybody in the local cloud can use these methods => no further check is necessary
 		} else {

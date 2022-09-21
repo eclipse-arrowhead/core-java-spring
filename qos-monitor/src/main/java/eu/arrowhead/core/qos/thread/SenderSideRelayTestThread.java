@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
@@ -49,6 +50,7 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 	// members
 	
 	private static final String CLOSE_MESSAGE_PREFIX = "CLOSE";
+	private static final int CLOSE_RETRY_PERIOD = 5000; // in milliseconds
 
 	private static final Logger logger = LogManager.getLogger(SenderSideRelayTestThread.class);
 	private static final Byte AWAKE_MESSAGE_ID = -1;
@@ -76,6 +78,8 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 	private final String queueId;
 	private MessageProducer sender;
 	private MessageProducer controlSender;
+	private MessageConsumer receiver;
+	private MessageConsumer controlReceiver;
 	
 	private final BlockingQueue<Byte> blockingQueue = new LinkedBlockingQueue<>();
 
@@ -113,14 +117,18 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public void init(final MessageProducer sender, final MessageProducer controlSender) {
+	public void init(final MessageProducer sender, final MessageProducer controlSender, final MessageConsumer receiver, final MessageConsumer controlReceiver) {
 		logger.debug("init started...");
 		
 		Assert.notNull(sender, "sender is null.");
 		Assert.notNull(controlSender, "controlSender is null.");
+		Assert.notNull(receiver, "receiver is null.");
+		Assert.notNull(controlReceiver, "controlReceiver is null.");
 		
 		this.sender = sender;
 		this.controlSender = controlSender;
+		this.receiver = receiver;
+		this.controlReceiver = controlReceiver;
 		this.initialized = true;
 	}
 	
@@ -268,7 +276,45 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 	private void close() {
 		logger.debug("close started...");
 		
-		relayClient.closeConnection(relaySession);
+		//Unsubscribe from the response (RESP-...) queue
+		try {
+			relayClient.unsubscribeFromQueues(receiver, controlReceiver);
+		} catch (final JMSException ex) {
+			logger.debug("Error while unsubscribing from response queues: {}", ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+		}
+		
+		//Destroy destinations (REQ-... queues) which this sender side QoS writes on and the connection after		
+		boolean relayConnectionClosed = relayClient.isConnectionClosed(relaySession);
+		boolean requestQueuesClosed = false;
+		
+		while (!relayConnectionClosed) {
+			
+			if (!requestQueuesClosed) {
+				try {
+					requestQueuesClosed = relayClient.destroyQueues(relaySession, sender, controlSender);
+				} catch (final JMSException ex) {
+					logger.debug("Error while closing relay destination: {}", ex.getMessage());
+					logger.debug("Stacktrace:", ex);
+				}				
+			}
+			
+			if (!requestQueuesClosed) {
+				logger.debug("Relay connection is not closeable yet");
+				await(CLOSE_RETRY_PERIOD);
+				
+			} else {
+				relayClient.closeConnection(relaySession);
+				if (!relayClient.isConnectionClosed(relaySession)) {
+					logger.debug("Could not close relay connection");
+					await(CLOSE_RETRY_PERIOD);
+					
+				} else {
+					relayConnectionClosed = true;
+					logger.debug("Relay connection has been closed");					
+				}
+			}			
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -304,7 +350,7 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 		logger.debug("handleControlMessage started...");
 		
 		if (isCloseMessage(message)) {
-			relayClient.handleCloseControlMessage(message, relaySession);
+			relayClient.handleCloseControlMessage(message, null); // just verifying the control msg, but not close the connection
 			try {
 				blockingQueue.put(AWAKE_MESSAGE_ID);
 			} catch (final InterruptedException ex) {
@@ -326,6 +372,15 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 			resultsSaved = true;
 			senderFlag = false;
 			relayClient.sendSwitchControlMessage(relaySession, controlSender, queueId);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void await(final long milisec) {
+		try {
+			Thread.sleep(milisec);
+		} catch (final InterruptedException ex) {
+			logger.debug("Thread.sleep() is interrupted");
 		}
 	}
 }

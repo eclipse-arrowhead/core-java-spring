@@ -91,6 +91,13 @@ public class ServiceRegistryApplicationInitListener extends ApplicationInitListe
             logger.error("Can't registrate {} as a system.", coreSystemRegistrationProperties.getCoreSystem().name());
             logger.debug("Stacktrace", ex);
         }
+        
+        try {
+        	serviceRegistryDBService.calculateSystemAddressTypeIfNecessary();
+        } catch (final ArrowheadException ex) {
+        	logger.warn("Problem occurs during calculating system address types: {}", ex.getMessage());
+        	logger.debug("Stacktrace", ex);
+        }
     }
 
     //-------------------------------------------------------------------------------------------------

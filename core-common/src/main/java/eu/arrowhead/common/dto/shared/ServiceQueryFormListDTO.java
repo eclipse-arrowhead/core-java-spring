@@ -18,6 +18,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class ServiceQueryFormListDTO implements Serializable {
 	
 	//=================================================================================================
@@ -25,7 +28,7 @@ public class ServiceQueryFormListDTO implements Serializable {
 	
 	private static final long serialVersionUID = 8818224363564234620L;
 	
-	private List<ServiceQueryFormDTO> forms = new ArrayList<>();
+	private List<? extends ServiceQueryFormDTO> forms = new ArrayList<>();
 	
 	//=================================================================================================
 	// methods
@@ -34,19 +37,29 @@ public class ServiceQueryFormListDTO implements Serializable {
 	public ServiceQueryFormListDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServiceQueryFormListDTO(final List<ServiceQueryFormDTO> forms) {
+	public ServiceQueryFormListDTO(final List<? extends ServiceQueryFormDTO> forms) {
 		if (forms != null) {
 			this.forms = forms;
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<? extends ServiceQueryFormDTO> getForms() { return forms; }
 
 	//-------------------------------------------------------------------------------------------------
-	public List<ServiceQueryFormDTO> getForms() { return forms; }
-
-	//-------------------------------------------------------------------------------------------------
-	public void setForms(final List<ServiceQueryFormDTO> forms) {
+	public void setForms(final List<? extends ServiceQueryFormDTO> forms) {
 		if (forms != null) {
 			this.forms = forms;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
 		}
 	}
 }

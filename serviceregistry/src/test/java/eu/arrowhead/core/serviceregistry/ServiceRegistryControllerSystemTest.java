@@ -66,6 +66,7 @@ import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
+import eu.arrowhead.common.dto.shared.AddressType;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -969,7 +970,7 @@ public class ServiceRegistryControllerSystemTest {
 		final List<System> systemList = new ArrayList<>(amountOfEntry);
 		
 		for (int i = 0; i < amountOfEntry; ++i) {
-			final System system = new System(MOCKED_SYSTEM_NAME + i, MOCKED_SYSTEM_ADDRESS, i, MOCKED_SYSTEM_AUTHENTICATION_INFO, Utilities.map2Text(Map.of("key", "value")));
+			final System system = new System(MOCKED_SYSTEM_NAME + i, MOCKED_SYSTEM_ADDRESS, AddressType.HOSTNAME, i, MOCKED_SYSTEM_AUTHENTICATION_INFO, Utilities.map2Text(Map.of("key", "value")));
 			system.setId(i);
 			final ZonedDateTime timeStamp = ZonedDateTime.now();
 			system.setCreatedAt(timeStamp);
@@ -989,7 +990,7 @@ public class ServiceRegistryControllerSystemTest {
 		final Integer port = 1;
 		final String authenticationInfo = MOCKED_SYSTEM_AUTHENTICATION_INFO;
 		
-		final System system = new System(systemName, address, port, authenticationInfo, Utilities.map2Text(Map.of("key", "value")));
+		final System system = new System(systemName, address, AddressType.HOSTNAME, port, authenticationInfo, Utilities.map2Text(Map.of("key", "value")));
 		
 		system.setId(1);
 		

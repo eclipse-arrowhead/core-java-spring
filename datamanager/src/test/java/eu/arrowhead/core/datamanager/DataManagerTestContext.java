@@ -9,6 +9,7 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Primary;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.database.service.CommonDBService;
 //import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.core.datamanager.database.service.DataManagerDBService;
 import eu.arrowhead.core.datamanager.service.HistorianService;
@@ -47,4 +48,11 @@ public class DataManagerTestContext {
     public ProxyService mocProxyService() {
         return Mockito.mock(ProxyService.class);
     }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean
+	@Primary // This bean is primary only in test context
+	public CommonDBService mockCommonDBService() {
+		return Mockito.mock(CommonDBService.class);
+	}
 }

@@ -22,6 +22,8 @@ import java.util.Map;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class OrchestrationResultDTO implements Serializable {
 
@@ -98,4 +100,14 @@ public class OrchestrationResultDTO implements Serializable {
 	public void setQosMeasurements(final QoSMeasurementAttributesFormDTO qosMeasurements) { this.qosMeasurements = qosMeasurements; }
 	public void setAuthorizationTokens(final Map<String,String> authorizationTokens) { this.authorizationTokens = authorizationTokens; }
 	public void setWarnings(final List<OrchestratorWarnings> warnings) { this.warnings = warnings; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

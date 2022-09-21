@@ -31,7 +31,7 @@ import eu.arrowhead.core.datamanager.service.HistorianService;
 import eu.arrowhead.core.datamanager.service.ProxyService;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = DataManagerMain.class)
 @ContextConfiguration(classes = {DataManagerTestContext.class})
 @ActiveProfiles("nonstrict")
 public class DataManagerControllerSystemTest2 {

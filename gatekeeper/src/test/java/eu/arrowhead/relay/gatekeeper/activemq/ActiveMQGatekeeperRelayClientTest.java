@@ -24,6 +24,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.util.Base64;
+import java.util.Set;
 
 import javax.jms.BytesMessage;
 import javax.jms.CompletionListener;
@@ -117,31 +118,31 @@ public class ActiveMQGatekeeperRelayClientTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorServerCommonNameNull() {
-		GatekeeperRelayClientFactory.createGatekeeperRelayClient(null, null, null, null, 0);
+		GatekeeperRelayClientFactory.createGatekeeperRelayClient(null, null, null, null, 0, Set.of());
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorServerCommonNameEmpty() {
-		GatekeeperRelayClientFactory.createGatekeeperRelayClient(" ", null, null, null, 0);
+		GatekeeperRelayClientFactory.createGatekeeperRelayClient(" ", null, null, null, 0, Set.of());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorPublicKeyNull() {
-		GatekeeperRelayClientFactory.createGatekeeperRelayClient("gatekeeper.testcloud2.aitia.arrowhead.eu", null, null, null, 0);
+		GatekeeperRelayClientFactory.createGatekeeperRelayClient("gatekeeper.testcloud2.aitia.arrowhead.eu", null, null, null, 0, Set.of());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorPrivateKeyNull() {
-		GatekeeperRelayClientFactory.createGatekeeperRelayClient("gatekeeper.testcloud2.aitia.arrowhead.eu", clientPublicKey, null, null, 0);
+		GatekeeperRelayClientFactory.createGatekeeperRelayClient("gatekeeper.testcloud2.aitia.arrowhead.eu", clientPublicKey, null, null, 0, Set.of());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorSSLPropertiesNull() {
-		GatekeeperRelayClientFactory.createGatekeeperRelayClient("gatekeeper.testcloud2.aitia.arrowhead.eu", clientPublicKey, otherPrivateKey, null, 0);
+		GatekeeperRelayClientFactory.createGatekeeperRelayClient("gatekeeper.testcloud2.aitia.arrowhead.eu", clientPublicKey, otherPrivateKey, null, 0, Set.of());
 	}
 	
 	//-------------------------------------------------------------------------------------------------

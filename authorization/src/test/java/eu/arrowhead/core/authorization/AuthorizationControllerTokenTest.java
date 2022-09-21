@@ -31,6 +31,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,6 +49,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.dto.internal.TokenGenerationMultiServiceResponseDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationProviderDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationResponseDTO;
@@ -66,6 +68,7 @@ public class AuthorizationControllerTokenTest {
 	// members
 	
 	private static final String AUTH_TOKEN_GENERATION_URI = CommonConstants.AUTHORIZATION_URI + "/token";
+	private static final String AUTH_MULTI_TOKEN_GENERATION_URI = CommonConstants.AUTHORIZATION_URI + "/token/multi";
 	private static final String AUTH_PUBLIC_KEY_URI = CommonConstants.AUTHORIZATION_URI + "/publickey";
 	
 	@Autowired
@@ -467,6 +470,24 @@ public class AuthorizationControllerTokenTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testGenerateMultiServiceTokens() throws Exception {
+		final TokenGenerationRequestDTO request1 = getRequest();
+		request1.getConsumer().setSystemName("consumer1");
+		final TokenGenerationRequestDTO request2 = getRequest();
+		request2.getConsumer().setSystemName("consumer2");
+		final List<TokenGenerationRequestDTO> requestList = List.of(request1, request2);
+		ArgumentCaptor<List<TokenGenerationRequestDTO>> captor = ArgumentCaptor.forClass(List.class);
+		when(tokenGenerationService.generateMultiServiceTokensResponse(captor.capture())).thenReturn(new TokenGenerationMultiServiceResponseDTO());
+		postGenerateMultiTokens(requestList, status().isOk());
+		
+		final List<TokenGenerationRequestDTO> captured = captor.getValue();
+		Assert.assertEquals(request1.getConsumer().getSystemName(), captured.get(0).getConsumer().getSystemName());
+		Assert.assertEquals(request2.getConsumer().getSystemName(), captured.get(1).getConsumer().getSystemName());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetPublicKeyNotSecure() throws Exception {
 		assumeFalse(secure);
@@ -511,6 +532,16 @@ public class AuthorizationControllerTokenTest {
 	//-------------------------------------------------------------------------------------------------
 	private MvcResult postGenerateTokens(final TokenGenerationRequestDTO request, final ResultMatcher matcher) throws Exception {
 		return this.mockMvc.perform(post(AUTH_TOKEN_GENERATION_URI)
+						   .contentType(MediaType.APPLICATION_JSON)
+						   .content(objectMapper.writeValueAsBytes(request))
+						   .accept(MediaType.APPLICATION_JSON))
+						   .andExpect(matcher)
+						   .andReturn();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MvcResult postGenerateMultiTokens(final List<TokenGenerationRequestDTO> request, final ResultMatcher matcher) throws Exception {
+		return this.mockMvc.perform(post(AUTH_MULTI_TOKEN_GENERATION_URI)
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(request))
 						   .accept(MediaType.APPLICATION_JSON))

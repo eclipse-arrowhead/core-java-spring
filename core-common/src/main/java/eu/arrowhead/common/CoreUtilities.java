@@ -14,12 +14,17 @@
 
 package eu.arrowhead.common;
 
-import eu.arrowhead.common.exception.BadPayloadException;
+
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.boot.logging.LogLevel;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
+
+import eu.arrowhead.common.exception.BadPayloadException;
 
 public class CoreUtilities {
 	
@@ -27,6 +32,8 @@ public class CoreUtilities {
 	// members
 	
 	private static final Logger logger = LogManager.getLogger(CoreUtilities.class);
+	
+	private static final  List<LogLevel> logLevelsInOrder = List.of(LogLevel.TRACE, LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR, LogLevel.FATAL, LogLevel.OFF);
 	
 	//=================================================================================================
 	// methods
@@ -71,6 +78,22 @@ public class CoreUtilities {
 		final Direction validatedDirection = calculateDirection(direction, origin);
 		
 		return new ValidatedPageParams(validatedPage, validatedSize, validatedDirection);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static List<LogLevel> getLogLevels(final String maxLevel, final String origin) { 
+		if (Utilities.isEmpty(maxLevel)) {
+			return null;
+		}
+		
+		try {
+			final LogLevel maxLogLevel = LogLevel.valueOf(maxLevel.toUpperCase().trim());
+			final int index = logLevelsInOrder.indexOf(maxLogLevel); // can't be -1 at this point
+			
+			return logLevelsInOrder.subList(index, logLevelsInOrder.size()); 
+		} catch (final IllegalArgumentException ex) {
+			throw new BadPayloadException("Defined log level is not exists.", org.apache.http.HttpStatus.SC_BAD_REQUEST, origin);
+		}
 	}
 
 	//=================================================================================================

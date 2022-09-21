@@ -22,6 +22,9 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import eu.arrowhead.common.dto.shared.OrchestrationFlags;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
@@ -114,6 +117,16 @@ public class ICNRequestFormDTO implements Serializable {
 	public void setCommands(final Map<String,String> commands) {
 		if (commands != null) {
 			this.commands = commands;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
 		}
 	}
 }

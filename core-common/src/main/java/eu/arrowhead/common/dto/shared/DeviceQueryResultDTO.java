@@ -14,17 +14,17 @@
 
 package eu.arrowhead.common.dto.shared;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonInclude(Include.NON_NULL)
-public class DeviceQueryResultDTO implements Serializable
-{
+public class DeviceQueryResultDTO implements Serializable {
 
     //=================================================================================================
     // members
@@ -37,35 +37,35 @@ public class DeviceQueryResultDTO implements Serializable
     //=================================================================================================
     // constructors
 
-	public DeviceQueryResultDTO()
-	{
+	//-------------------------------------------------------------------------------------------------
+	public DeviceQueryResultDTO() {
 		this(new ArrayList<>(), 0);
 	}
 
-	public DeviceQueryResultDTO(final List<DeviceRegistryResponseDTO> deviceQueryData, final int unfilteredHits)
-	{
+	//-------------------------------------------------------------------------------------------------
+	public DeviceQueryResultDTO(final List<DeviceRegistryResponseDTO> deviceQueryData, final int unfilteredHits) {
 		this.deviceQueryData = deviceQueryData;
 		this.unfilteredHits = unfilteredHits;
 	}
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", DeviceQueryResultDTO.class.getSimpleName() + "[", "]")
-                .add("deviceQueryData=" + deviceQueryData)
-                .add("unfilteredHits=" + unfilteredHits)
-                .toString();
-    }
-
+ 
     //=================================================================================================
     // methods
 
     //-------------------------------------------------------------------------------------------------
     public List<DeviceRegistryResponseDTO> getDeviceQueryData() { return deviceQueryData; }
+    public int getUnfilteredHits() { return unfilteredHits; }
 
     //-------------------------------------------------------------------------------------------------
     public void setDeviceQueryData(final List<DeviceRegistryResponseDTO> deviceQueryData) { this.deviceQueryData = deviceQueryData; }
-
-    public int getUnfilteredHits() { return unfilteredHits; }
-
     public void setUnfilteredHits(final int unfilteredHits) { this.unfilteredHits = unfilteredHits; }
+    
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }
