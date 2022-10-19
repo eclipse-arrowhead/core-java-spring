@@ -27,7 +27,7 @@
     \small
     \hspace*{0.075\textwidth}\begin{minipage}{0.1\textwidth}
       \vspace*{1mm}
-      Interface: \\
+      Operation: \\
       \notblank{#4}{Input: \\}{}
       \notblank{#5}{Output: \\}{}
     \end{minipage}
@@ -46,20 +46,26 @@
   \subsection*{\thesubsection\quad#1 \textcolor{ArrowheadPurple}{#2}}
   \label{sec:model:#2} \label{sec:model:#2s}
 }
+\newrobustcmd\msubsubsection[3]{
+  \addtocounter{subsubsection}{1}
+  \addcontentsline{toc}{subsubsection}{\protect\numberline{\thesubsubsection}#1 \textcolor{ArrowheadPurple}{#2}}
+  \subsubsection*{\thesubsubsection\quad#1 \textcolor{ArrowheadPurple}{#2}}
+  \label{sec:model:#2} \label{sec:model:#2s}
+}
 %%
 
 \begin{document}
 
 %% Arrowhead Document Properties
-\ArrowheadTitle{XXX HTTP/TLS/JSON} %e.g. ServiceDiscovery HTTP/TLS/JSON
-\ArrowheadServiceID{ZZZ} % e.g. register
+\ArrowheadTitle{echo HTTP/TLS/TEXT} %e.g. ServiceDiscovery HTTP/TLS/JSON
+\ArrowheadServiceID{echo} % e.g. register
 \ArrowheadType{Interface Design Description}
 \ArrowheadTypeShort{IDD}
-\ArrowheadVersion{4.4.1}
+\ArrowheadVersion{4.4.0}
 \ArrowheadDate{\today}
-\ArrowheadAuthor{xx yy} % e.g Szvetlin Tanyi}
+\ArrowheadAuthor{Tamás Bordi} % e.g Szvetlin Tanyi}
 \ArrowheadStatus{RELEASE}
-\ArrowheadContact{xx.yy@aa.bb} % jerker.delsing@arrowhead.eu
+\ArrowheadContact{tbordi@aitia.ai} % jerker.delsing@arrowhead.eu
 \ArrowheadFooter{\href{www.arrowhead.eu}{www.arrowhead.eu}}
 \ArrowheadSetup
 %%
@@ -85,8 +91,8 @@
 
   % Front Page Abstract
   \begin{abstract}
-    This document describes a [ppp] protocol with [sss] payload
-    security and [eee] payload encoding variant of the [XXX] service.
+    This document describes a HTTP protocol with TLS payload
+    security and TEXT payload encoding variant of the \textbf{echo} service.
   \end{abstract}
   \vspace*{1cm}
 
@@ -100,354 +106,57 @@
 \section{Overview}
 \label{sec:overview}
 
-This document describes the [XXX] service interface,
-which provides [brief descirption of the service interface].
+This document describes the \textbf{echo} service interface, which enables an ”I’m alive” kind monitoring of the system.. It's implemented using protocol, encoding as stated in the following table:
 
-% Table to be updated for the specified Service interface 
-\color{red}
-It's implemented using protocol, encoding as stated in belwo table:
 \begin{table}[ht!]
   \centering
   \begin{tabular}{|l|l|l|l|}
     \rowcolor{gray!33} Profile ype & Type & Version \\ \hline
     Transfer protocol & HTTP & 1.1 \\ \hline
     Data encryption & TLS & 1.3 \\ \hline
-    Encoding & e.g. JSON & RFC 8259 \cite{rfc8259} \\ \hline
+    Encoding & TEXT & - \\ \hline
     Compression & N/A & - \\ \hline
-    Semantics & e.g. SensML & RFC 9100 \cite{rfc9100} \\ \hline
-    Ontology & N/A & - \\ \hline
   \end{tabular}
-  \caption{Communication and sematics details used for the [XXX]
+  \caption{Communication and sematics details used for the \textbf{echo}
     service interface}
   \label{tab:comunication_semantics_profile}
 \end{table}
-\color{black}
 
-This document provides the Interface Design Description IDD to the \textit{[XXX] -- Service Description} document.
+This document provides the Interface Design Description IDD to the \textit{echo -- Service Description} document.
 For further details about how this service is meant to be used, please consult that document.
 
-The rest of this document describes how to realize the [XXX] service
-interface in detail. Both in terms of its functions (Section \ref{sec:functions}) and its information model (Section \ref{sec:model}).
-
-
+The rest of this document describes how to realize the echo service HTTP/TLS/TEXT interface in details.
 
 \newpage
 
-% To be replace with SysML figure for the Service discussed in this document 
-\begin{figure}[ht!]
-  \centering
-  \includegraphics[width=0.8\textwidth]{figures/ServiceDiscovery-IDD}
-  \caption{SysML model if the ServiceDIscovery interface, its
-    operations, datamodels and implementation.}
-  \label{fig:ServiceDiscovery-IDD}
-\end{figure}
-
-
-
-\section{Service Operations}
+\section{Interface Description}
 \label{sec:functions}
 
-The interfaces of the [XXX] service, its operations, data models and
-implementation are provided below. An SysML service overview is found in Figure \ref{fig:ServiceDiscovery-IDD}. A SysML overview of the operation datamodels is found in Figure \ref{fig:ServiceDiscovery-datamodels}.
-
-% To be replace with SysML figure for the Service discussed in this document 
-\begin{figure}[ht!]
-  \centering
-  \includegraphics[width=0.8\textwidth]{figures/ServiceDiscovery-datamodels}
-  \caption{A SysML models of the datamodel used by the
-    ServiceDiscovery interface operations. }
-  \label{fig:ServiceDiscovery-datamodels}
-\end{figure}
-
-In particular, each subsection first names the [ppp] protocl method and path used to call the function, after which it names an abstract function from the Service Discovery Register SD document, as well as input and output types.
-
-% Status codes: Stus code can in principal be freely defined but it's
-% strongly recomended to used HTTP status codes.
-All functions in this section respond with the status code \texttt{201
-  Created} if called successfully. The error codes are, \texttt{400
-  Bad Request} if request is malformed, \texttt{401 Unauthorized} if
+The service responses with the status code \texttt{200
+  Ok} if called successfully. The error codes are \texttt{401 Unauthorized} if
 improper client side certificate is provided, \texttt{500 Internal
-  Server Error} if Service Registry is unavailable.
+  Server Error} if the system is unavailable.
 
-\color{red}
-All interfaces to be described as provided by the following examples
-
-\fsubsection{Register}{POST}{/serviceregistry/register}{ServiceRegistryRequest}{}
-Called to register a service offered by the caller system, as exemplified in Listing \ref{lst:register}.
-
-\begin{lstlisting}[language=http,label={lst:register},caption={A \fref{Register} invocation.}]
-POST /serviceregistry/register HTTP/1.1
-
-{
-  "endOfValidity": "2020-12-05 12:00:00",
-  "interfaces": [
-    "HTTP-SECURE-JSON"
-  ],
-  "metadata": {
-    "unit": "celsius"
-  },
-  "providerSystem": {
-    "address": "192.168.0.101",
-    "authenticationInfo": "public key of the client certificate",
-    "port": 8080,
-    "systemName": "exampleprovider"
-  },
-  "secure": "TOKEN",
-  "serviceDefinition": "temperature",
-  "serviceUri": "/",
-  "version": 1
-}
-\end{lstlisting}
-
-\begin{lstlisting}[language=http,label={lst:register_response},caption={A \fref{Register} response. Every \pref{Object} contains an id.}]
-{
-  "id": 14,
-  "serviceDefinition": {
-    "id": 13,
-    "serviceDefinition": "temperature",
-    "createdAt": "2020-12-01 11:59:10",
-    "updatedAt": "2020-12-01 11:59:10"
-  },
-  "provider": {
-    "id": 4,
-    "systemName": "exampleprovider",
-    "address": "192.168.0.101",
-    "port": 8080,
-    "authenticationInfo": "public key of the client certificate",
-    "createdAt": "2020-12-01 11:59:10",
-    "updatedAt": "2020-12-01 11:59:10"
-  },
-  "serviceUri": "/",
-  "endOfValidity": "2020-12-05 12:00:00",
-  "secure": "TOKEN",
-  "metadata": {
-    "unit": "celsius"
-  },
-  "version": 1,
-  "interfaces": [
-    {
-      "id": 1,
-      "interfaceName": "HTTP-SECURE-JSON",
-      "createdAt": "2019-10-07 04:29:51",
-      "updatedAt": "2019-10-07 04:29:51"
-    }
-  ],
-  "createdAt": "2020-12-01 11:59:10",
-  "updatedAt": "2020-12-01 11:59:10"
-}
-\end{lstlisting}
-
-%\subsection{Unregister}{DELETE}{/serviceregistry/unregister\\
-\fsubsection{Unregister}{DELETE}{/serviceregistry/unregister\\
- \hspace*{0.1\textwidth}?address=\fparam{\{address\}}\\\hspace*{0.1\textwidth}\&port=\fparam{\{port\}}\\\hspace*{0.1\textwidth}\&service\_definition=\fparam{\{service\_definition\}}\\\hspace*{0.1\textwidth}\&system\_name=\fparam{\{system\_name\}}}{ServiceRegistryUnregisterRequest}{}
-
-Called to unregister a service offered by the caller system, as exemplified in Listing \ref{lst:unregister}.
-
-\begin{lstlisting}[language=http,label={lst:unregister},caption={An \fref{Unregister} invocation.}]
-DELETE /serviceregistry/unregister?address=10.0.0.0&port=8080&service_definition=temperature&system_name=mytemperaturesensor HTTP/1.1
-Accept: application/json
-\end{lstlisting}
-
-\fsubsection{Query}{POST}{/serviceregistry/query}{ServiceQueryForm}{ServiceQueryList}
-
-Called to query a service offered by a core system, as exemplified in Listing \ref{lst:query}.
-
-\begin{lstlisting}[language=http,label={lst:query},caption={A \fref{Query} invocation.}]
-POST /serviceregistry/query HTTP/1.1
-
-{
-  "interfaceRequirements": [
-    "HTTP-SECURE_JSON"
-  ],
-  "maxVersionRequirement": 1,
-  "metadataRequirements": {
-    "additionalProp1": "string",
-    "additionalProp2": "string",
-    "additionalProp3": "string"
-  },
-  "minVersionRequirement": 1,
-  "pingProviders": true,
-  "securityRequirements": [
-    "CERTIFICATE"
-  ],
-  "serviceDefinitionRequirement": "orchestration-service",
-  "versionRequirement": 1
-}
-
-\end{lstlisting}
-
-\begin{lstlisting}[language=http,label={lst:query_response},caption={A \fref{Query} response. Every \pref{Object} contains an id.}]
-{
- "serviceQueryData": [
-   {
-     "id": 0,
-     "serviceDefinition": {
-       "id": 0,
-       "serviceDefinition": "string",
-       "createdAt": "string",
-       "updatedAt": "string"
-     },
-     "provider": {
-       "id": 0,
-       "systemName": "string",
-       "address": "string",
-       "port": 0,
-       "authenticationInfo": "string",
-       "createdAt": "string",
-       "updatedAt": "string"
-     },
-     "serviceUri": "string",
-     "endOfValidity": "string",
-     "secure": "NOT_SECURE",
-     "metadata": {
-       "additionalProp1": "string",
-       "additionalProp2": "string",
-       "additionalProp3": "string"
-     },
-     "version": 0,
-     "interfaces": [
-       {
-         "id": 0,
-         "interfaceName": "string",
-         "createdAt": "string",
-         "updatedAt": "string"
-       }
-     ],
-     "createdAt": "string",
-     "updatedAt": "string"
-    }
- ],
- "unfilteredHits": 0
-}
-\end{lstlisting}
-
-\fsubsection{Echo}{GET}{/serviceregistry/echo}{}{StatusCodeKind}
-
-Called to check the core systems availability, as exemplified in Listing \ref{lst:echo}.
-
-\begin{lstlisting}[language=http,label={lst:echo},caption={An \fref{Echo} invocation response.}]
+\begin{lstlisting}[language=http,label={lst:echo},caption={A \fref{echo} invocation.}]
 GET /serviceregistry/echo HTTP/1.1
-
-200 OK
-
 \end{lstlisting}
-\color{black}
 
+\begin{lstlisting}[language=http,label={lst:echo_response},caption={A \fref{echo} response.}]
+Got it!
+\end{lstlisting}
 
 \newpage
 
 \section{Data Models}
 \label{sec:model}
 
-\color{red}
-Below is the prefered approach to data model description.
-The example used is from the SerivceRegistry system
-
 Here, all data objects that can be part of the service calls associated with this service are listed in alphabetic order.
 Note that each subsection, which describes one type of object, begins with the \textit{struct} keyword, which is meant to denote a JSON \pref{Object} that must contain certain fields, or names, with values conforming to explicitly named types.
 As a complement to the primary types defined in this section, there is also a list of secondary types in Section \ref{sec:model:primitives}, which are used to represent things like hashes, identifiers and texts.
 
-\msubsection{struct}{ServiceRegistryRequest}
+\msubsection{struct}{EchoResponse}
 
-This structure is used to register a service offering into the Service Registry.
-
-\begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
-\rowcolor{gray!33} Object Field & Value Type      & Description \\ \hline
-"endofValidity"                 & \pref{DateTime} & Service is available until this UTC timestamp. \\ \hline
-"interfaces"                   & \pref{Array}$<$\pref{Interface}$>$     & List of interfaces the service supports. \\ \hline
-"metadata"                  & \pref{Metadata}     & Metadata \\ \hline
-"providerSystem"                    & \pref{Name} & Name of the provider system. \\ \hline
-"secure"                    &\pref{SecureType}  & Type of security the service uses. \\ \hline
-"serviceDefinition"         &\pref{Name}        & Service Definition. \\ \hline
-"serviceUri"                &\pref{URI}         & URI of the service. \\ \hline
-"version"                   &\pref{Version}     & Version of the service. \\ \hline
-\end{tabularx}
-\end{table}
-
-\msubsection{struct}{ServiceRegistryUnregisterRequest}
-
-Identifies a requested Unregister call.
-As the fields of this type occur only as query parameters in the \fref{Unregister} function, there is no need for it to representable as a JSON \pref{Object}.
-This subsection exists only for the sake of completeness.
-
-\msubsection{struct}{ServiceQueryForm}
-
-This structure is used to query a service from the Service Registry.
-
-\begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{5cm} | p{3.5cm} | X |} \hline
-\rowcolor{gray!33} Object Field & Value Type      & Description \\ \hline
-"interfaceRequirements"                   & \pref{Array}$<$\pref{Interface}$>$     & List of the required interfaces. \\ \hline
-"maxVersionRequirement"                & \pref{Version}     & Maximum version. \\ \hline
-"minVersionRequirement"                & \pref{Version}     & Minimum version. \\ \hline
-"metadataRequirements"                  & \pref{Metadata}     & Metadata. \\ \hline
-"pingProviders".                    & \pref{Boolean} & Checks the availability of the providers if true \\ \hline
-"securityRequirements"                    &\pref{SecureType}  & Type of security. \\ \hline
-"serviceDefinitionRequirement"         &\pref{Name}        & Service Definition. \\ \hline
-"versionRequirement"                   &\pref{Version}     & Version of the service. \\ \hline
-\end{tabularx}
-\end{table}
-
-\msubsection{struct}{Metadata}
-
-A JSON \pref{Object} which maps \pref{String} key-value pairs.
-
-\subsection{Primitives}
-\label{sec:model:primitives}
-
-As all messages are encoded using the JSON format \cite{bray2014json}, the following primitive constructs, part of that standard, become available.
-Note that the official standard is defined in terms of parsing rules, while this list only concerns syntactic information.
-Furthermore, the \pref{Object} and \pref{Array} types are given optional generic type parameters, which are used in this document to signify when pair values or elements are expected to conform to certain types. 
-
-\begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{3cm} | X |} \hline
-\rowcolor{gray!33} JSON Type & Description \\ \hline
-\pdef{Value}                 & Any out of \pref{Object}, \pref{Array}, \pref{String}, \pref{Number}, \pref{Boolean} or \pref{Null}. \\ \hline
-\pdef{Object}$<$A$>$         & An unordered collection of $[$\pref{String}: \pref{Value}$]$ pairs, where each \pref{Value} conforms to type A. \\ \hline
-\pdef{Array}$<$A$>$          & An ordered collection of \pref{Value} elements, where each element conforms to type A. \\ \hline
-\pdef{String}                & An arbitrary UTF-8 string. \\ \hline
-\pdef{Number}                & Any IEEE 754 binary64 floating point number \cite{cowlishaw2019floating}, except for \textit{+Inf}, \textit{-Inf} and \textit{NaN}. \\ \hline
-\pdef{Boolean}               & One out of \texttt{true} or \texttt{false}. \\ \hline
-\pdef{Null}                  & Must be \texttt{null}. \\ \hline
-\end{tabularx}
-\end{table}
-
-With these primitives now available, we proceed to define all the types specified in the Service Discovery Register SD document without a direct equivalent among the JSON types.
-Concretely, we define the Service Discovery Register SD primitives either as \textit{aliases} or \textit{structs}.
-An \textit{alias} is a renaming of an existing type, but with some further details about how it is intended to be used.
-Structs are described in the beginning of the parent section.
-The types are listed by name in alphabetical order.
-
-\subsubsection{alias \pdef{DateTime} = \pref{String}}
-
-Pinpoints a moment in time in the format of "YYYY-MM-DD HH:mm:ss", where "YYYY" denotes year (4 digits), "MM" denotes month starting from 01, "DD" denotes day starting from 01, "HH" denotes hour in the 24-hour format (00-23), "MM" denotes minute (00-59), "SS" denotes second (00-59). " " is used as separator between the date and the time.
-An example of a valid date/time string is "2020-12-05 12:00:00"
-
-\subsubsection{alias \pdef{id} = \pref{Number}}
-
-An identifier generated for each \pref{Object} that enables to distinguish them and later to refer to a specific \pref{Object}.
-
-\subsubsection{alias \pdef{Interface} = \pref{String}}
-
-A \pref{String} that describes an interface in \textit{Protocol-SecurityType-MimeType} format. \textit{SecurityType} can be SECURE or INSECURE. \textit{Protocol} and \textit{MimeType} can be anything. An example of a valid interface is: "HTTPS-SECURE-JSON" or "HTTP-INSECURE-SENML".
-
-\subsubsection{alias \pdef{Name} = \pref{String}}
-
-A \pref{String} that is meant to be short (less than a few tens of characters) and both human and machine-readable.
-
-\subsubsection{alias \pdef{SecureType} = \pref{String}}
-
-A \pref{String} that describes an the security type. Possible values are \textit{NOT\_SECURE} or \textit{CERTIFICATE} or \textit{TOKEN}.
-
-\subsubsection{alias \pdef{URI} = \pref{String}}
-
-A \pref{String} that represents the URL subpath where the offered service is reachable, starting with a slash ("/"). An example of a valid URI is "/temperature".
-
-\subsubsection{alias \pdef{Version} = \pref{Number}}
-
-A \pref{Number} that represents the version of the service. And example of a valid version is: 1.
-\color{black}
+Simple text nessage with the value of "Got it!".
 
 \newpage
 
@@ -462,9 +171,7 @@ A \pref{Number} that represents the version of the service. And example of a val
 \noindent\begin{tabularx}{\textwidth}{| p{1cm} | p{3cm} | p{2cm} | X | p{4cm} |} \hline
 \rowcolor{gray!33} No. & Date & Version & Subject of Amendments & Author \\ \hline
 
-1 & 2020-12-05 & \arrowversion & & Szvetlin Tanyi \\ \hline
-2 & 2021-07-14 & \arrowversion & Minor edits & Jerker Delsing \\ \hline
-3 & 2022-01-17 & \arrowversion & Minor edits & Jerker Delsing \\ \hline
+1 & YYYY-MM-DD & \arrowversion & & Xxx Yyy \\ \hline
 
 \end{tabularx}
 
@@ -473,7 +180,7 @@ A \pref{Number} that represents the version of the service. And example of a val
 \noindent\begin{tabularx}{\textwidth}{| p{1cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} No. & Date & Version & Approved by \\ \hline
 
-1 & 2022-01-17 & \arrowversion & Jerker Delsing \\ \hline
+1 & YYYY-MM-DD & \arrowversion & Xxx Yyy \\ \hline
 
 \end{tabularx}
 
