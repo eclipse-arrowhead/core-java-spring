@@ -45,8 +45,8 @@
 \begin{document}
 
 %% Arrowhead Document Properties
-\ArrowheadTitle{service-register} % XXX = ServiceName 
-\ArrowheadServiceID{service-register} % ID name of service
+\ArrowheadTitle{query} % XXX = ServiceName 
+\ArrowheadServiceID{query} % ID name of service
 \ArrowheadType{Service Description}
 \ArrowheadTypeShort{SD}
 \ArrowheadVersion{4.4.0} % Arrowhead version X.Y.Z, e..g. 4.4.1
@@ -78,7 +78,7 @@
 
   % Front Page Abstract
   \begin{abstract}
-    This document provides service description for the \textbf{service-register} service. 
+    This document provides service description for the \textbf{query} service. 
   \end{abstract}
 
   \vspace*{1cm}
@@ -102,7 +102,7 @@
 
 \section{Overview}
 \label{sec:overview}
-This document describes the \textbf{service-register} service, which enables autonomous service registration, therefore it is an integral part of the implementation of service discovery requirements in Service Registry Mandatory Core System. Examples of this interaction is a system that has the capability to provide some kind of service. To enable other systems to use, to consume it, this service needs to be offered through the ServiceRegistry.
+This document describes the \textbf{query} service, which enables autonomous service look up, therefore it is an integral part of the implementation of service discovery requirements in Service Registry Mandatory Core System. Examples of this interaction is a system that has the capability to consume some kind of public core service. In order the system will be aware, where and how the service could be consumed, it needs query the service details from Service Registry Core System.
 
 The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
@@ -111,36 +111,22 @@ In Section \ref{sec:model}, we end the document by presenting the data types use
 \newpage
 
 \subsection{How This Service Is Meant to Be Used}
-The given service provider application system is required to use the  \textbf{service-register} service at its startup in order the offered services are being discoverable for the possible consumer application systems within the local cloud. Figure \ref{fig:activity_uml} describes the processing of registration data submitted by the application system.
-
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=\textwidth]{figures/post_service_registry_register_activity_uml}
-  \caption{
-    UML activity diagram of service registration process.
-  }
-  \label{fig:activity_uml}
-\end{figure}
-
-\newpage
-
+The given system is required to being aware how to consume the \textbf{query} service from Service Registry Core System in order to look for the other public core services such as orchestration from the Orchestrator Core System.  
 \subsection{Important Delimitations}
 \label{sec:delimitations}
 
-The registration data must meet the following criteria:
+The query data must meet the following criteria:
 
 \begin{itemize}
     \item Service definition can contain maximum 63 character of letters (english alphabet), numbers and dash (-), and has to start with a letter (also cannot ends with dash).
-    \item System name can't be what is reserved for core systems.
-    \item System name can contain maximum 63 character of letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).
-    \item Interface name has to follow the \texttt{Protocol-SecurityType-MimeType} format.
+    \item Interface names have to follow the \texttt{Protocol-SecurityType-MimeType} format.
     \item Security types could be only \texttt{NOT\_SECURE}, \texttt{CERTIFICATE} or \texttt{TOKEN} .
 \end{itemize}
 
 \subsection{Access policy}
 \label{sec:accesspolicy}
 
-Available for anyone within the local cloud, but in case of secure mode service provider is allowed to register only its own services. It means that provider system name and system part of certificate common name must match for successful registration.
+Available for anyone within the local cloud, but in case of application systems, the system is allowed to query only for public core services. Other Core Systems are allowed to query only for their own services.
 
 \textit{Exception:} Translator Supporting Core Sytem is allowed to register other services too.
 
@@ -149,14 +135,14 @@ Available for anyone within the local cloud, but in case of secure mode service 
 \section{Service Interface}
 \label{sec:functions}
 
-This section describes the interfaces to the service. The \textbf{service-register} service is used to register services. A service could contain various metadata as well as a physical endpoint. The various parameters are representing the necessary system and service input information.
+This section describes the interfaces to the service. The \textbf{query} service is used to looking for services. A service could contain various metadata as well as a physical endpoint. The various parameters are representing the necessary system and service input information.
 In particular, each subsection names an interface, an input type and an output type, in that order.
 The input type is named inside parentheses, while the output type is preceded by a colon.
 Input and output types are only denoted when accepted or returned, respectively, by the interface in question. All abstract data types named in this section are defined in Section 3.
 
 The following interfaces are available.
 
-\fsubsection{HTTP/TLS/JSON}{ServiceRegistryRequest}{ServiceRegistryResponse}
+\fsubsection{HTTP/TLS/JSON}{ServiceQueryForm}{ServiceQueryResult}
 
 \begin{table}[ht!]
   \centering
@@ -164,7 +150,7 @@ The following interfaces are available.
     \rowcolor{gray!33} Profile ype & Type & Version \\ \hline
     Transfer protocol & HTTP & 1.1 \\ \hline
     Data encryption & TLS & 1.3 \\ \hline
-    Encoding & e.g. JSON & RFC 8259 \cite{rfc8259} \\ \hline
+    Encoding & JSON & RFC 8259 \cite{rfc8259} \\ \hline
     Compression & N/A & - \\ \hline
   \end{tabular}
   \caption{HTTP/TLS/JSON communication details.}
@@ -176,44 +162,46 @@ The following interfaces are available.
 \section{Information Model}
 \label{sec:model}
 
-Here, all data objects that can be part of the \textbf{service-register} service
+Here, all data objects that can be part of the \textbf{query} service
 provides to the hosting System are listed in alphabetic order.
 Note that each subsection, which describes one type of object, begins with the \textit{struct} keyword, which is used to denote a collection of named fields, each with its own data type.
 As a complement to the explicitly defined types in this section, there is also a list of implicit primitive types in Section \ref{sec:model:primitives}, which are used to represent things like hashes and identifiers.
 
-\msubsection{struct}{ServiceRegistryRequest}
- 
+\msubsection{struct}{ServiceQueryForm}
+
 \begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
+\begin{tabularx}{\textwidth}{| p{5cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-endOfValidity & \pref{DateTime} & no & Service is available until this UTC timestamp. \\ \hline
-interfaces & \pref{Array}$<$\pref{Interface}$>$ & yes & List of interfaces the service supports. \\ \hline
-metadata & \pref{Metadata} & no & Metadata \\ \hline
-providerSystem & \pref{Object} & yes & Descriptor of the provider system. \\ \hline
-secure &\pref{SecureType} & yes & Type of security the service uses. \\ \hline
-serviceDefinition &\pref{Name} & yes & Identifier of the service. \\ \hline
-serviceUri &\pref{URI} & no & URI of the service. \\ \hline
-version &\pref{Version} & yes & Version of the service. \\ \hline
+interfaceRequirements &\pref{Array}$<$\pref{Interface}$>$ & no & Names of the required interfaces. If specified at least one of the interfaces must match for having result(s). \\ \hline
+maxVersionRequirement &\pref{Number} & no & Required maximum version of the service. If specified version must be equals or lower or having result(s). Ignored if \textit{versionRequirement} is specified. \\ \hline
+metadataRequirements &\pref{Metadata} & no & Service metadata requirements. If specified the whole content of
+the map must match for having result(s) \\ \hline
+minVersionRequirement &\pref{Number} & no & Required minimum version of the service. If specified version must be equals or higher or having result(s). Ignored if \textit{versionRequirement} is specified. \\ \hline
+pingProviders &\pref{Boolean} & no & Whether or not the provider should be pinged. If \textit{true} only the responding providers will comply. \\ \hline
+securityRequirements &\pref{Array}$<$\pref{SecureType}$>$ & no & Types of the required security levels. If specified at least one of the types must match for having result(s). \\ \hline
+serviceDefinitionRequirement &\pref{Name} & yes & Identifier of the service. \\ \hline
+versionRequirement &\pref{Number} & no & Required version of the service. If specified version must match for having result(s) \\ \hline
 \end{tabularx}
 \end{table}
 
-\msubsubsection{struct}{providerSystem}
+\msubsubsection{struct}{Metadata}
 
-\begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
-\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-address & \pref{String} & yes & Network address. \\ \hline
-authenticationInfo & \pref{String} & no & Public key of the client certificate. \\ \hline
-metadata & \pref{Metadata} & no & Metadata \\ \hline
-port & \pref{PortNumber} & yes & Port of the system. \\ \hline
-systemName &\pref{Name} & yes & Name of the system. \\ \hline
-\end{tabularx}
-\end{table}
+A JSON \pref{Object} which maps \pref{String} key-value pairs
 
 \clearpage
 
-\msubsection{struct}{ServiceRegistryResponse}
- 
+\msubsection{struct}{ServiceQueryResult}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{3cm} | p{6cm} | X |} \hline
+\rowcolor{gray!33} Field & Type      & Description \\ \hline
+serviceQueryData & \pref{Array}$<$\pref{ServiceRegistryResponse}$>$     & List of service instance results \\ \hline
+unfilteredHits & \pref{Number} & Number of service instances not included by \textit{serviceQueryData} due to the specified filters. \\ \hline
+\end{tabularx}
+\end{table}
+
+\msubsubsection{struct}{ServiceRegistryResponse}
+
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
 \rowcolor{gray!33} Field & Type      & Description \\ \hline
@@ -221,11 +209,11 @@ createdAt & \pref{DateTime} & Service instance record was created at this UTC ti
 endOfValidity & \pref{DateTime} & Service is available until this UTC timestamp. \\ \hline
 id & \pref{Number} & Identifier of the service instance \\ \hline
 interfaces & \pref{Array}$<$\pref{Object}$>$     & List of interfaces the service supports. \\ \hline
-metadata & \pref{Metadata}     & Metadata \\ \hline
-providerSystem & \pref{Object} & Descriptor of the provider system record. \\ \hline
+provider & \pref{Object} & Descriptor of the provider system record. \\ \hline
 secure &\pref{SecureType}  & Type of security the service uses. \\ \hline
-serviceDefinition &\pref{Object}        & Descriptor of the serviceDefinition record. \\ \hline
+serviceDefinitionResponse & \pref{Object} & Descriptor of the serviceDefinition record. \\ \hline
 serviceUri &\pref{URI}         & URI of the service. \\ \hline
+metadata & \pref{Metadata}     & Service metadata \\ \hline
 updatedAt & \pref{DateTime} & Service instance record was modified at this UTC timestamp. \\ \hline
 version &\pref{Version}     & Version of the service. \\ \hline
 \end{tabularx}
@@ -243,6 +231,8 @@ updatedAt & \pref{DateTime} & Interface instance record was modified at this UTC
 \end{tabularx}
 \end{table}
 
+\clearpage
+
 \msubsubsection{struct}{provider}
 
 \begin{table}[ht!]
@@ -258,8 +248,6 @@ systemName &\pref{Name}  & Name of the system. \\ \hline
 updatedAt & \pref{DateTime} & System instance record was modified at this UTC timestamp. \\ \hline
 \end{tabularx}
 \end{table}
-
-\clearpage
 
 \msubsubsection{struct}{serviceDefinition}
 
