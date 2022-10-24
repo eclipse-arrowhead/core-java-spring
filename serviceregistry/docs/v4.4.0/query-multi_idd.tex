@@ -57,8 +57,8 @@
 \begin{document}
 
 %% Arrowhead Document Properties
-\ArrowheadTitle{query HTTP/TLS/JSON} %e.g. ServiceDiscovery HTTP/TLS/JSON
-\ArrowheadServiceID{query} % e.g. register
+\ArrowheadTitle{query-multi HTTP/TLS/JSON} %e.g. ServiceDiscovery HTTP/TLS/JSON
+\ArrowheadServiceID{query-multi} % e.g. register
 \ArrowheadType{Interface Design Description}
 \ArrowheadTypeShort{IDD}
 \ArrowheadVersion{4.4.0}
@@ -92,7 +92,7 @@
   % Front Page Abstract
   \begin{abstract}
     This document describes a HTTP protocol with TLS payload
-    security and JSON payload encoding variant of the \textbf{query} service.
+    security and JSON payload encoding variant of the \textbf{query-multi} service.
   \end{abstract}
   \vspace*{1cm}
 
@@ -106,8 +106,8 @@
 \section{Overview}
 \label{sec:overview}
 
-This document describes the \textbf{query} service interface,
-which is enables autonomous service look-up. It's implemented using protocol, encoding as stated in the following table:
+This document describes the \textbf{query-multi} service interface,
+which is enables autonomous service look-up for multiple services by one request. It's implemented using protocol, encoding as stated in the following table:
 
 \begin{table}[ht!]
   \centering
@@ -118,15 +118,15 @@ which is enables autonomous service look-up. It's implemented using protocol, en
     Encoding & JSON & RFC 8259 \cite{rfc8259} \\ \hline
     Compression & N/A & - \\ \hline
   \end{tabular}
-  \caption{Communication and sematics details used for the \textbf{query}
+  \caption{Communication and sematics details used for the \textbf{query-multi}
     service interface}
   \label{tab:comunication_semantics_profile}
 \end{table}
 
-This document provides the Interface Design Description IDD to the \textit{query -- Service Description} document.
+This document provides the Interface Design Description IDD to the \textit{query-multi -- Service Description} document.
 For further details about how this service is meant to be used, please consult that document.
 
-The rest of this document describes how to realize the query service HTTP/TLS/JSON interface in details.
+The rest of this document describes how to realize the query-multi service HTTP/TLS/JSON interface in details.
 
 \newpage
 
@@ -139,71 +139,79 @@ The service responses with the status code \texttt{200
 improper client side certificate is provided, \texttt{500 Internal
   Server Error} if Service Registry is unavailable.
 
-\begin{lstlisting}[language=http,label={lst:register},caption={A \fref{query} invocation.}]
-POST /serviceregistry/query HTTP/1.1
+\begin{lstlisting}[language=http,label={lst:register},caption={A \fref{query-multi} invocation.}]
+POST /serviceregistry/query/multi HTTP/1.1
 
 {
- "serviceDefinitionRequirement": "string",
- "interfaceRequirements": [
-   "string"
- ],
- "securityRequirements": [
-   "CERTIFICATE"
- ],
- "metadataRequirements": {
-   "additionalProp1": "string",
-   "additionalProp2": "string",
-   "additionalProp3": "string"
- },
- "versionRequirement": 0,
- "maxVersionRequirement": 0,
- "minVersionRequirement": 0,
- "pingProviders": true
-}
-\end{lstlisting}
-
-\begin{lstlisting}[language=http,label={lst:register_response},caption={A \fref{query} response.}]
-{
- "serviceQueryData": [
-   {
-     "id": 0,
-     "serviceDefinition": {
-       "id": 0,
-       "serviceDefinition": "string",
-       "createdAt": "string",
-       "updatedAt": "string"
-     },
-     "provider": {
-       "id": 0,
-       "systemName": "string",
-       "address": "string",
-       "port": 0,
-       "authenticationInfo": "string",
-       "createdAt": "string",
-       "updatedAt": "string"
-     },
-     "serviceUri": "string",
-     "endOfValidity": "string",
-     "secure": "CERTIFICATE",
-     "metadata": {
+  "forms": [
+    {
+     "serviceDefinitionRequirement": "string",
+     "interfaceRequirements": [
+       "string"
+     ],
+     "securityRequirements": [
+       "CERTIFICATE"
+     ],
+     "metadataRequirements": {
        "additionalProp1": "string",
        "additionalProp2": "string",
        "additionalProp3": "string"
      },
-     "version": 0,
-     "interfaces": [
+     "versionRequirement": 0,
+     "maxVersionRequirement": 0,
+     "minVersionRequirement": 0,
+     "pingProviders": true
+    }
+  ]
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=http,label={lst:register_response},caption={A \fref{query-multi} response.}]
+{
+  "results": [
+    {
+     "serviceQueryData": [
        {
          "id": 0,
-         "interfaceName": "string",
+         "serviceDefinition": {
+           "id": 0,
+           "serviceDefinition": "string",
+           "createdAt": "string",
+           "updatedAt": "string"
+         },
+         "provider": {
+           "id": 0,
+           "systemName": "string",
+           "address": "string",
+           "port": 0,
+           "authenticationInfo": "string",
+           "createdAt": "string",
+           "updatedAt": "string"
+         },
+         "serviceUri": "string",
+         "endOfValidity": "string",
+         "secure": "CERTIFICATE",
+         "metadata": {
+           "additionalProp1": "string",
+           "additionalProp2": "string",
+           "additionalProp3": "string"
+         },
+         "version": 0,
+         "interfaces": [
+           {
+             "id": 0,
+             "interfaceName": "string",
+             "createdAt": "string",
+             "updatedAt": "string"
+           }
+         ],
          "createdAt": "string",
          "updatedAt": "string"
-       }
+        }
      ],
-     "createdAt": "string",
-     "updatedAt": "string"
+     "unfilteredHits": 0
     }
- ],
- "unfilteredHits": 0
+  ]
 }
 \end{lstlisting}
 
@@ -216,7 +224,16 @@ Here, all data objects that can be part of the service calls associated with thi
 Note that each subsection, which describes one type of object, begins with the \textit{struct} keyword, which is meant to denote a JSON \pref{Object} that must contain certain fields, or names, with values conforming to explicitly named types.
 As a complement to the primary types defined in this section, there is also a list of secondary types in Section \ref{sec:model:primitives}, which are used to represent things like hashes, identifiers and texts.
 
-\msubsection{struct}{ServiceQueryForm}
+\msubsection{struct}{ServiceQueryFormList}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{5cm} | p{3cm} | p{2cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
+forms &\pref{Array}$<$\pref{Object}$>$ & yes & List of service requirements form. \\ \hline
+\end{tabularx}
+\end{table}
+
+\msubsubsection{struct}{forms}
 
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{5cm} | p{3cm} | p{2cm} | X |} \hline
@@ -239,7 +256,16 @@ A JSON \pref{Object} which maps \pref{String} key-value pairs
 
 \clearpage
 
-\msubsection{struct}{ServiceQueryResult}
+\msubsection{struct}{ServiceQueryResultList}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
+\rowcolor{gray!33} Field & Type      & Description \\ \hline
+results & \pref{Array}$<$\pref{Object}$>$     & List of service query results \\ \hline
+\end{tabularx}
+\end{table}
+
+\msubsubsection{struct}{results}
 
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | p{6cm} | X |} \hline
@@ -332,8 +358,8 @@ Furthermore, the \pref{Object} and \pref{Array} types are given optional generic
 \end{tabularx}
 \end{table}
 
-With these primitives now available, we proceed to define all the types specified in the \textbf{query} SD document without a direct equivalent among the JSON types.
-Concretely, we define the \textbf{query} SD primitives either as \textit{aliases} or \textit{structs}.
+With these primitives now available, we proceed to define all the types specified in the \textbf{query-multi} SD document without a direct equivalent among the JSON types.
+Concretely, we define the \textbf{query-multi} SD primitives either as \textit{aliases} or \textit{structs}.
 An \textit{alias} is a renaming of an existing type, but with some further details about how it is intended to be used.
 Structs are described in the beginning of the parent section.
 The types are listed by name in alphabetical order.

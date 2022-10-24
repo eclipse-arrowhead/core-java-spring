@@ -45,8 +45,8 @@
 \begin{document}
 
 %% Arrowhead Document Properties
-\ArrowheadTitle{query} % XXX = ServiceName 
-\ArrowheadServiceID{query} % ID name of service
+\ArrowheadTitle{query-multi} % XXX = ServiceName 
+\ArrowheadServiceID{query-multi} % ID name of service
 \ArrowheadType{Service Description}
 \ArrowheadTypeShort{SD}
 \ArrowheadVersion{4.4.0} % Arrowhead version X.Y.Z, e..g. 4.4.1
@@ -78,7 +78,7 @@
 
   % Front Page Abstract
   \begin{abstract}
-    This document provides service description for the \textbf{query} service. 
+    This document provides service description for the \textbf{query-multi} service. 
   \end{abstract}
 
   \vspace*{1cm}
@@ -102,7 +102,7 @@
 
 \section{Overview}
 \label{sec:overview}
-This document describes the \textbf{query} service, which enables autonomous service look up, therefore it is an integral part of the implementation of service discovery requirements in Service Registry Mandatory Core System. Examples of this interaction is a system that has the capability to consume some kind of public core service. In order the system will be aware, where and how the service could be consumed, it needs query the service details from Service Registry Core System.
+This document describes the \textbf{query-multi} service, which enables autonomous service look up for multiple services by one request, therefore it is an integral part of the implementation of service discovery requirements in Service Registry Mandatory Core System. Examples of this interaction is a core system that needs the available information for services that fulfill certain requirements. The look up process itself is exactly the same as in case of the \textit{query} service.
 
 The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
@@ -111,7 +111,7 @@ In Section \ref{sec:model}, we end the document by presenting the data types use
 \newpage
 
 \subsection{How This Service Is Meant to Be Used}
-The given system is required to being aware how to consume the \textbf{query} service from Service Registry Core System in order to look for the other public core services such as orchestration from the Orchestrator Core System.  
+The given core system is required to submit a list of service query forms, in which the requirements for each systems are defined.
 \subsection{Important Delimitations}
 \label{sec:delimitations}
 
@@ -126,16 +126,14 @@ The query data must meet the following criteria:
 \subsection{Access policy}
 \label{sec:accesspolicy}
 
-Available for anyone within the local cloud, but in case of application systems, the system is allowed to query only for public core services. Other Core Systems are allowed to query only for their own services.
-
-\textit{Exception:} Translator Supporting Core Sytem is allowed to query for other services too.
+Available only for the following core systems: \textit{Authorizationt, Orchestrator, Certificate Authority, Choreographer, Device Registry, Event Handler, HawkBit Configuration Manager, MSCV, Plant Description Engine, QoS-Monitor, System Registry}
 
 \newpage
 
 \section{Service Interface}
 \label{sec:functions}
 
-This section describes the interfaces to the service. The \textbf{query} service is used to looking for services. A service could contain various metadata as well as a physical endpoint. The various parameters are representing the necessary system and service input information.
+This section describes the interfaces to the service. The \textbf{query-multi} service is used to looking for multiple services. A service could contain various metadata as well as a physical endpoint. The various parameters are representing the necessary system and service input information.
 In particular, each subsection names an interface, an input type and an output type, in that order.
 The input type is named inside parentheses, while the output type is preceded by a colon.
 Input and output types are only denoted when accepted or returned, respectively, by the interface in question. All abstract data types named in this section are defined in Section 3.
@@ -162,12 +160,21 @@ The following interfaces are available.
 \section{Information Model}
 \label{sec:model}
 
-Here, all data objects that can be part of the \textbf{query} service
+Here, all data objects that can be part of the \textbf{query-multi} service
 provides to the hosting System are listed in alphabetic order.
 Note that each subsection, which describes one type of object, begins with the \textit{struct} keyword, which is used to denote a collection of named fields, each with its own data type.
 As a complement to the explicitly defined types in this section, there is also a list of implicit primitive types in Section \ref{sec:model:primitives}, which are used to represent things like hashes and identifiers.
 
-\msubsection{struct}{ServiceQueryForm}
+\msubsection{struct}{ServiceQueryFormList}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{5cm} | p{3cm} | p{2cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
+forms &\pref{Array}$<$\pref{Object}$>$ & yes & List of service requirements form. \\ \hline
+\end{tabularx}
+\end{table}
+
+\msubsubsection{struct}{forms}
 
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{5cm} | p{3cm} | p{2cm} | X |} \hline
@@ -190,7 +197,16 @@ A JSON \pref{Object} which maps \pref{String} key-value pairs
 
 \clearpage
 
-\msubsection{struct}{ServiceQueryResult}
+\msubsection{struct}{ServiceQueryResultList}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
+\rowcolor{gray!33} Field & Type      & Description \\ \hline
+results & \pref{Array}$<$\pref{Object}$>$     & List of service query results \\ \hline
+\end{tabularx}
+\end{table}
+
+\msubsubsection{struct}{results}
 
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | p{6cm} | X |} \hline
