@@ -106,7 +106,7 @@
 \section{Overview}
 \label{sec:overview}
 
-This document describes the \textbf{echo} service interface, which enables an ”I’m alive” kind monitoring of the system.. It's implemented using protocol, encoding as stated in the following table:
+This document describes the \textbf{echo} service interface, which enables an ”I’m alive” kind monitoring of the system. It's implemented using protocol, encoding as stated in the following table:
 
 \begin{table}[ht!]
   \centering
@@ -134,7 +134,7 @@ The rest of this document describes how to realize the echo service HTTP/TLS/TEX
 
 The service responses with the status code \texttt{200
   Ok} if called successfully. The error codes are \texttt{401 Unauthorized} if
-improper client side certificate is provided, \texttt{500 Internal
+improper client side certificate is provided and \texttt{500 Internal
   Server Error} if the system is unavailable.
 
 \begin{lstlisting}[language=http,label={lst:echo},caption={A \fref{echo} invocation.}]
@@ -151,12 +151,10 @@ Got it!
 \label{sec:model}
 
 Here, all data objects that can be part of the service calls associated with this service are listed in alphabetic order.
-Note that each subsection, which describes one type of object, begins with the \textit{struct} keyword, which is meant to denote a JSON \pref{Object} that must contain certain fields, or names, with values conforming to explicitly named types.
-As a complement to the primary types defined in this section, there is also a list of secondary types in Section \ref{sec:model:primitives}, which are used to represent things like hashes, identifiers and texts.
 
-\msubsection{struct}{EchoResponse}
+\msubsection{text}{EchoResponse}
 
-Simple text nessage with the value of "Got it!".
+Simple text message with the value of "Got it!".
 
 \newpage
 

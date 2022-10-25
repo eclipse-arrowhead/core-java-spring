@@ -126,8 +126,7 @@ Available for anyone within the local cloud.
 \section{Service Interface}
 \label{sec:functions}
 
-This section describes the interfaces to the service. The \textbf{echo} service is used to monitor the system availability. A service could contain various metadata as well as a physical endpoint. The various parameters are representing the necessary system and service input information.
-In particular, each subsection names an interface, an input type and an output type, in that order.
+This section describes the interfaces to the service. The \textbf{echo} service is used to monitor the system availability. In the following, each subsection names an interface, an input type and an output type, in that order.
 The input type is named inside parentheses, while the output type is preceded by a colon.
 Input and output types are only denoted when accepted or returned, respectively, by the interface in question. All abstract data types named in this section are defined in Section 3.
 
@@ -155,10 +154,8 @@ The following interfaces are available.
 
 Here, all data objects that can be part of the \textbf{echo} service
 provides to the hosting System are listed in alphabetic order.
-Note that each subsection, which describes one type of object, begins with the \textit{struct} keyword, which is used to denote a collection of named fields, each with its own data type.
-As a complement to the explicitly defined types in this section, there is also a list of implicit primitive types in Section \ref{sec:model:primitives}, which are used to represent things like hashes and identifiers.
 
-\msubsection{struct}{EchoResponse}
+\msubsection{text}{EchoResponse}
  
 Simple text message with the value of "Got it!".
 

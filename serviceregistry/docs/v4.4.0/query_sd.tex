@@ -102,7 +102,7 @@
 
 \section{Overview}
 \label{sec:overview}
-This document describes the \textbf{query} service, which enables autonomous service look up, therefore it is an integral part of the implementation of service discovery requirements in Service Registry Mandatory Core System. Examples of this interaction is a system that has the capability to consume some kind of public core service. In order the system will be aware, where and how the service could be consumed, it needs query the service details from Service Registry Core System.
+This document describes the \textbf{query} service, which enables autonomous service look up, therefore it is an integral part of the implementation of service discovery requirements in Service Registry Mandatory Core System. Examples of this interaction is a system that has the capability to consume some kind of public core service. In order the system will be aware, where and how the service could be consumed, it needs to query the service details from Service Registry Core System.
 
 The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
@@ -111,7 +111,20 @@ In Section \ref{sec:model}, we end the document by presenting the data types use
 \newpage
 
 \subsection{How This Service Is Meant to Be Used}
-The given system is required to being aware how to consume the \textbf{query} service from Service Registry Core System in order to look for the other public core services such as orchestration from the Orchestrator Core System.  
+The given system is required to being aware how to consume the \textbf{query} service from Service Registry Core System in order to look for the other public core services such as orchestration from the Orchestrator Core System. Figure \ref{fig:activity_uml} describes the processing of query data.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=9cm]
+  {figures/post_service_registry_query_activity_uml}
+  \caption{
+    UML activity diagram of query process.
+  }
+  \label{fig:activity_uml}
+\end{figure}
+
+\clearpage
+
 \subsection{Important Delimitations}
 \label{sec:delimitations}
 

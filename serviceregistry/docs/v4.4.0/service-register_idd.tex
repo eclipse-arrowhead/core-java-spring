@@ -107,7 +107,7 @@
 \label{sec:overview}
 
 This document describes the \textbf{service-register} service interface,
-which is enables autonomous service registration. It's implemented using protocol, encoding as stated in the following table:
+which enables autonomous service registration. It's implemented using protocol, encoding as stated in the following table:
 
 \begin{table}[ht!]
   \centering
@@ -115,7 +115,7 @@ which is enables autonomous service registration. It's implemented using protoco
     \rowcolor{gray!33} Profile ype & Type & Version \\ \hline
     Transfer protocol & HTTP & 1.1 \\ \hline
     Data encryption & TLS & 1.3 \\ \hline
-    Encoding & e.g. JSON & RFC 8259 \cite{rfc8259} \\ \hline
+    Encoding & JSON & RFC 8259 \cite{rfc8259} \\ \hline
     Compression & N/A & - \\ \hline
   \end{tabular}
   \caption{Communication and sematics details used for the \textbf{service-register}
@@ -234,6 +234,10 @@ version &\pref{Version} & no & Version of the service. \newline Default: \texttt
 \end{tabularx}
 \end{table}
 
+\msubsubsection{struct}{Metadata}
+
+A JSON \pref{Object} which maps \pref{String} key-value pairs.
+
 \msubsubsection{struct}{providerSystem}
 
 \begin{table}[ht!]
@@ -279,6 +283,12 @@ interfaceName &\pref{Interface}  & Specified name of the interface. \\ \hline
 updatedAt & \pref{DateTime} & Interface instance record was modified at this UTC timestamp. \\ \hline
 \end{tabularx}
 \end{table}
+
+\msubsubsection{struct}{Metadata}
+
+A JSON \pref{Object} which maps \pref{String} key-value pairs.
+
+\clearpage
 
 \msubsubsection{struct}{provider}
 

@@ -164,7 +164,7 @@ The following interfaces are available.
     \rowcolor{gray!33} Profile ype & Type & Version \\ \hline
     Transfer protocol & HTTP & 1.1 \\ \hline
     Data encryption & TLS & 1.3 \\ \hline
-    Encoding & e.g. JSON & RFC 8259 \cite{rfc8259} \\ \hline
+    Encoding & JSON & RFC 8259 \cite{rfc8259} \\ \hline
     Compression & N/A & - \\ \hline
   \end{tabular}
   \caption{HTTP/TLS/JSON communication details.}
@@ -196,6 +196,10 @@ serviceUri &\pref{URI} & no & URI of the service. \\ \hline
 version &\pref{Version} & yes & Version of the service. \\ \hline
 \end{tabularx}
 \end{table}
+
+\msubsubsection{struct}{Metadata}
+
+A JSON \pref{Object} which maps \pref{String} key-value pairs.
 
 \msubsubsection{struct}{providerSystem}
 
@@ -242,6 +246,12 @@ interfaceName &\pref{Interface}  & Specified name of the interface. \\ \hline
 updatedAt & \pref{DateTime} & Interface instance record was modified at this UTC timestamp. \\ \hline
 \end{tabularx}
 \end{table}
+
+\msubsubsection{struct}{Metadata}
+
+A JSON \pref{Object} which maps \pref{String} key-value pairs.
+
+\clearpage
 
 \msubsubsection{struct}{provider}
 
