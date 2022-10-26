@@ -1,0 +1,259 @@
+\documentclass[a4paper]{arrowhead}
+
+\usepackage[yyyymmdd]{datetime}
+\usepackage{etoolbox}
+\usepackage[utf8]{inputenc}
+\usepackage{multirow}
+
+\renewcommand{\dateseparator}{-}
+
+\setlength{\parskip}{1em}
+
+\newcommand{\fparam}[1]{\textit{\textcolor{ArrowheadBlue}{#1}}}
+
+%% Special references
+\newcommand{\fref}[1]{{\textcolor{ArrowheadBlue}{\hyperref[sec:functions:#1]{#1}}}}
+\newcommand{\mref}[1]{{\textcolor{ArrowheadPurple}{\hyperref[sec:model:#1]{#1}}}}
+\newcommand{\pdef}[1]{{\textcolor{ArrowheadGrey}{#1 \label{sec:model:primitives:#1} \label{sec:model:primitives:#1s}}}}
+\newcommand{\pref}[1]{{\textcolor{ArrowheadGrey}{\hyperref[sec:model:primitives:#1]{#1}}}}
+
+\newrobustcmd\fsubsection[5]{
+  \addtocounter{subsection}{1}
+  \addcontentsline{toc}{subsection}{\protect\numberline{\thesubsection}operation \textcolor{ArrowheadBlue}{#1}}
+  \renewcommand*{\do}[1]{\rref{##1},\ }
+  \subsection*{
+    \thesubsection\quad
+    #2 \textcolor{ArrowheadPurple}{#3} \\
+    \small
+    \hspace*{0.075\textwidth}\begin{minipage}{0.1\textwidth}
+      \vspace*{1mm}
+      Operation: \\
+      \notblank{#4}{Input: \\}{}
+      \notblank{#5}{Output: \\}{}
+    \end{minipage}
+    \begin{minipage}{0.825\textwidth}
+      \vspace*{1mm}
+      \textcolor{ArrowheadBlue}{#1} \\
+      \notblank{#4}{\mref{#4} \\}{}
+      \notblank{#5}{\mref{#5} \\}{}
+    \end{minipage}
+  }
+  \label{sec:functions:#1}
+}
+\newrobustcmd\msubsection[2]{
+  \addtocounter{subsection}{1}
+  \addcontentsline{toc}{subsection}{\protect\numberline{\thesubsection}#1 \textcolor{ArrowheadPurple}{#2}}
+  \subsection*{\thesubsection\quad#1 \textcolor{ArrowheadPurple}{#2}}
+  \label{sec:model:#2} \label{sec:model:#2s}
+}
+\newrobustcmd\msubsubsection[3]{
+  \addtocounter{subsubsection}{1}
+  \addcontentsline{toc}{subsubsection}{\protect\numberline{\thesubsubsection}#1 \textcolor{ArrowheadPurple}{#2}}
+  \subsubsection*{\thesubsubsection\quad#1 \textcolor{ArrowheadPurple}{#2}}
+  \label{sec:model:#2} \label{sec:model:#2s}
+}
+%%
+
+\begin{document}
+
+%% Arrowhead Document Properties
+\ArrowheadTitle{query-by-system-id HTTP/TLS/JSON} %e.g. ServiceDiscovery HTTP/TLS/JSON
+\ArrowheadServiceID{query-by-system-id} % e.g. register
+\ArrowheadType{Interface Design Description}
+\ArrowheadTypeShort{IDD}
+\ArrowheadVersion{4.4.0}
+\ArrowheadDate{\today}
+\ArrowheadAuthor{Tamás Bordi} % e.g Szvetlin Tanyi}
+\ArrowheadStatus{RELEASE}
+\ArrowheadContact{tbordi@aitia.ai} % jerker.delsing@arrowhead.eu
+\ArrowheadFooter{\href{www.arrowhead.eu}{www.arrowhead.eu}}
+\ArrowheadSetup
+%%
+
+%% Front Page
+\begin{center}
+  \vspace*{1cm}
+  \huge{\arrowtitle}
+
+  \vspace*{0.2cm}
+  \LARGE{\arrowtype}
+  \vspace*{1cm}
+\end{center}
+
+%  \Large{Service ID: \textit{"\arrowid"}}
+  \vspace*{\fill}
+
+  % Front Page Image
+  %\includegraphics{figures/TODO}
+
+  \vspace*{1cm}
+  \vspace*{\fill}
+
+  % Front Page Abstract
+  \begin{abstract}
+    This document describes a HTTP protocol with TLS payload
+    security and JSON payload encoding variant of the \textbf{query-by-system-id} service.
+  \end{abstract}
+  \vspace*{1cm}
+
+\newpage
+
+%% Table of Contents
+\tableofcontents
+\newpage
+%%
+
+\section{Overview}
+\label{sec:overview}
+
+This document describes the \textbf{query-by-system-id} service interface, which enables the systems to query for specific system details based on system parameters. It's implemented using protocol, encoding as stated in the following table:
+
+\begin{table}[ht!]
+  \centering
+  \begin{tabular}{|l|l|l|l|}
+    \rowcolor{gray!33} Profile ype & Type & Version \\ \hline
+    Transfer protocol & HTTP & 1.1 \\ \hline
+    Data encryption & TLS & 1.3 \\ \hline
+    Encoding & JSON & RFC 8259 \cite{rfc8259} \\ \hline
+    Compression & N/A & - \\ \hline
+  \end{tabular}
+  \caption{Communication and sematics details used for the \textbf{query-by-system-id}
+    service interface}
+  \label{tab:comunication_semantics_profile}
+\end{table}
+
+This document provides the Interface Design Description IDD to the \textit{query-by-system-id -- Service Description} document.
+For further details about how this service is meant to be used, please consult that document.
+
+The rest of this document describes how to realize the query-by-system-id service HTTP/TLS/JSON interface in details.
+
+\newpage
+
+\section{Interface Description}
+\label{sec:functions}
+
+The service responses with the status code \texttt{200
+  Ok} if called successfully. The error codes are, \texttt{400
+  Bad Request} if request is malformed, \texttt{401 Unauthorized} if
+improper client side certificate is provided, \texttt{500 Internal
+  Server Error} if Service Registry is unavailable.
+
+\begin{lstlisting}[language=http,label={lst:register},caption={A \fref{query-by-system-id} invocation.}]
+GET /serviceregistry/query/system/{id} HTTP/1.1
+\end{lstlisting}
+
+\begin{lstlisting}[language=http,label={lst:register_response},caption={A \fref{query-by-system-id} response.}]
+{
+    "id": 4,
+    "systemName": "exampleprovider",
+    "address": "192.168.0.101",
+    "port": 8080,
+    "authenticationInfo": "public key of the client certificate",
+    "metadata": {
+        "location": "building-a"
+    },
+    "createdAt": "2020-03-18T22:13:32.143",
+    "updatedAt": "2020-03-18T22:13:32.143"
+}
+\end{lstlisting}
+
+\newpage
+
+\section{Data Models}
+\label{sec:model}
+
+Here, all data objects that can be part of the service calls associated with this service are listed in alphabetic order.
+Note that each subsection, which describes one type of object, begins with the \textit{struct} keyword, which is meant to denote a JSON \pref{Object} that must contain certain fields, or names, with values conforming to explicitly named types.
+As a complement to the primary types defined in this section, there is also a list of secondary types in Section \ref{sec:model:primitives}, which are used to represent things like hashes, identifiers and texts.
+
+\msubsection{struct}{SystemResponse}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
+\rowcolor{gray!33} Field & Type      & Description \\ \hline
+address & \pref{Address} & A string representation of the network address. \\ \hline
+authenticationInfo & \pref{String}     & Public key of the client certificate. \\ \hline
+createdAt & \pref{DateTime} & System instance record was created at this UTC timestamp. \\ \hline
+id & \pref{Number} & Identifier of the system instance \\ \hline
+metadata & \pref{Metadata}     & Metadata \\ \hline
+port & \pref{PortNumber} & Port of the system. \\ \hline
+systemName &\pref{Name}  & Name of the system. \\ \hline
+updatedAt & \pref{DateTime} & System instance record was modified at this UTC timestamp. \\ \hline
+\end{tabularx}
+\end{table}
+
+\msubsubsection{struct}{Metadata}
+
+A JSON \pref{Object} which maps \pref{String} key-value pairs.
+
+\newpage
+
+\subsubsection{Primitives}
+\label{sec:model:primitives}
+
+As all messages are encoded using the JSON format \cite{bray2014json}, the following primitive constructs, part of that standard, become available.
+Note that the official standard is defined in terms of parsing rules, while this list only concerns syntactic information. 
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{3cm} | X |} \hline
+\rowcolor{gray!33} JSON Type & Description \\ \hline
+\pdef{Value}                 & Any out of \pref{Object}, \pref{Array}, \pref{String}, \pref{Number}, \pref{Boolean} or \pref{Null}. \\ \hline
+\pdef{Object}$<$A$>$         & An unordered collection of $[$\pref{String}: \pref{Value}$]$ pairs, where each \pref{Value} conforms to type A. \\ \hline
+\pdef{Array}$<$A$>$          & An ordered collection of \pref{Value} elements, where each element conforms to type A. \\ \hline
+\pdef{String}                & An arbitrary UTF-8 string. \\ \hline
+\pdef{Number}                & Any IEEE 754 binary64 floating point number \cite{cowlishaw2019floating}, except for \textit{+Inf}, \textit{-Inf} and \textit{NaN}. \\ \hline
+\pdef{Boolean}               & One out of \texttt{true} or \texttt{false}. \\ \hline
+\pdef{Null}                  & Must be \texttt{null}. \\ \hline
+\end{tabularx}
+\end{table}
+
+With these primitives now available, we proceed to define all the types specified in the \textbf{query-by-system-id} SD document without a direct equivalent among the JSON types.
+Concretely, we define the \textbf{query-by-system-id} SD primitives either as \textit{aliases} or \textit{structs}.
+An \textit{alias} is a renaming of an existing type, but with some further details about how it is intended to be used.
+Structs are described in the beginning of the parent section.
+The types are listed by name in alphabetical order.
+
+\subsubsection{alias \pdef{DateTime} = \pref{String}}
+
+Pinpoints a moment in time in the format of ISO8601 standard "yyyy-mm-ddThh:mm:ss", where "yyy" denotes year (4 digits), "mm" denotes month starting from 01, "dd" denotes day starting from 01, "T" is the separator between date and time part, "hh" denotes hour in the 24-hour format (00-23), "MM" denotes minute (00-59), "SS" denotes second (00-59). " " is used as separator between the date and the time.
+An example of a valid date/time string is "2020-12-05T12:00:00"
+
+\subsubsection{alias \pdef{id} = \pref{Number}}
+
+An identifier generated for each \pref{Object} that enables to distinguish them and later to refer to a specific \pref{Object}.
+
+\subsubsection{alias \pdef{Name} = \pref{String}}
+
+A \pref{String} indentifier that is intended to be both human and machine-readable.
+
+\subsubsection{alias \pdef{PortNumber} = \pref{Number}}
+
+Decimal \pref{Number} in the range of 0-65535.
+
+\newpage
+
+\bibliographystyle{IEEEtran}
+\bibliography{bibliography}
+
+\newpage
+
+\section{Revision History}
+\subsection{Amendments}
+
+\noindent\begin{tabularx}{\textwidth}{| p{1cm} | p{3cm} | p{2cm} | X | p{4cm} |} \hline
+\rowcolor{gray!33} No. & Date & Version & Subject of Amendments & Author \\ \hline
+
+1 & YYYY-MM-DD & \arrowversion & & Xxx Yyy \\ \hline
+
+\end{tabularx}
+
+\subsection{Quality Assurance}
+
+\noindent\begin{tabularx}{\textwidth}{| p{1cm} | p{3cm} | p{2cm} | X |} \hline
+\rowcolor{gray!33} No. & Date & Version & Approved by \\ \hline
+
+1 & YYYY-MM-DD & \arrowversion & Xxx Yyy \\ \hline
+
+\end{tabularx}
+
+\end{document}
