@@ -160,9 +160,9 @@ In order to achieve the mentioned functionalities, Orchestrator is capable to st
 \subsection{Important Delimitations}
 \label{sec:delimitations}
 
-While Orchestrator Core System is capable of using two types of matching rules (fix rules where every pairing is referencing a consumer and a provider instance, or flexible rules where both consumer and provider can be described with their names and/or their settings), can't use both simultaneously. Administators have to choose between the two mode in deploy time.
+While Orchestrator Core System is capable of using two types of matching rules (fix rules where every pairing is referencing a consumer and a provider instance, or flexible rules where both consumer and provider can be described with their names and/or their settings), can't use both simultaneously. Administators have to choose between the two modes when deploying the system.
 
-Also, the Orchestrator can't work alone. It needs a working Service Registry Core System and a Authorization Core System to operate. To enable inter-cloud orchestration, it also needs at least a running Gatekeeper Core System and depending on networking, a Gateway Core System, too. To enable Quality-of-Service requirement matching, a QoSMonitor Core System is needed.
+Also, the Orchestrator can't work alone. It needs a Service Registry Core System and a Authorization Core System to operate. To enable inter-cloud orchestration, it also needs at least a running Gatekeeper Core System and depending on networking a Gateway Core System, too. To enable Quality-of-Service requirement matching, a QoS Monitor Core System is needed.
 
 \newpage
 
@@ -172,35 +172,35 @@ Also, the Orchestrator can't work alone. It needs a working Service Registry Cor
 \msubsection{service}{echo}
 The purpose of this service is to test the system availability. The service is offered for both application and core systems. 
 
-\msubsection{service}{orchestration}
-The purpose of this service is to get access information for providers that provides the required service and met the additional requirements. The service is offered for both application and core systems. 
+\msubsection{service}{orchestration-service}
+The purpose of this service is to get access information for providers that provides the required service and meets the additional requirements. The service is offered for both application and core systems. 
 
-\msubsection{service}{orchestration-by-proxy}
-The purpose of this service is to get access information for providers that provides the required service and met the additional requirements. The main difference between this service and the previous one that here the consumer of the service is not the requester system. The service is offered only for the Workflow Choreographer core system. 
+\msubsection{service}{orchestration-service-by-proxy}
+The purpose of this service is to get access information for providers that provides the required service and meets the additional requirements. The main difference between this service and the previous one that here the consumer of the service is not the requester system. The service is offered only for the Workflow Choreographer core system. 
 
-\msubsection{service}{orchestration-by-id}
+\msubsection{service}{orchestration-service-by-id}
 The purpose of this service is that a consumer get access information for all its necessary services based on the top priority stored matching rules. The service is offered for both application and core systems.
 
-\msubsection{service}{create-flexible-rule}
+\msubsection{service}{orchestration-create-flexible-store-rules}
 The purpose of this service is to create a flexible matching rule. The service is offered only for the Plant Description Engine Core System.
 
-\msubsection{service}{remove-flexible-rule}
+\msubsection{service}{orchestration-remove-flexible-store-rules}
 The purpose of this service is to remove a flexible matching rule. The service is offered only for the Plant Description Engine Core System.
 
-\msubsection{service}{clean-flexible-rules}
+\msubsection{service}{orchestration-clean-flexible-store}
 The purpose of this service is to remove all flexible matching rules. The service is offered only for the Plant Description Engine Core System.
 
-\msubsection{service}{qos-enabled}
+\msubsection{service}{orchestration-qos-enabled}
 The purpose of this service is to tell the requester whether the Orchestrator can handle Quality-of-Service requirements or not. The service is offered only for Gatekeeper Core System.
 
-\msubsection{service}{qos-reservations}
+\msubsection{service}{orchestration-qos-reservations}
 The purpose of this service is to return all active provider reservations. The service is offered only for Gatekeeper Core System. 
 
-\msubsection{service}{qos-temporary-lock}
-The purpose of this service is lock a set of providers temporarily. The service is offered only for Gatekeeper Core System. 
+\msubsection{service}{orchestration-qos-temporary-lock}
+The purpose of this service is to lock a set of providers temporarily. The service is offered only for Gatekeeper Core System. 
 
-\msubsection{service}{confirm-reservation}
-The purpose of this service is confirm a temporary provider reservation. All related not confirmed reservation are released. The service is offered only for Gatekeeper Core System. 
+\msubsection{service}{orchestration-confirm-reservation}
+The purpose of this service is to confirm a temporary provider reservation. All related not confirmed reservation are released. The service is offered only for Gatekeeper Core System. 
 
 \newpage
 
