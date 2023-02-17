@@ -121,9 +121,9 @@ collaborating with other Core Systems. In Section \ref{sec:implementation}, we d
 
 Implementation of data storage functionality was done as described by Figure 1. 
 
-Please note that the Űrchestrator is only responsible for handling the data that belongs to the tables inside the red rectangle. The \textit{system\_}, \textit{service\_definition} and \textit{service\_interface} tables are controlled by the Service Registry Core System, and the \textit{cloud} table is belongs to the Gatekeeper Core System.
+Please note that the Orchestrator is only responsible for handling the data that belongs to the tables inside the red rectangle. The \textit{system\_}, \textit{service\_definition} and \textit{service\_interface} tables are controlled by the Service Registry Core System, and the \textit{cloud} table is belongs to the Gatekeeper Core System.
 
-Please also note the the \textit{provider\_system\_id} field of the \textit{orchestrator\_store} table is either store the id of a \textit{system\_} record (local provider) or the id of a \textit{foreign\_system} record (provider from an other cloud). In the latter case, the \textit{foreign\_} flag is set to true.
+Please also note the the \textit{provider\_system\_id} field of the \textit{orchestrator\_store} table either stores the id of a \textit{system\_} record (local provider) or the id of a \textit{foreign\_system} record (provider from an other cloud). In the latter case, the \textit{foreign\_} flag is set to true.
 
 \begin{figure}[h!]
   \centering
@@ -255,18 +255,6 @@ The system configuration properties can be found in the \texttt{application.prop
   
   Set this when the system is available via domain port within the network.
 
-  \item \textbf{coap.server.enabled}
-
-  There is an experimental option in the Orchestrator Core System that expose some of the system's features via CoAP. Set this true to enable this option
-
-  \item \textbf{coap.server.address}
-
-  Address of the CoAP server.
-
-  \item \textbf{coap.server.port}
-
-  Port of the CoAP server.
-  
   \item \textbf{core\_system\_name}
   
   Name of the system. Must be always 'ORCHESTRATOR'.
