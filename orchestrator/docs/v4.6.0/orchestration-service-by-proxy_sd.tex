@@ -45,8 +45,8 @@
 \begin{document}
 
 %% Arrowhead Document Properties
-\ArrowheadTitle{orchestration-service} % XXX = ServiceName 
-\ArrowheadServiceID{orchestration-service} % ID name of service
+\ArrowheadTitle{orchestration-service-by-proxy} % XXX = ServiceName 
+\ArrowheadServiceID{orchestration-service-by-proxy} % ID name of service
 \ArrowheadType{Service Description}
 \ArrowheadTypeShort{SD}
 \ArrowheadVersion{4.6.0} % Arrowhead version X.Y.Z, e..g. 4.4.1
@@ -78,7 +78,7 @@
 
   % Front Page Abstract
   \begin{abstract}
-    This document provides service description for the \textbf{orchestration-service} service. 
+    This document provides service description for the \textbf{orchestration-service-by-proxy} service. 
   \end{abstract}
 
   \vspace*{1cm}
@@ -102,7 +102,7 @@
 
 \section{Overview}
 \label{sec:overview}
-This document describes the \textbf{orchestration-service} service that provides runtime (late) binding between application systems. Its primary purpose is to provide application systems with orchestration information: where they need to connect to. The outcome of the service includes data that will tell the application system what service provider system(s) it should connect to and how (acting as a service consumer). Such orchestration data include:
+This document describes the \textbf{orchestration-service-by-proxy} service that provides runtime (late) binding between application systems. Its primary purpose is to provide application systems with orchestration information: where they need to connect to. The outcome of the service includes data that will tell the application system what service provider system(s) it should connect to and how (acting as a service consumer). Such orchestration data include:
 
 \begin{itemize}
     \item Accessibility information details of a service provider (e.g network address and port),
@@ -118,22 +118,22 @@ In Section \ref{sec:model}, we end the document by presenting the data types use
 \newpage
 
 \subsection{How This Service Is Meant to Be Used}
-The given system should consume the Service Registry Core System's \textbf{query} service to get information about the \textbf{orchestration-service} service. Using this information the system can request the \textbf{orchestration-service} service with an orchestration form about the service the system wants to consume. 
+This service is for the Workflow Choreographer Core System to collect the necessary providers for its executors to execute the plan. The Workflow Choreographer should consume the Service Registry Core System's \textbf{query} service to get information about the \textbf{orchestration-service-by-proxy} service. Using this information the system can request the \textbf{orchestration-service-by-proxy} service with an orchestration form about the service one of its executors wants to consume. 
 
 The service can be used in two ways. The first one uses predefined rules (coming from the fix or flexible database store) to find the appropriate providers for the consumer. The second option is the dynamic orchestration in which case the service searches the whole local cloud (and maybe some other clouds) to find matching providers.
 
 \subsubsection{Fix Store Orchestration}
 
 \begin{itemize}
-    \item requester system is mandatory,
+    \item consumer system is mandatory (this is the executor system that actually will consume the service),
     \item requested service and all the other parameters are optional,
-    \item if requested service is not specified, then this service returns the top priority local provider of all services contained by the Orchestrator store database for the requester system. if requested service is specified, then you have to define the service definition and exactly one interface (all other service requirements are optional). In this case, it returns all accessible providers from the Orchestrator store database that provides the specified service via the specified interface to the specified consumer.
+    \item if requested service is not specified, then this service returns the top priority local provider of all services contained by the Orchestrator store database for the consumer system. if requested service is specified, then you have to define the service definition and exactly one interface (all other service requirements are optional). In this case, it returns all accessible providers from the Orchestrator store database that provides the specified service via the specified interface to the specified consumer.
 \end{itemize}
 
 \subsubsection{Flexible Store Orchestration}
 
 \begin{itemize}
-    \item requester system is mandatory,
+    \item consumer system is mandatory (this is the executor system that actually will consume the service),
     \item requested service is mandatory, but just the service definition part, all other parameters of the requested service are optional,
     \item all other parameters are optional
 \end{itemize}    
@@ -141,14 +141,14 @@ The service can be used in two ways. The first one uses predefined rules (coming
 \subsubsection{Dynamic Orchestration}
 
 \begin{itemize}
-    \item requester system is mandatory,
+    \item consumer system is mandatory (this is the executor system that actually will consume the service),
     \item requested service is mandatory, but just the service definition part, all other parameters of the requested service are optional,
     \item all other parameters are optional
 \end{itemize}    
     
 \subsubsection{Orchestration flags}
 
-The requester can modify the \textbf{orchestration-service}'s behaviour using these flags. These are the available options:
+The requester can modify the \textbf{orchestration-service-by-proxy}'s behaviour using these flags. These are the available options:
 
 \begin{itemize}
     \item \texttt{enableInterCloud}: the service can search another clouds for providers if none of the local cloud providers match the requirements,
@@ -209,6 +209,12 @@ The flexible store mode has the following delimitations:
     \item It does not use the Authorization Core System to check whether a system can consume a service. Authorization should be checked before a flexible rule is inserting into the Orchestration store.
 \end{itemize}
 
+The dynamic orchestration mode has the following delimitations:
+
+\begin{itemize}
+    \item It does not use the Authorization Core System to check whether a system can consume a service. Authorization should be checked before an executor system is registered into the Workflow Choreographer Core System's database.
+\end{itemize}
+
 The requested service data must meet the following criteria:
 
 \begin{itemize}
@@ -220,14 +226,14 @@ The requested service data must meet the following criteria:
 \subsection{Access policy}
 \label{sec:accesspolicy}
 
-Available for anyone within the local cloud, but in case of application systems, the system is allowed to orchestrate only for itself. 
+This service is only available for the Workflow Choreographer Core System.  
 
 \newpage
 
 \section{Service Interface}
 \label{sec:functions}
 
-This section describes the interfaces to the service. The \textbf{orchestration-service} service is used to looking for matching providers. The various parameters are representing the necessary system and service input information.
+This section describes the interfaces to the service. The \textbf{orchestration-service-by-proxy} service is used to looking for matching providers. The various parameters are representing the necessary system and service input information.
 In particular, each subsection names an interface, an input type and an output type, in that order.
 The input type is named inside parentheses, while the output type is preceded by a colon.
 Input and output types are only denoted when accepted or returned, respectively, by the interface in question. All abstract data types named in this section are defined in Section 3.
@@ -254,7 +260,7 @@ The following interfaces are available.
 \section{Information Model}
 \label{sec:model}
 
-Here, all data objects that can be part of the \textbf{orchestration-service} service
+Here, all data objects that can be part of the \textbf{orchestration-service-by-proxy} service
 provides to the hosting System are listed in alphabetic order.
 Note that each subsection, which describes one type of object, begins with the \textit{struct} keyword, which is used to denote a collection of named fields, each with its own data type.
 As a complement to the explicitly defined types in this section, there is also a list of implicit primitive types in Section \ref{sec:model:primitives}, which are used to represent things like hashes and identifiers.
@@ -271,7 +277,7 @@ preferredProviders &\pref{List}$<$\hyperref[sec:model:PreferredProvider]{Preferr
 qosRequirements &\hyperref[sec:model:Metadata]{Metadata} & no & Quality-of-Service requirement map. See details above. \\ \hline
 requestedService &\hyperref[sec:model:SQF]{ServiceQueryForm} & no (yes) & Information about the requested service; mandatory in case of dynamic or flexible store orchestration. \\ \hline
 requesterCloud &\hyperref[sec:model:Cloud]{Cloud} & no & Information about the cloud from which the request comes. Only specified when the request comes from an other cloud. \\ \hline
-requesterSystem &\hyperref[sec:model:System]{System} & yes & Information about the system that requests the service. \\ \hline
+requesterSystem &\hyperref[sec:model:System]{System} & yes & Information about the executor system that will consume the service. \\ \hline
 \end{tabularx}
 \end{table}
 
