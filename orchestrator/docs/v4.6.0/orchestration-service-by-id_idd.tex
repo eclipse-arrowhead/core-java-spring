@@ -57,8 +57,8 @@
 \begin{document}
 
 %% Arrowhead Document Properties
-\ArrowheadTitle{orchestration-service-by-proxy HTTP/TLS/JSON} %e.g. ServiceDiscovery HTTP/TLS/JSON
-\ArrowheadServiceID{orchestration-service-by-proxy} % e.g. register
+\ArrowheadTitle{orchestration-service-by-id HTTP/TLS/JSON} %e.g. ServiceDiscovery HTTP/TLS/JSON
+\ArrowheadServiceID{orchestration-service-by-id} % e.g. register
 \ArrowheadType{Interface Design Description}
 \ArrowheadTypeShort{IDD}
 \ArrowheadVersion{4.6.0}
@@ -92,7 +92,7 @@
   % Front Page Abstract
   \begin{abstract}
     This document describes a HTTP protocol with TLS payload
-    security and JSON payload encoding variant of the \textbf{orchestration-service-by-proxy} service.
+    security and JSON payload encoding variant of the \textbf{orchestration-service-by-id} service.
   \end{abstract}
   \vspace*{1cm}
 
@@ -106,7 +106,7 @@
 \section{Overview}
 \label{sec:overview}
 
-This document describes the \textbf{orchestration-service-by-proxy} service interface, that provides runtime (late) binding between application systems. It's implemented using protocol, encoding as stated in the following table:
+This document describes the \textbf{orchestration-service-by-id} service interface, that provides runtime (late) binding between application systems. It's implemented using protocol, encoding as stated in the following table:
 
 \begin{table}[ht!]
   \centering
@@ -117,15 +117,15 @@ This document describes the \textbf{orchestration-service-by-proxy} service inte
     Encoding & JSON & RFC 8259 \cite{rfc8259} \\ \hline
     Compression & N/A & - \\ \hline
   \end{tabular}
-  \caption{Communication and semantics details used for the \textbf{orchestration-service-by-proxy}
+  \caption{Communication and semantics details used for the \textbf{orchestration-service-by-id}
     service interface}
   \label{tab:comunication_semantics_profile}
 \end{table}
 
-This document provides the Interface Design Description IDD to the \textit{orchestration-service-by-proxy -- Service Description} document.
+This document provides the Interface Design Description IDD to the \textit{orchestration-service-by-id -- Service Description} document.
 For further details about how this service is meant to be used, please consult that document.
 
-The rest of this document describes how to realize the \textit{orchestration-service-by-proxy} service HTTP/TLS/JSON interface in details.
+The rest of this document describes how to realize the \textit{orchestration-service-by-id} service HTTP/TLS/JSON interface in details.
 
 \newpage
 
@@ -134,60 +134,12 @@ The rest of this document describes how to realize the \textit{orchestration-ser
 
 The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are, \texttt{400 Bad Request} if request is malformed, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Orchestrator is unavailable.
 
-\begin{lstlisting}[language=http,label={lst:orchestration-by-proxy},caption={An \fref{orchestration-service-by-proxy} invocation.}]
-POST /orchestrator/orchestration-by-proxy HTTP/1.1
-
-{
-  "requesterSystem": {
-    "systemName": "string",
-    "address": "string",
-    "port": 0,
-    "authenticationInfo": "string"
-  },
-  "requestedService": {
-    "serviceDefinitionRequirement": "string",
-    "interfaceRequirements": [
-      "string"
-    ],
-    "securityRequirements": [
-      "CERTIFICATE", "TOKEN"
-    ],
-    "metadataRequirements": {
-      "additionalProp1": "string",
-      "additionalProp2": "string",
-      "additionalProp3": "string"
-    },
-    "versionRequirement": 0,
-    "maxVersionRequirement": 0,
-    "minVersionRequirement": 0
-  },
-  "preferredProviders": [
-    {
-      "providerCloud": {
-        "operator": "string",
-        "name": "string"
-      },
-      "providerSystem": {
-        "systemName": "string",
-        "address": "string",
-        "port": 0
-      }
-    }
-  ],
-  "orchestrationFlags": {
-    "overrideStore": true,
-    "matchmaking": true,
-    "enableQoS": true
-  },
-  "qosRequirements": {
-    "qosMaxRespTimeThreshold": "1000"
-  }
-}
+\begin{lstlisting}[language=http,label={lst:orchestration-by-id},caption={An \fref{orchestration-service-by-id} invocation.}]
+GET /orchestrator/orchestration/{id} HTTP/1.1
 \end{lstlisting}
 
-\clearpage
 
-\begin{lstlisting}[language=http,label={lst:orchestration-by-proxy_response},caption={An \fref{orchestration-service-by-proxy} response.}]
+\begin{lstlisting}[language=http,label={lst:orchestration-by-id_response},caption={An \fref{orchestration-service-by-id} response.}]
 {
   "response": [
     {
@@ -232,7 +184,7 @@ POST /orchestrator/orchestration-by-proxy HTTP/1.1
         "interfaceName2": "token2"
       },
       "warnings": [
-        "FROM_OTHER_CLOUD", "TTL_UNKNOWN"
+        "TTL_UNKNOWN"
       ]
     }
   ]
@@ -248,92 +200,6 @@ Here, all data objects that can be part of the service calls associated with thi
 Note that each subsection, which describes one type of object, begins with the \textit{struct} keyword, which is meant to denote a JSON \pref{Object} that must contain certain fields, or names, with values conforming to explicitly named types.
 As a complement to the primary types defined in this section, there is also a list of secondary types in Section \ref{sec:model:primitives}, which are used to represent things like hashes, identifiers and texts.
 
-\msubsection{struct}{OrchestrationForm}
-\label{sec:model:OrchestrationForm}
-
-\begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{4cm} | p{4cm} | p{2cm} | X |} \hline
-\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-commands &\hyperref[sec:model:Metadata]{Metadata} & no & Additional commands to the Orchestrator, the only available command now is \texttt{qosExclusivity} (see above). \\ \hline
-orchestrationFlags &\hyperref[sec:model:OrchestrationFlags]{OrchestrationFlags} & no & A map of flags that changes the behaviour of the service. See details above. \\ \hline
-preferredProviders &\pref{List}$<$\hyperref[sec:model:PreferredProvider]{PreferredProvider}$>$ & no & A list of providers that takes precedence in matchmaking if they are available; if \texttt{onlyPreferred} flag is set, then the result can only be a subset of this list. \\ \hline
-qosRequirements &\hyperref[sec:model:Metadata]{Metadata} & no & Quality-of-Service requirement map. See details above. \\ \hline
-requestedService &\hyperref[sec:model:SQF]{ServiceQueryForm} & no (yes) & Information about the requested service; mandatory in case of dynamic or flexible store orchestration. \\ \hline
-requesterCloud &\hyperref[sec:model:Cloud]{Cloud} & no & Information about the cloud from which the request comes. Only specified when the request comes from an other cloud. \\ \hline
-requesterSystem &\hyperref[sec:model:System]{System} & yes & Information about the executor system that will consume the service. \\ \hline
-\end{tabularx}
-\end{table}
-
-\msubsection{struct}{Metadata}
-\label{sec:model:Metadata}
-
-An \pref{Object} which maps \pref{String} key-value pairs.
-
-\msubsection{struct}{OrchestrationFlags}
-\label{sec:model:OrchestrationFlags}
-
-An \pref{Object} which maps \pref{String} keys to \pref{Boolean} values. 
-
-\clearpage
-
-\msubsection{struct}{PreferredProvider}
-\label{sec:model:PreferredProvider}
-
-\begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{4cm} | p{4cm} | p{2cm} | X |} \hline
-\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-
-providerCloud &\hyperref[sec:model:Cloud]{Cloud} & no & Information about the cloud of the preferred system. Need only specified when the system is in an other cloud. \\ \hline
-providerSystem &\hyperref[sec:model:System]{System} & yes & Information about the preferred system.  \\ \hline
-\end{tabularx}
-\end{table}
-
-\msubsection{struct}{Cloud}
-\label{sec:model:Cloud}
-
-\begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{4cm} | p{4cm} | p{2cm} | X |} \hline
-\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-
-name &\pref{Name} & yes & Name of the cloud. \\ \hline
-operator &\pref{Name} & yes & Operator of the cloud. \\ \hline
-\end{tabularx}
-\end{table}
-
-\msubsection{struct}{System}
-\label{sec:model:System}
-
-\begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{4cm} | p{4cm} | p{2cm} | X |} \hline
-\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-
-address &\pref{Address} & yes & Network address of the system. \\ \hline
-authenticationInfo &\pref{String} & no & X.509 public key of the system. \\ \hline
-metadata &\hyperref[sec:model:Metadata]{Metadata} & no & Additional information about the system. \\ \hline
-port &\pref{PortNumber} & yes & Port of the system. \\ \hline
-systemName &\pref{Name} & yes & Name of the system. \\ \hline
-\end{tabularx}
-\end{table}
-
-\clearpage
-
-\msubsection{struct}{ServiceQueryForm}
-\label{sec:model:SQF}
-
-\begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{5cm} | p{3cm} | p{2cm} | X |} \hline
-\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-interfaceRequirements &\pref{List}$<$\pref{Interface}$>$ & no & Names of the required interfaces. If specified at least one of the interfaces must match for having result(s). \\ \hline
-maxVersionRequirement &\pref{Number} & no & Required maximum version of the service. If specified version must be equals or lower or having result(s). Ignored if \texttt{versionRequirement} is specified. \\ \hline
-metadataRequirements &\hyperref[sec:model:Metadata]{Metadata} & no & Service metadata requirements. If specified the whole content of the map must match for having result(s). Only applied if the \texttt{metadataSearch} flag is set to true. \\ \hline
-minVersionRequirement &\pref{Number} & no & Required minimum version of the service. If specified version must be equals or higher or having result(s). Ignored if \texttt{versionRequirement} is specified. \\ \hline
-pingProviders &\pref{Boolean} & no & Whether or not the provider should be pinged. If true only the responding providers will comply. The orchestration flag \texttt{pingProviders} overrides this value. \\ \hline
-securityRequirements &\pref{List}$<$\pref{SecureType}$>$ & no & Types of the required security levels. If specified at least one of the types must match for having result(s). \\ \hline
-serviceDefinitionRequirement &\pref{Name} & yes & Identifier of the service. \\ \hline
-versionRequirement &\pref{Number} & no & Required version of the service. If specified version must match for having result(s). \\ \hline
-\end{tabularx}
-\end{table}
-
 \msubsection{struct}{OrchestrationResultList}
 \label{sec:model:OrchestrationResultList}
 
@@ -343,8 +209,6 @@ versionRequirement &\pref{Number} & no & Required version of the service. If spe
 response & \pref{List}$<$\hyperref[sec:model:OrchestrationResult]{OrchestrationResult}$>$ & List of orchestration results. \\ \hline
 \end{tabularx}
 \end{table}
-
-\clearpage
 
 \msubsection{struct}{OrchestrationResult}
 \label{sec:model:OrchestrationResult}
@@ -364,6 +228,13 @@ warnings & \pref{List}$<$\pref{OrchestratorWarning}$>$ & List of warnings about 
 
 \end{tabularx}
 \end{table}
+
+\msubsection{struct}{Metadata}
+\label{sec:model:Metadata}
+
+An \pref{Object} which maps \pref{String} key-value pairs.
+
+\clearpage
 
 \msubsection{struct}{ServiceInterfaceRecord}
 \label{sec:model:ServiceInterfaceRecord}
@@ -395,8 +266,6 @@ systemName &\pref{Name} & Name of the system. \\ \hline
 updatedAt & \pref{DateTime} & System instance record was modified at this UTC time\-stamp. \\ \hline
 \end{tabularx}
 \end{table}
-
-\clearpage
 
 \msubsection{struct}{ServiceDefinitionRecord}
 \label{sec:model:ServiceDefinitionRecord}
@@ -433,8 +302,8 @@ Furthermore, the \pref{Object} and \pref{Array} types are given optional generic
 \end{tabularx}
 \end{table}
 
-With these primitives now available, we proceed to define all the types specified in the \textbf{orchestration-service-by-proxy} SD document without a direct equivalent among the JSON types.
-Concretely, we define the \textbf{orchestration-service-by-proxy} SD primitives either as \textit{aliases} or \textit{structs}.
+With these primitives now available, we proceed to define all the types specified in the \textbf{orchestration-service-by-id} SD document without a direct equivalent among the JSON types.
+Concretely, we define the \textbf{orchestration-service-by-id} SD primitives either as \textit{aliases} or \textit{structs}.
 An \textit{alias} is a renaming of an existing type, but with some further details about how it is intended to be used.
 Structs are described in the beginning of the parent section.
 The types are listed by name in alphabetical order.
