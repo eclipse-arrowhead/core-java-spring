@@ -57,15 +57,15 @@
 \begin{document}
 
 %% Arrowhead Document Properties
-\ArrowheadTitle{echo HTTP/TLS/TEXT} %e.g. ServiceDiscovery HTTP/TLS/JSON
-\ArrowheadServiceID{echo} % e.g. register
+\ArrowheadTitle{orchestration-remove-flexible-store-rule HTTP/TLS/URL} %e.g. ServiceDiscovery HTTP/TLS/JSON
+\ArrowheadServiceID{orchestration-remove-flexible-store-rule} % e.g. register
 \ArrowheadType{Interface Design Description}
 \ArrowheadTypeShort{IDD}
 \ArrowheadVersion{4.6.0}
 \ArrowheadDate{\today}
-\ArrowheadAuthor{Tamás Bordi} % e.g Szvetlin Tanyi}
+\ArrowheadAuthor{Rajmund Bocsi} % e.g Szvetlin Tanyi}
 \ArrowheadStatus{RELEASE}
-\ArrowheadContact{tbordi@aitia.ai} % jerker.delsing@arrowhead.eu
+\ArrowheadContact{rbocsi@aitia.ai} % jerker.delsing@arrowhead.eu
 \ArrowheadFooter{\href{www.arrowhead.eu}{www.arrowhead.eu}}
 \ArrowheadSetup
 %%
@@ -91,8 +91,7 @@
 
   % Front Page Abstract
   \begin{abstract}
-    This document describes a HTTP protocol with TLS payload
-    security and TEXT payload encoding variant of the \textbf{echo} service.
+    This document describes a HTTP protocol with TLS security and URL encoding variant of the \textbf{orchestration-remove-flexible-store-rule} service.
   \end{abstract}
   \vspace*{1cm}
 
@@ -106,7 +105,8 @@
 \section{Overview}
 \label{sec:overview}
 
-This document describes the \textbf{echo} service interface, which enables an ”I’m alive” kind monitoring of the system. It's implemented using protocol, encoding as stated in the following table:
+This document describes the \textbf{orchestration-remove-flexible-store-rule} service interface,
+which enables systems to remove flexible matching rules from the Orchestrator Core System (if the Orchestrator is in flexible store mode). It's implemented using protocol, encoding as stated in the following table:
 
 \begin{table}[ht!]
   \centering
@@ -114,35 +114,27 @@ This document describes the \textbf{echo} service interface, which enables an �
     \rowcolor{gray!33} Profile type & Type & Version \\ \hline
     Transfer protocol & HTTP & 1.1 \\ \hline
     Data encryption & TLS & 1.3 \\ \hline
-    Encoding & TEXT & - \\ \hline
+    Encoding & URL & RFC 1738 \\ \hline
     Compression & N/A & - \\ \hline
   \end{tabular}
-  \caption{Communication and semantics details used for the \textbf{echo}
-    service interface}
+  \caption{Communication and semantics details used for the \textbf{orchestration-remove-flexible-store-rule} service interface}
   \label{tab:comunication_semantics_profile}
 \end{table}
 
-This document provides the Interface Design Description IDD to the \textit{echo -- Service Description} document.
+This document provides the Interface Design Description IDD to the \textit{orchestration-remove-flexible-store-rule -- Service Description} document.
 For further details about how this service is meant to be used, please consult that document.
 
-The rest of this document describes how to realize the echo service HTTP/TLS/TEXT interface in details.
+The rest of this document describes how to realize the orchestration-remove-flexible-store-rule service HTTP/TLS/URL interface in details.
 
 \newpage
 
 \section{Interface Description}
 \label{sec:functions}
 
-The service responses with the status code \texttt{200
-  Ok} if called successfully. The error codes are \texttt{401 Unauthorized} if
-improper client side certificate is provided and \texttt{500 Internal
-  Server Error} if the system is unavailable.
+The service responses with the status code \texttt{200 OK} if called successfully. The error codes are, \texttt{400 Bad Request} if request is malformed or the Orchestrator is not in flexible store mode, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Orchestrator is unavailable.
 
-\begin{lstlisting}[language=http,label={lst:echo},caption={A \fref{echo} invocation.}]
-GET /serviceregistry/echo HTTP/1.1
-\end{lstlisting}
-
-\begin{lstlisting}[language=http,label={lst:echo_response},caption={A \fref{echo} response.}]
-Got it!
+\begin{lstlisting}[language=http,label={lst:orchestration-remove-flexible-store-rule},caption={An \fref{orchestration-remove-flexible-store-rule} invocation.}]
+DELETE /orchestrator/store/flexible/{id} HTTP/1.1
 \end{lstlisting}
 
 \newpage
@@ -150,11 +142,20 @@ Got it!
 \section{Data Models}
 \label{sec:model}
 
-Here, all data objects that can be part of the service calls associated with this service are listed in alphabetic order.
+Here, all data objects that can be part of the service calls associated with this service are listed 
 
-\msubsection{text}{EchoResponse}
+\subsection{Primitives}
+\label{sec:model:primitives}
 
-Simple text message with the value of "Got it!".
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{3cm} | X |} \hline
+\rowcolor{gray!33} Type & Description \\ \hline
+\pdef{Number}                & Any IEEE 754 binary64 floating point number \cite{cowlishaw2019floating}, except for \textit{+Inf}, \textit{-Inf} and \textit{NaN}. \\ \hline
+\pdef{void}             & Special 'type' to indicate when a service does not return anything (except some indication that the operation was a success or not). \\ \hline 
+\end{tabularx}
+\end{table}
+
+\color{black}
 
 \newpage
 

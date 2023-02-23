@@ -57,8 +57,8 @@
 \begin{document}
 
 %% Arrowhead Document Properties
-\ArrowheadTitle{orchestration-create-flexible-store-rules HTTP/TLS/JSON} %e.g. ServiceDiscovery HTTP/TLS/JSON
-\ArrowheadServiceID{orchestration-create-flexible-store-rules} % e.g. register
+\ArrowheadTitle{orchestration-qos-reservations HTTP/TLS/JSON} %e.g. ServiceDiscovery HTTP/TLS/JSON
+\ArrowheadServiceID{orchestration-qos-reservations} % e.g. register
 \ArrowheadType{Interface Design Description}
 \ArrowheadTypeShort{IDD}
 \ArrowheadVersion{4.6.0}
@@ -92,7 +92,7 @@
   % Front Page Abstract
   \begin{abstract}
     This document describes a HTTP protocol with TLS payload
-    security and JSON payload encoding variant of the \textbf{orchestration-create-flexible-store-rules} service.
+    security and JSON payload encoding variant of the \textbf{orchestration-qos-reservations} service.
   \end{abstract}
   \vspace*{1cm}
 
@@ -106,8 +106,8 @@
 \section{Overview}
 \label{sec:overview}
 
-This document describes the \textbf{orchestration-create-flexible-store-rules} service interface,
-which enables systems to add flexible matching rules to the Orchestrator Core System (if the Orchestrator is in flexible store mode). It's implemented using protocol, encoding as stated in the following table:
+This document describes the \textbf{orchestration-qos-reservations} service interface,
+which enables systems to get current provider reservations from the Orchestrator Core System. It's implemented using protocol, encoding as stated in the following table:
 
 \begin{table}[ht!]
   \centering
@@ -118,62 +118,38 @@ which enables systems to add flexible matching rules to the Orchestrator Core Sy
     Encoding & JSON & RFC 8259 \cite{rfc8259} \\ \hline
     Compression & N/A & - \\ \hline
   \end{tabular}
-  \caption{Communication and semantics details used for the \textbf{orchestration-create-flexible-store-rules} service interface}
+  \caption{Communication and semantics details used for the \textbf{orchestration-qos-reservations} service interface}
   \label{tab:comunication_semantics_profile}
 \end{table}
 
-This document provides the Interface Design Description IDD to the \textit{orchestration-create-flexible-store-rules -- Service Description} document.
+This document provides the Interface Design Description IDD to the \textit{orchestration-qos-reservations -- Service Description} document.
 For further details about how this service is meant to be used, please consult that document.
 
-The rest of this document describes how to realize the orchestration-create-flexible-store-rules service HTTP/TLS/JSON interface in details.
+The rest of this document describes how to realize the orchestration-qos-reservations service HTTP/TLS/JSON interface in details.
 
 \newpage
 
 \section{Interface Description}
 \label{sec:functions}
 
-The service responses with the status code \texttt{201 Created} if called successfully. The error codes are, \texttt{400 Bad Request} if request is malformed or the Orchestrator is not in flexible store mode, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Orchestrator is unavailable.
+The service responses with the status code \texttt{201 Created} if called successfully. The error codes are, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Orchestrator is unavailable.
 
-\begin{lstlisting}[language=http,label={lst:orchestration-create-flexible-store-rules},caption={An \fref{orchestration-create-flexible-store-rules} invocation.}]
-POST /orchestrator/store/flexible HTTP/1.1
-
-[{
-  "consumerSystem": {
-    "systemName": "testConsumer"
-  },
-  "providerSystem": {
-    "metadata": {
-      "mode": "legacy"
-    }
-  },
-  "serviceDefinitionName": "temperature",
-  "servuceInterfaceName": "HTTP-SECURE-JSON"
-  "serviceMetadata": {
-    "unit": "celsius"
-  },
-  "priority": 1
-}]
+\begin{lstlisting}[language=http,label={lst:orchestration-qos-reservations},caption={An \fref{orchestration-qos-reservations} invocation.}]
+GET /orchestrator/qos_reservations HTTP/1.1
 \end{lstlisting}
 
-\begin{lstlisting}[language=http,label={lst:orchestration-create-flexible-store-rules_response},caption={An \fref{orchestration-create-flexible-store-rules} response.}]
+\begin{lstlisting}[language=http,label={lst:orchestration-qos-reservations_response},caption={An \fref{orchestration-qos-reservations} response.}]
 {
   "count": 1,
   "data": [{
     "id": 1,
-    "consumerSystem": {
-      "systemName": "testConsumer"
-    },
-    "providerSystem": {
-      "metadata": {
-        "mode": "legacy"
-      }
-    },
-    "serviceDefinitionName": "temperature",
-    "servuceInterfaceName": "HTTP-SECURE-JSON"
-    "serviceMetadata": {
-      "unit": "celsius"
-    },
-    "priority": 1,
+    "reservedProviderId": 2,
+    "reservedServiceId": 3,
+    "consumerSystemName": "TestConsumer",
+    "consumerAddress": "test-consumer.test.com",
+    "consumerPort": 10,
+    "reservedTo": "2020-03-18T22:18:32.143",
+    "temporaryLock": false,
     "createdAt": "2020-03-18T22:13:32.143",
     "updatedAt": "2020-03-18T22:13:32.143"
   }]
@@ -189,67 +165,37 @@ Here, all data objects that can be part of the service calls associated with thi
 Note that each subsection, which describes one type of object, begins with the \textit{struct} keyword, which is meant to denote a JSON \pref{Object} that must contain certain fields, or names, with values conforming to explicitly named types.
 As a complement to the primary types defined in this section, there is also a list of secondary types in Section \ref{sec:model:primitives}, which are used to represent things like hashes, identifiers and texts.
 
-\msubsection{struct}{FlexibleRule}
-\label{sec:model:FlexibleRule}
- 
-\begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{3.5cm} | p{3cm} | p{2cm} | X |} \hline
-\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-consumerSystem & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & yes & Requirements for a system that tells if this rule is applied to a consumer. \\ \hline
-priority & \pref{Number} & no & Priority of the rule. \\ \hline
-providerSystem & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & yes & Requirements for a system that tells if this rule is applied to a provider. \\ \hline
-serviceDefinition & \pref{Name} & yes & Identifier of a service. \\ \hline
-serviceInterfaceName & \pref{Interface} & no & Interface requirement \\ \hline
-serviceMetadata & \hyperref[sec:model:Metadata]{Metadata} & no & Service instance level metadata requirements. \\ \hline
-
-\end{tabularx}
-\end{table}
-
-\msubsection{struct}{SystemDescriptor}
-\label{sec:model:SystemDescriptor}
-
-\begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
-\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-systemName & \pref{Name} & no (yes) & Name of a system. Mandatory if \textit{metadata} is not specified. \\ \hline
-metadata & \hyperref[sec:model:Metadata]{Metadata} & no (yes) & System level metadata requirements (a system's metadata must contain all of its keys with the same value to match). Mandatory if \textit{systemName} is not specified. \\ \hline
-\end{tabularx}
-\end{table}
-
-
-\msubsection{struct}{Metadata}
-\label{sec:model:Metadata}
-
-An \pref{Object} which maps \pref{String} key-value pairs.
-
-\msubsection{struct}{FlexibleRuleListResponse}
-\label{sec:model:FlexibleRuleListResponse}
+\msubsection{struct}{QoSReservationList}
+\label{sec:model:QoSReservationList}
  
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{2cm} | p{5.0cm} | X |} \hline
 \rowcolor{gray!33} Field & Type      & Description \\ \hline
-count & \pref{Number} & The number of created rules. \\ \hline
-data & \pref{List}$<$\hyperref[sec:model:FlexibleRuleResponse]{FlexibleRuleResponse}$>$ & Created rule records. \\ \hline
+count & \pref{Number} & The number of reservation records. \\ \hline
+data & \pref{List}$<$\hyperref[sec:model:QoSReservation]{QoSReservation}$>$ & Reservation records. \\ \hline
 \end{tabularx}
 \end{table}
 
-\msubsection{struct}{FlexibleRuleResponse}
-\label{sec:model:FlexibleRuleResponse}
+\msubsection{struct}{QoSReservation}
+\label{sec:model:QoSReservation}
 
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
 \rowcolor{gray!33} Field & Type      & Description \\ \hline
-consumerSystem & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & Requirements for a system that tells if this rule is applied to a consumer. \\ \hline
-createdAt & \pref{DateTime} & Rule record was created at this UTC time\-stamp. \\ \hline
-id & \pref{Number} & Identifier of the rule. \\ \hline
-priority & \pref{Number} & Priority of the rule. \\ \hline
-providerSystem & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & Requirements for a system that tells if this rule is applied to a provider. \\ \hline
-serviceDefinition & \pref{Name} &  Identifier of a service. \\ \hline
-serviceInterface & \pref{Interface} & Interface requirement \\ \hline
-serviceMetadata & \hyperref[sec:model:Metadata]{Metadata} & Service instance level metadata requirements. \\ \hline
-updatedAt & \pref{DateTime} & Rule record was modified at this UTC time\-stamp. \\ \hline
+consumerAddress & \pref{Address} & Network address of the consumer system. \\ \hline
+consumerPort & \pref{PortNumber} & Port of the consumer system. \\ \hline
+consumerSystemName & \pref{Name} & The name of the consumer system. \\ \hline
+createdAt & \pref{DateTime} & Reservation record was created at this UTC time\-stamp. \\ \hline
+id & \pref{Number} & Identifier of the record. \\ \hline
+reservedProviderId & \pref{Number} & The id of the provider system. \\ \hline
+reservedServiceId & \pref{Number} & The id of the service that is reserved. \\ \hline
+reservedTo & \pref{DateTime} & Expiration of the reservation. \\ \hline
+temporaryLock & \pref{Boolean} & Is this reservation temporary (with short expiration)? Temporary reservation should be extend or removed before the end of the orchestration process. \\ \hline
+updatedAt & \pref{DateTime} & Reservation record was modified at this UTC time\-stamp. \\ \hline
 \end{tabularx}
 \end{table}
+
+\clearpage
 
 \subsection{Primitives}
 \label{sec:model:primitives}
@@ -271,20 +217,20 @@ Furthermore, the \pref{Object} and \pref{Array} types are given optional generic
 \end{tabularx}
 \end{table}
 
-With these primitives now available, we proceed to define all the types specified in the \textbf{orchestration-create-flexible-store-rules} SD document without a direct equivalent among the JSON types.
-Concretely, we define the \textbf{orchestration-create-flexible-store-rules} SD primitives either as \textit{aliases} or \textit{structs}.
+With these primitives now available, we proceed to define all the types specified in the \textbf{orchestration-qos-reservations} SD document without a direct equivalent among the JSON types.
+Concretely, we define the \textbf{orchestration-qos-reservations} SD primitives either as \textit{aliases} or \textit{structs}.
 An \textit{alias} is a renaming of an existing type, but with some further details about how it is intended to be used.
 Structs are described in the beginning of the parent section.
 The types are listed by name in alphabetical order.
+
+\subsubsection{alias \pdef{Address} = \pref{String}}
+
+A string representation of a network address. An address can be a version 4 IP address (RFC 791), a version 6 IP address (RFC 2460) or a DNS name (RFC 1034).
 
 \subsubsection{alias \pdef{DateTime} = \pref{String}}
 
 Pinpoints a moment in time in the format of ISO8601 standard "yyyy-mm-ddThh:mm:ss", where "yyy" denotes year (4 digits), "mm" denotes month starting from 01, "dd" denotes day starting from 01, "T" is the separator between date and time part, "hh" denotes hour in the 24-hour format (00-23), "MM" denotes minute (00-59), "SS" denotes second (00-59). " " is used as separator between the date and the time.
 An example of a valid date/time string is "2020-12-05T12:00:00"
-
-\subsubsection{alias \pdef{Interface} = \pref{String}}
-
-A \pref{String} that describes an interface in \textit{Protocol-SecurityType-MimeType} format. \textit{SecurityType} can be SECURE or INSECURE. \textit{Protocol} and \textit{MimeType} can be anything. An example of a valid interface is: "HTTPS-SECURE-JSON" or "HTTP-INSECURE-SENML".
 
 \subsubsection{alias \pdef{List}$<$A$>$ = \pref{Array}$<$A$>$}
 There is no difference.
@@ -292,6 +238,10 @@ There is no difference.
 \subsubsection{alias \pdef{Name} = \pref{String}}
 
 A \pref{String} identifier that is intended to be both human and machine-readable.
+
+\subsubsection{alias \pdef{PortNumber} = \pref{Number}}
+
+Decimal \pref{Number} in the range of 0-65535.
 
 \color{black}
 
