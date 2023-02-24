@@ -115,8 +115,13 @@ Primarily the Orchestrator Core System should consume this service during the or
 
 The generated token has to meet the following criteria:
 \begin{itemize}
-    \item It must contain the consumer system's certificate common name, the service definition an the interface name
-    \item It could contain a duration time.
+    \item It must contain the issuer system's name.
+    \item It must contain an issued at timestamp.
+    \item It must contain a valid from time 
+    \item It could contain an expiration time.
+    \item It must contain a consumer identifier.
+    \item It must contain a service identifier.
+    \item It must contain a interface identifier.
     \item It must be signed by Authorization Core System,
     \item It must be encrypted with the provider's public key. 
 \end{itemize}
@@ -127,7 +132,7 @@ The generated token has to meet the following criteria:
 Supported token types:
 
 \begin{itemize}
-    \item JSON Web Token (JWT)
+    \item JSON Web Token (JWT) with SHA-512 (Secure Hash Algorithm 512-bit) 
 \end{itemize}
 
 \subsection{Access policy}
@@ -243,10 +248,15 @@ tokenData & \pref{List}$<$\hyperref[sec:model:TokenData]{TokenData}$>$ & List of
 providerAddress & \pref{Address} & Network address of the system. \\ \hline
 providerPort & \pref{PortNumber} & Port of the system. \\ \hline
 providerName & \pref{Name} & Name of the system. \\ \hline
-tokens &  \pref{Map}$<$\pref{Interface},\pref{String}$>$ & Interface-token pairs \\ \hline 
+tokens &  \pref{Map}$<$\pref{Interface},\hyperref[sec:model:Token]{Token}$>$ & Interface-token pairs \\ \hline 
 
 \end{tabularx}
 \end{table}
+
+\msubsection{struct}{Token}
+\label{sec:model:Token}
+
+An encrypted \pref{String} format credential which, holds system, cloud, service and session information.
 
 \msubsection{struct}{Metadata}
 \label{sec:model:Metadata}
