@@ -125,7 +125,7 @@ which enables systems to add flexible matching rules to the Orchestrator Core Sy
 This document provides the Interface Design Description IDD to the \textit{orchestration-create-flexible-store-rules -- Service Description} document.
 For further details about how this service is meant to be used, please consult that document.
 
-The rest of this document describes how to realize the orchestration-create-flexible-store-rules service HTTP/TLS/JSON interface in details.
+The rest of this document describes how to realize the \textbf{orchestration-create-flexible-store-rules} service HTTP/TLS/JSON interface in details.
 
 \newpage
 
@@ -147,7 +147,7 @@ POST /orchestrator/store/flexible HTTP/1.1
     }
   },
   "serviceDefinitionName": "temperature",
-  "servuceInterfaceName": "HTTP-SECURE-JSON"
+  "serviceInterfaceName": "HTTP-SECURE-JSON"
   "serviceMetadata": {
     "unit": "celsius"
   },
@@ -169,7 +169,7 @@ POST /orchestrator/store/flexible HTTP/1.1
       }
     },
     "serviceDefinitionName": "temperature",
-    "servuceInterfaceName": "HTTP-SECURE-JSON"
+    "serviceInterfaceName": "HTTP-SECURE-JSON"
     "serviceMetadata": {
       "unit": "celsius"
     },
@@ -284,7 +284,7 @@ An example of a valid date/time string is "2020-12-05T12:00:00"
 
 \subsubsection{alias \pdef{Interface} = \pref{String}}
 
-A \pref{String} that describes an interface in \textit{Protocol-SecurityType-MimeType} format. \textit{SecurityType} can be SECURE or INSECURE. \textit{Protocol} and \textit{MimeType} can be anything. An example of a valid interface is: "HTTPS-SECURE-JSON" or "HTTP-INSECURE-SENML".
+A \pref{String} that describes an interface in \textit{Protocol-SecurityType-MimeType} format. \textit{SecurityType} can be SECURE or INSECURE. \textit{Protocol} and \textit{MimeType} can be anything. An example of a valid interface is: "HTTP-SECURE-JSON" or "HTTP-INSECURE-SENML".
 
 \subsubsection{alias \pdef{List}$<$A$>$ = \pref{Array}$<$A$>$}
 There is no difference.

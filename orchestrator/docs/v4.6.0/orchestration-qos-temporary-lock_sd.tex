@@ -102,16 +102,14 @@
 
 \section{Overview}
 \label{sec:overview}
-This document describes the \textbf{orchestration-qos-temporary-lock} service that enables to the requester system to exclude some providers from orchestration temporarily. The time of this exclusion can be customized but it should be a very short time. Its purpose to lock some providers while the (inter-cloud) orchestration process is finished, when one of the reservation will be extended while all the others are released.
+This document describes the \textbf{orchestration-qos-temporary-lock} service that enables to the requester system to exclude some providers from orchestration temporarily. The time of this exclusion can be customized but it should be a very short time. Its purpose to lock some providers while the (inter-cloud) orchestration process is finished, when one of the reservation will be extended while all the others will be released.
 
 The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
 In Section \ref{sec:model}, we end the document by presenting the data types used by the mentioned functions.
 
-\newpage
-
 \subsection{How This Service Is Meant to Be Used}
-The given system should consume the Service Registry Core System's \textbf{query} service to get information about the \textbf{orchestration-qos-temporary-lock} service. Using this information the system can request the \textbf{orchestration-qos-temporary-lock} service with a lock request which contains information about the original requester and its orchestration results.
+The Gatekeeper Core System should consume the Service Registry Core System's \textbf{query} service to get information about the \textbf{orchestration-qos-temporary-lock} service. Using this information the system can request the \textbf{orchestration-qos-temporary-lock} service with a lock request which contains information about the original requester and its orchestration results.
 
 \subsection{Important Delimitations}
 \label{sec:delimitations}
@@ -166,8 +164,8 @@ As a complement to the explicitly defined types in this section, there is also a
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{4cm} | p{4cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-requester & \hyperref[sec:model:System]{System} & yes & The consumer system whose behalf the lock request is sent. \\ \hline
-orList & \pref{List}$<$\hyperref[sec:model:OrchestrationResult]{OrchestrationResult}$>$ & no & A result list of an orchestration request. The providers in the list are the subject of the lock. \\ \hline
+requester & \hyperref[sec:model:System]{System} & yes & The consumer system on whose behalf the lock request is sent. \\ \hline
+orList & \pref{List}$<$\hyperref[sec:model:OrchestrationResult]{OrchestrationResult}$>$ & no & A result list of an orchestration request. The providers in the list are the subjects of the lock. \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -197,7 +195,7 @@ An \pref{Object} which maps \pref{String} key-value pairs.
 \label{sec:model:OrchestrationResult}
 
 \begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{3.5cm} | p{4.5cm} | p{2cm} | X |} \hline
+\begin{tabularx}{\textwidth}{| p{3.5cm} | p{4.6cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 authorizationTokens & \hyperref[sec:model:Metadata]{Metadata} & no & Tokens to use the service instance (one for every supported interface). Only filled if the security type is \texttt{TOKEN}. \\ \hline
 interfaces & \pref{List}$<$\hyperref[sec:model:ServiceInterfaceRecord]{ServiceInterfaceRecord}$>$ & no & List of interfaces the service instance supports. \\ \hline

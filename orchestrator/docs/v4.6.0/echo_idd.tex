@@ -132,13 +132,11 @@ The rest of this document describes how to realize the echo service HTTP/TLS/TEX
 \section{Interface Description}
 \label{sec:functions}
 
-The service responses with the status code \texttt{200
-  Ok} if called successfully. The error codes are \texttt{401 Unauthorized} if
-improper client side certificate is provided and \texttt{500 Internal
+The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are \texttt{401 Unauthorized} if improper client side certificate is provided and \texttt{500 Internal
   Server Error} if the system is unavailable.
 
 \begin{lstlisting}[language=http,label={lst:echo},caption={A \fref{echo} invocation.}]
-GET /serviceregistry/echo HTTP/1.1
+GET /orchestrator/echo HTTP/1.1
 \end{lstlisting}
 
 \begin{lstlisting}[language=http,label={lst:echo_response},caption={A \fref{echo} response.}]

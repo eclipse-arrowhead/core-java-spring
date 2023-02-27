@@ -102,13 +102,11 @@
 
 \section{Overview}
 \label{sec:overview}
-This document describes the \textbf{orchestration-qos-confirm-reservation} service that enables to the requester system to extend one from a group of temporary provider locks while releasing all the others immediately . 
+This document describes the \textbf{orchestration-qos-confirm-reservation} service that enables to the requester system to extend one from a group of temporary provider locks while releasing all the others immediately. 
 
 The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
 In Section \ref{sec:model}, we end the document by presenting the data types used by the mentioned functions.
-
-\newpage
 
 \subsection{How This Service Is Meant to Be Used}
 The given system should consume the Service Registry Core System's \textbf{query} service to get information about the \textbf{orchestration-qos-confirm-reservation} service. Using this information the system can request the \textbf{orchestration-qos-confirm-reservation} service with a confirm request which contains information about the original requester, its orchestration results and the selected result.
@@ -128,7 +126,7 @@ This service is only available for the Gatekeeper Core System.
 \section{Service Interface}
 \label{sec:functions}
 
-This section describes the interfaces to the service. The \textbf{orchestration-qos-confirm-reservation} service is used to keep and extend one of the provider locks while releasing all the other. The various parameters are representing the necessary system and service input information.
+This section describes the interfaces to the service. The \textbf{orchestration-qos-confirm-reservation} service is used to keep and extend one of the provider locks while releasing all the others. The various parameters are representing the necessary system and service input information.
 In particular, each subsection names an interface, an input type and an output type, in that order.
 The input type is named inside parentheses, while the output type is preceded by a colon.
 Input and output types are only denoted when accepted or returned, respectively, by the interface in question. All abstract data types named in this section are defined in Section 3.
@@ -165,8 +163,8 @@ As a complement to the explicitly defined types in this section, there is also a
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{4cm} | p{4cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-requester & \hyperref[sec:model:System]{System} & yes & The consumer system whose behalf the lock request is sent. \\ \hline
-orList & \pref{List}$<$\hyperref[sec:model:OrchestrationResult]{OrchestrationResult}$>$ & yes & A result list of an orchestration request. The providers in the list are the subject of the lock. \\ \hline
+requester & \hyperref[sec:model:System]{System} & yes & The consumer system on whose behalf the confirm request is sent. \\ \hline
+orList & \pref{List}$<$\hyperref[sec:model:OrchestrationResult]{OrchestrationResult}$>$ & yes & A result list of an orchestration request. The providers in the list were the subjects of a temporary lock. \\ \hline
 selected & \hyperref[sec:model:OrchestrationResult]{OrchestrationResult} & yes & The selected result from the \textit{orList}. \\ \hline
 \end{tabularx}
 \end{table}
@@ -197,7 +195,7 @@ An \pref{Object} which maps \pref{String} key-value pairs.
 \label{sec:model:OrchestrationResult}
 
 \begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{3.5cm} | p{4.5cm} | p{2cm} | X |} \hline
+\begin{tabularx}{\textwidth}{| p{3.5cm} | p{4.6cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 authorizationTokens & \hyperref[sec:model:Metadata]{Metadata} & no & Tokens to use the service instance (one for every supported interface). Only filled if the security type is \texttt{TOKEN}. \\ \hline
 interfaces & \pref{List}$<$\hyperref[sec:model:ServiceInterfaceRecord]{ServiceInterfaceRecord}$>$ & no & List of interfaces the service instance supports. \\ \hline

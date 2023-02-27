@@ -125,14 +125,14 @@ which enables systems to get current provider reservations from the Orchestrator
 This document provides the Interface Design Description IDD to the \textit{orchestration-qos-reservations -- Service Description} document.
 For further details about how this service is meant to be used, please consult that document.
 
-The rest of this document describes how to realize the orchestration-qos-reservations service HTTP/TLS/JSON interface in details.
+The rest of this document describes how to realize the \textbf{orchestration-qos-reservations} service HTTP/ TLS/JSON interface in details.
 
 \newpage
 
 \section{Interface Description}
 \label{sec:functions}
 
-The service responses with the status code \texttt{201 Created} if called successfully. The error codes are, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Orchestrator is unavailable.
+The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Orchestrator is unavailable.
 
 \begin{lstlisting}[language=http,label={lst:orchestration-qos-reservations},caption={An \fref{orchestration-qos-reservations} invocation.}]
 GET /orchestrator/qos_reservations HTTP/1.1
