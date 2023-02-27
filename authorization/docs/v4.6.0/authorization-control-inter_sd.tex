@@ -45,8 +45,8 @@
 \begin{document}
 
 %% Arrowhead Document Properties
-\ArrowheadTitle{authorization-control-intra} % XXX = ServiceName 
-\ArrowheadServiceID{authorization-control-intra} % ID name of service
+\ArrowheadTitle{authorization-control-inter} % XXX = ServiceName 
+\ArrowheadServiceID{authorization-control-inter} % ID name of service
 \ArrowheadType{Service Description}
 \ArrowheadTypeShort{SD}
 \ArrowheadVersion{4.6.0} % Arrowhead version X.Y.Z, e..g. 4.4.1
@@ -78,7 +78,7 @@
 
   % Front Page Abstract
   \begin{abstract}
-    This document provides service description for the \textbf{authorization-control-intra} service. 
+    This document provides service description for the \textbf{authorization-control-inter} service. 
   \end{abstract}
 
   \vspace*{1cm}
@@ -102,7 +102,7 @@
 
 \section{Overview}
 \label{sec:overview}
-This document describes the \textbf{authorization-control-intra} service, which enables authorization control within a local cloud. The purpose of this service is to grant access right for a consumer to a provider-service-interface triplet.
+This document describes the \textbf{authorization-control-inter} service, which enables authorization control between local clouds. The purpose of this service is to grant access right for a consumer cloud to a provider-service-interface triplet.
 
 The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
@@ -111,12 +111,12 @@ In Section \ref{sec:model}, we end the document by presenting the data types use
 \newpage
 
 \subsection{How This Service Is Meant to Be Used}
-Primarily the Orchestrator Core System should consume this service during the orchestration process to check whether the specified consumer system has right to consume the actually matching provider-service-interface triplet. 
+Primarily the Orchestrator Core System should consume this service during the orchestration process to check whether the specified consumer cloud has right to consume the actually matching provider-service-interface triplet. 
 
 \subsection{Important Delimitations}
 \label{sec:delimitations}
 
-The intra-cloud authorization rules are possible to define by database record ids, so when a system or  service definition or iterface name has been unregistered or removed, than the authorization rule is going to be remvoed as well.
+The inter-cloud authorization rules are possible to define by database record ids, so when a cloud or  service definition or iterface name has been unregistered or removed, than the authorization rule is going to be remvoed as well.
 
 \subsection{Access policy}
 \label{sec:accesspolicy}
@@ -128,7 +128,7 @@ This service is available only for the Orchestrator and the Choreographer Core S
 \section{Service Interface}
 \label{sec:functions}
 
-This section describes the interfaces to the service. The \textbf{authorization-control-intra} service is used to define authorization rules. The various parameters are representing the necessary system and service input information.
+This section describes the interfaces to the service. The \textbf{authorization-control-inter} service is used to define authorization rules. The various parameters are representing the necessary system and service input information.
 In particular, each subsection names an interface, an input type and an output type, in that order.
 The input type is named inside parentheses, while the output type is preceded by a colon.
 Input and output types are only denoted when accepted or returned, respectively, by the interface in question. All abstract data types named in this section are defined in Section 3.
@@ -166,23 +166,20 @@ As a complement to the explicitly defined types in this section, there is also a
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | p{6cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-consumer & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & yes & Descriptor of the consumer system. \\ \hline
+cloud & \hyperref[sec:model:CloudDescriptor]{CloudDescriptor} & yes &  Descriptor of the consumer cloud. \\ \hline
 providerInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & yes & Array of provider and interface reference objects \\ \hline
 serviceDefinitionId &\pref{Number} & yes & Identifier of the service definition database record. \\ \hline
 \end{tabularx}
 \end{table}
 
-\msubsection{struct}{SystemDescriptor}
-\label{sec:model:SystemDescriptor}
+\msubsection{struct}{CloudDescriptor}
+\label{sec:model:CloudDescriptor}
 
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-address & \pref{Address} & yes & Network address. \\ \hline
-authenticationInfo & \pref{String} & no & Public key of the client certificate. \\ \hline
-metadata & \hyperref[sec:model:Metadata]{Metadata} & no & Metadata \\ \hline
-port & \pref{PortNumber} & yes & Port of the system. \\ \hline
-systemName &\pref{Name} & yes & Name of the system. \\ \hline
+name & \pref{Name} & yes & Name of the cloud \\ \hline
+operator & \pref{Name} & yes & Name of the cloud operator \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -197,8 +194,6 @@ idList & \pref{List}$<$\pref{Number}$>$ & yes & List of interface database recor
 \end{tabularx}
 \end{table}
 
-\clearpage
-
 \msubsection{struct}{CheckAuthRuleResponse}
 \label{sec:model:CheckAuthRuleResponse}
  
@@ -206,15 +201,10 @@ idList & \pref{List}$<$\pref{Number}$>$ & yes & List of interface database recor
 \begin{tabularx}{\textwidth}{| p{5cm} | p{5cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Description \\ \hline
 authorizedProviderInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & Array of the authorized provider and interface reference objects \\ \hline
-consumer & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} &  Descriptor of the consumer system. \\ \hline
-serviceDefinitionId &\pref{Number} & Identifier of the service definition database record. \\ \hline
+cloud & \hyperref[sec:model:CloudDescriptor]{CloudDescriptor} & Descriptor of the consumer cloud. \\ \hline 
+serviceDefinitionId & \pref{Number} & Identifier of the service definition database record. \\ \hline
 \end{tabularx}
 \end{table}
-
-\msubsection{struct}{Metadata}
-\label{sec:model:Metadata}
-
-An \pref{Object} which maps \pref{String} key-value pairs.
 
 \clearpage
 
@@ -228,12 +218,10 @@ The concrete interpretations of each of these types and structures must be provi
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | X |} \hline
 \rowcolor{gray!33} Type & Description \\ \hline
-\pdef{Address}          & A string representation of the address \\ \hline
 \pdef{Object}           & Set of primitives and possible further objects. \\ \hline
 \pdef{List}$<$A$>$      & An \textit{array} of a known number of items, each having type A. \\ \hline
 \pdef{Name}             & A string identifier that is intended to be both human and machine-readable. \\ \hline
 \pdef{Number}           & Decimal number \\ \hline
-\pdef{PortNumber}       & A \pref{Number} between 0 and 65535. \\ \hline
 \pdef{String}           & A chain of characters. \\ \hline
 \end{tabularx}
 \end{table}
