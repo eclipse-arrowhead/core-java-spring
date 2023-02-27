@@ -132,7 +132,7 @@ The rest of this document describes how to realize the \textit{token-generation}
 \section{Interface Description}
 \label{sec:functions}
 
-The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are, \texttt{400 Bad Request} if request is malformed, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Orchestrator is unavailable.
+The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are, \texttt{400 Bad Request} if request is malformed, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Authorizator is unavailable.
 
 \begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{token-generation} invocation.}]
 POST /authorization/token HTTP/1.1
@@ -150,17 +150,8 @@ POST /authorization/token HTTP/1.1
     "systemName": "string"
   },
   "consumerCloud": {
-    "authenticationInfo": "string",
-    "gatekeeperRelayIds": [
-      0
-    ],
-    "gatewayRelayIds": [
-      0
-    ],
     "name": "string",
-    "neighbor": true,
-    "operator": "string",
-    "secure": true
+    "operator": "string"
   },
   "providers": [
     {

@@ -57,8 +57,8 @@
 \begin{document}
 
 %% Arrowhead Document Properties
-\ArrowheadTitle{authorization-control-intra HTTP/TLS/JSON} %e.g. ServiceDiscovery HTTP/TLS/JSON
-\ArrowheadServiceID{authorization-control-intra} % e.g. register
+\ArrowheadTitle{authorization-control-inter HTTP/TLS/JSON} %e.g. ServiceDiscovery HTTP/TLS/JSON
+\ArrowheadServiceID{authorization-control-inter} % e.g. register
 \ArrowheadType{Interface Design Description}
 \ArrowheadTypeShort{IDD}
 \ArrowheadVersion{4.6.0}
@@ -92,7 +92,7 @@
   % Front Page Abstract
   \begin{abstract}
     This document describes a HTTP protocol with TLS payload
-    security and JSON payload encoding variant of the \textbf{authorization-control-intra} service.
+    security and JSON payload encoding variant of the \textbf{authorization-control-inter} service.
   \end{abstract}
   \vspace*{1cm}
 
@@ -106,7 +106,7 @@
 \section{Overview}
 \label{sec:overview}
 
-This document describes the \textbf{authorization-control-intra} service interface, which enables authorization control within a local cloud. It's implemented using protocol, encoding as stated in the following table:
+This document describes the \textbf{authorization-control-inter} service interface, which enables authorization control between local clouds. It's implemented using protocol, encoding as stated in the following table:
 
 \begin{table}[ht!]
   \centering
@@ -117,15 +117,15 @@ This document describes the \textbf{authorization-control-intra} service interfa
     Encoding & JSON & RFC 8259 \cite{rfc8259} \\ \hline
     Compression & N/A & - \\ \hline
   \end{tabular}
-  \caption{Communication and semantics details used for the \textbf{authorization-control-intra}
+  \caption{Communication and semantics details used for the \textbf{authorization-control-inter}
     service interface}
   \label{tab:comunication_semantics_profile}
 \end{table}
 
-This document provides the Interface Design Description IDD to the \textit{authorization-control-intra -- Service Description} document.
+This document provides the Interface Design Description IDD to the \textit{authorization-control-inter -- Service Description} document.
 For further details about how this service is meant to be used, please consult that document.
 
-The rest of this document describes how to realize the \textit{authorization-control-intra} service HTTP/TLS/JSON interface in details.
+The rest of this document describes how to realize the \textit{authorization-control-inter} service HTTP/TLS/JSON interface in details.
 
 \newpage
 
@@ -134,20 +134,13 @@ The rest of this document describes how to realize the \textit{authorization-con
 
 The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are, \texttt{400 Bad Request} if request is malformed, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Authorizator is unavailable.
 
-\begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{authorization-control-intra} invocation.}]
-POST /authorization/intracloud/check HTTP/1.1
+\begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{authorization-control-inter} invocation.}]
+POST /authorization/intercloud/check HTTP/1.1
 
 {
-  "consumer": {
-    "address": "string",
-    "authenticationInfo": "string",
-    "metadata": {
-      "additionalProp1": "string",
-      "additionalProp2": "string",
-      "additionalProp3": "string"
-    },
-    "port": 0,
-    "systemName": "string"
+  "cloud": {
+    "name": "string",
+    "operator": "string",
   },
   "providerIdsWithInterfaceIds": [
     {
@@ -157,14 +150,14 @@ POST /authorization/intracloud/check HTTP/1.1
       ]
     }
   ],
-  "serviceDefinitionId": 0
+  "serviceDefinition": "string"
 }
 
 \end{lstlisting}
 
 \clearpage
 
-\begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{authorization-control-intra} response.}]
+\begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{authorization-control-inter} response.}]
 {
   "authorizedProviderIdsWithInterfaceIds": [
     {
@@ -174,21 +167,11 @@ POST /authorization/intracloud/check HTTP/1.1
       ]
     }
   ],
-  "consumer": {
-    "address": "string",
-    "authenticationInfo": "string",
-    "createdAt": "string",
-    "id": 0,
-    "metadata": {
-      "additionalProp1": "string",
-      "additionalProp2": "string",
-      "additionalProp3": "string"
-    },
-    "port": 0,
-    "systemName": "string",
-    "updatedAt": "string"
+  "cloud": {
+    "name": "string",
+    "operator": "string"
   },
-  "serviceDefinitionId": 0
+  "serviceDefinition": "string"
 }
 \end{lstlisting}
 
@@ -207,23 +190,20 @@ As a complement to the primary types defined in this section, there is also a li
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{5cm} | p{4cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-consumer & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & yes & Descriptor of the consumer system. \\ \hline
+cloud & \hyperref[sec:model:CloudDescriptor]{CloudDescriptor} & yes &  Descriptor of the consumer cloud. \\ \hline
 providerIdsWithInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & yes & Array of provider and interface reference objects \\ \hline
-serviceDefinitionId &\pref{Number} & yes & Identifier of the service definition database record. \\ \hline
+serviceDefinition &\pref{Name} & yes & Service definition name. \\ \hline
 \end{tabularx}
 \end{table}
 
-\msubsection{struct}{SystemDescriptor}
-\label{sec:model:SystemDescriptor}
+\msubsection{struct}{CloudDescriptor}
+\label{sec:model:CloudDescriptor}
 
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-address & \pref{Address} & yes & Network address. \\ \hline
-authenticationInfo & \pref{String} & no & Public key of the client certificate. \\ \hline
-metadata & \hyperref[sec:model:Metadata]{Metadata} & no & Metadata \\ \hline
-port & \pref{PortNumber} & yes & Port of the system. \\ \hline
-systemName &\pref{Name} & yes & Name of the system. \\ \hline
+name & \pref{Name} & yes & Name of the cloud \\ \hline
+operator & \pref{Name} & yes & Name of the cloud operator \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -247,15 +227,10 @@ idList & \pref{List}$<$\pref{Number}$>$ & yes & List of interface database recor
 \begin{tabularx}{\textwidth}{| p{6cm} | p{4cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 authorizedProviderIdsWithInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & yes & Array of the authorized provider and interface reference objects \\ \hline
-consumer & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & yes & Descriptor of the consumer system. \\ \hline
-serviceDefinitionId &\pref{Number} & yes & Identifier of the service definition database record. \\ \hline
+cloud & \hyperref[sec:model:CloudDescriptor]{CloudDescriptor} & yes &  Descriptor of the consumer cloud. \\ \hline
+serviceDefinition &\pref{Name} & yes & Service definition name. \\ \hline
 \end{tabularx}
 \end{table}
-
-\msubsection{struct}{Metadata}
-\label{sec:model:Metadata}
-
-An \pref{Object} which maps \pref{String} key-value pairs.
 
 \newpage
 

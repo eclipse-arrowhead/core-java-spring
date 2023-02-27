@@ -155,7 +155,7 @@ The following interfaces are available.
 \section{Information Model}
 \label{sec:model}
 
-Here, all data objects that can be part of the \textbf{authorization-control-intra} service
+Here, all data objects that can be part of the \textbf{authorization-control-inter} service
 provides to the hosting System are listed in alphabetic order.
 Note that each subsection, which describes one type of object, begins with the \textit{struct} keyword, which is used to denote a collection of named fields, each with its own data type.
 As a complement to the explicitly defined types in this section, there is also a list of implicit primitive types in Section \ref{sec:model:primitives}, which are used to represent things like hashes and identifiers.
@@ -168,7 +168,7 @@ As a complement to the explicitly defined types in this section, there is also a
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 cloud & \hyperref[sec:model:CloudDescriptor]{CloudDescriptor} & yes &  Descriptor of the consumer cloud. \\ \hline
 providerInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & yes & Array of provider and interface reference objects \\ \hline
-serviceDefinitionId &\pref{Number} & yes & Identifier of the service definition database record. \\ \hline
+serviceDefinition &\pref{Name} & yes & Service definition name. \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -202,7 +202,7 @@ idList & \pref{List}$<$\pref{Number}$>$ & yes & List of interface database recor
 \rowcolor{gray!33} Field & Type & Description \\ \hline
 authorizedProviderInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & Array of the authorized provider and interface reference objects \\ \hline
 cloud & \hyperref[sec:model:CloudDescriptor]{CloudDescriptor} & Descriptor of the consumer cloud. \\ \hline 
-serviceDefinitionId & \pref{Number} & Identifier of the service definition database record. \\ \hline
+serviceDefinition & \pref{Name} & Service definition name. \\ \hline
 \end{tabularx}
 \end{table}
 
