@@ -205,11 +205,16 @@ idList & \pref{List}$<$\pref{Number}$>$ & yes & List of interface database recor
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{5cm} | p{5cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-consumer & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & yes & Descriptor of the consumer system. \\ \hline
 authorizedProviderInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & yes & Array of the authorized provider and interface reference objects \\ \hline
+consumer & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & yes & Descriptor of the consumer system. \\ \hline
 serviceDefinitionId &\pref{Number} & yes & Identifier of the service definition database record. \\ \hline
 \end{tabularx}
 \end{table}
+
+\msubsection{struct}{Metadata}
+\label{sec:model:Metadata}
+
+An \pref{Object} which maps \pref{String} key-value pairs.
 
 \clearpage
 
