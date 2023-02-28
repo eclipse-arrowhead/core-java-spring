@@ -57,8 +57,8 @@
 \begin{document}
 
 %% Arrowhead Document Properties
-\ArrowheadTitle{token-generation HTTP/TLS/JSON} %e.g. ServiceDiscovery HTTP/TLS/JSON
-\ArrowheadServiceID{token-generation} % e.g. register
+\ArrowheadTitle{token-generation-multi-service HTTP/TLS/JSON} %e.g. ServiceDiscovery HTTP/TLS/JSON
+\ArrowheadServiceID{token-generation-multi-service} % e.g. register
 \ArrowheadType{Interface Design Description}
 \ArrowheadTypeShort{IDD}
 \ArrowheadVersion{4.6.0}
@@ -92,7 +92,7 @@
   % Front Page Abstract
   \begin{abstract}
     This document describes a HTTP protocol with TLS payload
-    security and JSON payload encoding variant of the \textbf{token-generation} service.
+    security and JSON payload encoding variant of the \textbf{token-generation-multi-service} service.
   \end{abstract}
   \vspace*{1cm}
 
@@ -106,7 +106,7 @@
 \section{Overview}
 \label{sec:overview}
 
-This document describes the \textbf{token-generation} service interface, which enables session control during a service consumption. It's implemented using protocol, encoding as stated in the following table:
+This document describes the \textbf{token-generation-multi-service} service interface, which enables session control during a service consumption. It's implemented using protocol, encoding as stated in the following table:
 
 \begin{table}[ht!]
   \centering
@@ -122,10 +122,10 @@ This document describes the \textbf{token-generation} service interface, which e
   \label{tab:comunication_semantics_profile}
 \end{table}
 
-This document provides the Interface Design Description IDD to the \textit{token-generation -- Service Description} document.
+This document provides the Interface Design Description IDD to the \textit{token-generation-multi-service -- Service Description} document.
 For further details about how this service is meant to be used, please consult that document.
 
-The rest of this document describes how to realize the \textit{token-generation} service HTTP/TLS/JSON interface in details.
+The rest of this document describes how to realize the \textit{token-generation-multi-service} service HTTP/TLS/JSON interface in details.
 
 \newpage
 
@@ -134,63 +134,73 @@ The rest of this document describes how to realize the \textit{token-generation}
 
 The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are, \texttt{400 Bad Request} if request is malformed, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Authorizator is unavailable.
 
-\begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{token-generation} invocation.}]
-POST /authorization/token HTTP/1.1
+\begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{token-generation-multi-service} invocation.}]
+POST /authorization/token/multi HTTP/1.1
 
-{
-  "consumer": {
-    "address": "string",
-    "authenticationInfo": "string",
-    "metadata": {
-      "additionalProp1": "string",
-      "additionalProp2": "string",
-      "additionalProp3": "string"
-    },
-    "port": 0,
-    "systemName": "string"
-  },
-  "consumerCloud": {
-    "name": "string",
-    "operator": "string"
-  },
-  "providers": [
-    {
-      "provider": {
-        "address": "string",
-        "authenticationInfo": "string",
-        "metadata": {
-          "additionalProp1": "string",
-          "additionalProp2": "string",
-          "additionalProp3": "string"
-        },
-        "port": 0,
-        "systemName": "string"
+[
+  {
+    "consumer": {
+      "address": "string",
+      "authenticationInfo": "string",
+      "metadata": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
       },
-      "serviceInterfaces": [
-        "string"
-      ],
-      "tokenDuration": 0
-    }
-  ],
-  "service": "string"
-}
+      "port": 0,
+      "systemName": "string"
+    },
+    "consumerCloud": {
+      "name": "string",
+      "operator": "string"
+    },
+    "providers": [
+      {
+        "provider": {
+          "address": "string",
+          "authenticationInfo": "string",
+          "metadata": {
+            "additionalProp1": "string",
+            "additionalProp2": "string",
+            "additionalProp3": "string"
+          },
+          "port": 0,
+          "systemName": "string"
+        },
+        "serviceInterfaces": [
+          "string"
+        ],
+        "tokenDuration": 0
+      }
+    ],
+    "service": "string"
+  }
+]}
 
 \end{lstlisting}
 
 \clearpage
 
-\begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{token-generation} response.}]
+\begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{token-generation-multi-service} response.}]
 {
-  "tokenData": [
+  "data": [
     {
-      "providerAddress": "string",
-      "providerName": "string",
-      "providerPort": 0,
-      "tokens": {
-        "additionalProp1": "string",
-        "additionalProp2": "string",
-        "additionalProp3": "string"
-      }
+      "consumerAdress": "string",
+      "consumerName": "string",
+      "consumerPort": 0,
+      "service": "string",
+      "tokenData": [
+        {
+          "providerAddress": "string",
+          "providerName": "string",
+          "providerPort": 0,
+          "tokens": {
+            "additionalProp1": "string",
+            "additionalProp2": "string",
+            "additionalProp3": "string"
+          }
+        }
+      ]
     }
   ]
 }
@@ -257,6 +267,16 @@ tokenDuration &  \pref{Number} & yes & Validity period of the token in seconds \
 \end{tabularx}
 \end{table}
 
+\msubsection{struct}{TokenGenerationMultiResponse}
+\label{sec:model:TokenGenerationMultiResponse}
+ 
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{2cm} | p{5.5cm} | X |} \hline
+\rowcolor{gray!33} Field & Type      & Description \\ \hline
+data & \pref{List}$<$\hyperref[sec:model:TokenGenerationResponse]{TokenGenerationResponse}$>$ & List of different generation result descriptors. \\ \hline
+\end{tabularx}
+\end{table}
+
 \msubsection{struct}{TokenGenerationResponse}
 \label{sec:model:TokenGenerationResponse}
  
@@ -284,6 +304,8 @@ tokens &  \pref{Map}$<$\pref{Interface},\hyperref[sec:model:JWT]{JWT}$>$ & Inter
 \label{sec:model:Token}
 
 A \pref{String} format credential (token) which were created by encrypting a JSON object \cite{bray2014json}. JSON Web Tokens (JWT) are an open, industry standard RFC 7519 method for representing claims securely between two parties.
+
+\clearpage
 
 A JWT token genereated by this service, holds the following JSON object:
 
@@ -346,7 +368,7 @@ Furthermore, the \pref{Object} and \pref{Array} types are given optional generic
 \end{tabularx}
 \end{table}
 
-With these primitives now available, we proceed to define all the types specified in the \textbf{token-generation} SD document without a direct equivalent among the JSON types.
+With these primitives now available, we proceed to define all the types specified in the \textbf{token-generation-multi-service} SD document without a direct equivalent among the JSON types.
 Concretely, we define the \textbf{token-generation} SD primitives either as \textit{aliases} or \textit{structs}.
 An \textit{alias} is a renaming of an existing type, but with some further details about how it is intended to be used.
 Structs are described in the beginning of the parent section.

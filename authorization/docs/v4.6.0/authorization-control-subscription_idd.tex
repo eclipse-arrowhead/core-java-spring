@@ -57,8 +57,8 @@
 \begin{document}
 
 %% Arrowhead Document Properties
-\ArrowheadTitle{token-generation HTTP/TLS/JSON} %e.g. ServiceDiscovery HTTP/TLS/JSON
-\ArrowheadServiceID{token-generation} % e.g. register
+\ArrowheadTitle{authorization-control-subscription HTTP/TLS/JSON} %e.g. ServiceDiscovery HTTP/TLS/JSON
+\ArrowheadServiceID{authorization-control-subscription} % e.g. register
 \ArrowheadType{Interface Design Description}
 \ArrowheadTypeShort{IDD}
 \ArrowheadVersion{4.6.0}
@@ -92,7 +92,7 @@
   % Front Page Abstract
   \begin{abstract}
     This document describes a HTTP protocol with TLS payload
-    security and JSON payload encoding variant of the \textbf{token-generation} service.
+    security and JSON payload encoding variant of the \textbf{authorization-control-subscription} service.
   \end{abstract}
   \vspace*{1cm}
 
@@ -106,7 +106,7 @@
 \section{Overview}
 \label{sec:overview}
 
-This document describes the \textbf{token-generation} service interface, which enables session control during a service consumption. It's implemented using protocol, encoding as stated in the following table:
+This document describes the \textbf{authorization-control-subscription} service interface,  which enables publish-subscribe type authorization control within a local cloud. It's implemented using protocol, encoding as stated in the following table:
 
 \begin{table}[ht!]
   \centering
@@ -117,15 +117,15 @@ This document describes the \textbf{token-generation} service interface, which e
     Encoding & JSON & RFC 8259 \cite{rfc8259} \\ \hline
     Compression & N/A & - \\ \hline
   \end{tabular}
-  \caption{Communication and semantics details used for the \textbf{token-generation}
+  \caption{Communication and semantics details used for the \textbf{authorization-control-subscription}
     service interface}
   \label{tab:comunication_semantics_profile}
 \end{table}
 
-This document provides the Interface Design Description IDD to the \textit{token-generation -- Service Description} document.
+This document provides the Interface Design Description IDD to the \textit{authorization-control-subscription -- Service Description} document.
 For further details about how this service is meant to be used, please consult that document.
 
-The rest of this document describes how to realize the \textit{token-generation} service HTTP/TLS/JSON interface in details.
+The rest of this document describes how to realize the \textit{authorization-control-subscription} service HTTP/TLS/JSON interface in details.
 
 \newpage
 
@@ -134,8 +134,8 @@ The rest of this document describes how to realize the \textit{token-generation}
 
 The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are, \texttt{400 Bad Request} if request is malformed, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Authorizator is unavailable.
 
-\begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{token-generation} invocation.}]
-POST /authorization/token HTTP/1.1
+\begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{authorization-control-subscription} invocation.}]
+POST /authorization/subscription/check HTTP/1.1
 
 {
   "consumer": {
@@ -149,48 +149,49 @@ POST /authorization/token HTTP/1.1
     "port": 0,
     "systemName": "string"
   },
-  "consumerCloud": {
-    "name": "string",
-    "operator": "string"
-  },
-  "providers": [
+  "publishers": [
     {
-      "provider": {
-        "address": "string",
-        "authenticationInfo": "string",
-        "metadata": {
-          "additionalProp1": "string",
-          "additionalProp2": "string",
-          "additionalProp3": "string"
-        },
-        "port": 0,
-        "systemName": "string"
+      "address": "string",
+      "authenticationInfo": "string",
+      "metadata": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
       },
-      "serviceInterfaces": [
-        "string"
-      ],
-      "tokenDuration": 0
+      "port": 0,
+      "systemName": "string"
     }
-  ],
-  "service": "string"
+  ]
 }
 
 \end{lstlisting}
 
 \clearpage
 
-\begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{token-generation} response.}]
+\begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{authorization-control-subscription} response.}]
 {
-  "tokenData": [
+  "consumer": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "metadata": {
+      "additionalProp1": "string",
+      "additionalProp2": "string",
+      "additionalProp3": "string"
+    },
+    "port": 0,
+    "systemName": "string"
+  },
+  "publishers": [
     {
-      "providerAddress": "string",
-      "providerName": "string",
-      "providerPort": 0,
-      "tokens": {
+      "address": "string",
+      "authenticationInfo": "string",
+      "metadata": {
         "additionalProp1": "string",
         "additionalProp2": "string",
         "additionalProp3": "string"
-      }
+      },
+      "port": 0,
+      "systemName": "string"
     }
   ]
 }
@@ -205,27 +206,14 @@ Here, all data objects that can be part of the service calls associated with thi
 Note that each subsection, which describes one type of object, begins with the \textit{struct} keyword, which is meant to denote a JSON \pref{Object} that must contain certain fields, or names, with values conforming to explicitly named types.
 As a complement to the primary types defined in this section, there is also a list of secondary types in Section \ref{sec:model:primitives}, which are used to represent things like hashes, identifiers and texts.
 
-\msubsection{struct}{TokenGenerationRequest}
-\label{sec:model:TokenGenerationRequest}
+\msubsection{struct}{CheckAuthSubscription}
+\label{sec:model:CheckAuthSubscription}
  
 \begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{3cm} | p{6cm} | p{2cm} | X |} \hline
+\begin{tabularx}{\textwidth}{| p{3cm} | p{4cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 consumer & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & yes & Descriptor of the consumer system. \\ \hline
-consumerCloud & \hyperref[sec:model:CloudDescriptor]{CloudDescriptor} & no &  Descriptor of the consumer cloud. \\ \hline
-providers &  \pref{List}$<$\hyperref[sec:model:TokenGenerationDescriptor]{TokenGenerationDescriptor}$>$ & yes & Array of token generation descriptors \\ \hline
-service &\pref{Name} & yes & Identifier of the service. \\ \hline
-\end{tabularx}
-\end{table}
-
-\msubsection{struct}{CloudDescriptor}
-\label{sec:model:CloudDescriptor}
-
-\begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
-\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-name & \pref{Name} & yes & Name of the cloud \\ \hline
-operator & \pref{Name} & yes & Name of the cloud operator \\ \hline
+publishers & \pref{List}$<$\hyperref[sec:model:SystemDescriptor]{SystemDescriptor}$>$ & yes & Descriptor of the publisher systems. (The output contains only the authorized publishers) \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -242,82 +230,6 @@ port & \pref{PortNumber} & yes & Port of the system. \\ \hline
 systemName &\pref{Name} & yes & Name of the system. \\ \hline
 \end{tabularx}
 \end{table}
-
-\clearpage
-
-\msubsection{struct}{TokenGenerationDescriptor}
-\label{sec:model:TokenGenerationDescriptor}
-
-\begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{3cm} | p{6cm} | p{2cm} | X |} \hline
-\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-provider & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & yes & Descriptor of the provider system. \\ \hline
-interfaces & \pref{List}$<$\pref{Name}$>$ & yes & List of interface names. \\ \hline
-tokenDuration &  \pref{Number} & yes & Validity period of the token in seconds \\ \hline
-\end{tabularx}
-\end{table}
-
-\msubsection{struct}{TokenGenerationResponse}
-\label{sec:model:TokenGenerationResponse}
- 
-\begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
-\rowcolor{gray!33} Field & Type      & Description \\ \hline
-tokenData & \pref{List}$<$\hyperref[sec:model:TokenData]{TokenData}$>$ & List of token data descriptors. \\ \hline
-\end{tabularx}
-\end{table}
-
-\msubsection{struct}{TokenData}
-\label{sec:model:TokenData}
-
-\begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
-\rowcolor{gray!33} Field & Type      & Description \\ \hline
-providerAddress & \pref{Address} & Network address of the system. \\ \hline
-providerPort & \pref{PortNumber} & Port of the system. \\ \hline
-providerName & \pref{Name} & Name of the system. \\ \hline
-tokens &  \pref{Map}$<$\pref{Interface},\hyperref[sec:model:JWT]{JWT}$>$ & Interface-token pairs \\ \hline 
-\end{tabularx}
-\end{table}
-
-\msubsection{struct}{JWT}
-\label{sec:model:Token}
-
-A \pref{String} format credential (token) which were created by encrypting a JSON object \cite{bray2014json}. JSON Web Tokens (JWT) are an open, industry standard RFC 7519 method for representing claims securely between two parties.
-
-A JWT token genereated by this service, holds the following JSON object:
-
-\begin{lstlisting}[language=http,label={lst:authorization},caption={Content of a \fref{JWT token} generated by this service.}]
-{
-  "header": {
-    "alg": "RS512",
-    "typ": "JSON"
-  },
-  "payload": {
-    "iss": "Authorization",
-    "iat": 1516239022,
-    "nbf": 1516239122, // optional
-    "exp": 1516242622,
-    "cid": "<system-name>.<cloud-name>.<cloud-operator>",
-    "sid": "<service-name>",
-    "iid": "<interface-identifier>",
-  },
-  "signature": "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-}
-\end{lstlisting}
-
-\begin{itemize}
-    \item The \textbf{alg} field specifies the cryptographic algorithm used to sign the JWT. Value is always \texttt{RS512}.
-    \item The \textbf{typ} field is used to declare the media type of the JWT payload. Value is always \texttt{JSON}.
-    \item The \textbf{iss} is used to identify the entity that issued the JWT. Value is always \texttt{Authorization}.
-    \item The \textbf{iat} stands for "issued at", which represents the Unix timestamp when the token was created.
-    \item The \textbf{nbf} stands for "not before", which represents the Unix timestamp before which the token should not be considered as valid. 
-    \item The \textbf{exp} stands for "expiration time", which represents the Unix timestamp after which the token is no longer valid.
-    \item The \textbf{cid} stands for "consumer identifier" and used to identify the consumer system which the token was generated for. The format of the value is always \texttt{<system-name>.<cloud-name>.<cloud-operator>}.
-    \item The \textbf{sid} stands for "service identifier" and used to identify the service which the token was generated for. The value is always the exact service definition name.
-    \item The \textbf{iid} stands for "interface identifier" and used to identify the interface which the token was generated for. The value is always the exact interface name.
-    \item The \textbf{signature} is always coming from the private key of the issuer (Authorization Core System) and can be verified with the public key of the issuer.
-\end{itemize}
 
 \msubsection{struct}{Metadata}
 \label{sec:model:Metadata}
@@ -346,8 +258,8 @@ Furthermore, the \pref{Object} and \pref{Array} types are given optional generic
 \end{tabularx}
 \end{table}
 
-With these primitives now available, we proceed to define all the types specified in the \textbf{token-generation} SD document without a direct equivalent among the JSON types.
-Concretely, we define the \textbf{token-generation} SD primitives either as \textit{aliases} or \textit{structs}.
+With these primitives now available, we proceed to define all the types specified in the \textbf{authorization-control-subscription} SD document without a direct equivalent among the JSON types.
+Concretely, we define the \textbf{authorization-control-subscription} SD primitives either as \textit{aliases} or \textit{structs}.
 An \textit{alias} is a renaming of an existing type, but with some further details about how it is intended to be used.
 Structs are described in the beginning of the parent section.
 The types are listed by name in alphabetical order.
@@ -355,10 +267,6 @@ The types are listed by name in alphabetical order.
 \subsubsection{alias \pdef{Address} = \pref{String}}
 
 A string representation of a network address. An address can be a version 4 IP address (RFC 791), a version 6 IP address (RFC 2460) or a DNS name (RFC 1034).
-
-\subsubsection{alias \pdef{Interface} = \pref{String}}
-
-A \pref{String} that describes an interface in \textit{Protocol-SecurityType-MimeType} format. \textit{SecurityType} can be SECURE or INSECURE. \textit{Protocol} and \textit{MimeType} can be anything. An example of a valid interface is: "HTTP-SECURE-JSON" or "HTTP-INSECURE-SENML".
 
 \subsubsection{alias \pdef{List}$<$A$>$ = \pref{Array}$<$A$>$}
 There is no difference.
