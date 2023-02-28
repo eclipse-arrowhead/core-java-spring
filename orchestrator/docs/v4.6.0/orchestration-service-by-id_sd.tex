@@ -115,8 +115,6 @@ The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
 In Section \ref{sec:model}, we end the document by presenting the data types used by the mentioned functions.
 
-\newpage
-
 \subsection{How This Service Is Meant to Be Used}
 The given system should consume the Service Registry Core System’s \textbf{query} service to get information about the \textbf{orchestration-service-by-id} service. Using this information the system can request the \textbf{orchestration-service-by-id} service with its own database id. The service returns the top priority local provider of all services contained by the Orchestrator store database for the consumer system.
 
@@ -156,8 +154,7 @@ Available for anyone within the local cloud.
 \section{Service Interface}
 \label{sec:functions}
 
-This section describes the interfaces to the service. The \textbf{orchestration-service-by-id} service is used to looking for matching providers. The various parameters are representing the necessary system and service input information.
-In particular, each subsection names an interface, an input type and an output type, in that order.
+This section describes the interfaces to the service. The \textbf{orchestration-service-by-id} service is used to looking for matching providers. Each subsection names an interface, an input type and an output type, in that order.
 The input type is named inside parentheses, while the output type is preceded by a colon.
 Input and output types are only denoted when accepted or returned, respectively, by the interface in question. All abstract data types named in this section are defined in Section 3.
 
@@ -202,7 +199,7 @@ response & \pref{List}$<$\hyperref[sec:model:OrchestrationResult]{OrchestrationR
 \label{sec:model:OrchestrationResult}
 
 \begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{4cm} | p{4.5cm} | X |} \hline
+\begin{tabularx}{\textwidth}{| p{4cm} | p{4.6cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Description \\ \hline
 authorizationTokens & \hyperref[sec:model:Metadata]{Metadata} & Tokens to use the service instance (one for every supported interface). Only filled if the security type is \texttt{TOKEN}. \\ \hline
 interfaces & \pref{List}$<$\hyperref[sec:model:ServiceInterfaceRecord]{ServiceInterfaceRecord}$>$ & List of interfaces the service instance supports. \\ \hline
@@ -287,7 +284,7 @@ The concrete interpretations of each of these types and structures must be provi
 \pdef{Number}           & Decimal number \\ \hline
 \pdef{OrchestratorWarning} & A potentially interesting information about a provider and/or its service instance. \\ \hline
 \pdef{PortNumber}       & A \pref{Number} between 0 and 65535. \\ \hline
-\pdef{SecureType}       & Any suitable type chosen by the implementor of service \\ \hline
+\pdef{SecureType}       & Any suitable type chosen by the implementor of service. \\ \hline
 \pdef{String}           & A chain of characters. \\ \hline
 \pdef{Version}          & Specifies a service version. \\ \hline
 \end{tabularx}

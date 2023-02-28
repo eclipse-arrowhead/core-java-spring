@@ -111,8 +111,6 @@ operations produced by the system.
 In Section \ref{sec:security}, we describe the security capabilities
 of the system.
 
-\newpage
-
 \subsection{Significant Prior Art}
 \label{sec:prior_art}
 
@@ -127,7 +125,7 @@ An orchestration system is a central component in any Service-Oriented Architect
 
 Orchestration is a mandatory core system of Eclipse Arrowhead LC and is responsible for finding and pairing service consumers and providers. 
 
-An application that want to consume a service should ask the Orchestrator to find one or more accessible providers that met the necessary requirements (including Quality-of-Service requirements). The Orchestrator returns the information (address, port, context path, tokens) that the application needs to consume the specified service.
+An application that want to consume a service should ask the Orchestrator to find one or more accessible providers that meet the necessary requirements (including Quality-of-Service requirements). The Orchestrator returns the information (address, port, context path, tokens) that the application needs to consume the specified service.
 
 \subsection{System functionalities and properties}
 \label{sec:properties}
@@ -176,13 +174,13 @@ The purpose of this service is to test the system availability. The service is o
 The purpose of this service is to get access information for providers that provides the required service and meets the additional requirements. The service is offered for both application and core systems. 
 
 \msubsection{service}{orchestration-service-by-proxy}
-The purpose of this service is to get access information for providers that provides the required service and meets the additional requirements. The main difference between this service and the previous one that here the consumer of the service is not the requester system. The service is offered only for the Workflow Choreographer core system. 
+The purpose of this service is to get access information for providers that provides the required service and meets the additional requirements. The main difference between this service and the previous one that here the consumer of the service is not the requester system. The service is offered only for the Workflow Choreographer Core System. 
 
 \msubsection{service}{orchestration-service-by-id}
 With this service a consumer can get access information for all its necessary services based on the top priority stored matching rules. The service is offered for both application and core systems.
 
 \msubsection{service}{orchestration-create-flexible-store-rules}
-The purpose of this service is to create a flexible matching rule. The service is offered only for the Plant Description Engine Core System.
+The purpose of this service is to create flexible matching rules. The service is offered only for the Plant Description Engine Core System.
 
 \msubsection{service}{orchestration-remove-flexible-store-rule}
 The purpose of this service is to remove a flexible matching rule. The service is offered only for the Plant Description Engine Core System.
@@ -215,6 +213,8 @@ The security of Eclipse Arrowhead - and therefore the security of Orchestrator  
 \end{itemize}
 
 For Arrowhead certificate profile see \url{https://github.com/eclipse-arrowhead/documentation}
+
+\newpage
 
 \bibliographystyle{IEEEtran}
 \bibliography{bibliography}

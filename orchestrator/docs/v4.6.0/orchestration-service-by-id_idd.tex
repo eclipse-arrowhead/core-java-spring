@@ -125,7 +125,7 @@ This document describes the \textbf{orchestration-service-by-id} service interfa
 This document provides the Interface Design Description IDD to the \textit{orchestration-service-by-id -- Service Description} document.
 For further details about how this service is meant to be used, please consult that document.
 
-The rest of this document describes how to realize the \textit{orchestration-service-by-id} service HTTP/TLS/JSON interface in details.
+The rest of this document describes how to realize the \textbf{orchestration-service-by-id} service HTTP/TLS/JSON interface in details.
 
 \newpage
 
@@ -214,7 +214,7 @@ response & \pref{List}$<$\hyperref[sec:model:OrchestrationResult]{OrchestrationR
 \label{sec:model:OrchestrationResult}
 
 \begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{4cm} | p{4.5cm} | X |} \hline
+\begin{tabularx}{\textwidth}{| p{4cm} | p{4.6cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Description \\ \hline
 authorizationTokens & \hyperref[sec:model:Metadata]{Metadata} & Tokens to use the service instance (one for every supported interface). Only filled if the security type is \texttt{TOKEN}. \\ \hline
 interfaces & \pref{List}$<$\hyperref[sec:model:ServiceInterfaceRecord]{ServiceInterfaceRecord}$>$ & List of interfaces the service instance supports. \\ \hline

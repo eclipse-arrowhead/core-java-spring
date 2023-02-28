@@ -115,8 +115,6 @@ The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
 In Section \ref{sec:model}, we end the document by presenting the data types used by the mentioned functions.
 
-\newpage
-
 \subsection{How This Service Is Meant to Be Used}
 This service is for the Workflow Choreographer Core System to collect the necessary providers for its executors to execute the plan. The Workflow Choreographer should consume the Service Registry Core System's \textbf{query} service to get information about the \textbf{orchestration-service-by-proxy} service. Using this information the system can request the \textbf{orchestration-service-by-proxy} service with an orchestration form about the service one of its executors wants to consume. 
 
@@ -127,7 +125,7 @@ The service can be used in two ways. The first one uses predefined rules (coming
 \begin{itemize}
     \item consumer system is mandatory (this is the executor system that actually will consume the service),
     \item requested service and all the other parameters are optional,
-    \item if requested service is not specified, then this service returns the top priority local provider of all services contained by the Orchestrator store database for the consumer system. if requested service is specified, then you have to define the service definition and exactly one interface (all other service requirements are optional). In this case, it returns all accessible providers from the Orchestrator store database that provides the specified service via the specified interface to the specified consumer.
+    \item if requested service is not specified, then this service returns the top priority local provider of all services contained by the Orchestrator store database for the consumer system. if requested service is specified, then it has to contain the service definition and exactly one interface (all other service requirements are optional). In this case, it returns all accessible providers from the Orchestrator store database that provides the specified service via the specified interface to the specified consumer.
 \end{itemize}
 
 \subsubsection{Flexible Store Orchestration}
@@ -151,9 +149,8 @@ The service can be used in two ways. The first one uses predefined rules (coming
 The requester can modify the \textbf{orchestration-service-by-proxy}'s behaviour using these flags. These are the available options:
 
 \begin{itemize}
-    \item \texttt{enableInterCloud}: the service can search another clouds for providers if none of the local cloud providers match the requirements,
+    \item \texttt{enableInterCloud}: the service can search in another clouds for providers if none of the local cloud providers match the requirements,
     \item \texttt{enableQoS}: the orchestration process will use Quality-of-Service requirements and provider reservation requests (if the Orchestrator supports it),
-    \item \texttt{externalServiceRequest}: the service is called by the Gatekeeper Core System on behalf of a consumer from an other cloud,
     \item \texttt{matchmaking}: the service automatically selects exactly one provider from the appropriate providers (if any),
     \item \texttt{metadataSearch}: query in the Service Registry uses metadata filtering,
     \item \texttt{onlyIPAddressResponse}: the service only returns providers whose address is an IP address (not a domain name),
@@ -161,7 +158,7 @@ The requester can modify the \textbf{orchestration-service-by-proxy}'s behaviour
     \item \texttt{onlyIPv6AddressResponse}: the service only returns providers whose address is a version 6 IP address (not a domain name and not a version 4 IP address),
     \item \texttt{onlyPreferred}: the service filters the results with the specified provider list,
     \item \texttt{overrideStore}: services uses dynamic orchestration if this flag is true, otherwise it uses the orchestration store,
-    \item \texttt{pingProviders}: the service checks whether the returning providers are online and remove the unaccessible ones from the results,
+    \item \texttt{pingProviders}: the service checks whether the returning providers are online and remove the in\-accessible ones from the results,
     \item \texttt{triggerInterCloud}: the service skipped the search in the local cloud and tries to find providers in other clouds instead.
 \end{itemize}
 
@@ -341,13 +338,13 @@ systemName &\pref{Name} & yes & Name of the system. \\ \hline
 \begin{tabularx}{\textwidth}{| p{5cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 interfaceRequirements &\pref{List}$<$\pref{Interface}$>$ & no & Names of the required interfaces. If specified at least one of the interfaces must match for having result(s). \\ \hline
-maxVersionRequirement &\pref{Number} & no & Required maximum version of the service. If specified version must be equals or lower or having result(s). Ignored if \texttt{versionRequirement} is specified. \\ \hline
-metadataRequirements &\hyperref[sec:model:Metadata]{Metadata} & no & Service metadata requirements. If specified the whole content of the map must match for having result(s). Only applied if the \texttt{metadataSearch} flag is set to true. \\ \hline
-minVersionRequirement &\pref{Number} & no & Required minimum version of the service. If specified version must be equals or higher or having result(s). Ignored if \texttt{versionRequirement} is specified. \\ \hline
+maxVersionRequirement &\pref{Number} & no & Required maximum version of the service. If specified version must be equal or lower for having result(s). Ignored if \texttt{versionRequirement} is specified. \\ \hline
+metadataRequirements &\hyperref[sec:model:Metadata]{Metadata} & no & Service metadata requirements. If spe\-cified the whole content of the map must match for having result(s). Only applied if the \texttt{metadataSearch} flag is set to true. \\ \hline
+minVersionRequirement &\pref{Number} & no & Required minimum version of the service. If specified version must be equal or higher for having result(s). Ignored if \texttt{versionRequirement} is specified. \\ \hline
 pingProviders &\pref{Boolean} & no & Whether or not the provider should be pinged. If true only the responding providers will comply. The orchestration flag \texttt{pingProviders} overrides this value. \\ \hline
 securityRequirements &\pref{List}$<$\pref{SecureType}$>$ & no & Types of the required security levels. If specified at least one of the types must match for having result(s). \\ \hline
 serviceDefinitionRequirement &\pref{Name} & yes & Identifier of the service. \\ \hline
-versionRequirement &\pref{Number} & no & Required version of the service. If specified version must match for having result(s). \\ \hline
+versionRequirement &\pref{Number} & no & Required version of the service. If spe\-cified version must match for having result(s). \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -367,7 +364,7 @@ response & \pref{List}$<$\hyperref[sec:model:OrchestrationResult]{OrchestrationR
 \label{sec:model:OrchestrationResult}
 
 \begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{4cm} | p{4.5cm} | X |} \hline
+\begin{tabularx}{\textwidth}{| p{4cm} | p{4.6cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Description \\ \hline
 authorizationTokens & \hyperref[sec:model:Metadata]{Metadata} & Tokens to use the service instance (one for every supported interface). Only filled if the security type is \texttt{TOKEN}. \\ \hline
 interfaces & \pref{List}$<$\hyperref[sec:model:ServiceInterfaceRecord]{ServiceInterfaceRecord}$>$ & List of interfaces the service instance supports. \\ \hline
@@ -447,7 +444,7 @@ The concrete interpretations of each of these types and structures must be provi
 \pdef{Number}           & Decimal number \\ \hline
 \pdef{OrchestratorWarning} & A potentially interesting information about a provider and/or its service instance. \\ \hline
 \pdef{PortNumber}       & A \pref{Number} between 0 and 65535. \\ \hline
-\pdef{SecureType}       & Any suitable type chosen by the implementor of service \\ \hline
+\pdef{SecureType}       & Any suitable type chosen by the implementor of service. \\ \hline
 \pdef{String}           & A chain of characters. \\ \hline
 \pdef{Version}          & Specifies a service version. \\ \hline
 \end{tabularx}

@@ -125,7 +125,7 @@ This document describes the \textbf{orchestration-service} service interface, th
 This document provides the Interface Design Description IDD to the \textit{orchestration-service -- Service Description} document.
 For further details about how this service is meant to be used, please consult that document.
 
-The rest of this document describes how to realize the \textit{orchestration-service} service HTTP/TLS/JSON interface in details.
+The rest of this document describes how to realize the \textbf{orchestration-service} service HTTP/TLS/JSON interface in details.
 
 \newpage
 
@@ -254,10 +254,10 @@ As a complement to the primary types defined in this section, there is also a li
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{4cm} | p{4cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-commands &\hyperref[sec:model:Metadata]{Metadata} & no & Additional commands to the Orchestrator, the only available command now is \texttt{qosExclusivity} (see above). \\ \hline
-orchestrationFlags &\hyperref[sec:model:OrchestrationFlags]{OrchestrationFlags} & no & A map of flags that changes the behaviour of the service. See details above. \\ \hline
+commands &\hyperref[sec:model:Metadata]{Metadata} & no & Additional commands to the Orchestrator, the only available command now is \texttt{qosExclusivity} (see in the Service Description document). \\ \hline
+orchestrationFlags &\hyperref[sec:model:OrchestrationFlags]{OrchestrationFlags} & no & A map of flags that changes the behaviour of the service. See details in the Service Description document. \\ \hline
 preferredProviders &\pref{List}$<$\hyperref[sec:model:PreferredProvider]{PreferredProvider}$>$ & no & A list of providers that takes precedence in matchmaking if they are available; if \texttt{onlyPreferred} flag is set, then the result can only be a subset of this list. \\ \hline
-qosRequirements &\hyperref[sec:model:Metadata]{Metadata} & no & Quality-of-Service requirement map. See details above. \\ \hline
+qosRequirements &\hyperref[sec:model:Metadata]{Metadata} & no & Quality-of-Service requirement map. See details in the Service Description document. \\ \hline
 requestedService &\hyperref[sec:model:SQF]{ServiceQueryForm} & no (yes) & Information about the requested service; mandatory in case of dynamic or flexible store orchestration. \\ \hline
 requesterCloud &\hyperref[sec:model:Cloud]{Cloud} & no & Information about the cloud from which the request comes. Only specified when the request comes from an other cloud. \\ \hline
 requesterSystem &\hyperref[sec:model:System]{System} & yes & Information about the system that requests the service. \\ \hline
@@ -325,13 +325,13 @@ systemName &\pref{Name} & yes & Name of the system. \\ \hline
 \begin{tabularx}{\textwidth}{| p{5cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 interfaceRequirements &\pref{List}$<$\pref{Interface}$>$ & no & Names of the required interfaces. If specified at least one of the interfaces must match for having result(s). \\ \hline
-maxVersionRequirement &\pref{Number} & no & Required maximum version of the service. If specified version must be equals or lower or having result(s). Ignored if \texttt{versionRequirement} is specified. \\ \hline
-metadataRequirements &\hyperref[sec:model:Metadata]{Metadata} & no & Service metadata requirements. If specified the whole content of the map must match for having result(s). Only applied if the \texttt{metadataSearch} flag is set to true. \\ \hline
-minVersionRequirement &\pref{Number} & no & Required minimum version of the service. If specified version must be equals or higher or having result(s). Ignored if \texttt{versionRequirement} is specified. \\ \hline
+maxVersionRequirement &\pref{Number} & no & Required maximum version of the service. If specified version must be equal or lower for having result(s). Ignored if \texttt{versionRequirement} is specified. \\ \hline
+metadataRequirements &\hyperref[sec:model:Metadata]{Metadata} & no & Service metadata requirements. If spe\-cified the whole content of the map must match for having result(s). Only applied if the \texttt{metadataSearch} flag is set to true. \\ \hline
+minVersionRequirement &\pref{Number} & no & Required minimum version of the service. If specified version must be equal or higher for having result(s). Ignored if \texttt{versionRequirement} is specified. \\ \hline
 pingProviders &\pref{Boolean} & no & Whether or not the provider should be pinged. If true only the responding providers will comply. The orchestration flag \texttt{pingProviders} overrides this value. \\ \hline
 securityRequirements &\pref{List}$<$\pref{SecureType}$>$ & no & Types of the required security levels. If specified at least one of the types must match for having result(s). \\ \hline
 serviceDefinitionRequirement &\pref{Name} & yes & Identifier of the service. \\ \hline
-versionRequirement &\pref{Number} & no & Required version of the service. If specified version must match for having result(s). \\ \hline
+versionRequirement &\pref{Number} & no & Required version of the service. If spe\-cified version must match for having result(s). \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -351,7 +351,7 @@ response & \pref{List}$<$\hyperref[sec:model:OrchestrationResult]{OrchestrationR
 \label{sec:model:OrchestrationResult}
 
 \begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{4cm} | p{4.5cm} | X |} \hline
+\begin{tabularx}{\textwidth}{| p{4cm} | p{4.6cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Description \\ \hline
 authorizationTokens & \hyperref[sec:model:Metadata]{Metadata} & Tokens to use the service instance (one for every supported interface). Only filled if the security type is \texttt{TOKEN}. \\ \hline
 interfaces & \pref{List}$<$\hyperref[sec:model:ServiceInterfaceRecord]{ServiceInterfaceRecord}$>$ & List of interfaces the service instance supports. \\ \hline
@@ -412,8 +412,6 @@ updatedAt & \pref{DateTime} & Service definition instance record was modified at
 \end{tabularx}
 \end{table} 
 
-\newpage
-
 \subsection{Primitives}
 \label{sec:model:primitives}
 
@@ -428,7 +426,7 @@ Furthermore, the \pref{Object} and \pref{Array} types are given optional generic
 \pdef{Object}$<$A$>$         & An unordered collection of $[$\pref{String}: \pref{Value}$]$ pairs, where each \pref{Value} conforms to type A. \\ \hline
 \pdef{Array}$<$A$>$          & An ordered collection of \pref{Value} elements, where each element conforms to type A. \\ \hline
 \pdef{String}                & An arbitrary UTF-8 string. \\ \hline
-\pdef{Number}                & Any IEEE 754 binary64 floating point number \cite{cowlishaw2019floating}, except for \textit{+Inf}, \textit{-Inf} and \textit{NaN}. \\ \hline
+\pdef{Number}                & Any IEEE 754 binary64 floating point number. \cite{cowlishaw2019floating}, except for \textit{+Inf}, \textit{-Inf} and \textit{NaN}. \\ \hline
 \pdef{Boolean}               & One out of \texttt{true} or \texttt{false}. \\ \hline
 \pdef{Null}                  & Must be \texttt{null}. \\ \hline
 \end{tabularx}
