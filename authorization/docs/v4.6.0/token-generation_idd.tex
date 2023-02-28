@@ -291,7 +291,7 @@ A JWT token genereated by this service, holds the following JSON object:
 {
   "header": {
     "alg": "RS512",
-    "typ": "JWT"
+    "typ": "JSON"
   },
   "payload": {
     "iss": "Authorization",
@@ -308,7 +308,7 @@ A JWT token genereated by this service, holds the following JSON object:
 
 \begin{itemize}
     \item The \textbf{alg} field specifies the cryptographic algorithm used to sign the JWT. Value is always \texttt{RS512}.
-    \item The \textbf{typ} field is used to declare the media type of the JWT. Value is always \texttt{JWT}.
+    \item The \textbf{typ} field is used to declare the media type of the JWT payload. Value is always \texttt{JSON}.
     \item The \textbf{iss} is used to identify the entity that issued the JWT. Value is always \texttt{Authorization}.
     \item The \textbf{iat} stands for "issued at", which represents the Unix timestamp when the token was created.
     \item The \textbf{nbf} stands for "not before", which represents the Unix timestamp before which the token should not be considered as valid. 
