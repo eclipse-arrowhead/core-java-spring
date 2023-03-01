@@ -108,27 +108,25 @@ The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
 In Section \ref{sec:model}, we end the document by presenting the data types used by the mentioned functions.
 
-\newpage
-
 \subsection{How This Service Is Meant to Be Used}
-Primarily the Orchestrator Core System should consume this service during the orchestration process to check whether the specified consumer cloud has right to consume the actually matching provider-service-interface triplet. 
+Primarily the Gatekeeper Core System should consume this service during the global service discovery process to check whether the specified consumer cloud has right to consume the actually matching provider-service-interface triplet. 
 
 \subsection{Important Delimitations}
 \label{sec:delimitations}
 
-The inter-cloud authorization rules are possible to define by database record ids, so when a cloud or  service definition or iterface name has been unregistered or removed, than the authorization rule is going to be remvoed as well.
+The inter-cloud authorization rules are possible to define by database record ids, so when a cloud or  service definition or interface name has been unregistered or removed, then the authorization rule is going to be removed as well.
 
 \subsection{Access policy}
 \label{sec:accesspolicy}
 
-This service is available only for the Orchestrator and the Choreographer Core Systems.
+This service is available only for the Orchestrator and the Gatekeeper Core Systems.
 
 \newpage
 
 \section{Service Interface}
 \label{sec:functions}
 
-This section describes the interfaces to the service. The \textbf{authorization-control-inter} service is used to verify authorization rules. The various parameters are representing the necessary system and service input information.
+This section describes the interfaces to the service. The \textbf{authorization-control-inter} service is used to verify authorization rules. The various parameters are representing the necessary cloud, system and service input information.
 In particular, each subsection names an interface, an input type and an output type, in that order.
 The input type is named inside parentheses, while the output type is preceded by a colon.
 Input and output types are only denoted when accepted or returned, respectively, by the interface in question. All abstract data types named in this section are defined in Section 3.
@@ -164,10 +162,10 @@ As a complement to the explicitly defined types in this section, there is also a
 \label{sec:model:CheckAuthRuleRequest}
  
 \begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{3cm} | p{6cm} | p{2cm} | X |} \hline
+\begin{tabularx}{\textwidth}{| p{3cm} | p{5cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 cloud & \hyperref[sec:model:CloudDescriptor]{CloudDescriptor} & yes &  Descriptor of the consumer cloud. \\ \hline
-providerInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & yes & Array of provider and interface reference objects \\ \hline
+providerInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & yes & Array of provider and interface reference objects. \\ \hline
 serviceDefinition &\pref{Name} & yes & Service definition name. \\ \hline
 \end{tabularx}
 \end{table}
@@ -178,8 +176,8 @@ serviceDefinition &\pref{Name} & yes & Service definition name. \\ \hline
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-name & \pref{Name} & yes & Name of the cloud \\ \hline
-operator & \pref{Name} & yes & Name of the cloud operator \\ \hline
+name & \pref{Name} & yes & Name of the cloud. \\ \hline
+operator & \pref{Name} & yes & Name of the cloud operator. \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -189,7 +187,7 @@ operator & \pref{Name} & yes & Name of the cloud operator \\ \hline
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-id & \pref{Number} & yes & Database record identifier of the provider system \\ \hline
+id & \pref{Number} & yes & Database record identifier of the provider system. \\ \hline
 idList & \pref{List}$<$\pref{Number}$>$ & yes & List of interface database record identifiers. \\ \hline
 \end{tabularx}
 \end{table}
@@ -200,7 +198,7 @@ idList & \pref{List}$<$\pref{Number}$>$ & yes & List of interface database recor
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{5cm} | p{5cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Description \\ \hline
-authorizedProviderInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & Array of the authorized provider and interface reference objects \\ \hline
+authorizedProviderInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & Array of the authorized provider and interface reference objects. \\ \hline
 cloud & \hyperref[sec:model:CloudDescriptor]{CloudDescriptor} & Descriptor of the consumer cloud. \\ \hline 
 serviceDefinition & \pref{Name} & Service definition name. \\ \hline
 \end{tabularx}
@@ -218,11 +216,9 @@ The concrete interpretations of each of these types and structures must be provi
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | X |} \hline
 \rowcolor{gray!33} Type & Description \\ \hline
-\pdef{Object}           & Set of primitives and possible further objects. \\ \hline
 \pdef{List}$<$A$>$      & An \textit{array} of a known number of items, each having type A. \\ \hline
 \pdef{Name}             & A string identifier that is intended to be both human and machine-readable. \\ \hline
 \pdef{Number}           & Decimal number \\ \hline
-\pdef{String}           & A chain of characters. \\ \hline
 \end{tabularx}
 \end{table}
 

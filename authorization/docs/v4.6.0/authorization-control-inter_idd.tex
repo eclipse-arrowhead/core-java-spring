@@ -132,7 +132,7 @@ The rest of this document describes how to realize the \textit{authorization-con
 \section{Interface Description}
 \label{sec:functions}
 
-The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are, \texttt{400 Bad Request} if request is malformed, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Authorizator is unavailable.
+The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are, \texttt{400 Bad Request} if request is malformed, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Authorization is unavailable.
 
 \begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{authorization-control-inter} invocation.}]
 POST /authorization/intercloud/check HTTP/1.1
@@ -154,8 +154,6 @@ POST /authorization/intercloud/check HTTP/1.1
 }
 
 \end{lstlisting}
-
-\clearpage
 
 \begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{authorization-control-inter} response.}]
 {
@@ -188,10 +186,10 @@ As a complement to the primary types defined in this section, there is also a li
 \label{sec:model:CheckAuthRuleRequest}
  
 \begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{5cm} | p{4cm} | p{2cm} | X |} \hline
+\begin{tabularx}{\textwidth}{| p{5cm} | p{4.5cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 cloud & \hyperref[sec:model:CloudDescriptor]{CloudDescriptor} & yes &  Descriptor of the consumer cloud. \\ \hline
-providerIdsWithInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & yes & Array of provider and interface reference objects \\ \hline
+providerIdsWithInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & yes & Array of provider and interface reference objects. \\ \hline
 serviceDefinition &\pref{Name} & yes & Service definition name. \\ \hline
 \end{tabularx}
 \end{table}
@@ -202,8 +200,8 @@ serviceDefinition &\pref{Name} & yes & Service definition name. \\ \hline
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-name & \pref{Name} & yes & Name of the cloud \\ \hline
-operator & \pref{Name} & yes & Name of the cloud operator \\ \hline
+name & \pref{Name} & yes & Name of the cloud. \\ \hline
+operator & \pref{Name} & yes & Name of the cloud operator. \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -213,12 +211,10 @@ operator & \pref{Name} & yes & Name of the cloud operator \\ \hline
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-id & \pref{Number} & yes & Database record identifier of the provider system \\ \hline
+id & \pref{Number} & yes & Database record identifier of the provider system. \\ \hline
 idList & \pref{List}$<$\pref{Number}$>$ & yes & List of interface database record identifiers. \\ \hline
 \end{tabularx}
 \end{table}
-
-\clearpage
 
 \msubsection{struct}{CheckAuthRuleResponse}
 \label{sec:model:CheckAuthRuleResponse}
@@ -226,7 +222,7 @@ idList & \pref{List}$<$\pref{Number}$>$ & yes & List of interface database recor
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{6cm} | p{4cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-authorizedProviderIdsWithInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & yes & Array of the authorized provider and interface reference objects \\ \hline
+authorizedProviderIdsWithInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & yes & Array of the authorized provider and interface re\-ference objects. \\ \hline
 cloud & \hyperref[sec:model:CloudDescriptor]{CloudDescriptor} & yes &  Descriptor of the consumer cloud. \\ \hline
 serviceDefinition &\pref{Name} & yes & Service definition name. \\ \hline
 \end{tabularx}
@@ -260,20 +256,12 @@ An \textit{alias} is a renaming of an existing type, but with some further detai
 Structs are described in the beginning of the parent section.
 The types are listed by name in alphabetical order.
 
-\subsubsection{alias \pdef{Address} = \pref{String}}
-
-A string representation of a network address. An address can be a version 4 IP address (RFC 791), a version 6 IP address (RFC 2460) or a DNS name (RFC 1034).
-
 \subsubsection{alias \pdef{List}$<$A$>$ = \pref{Array}$<$A$>$}
 There is no difference.
 
 \subsubsection{alias \pdef{Name} = \pref{String}}
 
 A \pref{String} identifier that is intended to be both human and machine-readable.
-
-\subsubsection{alias \pdef{PortNumber} = \pref{Number}}
-
-Decimal \pref{Number} in the range of 0-65535.
 
 \newpage
 
