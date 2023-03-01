@@ -125,16 +125,16 @@ This document describes the \textbf{token-generation-multi-service} service inte
 This document provides the Interface Design Description IDD to the \textit{token-generation-multi-service -- Service Description} document.
 For further details about how this service is meant to be used, please consult that document.
 
-The rest of this document describes how to realize the \textit{token-generation-multi-service} service HTTP/TLS/JSON interface in details.
+The rest of this document describes how to realize the \textit{token-generation-multi-service} service HTTP/TLS/ JSON interface in details.
 
 \newpage
 
 \section{Interface Description}
 \label{sec:functions}
 
-The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are, \texttt{400 Bad Request} if request is malformed, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Authorizator is unavailable.
+The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are, \texttt{400 Bad Request} if request is malformed, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Authorization is unavailable.
 
-\begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{token-generation-multi-service} invocation.}]
+\begin{lstlisting}[language=http,label={lst:authorization},caption={A \fref{token-generation-multi-service} invocation.}]
 POST /authorization/token/multi HTTP/1.1
 
 [
@@ -181,7 +181,7 @@ POST /authorization/token/multi HTTP/1.1
 
 \clearpage
 
-\begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{token-generation-multi-service} response.}]
+\begin{lstlisting}[language=http,label={lst:authorization},caption={A \fref{token-generation-multi-service} response.}]
 {
   "data": [
     {
@@ -195,9 +195,9 @@ POST /authorization/token/multi HTTP/1.1
           "providerName": "string",
           "providerPort": 0,
           "tokens": {
-            "additionalProp1": "string",
-            "additionalProp2": "string",
-            "additionalProp3": "string"
+            "interface1": "string",
+            "interface2": "string",
+            "interface3": "string"
           }
         }
       ]
@@ -223,19 +223,8 @@ As a complement to the primary types defined in this section, there is also a li
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 consumer & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & yes & Descriptor of the consumer system. \\ \hline
 consumerCloud & \hyperref[sec:model:CloudDescriptor]{CloudDescriptor} & no &  Descriptor of the consumer cloud. \\ \hline
-providers &  \pref{List}$<$\hyperref[sec:model:TokenGenerationDescriptor]{TokenGenerationDescriptor}$>$ & yes & Array of token generation descriptors \\ \hline
+providers &  \pref{List}$<$\hyperref[sec:model:TokenGenerationDescriptor]{TokenGenerationDescriptor}$>$ & yes & Array of token generation descriptors. \\ \hline
 service &\pref{Name} & yes & Identifier of the service. \\ \hline
-\end{tabularx}
-\end{table}
-
-\msubsection{struct}{CloudDescriptor}
-\label{sec:model:CloudDescriptor}
-
-\begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
-\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-name & \pref{Name} & yes & Name of the cloud \\ \hline
-operator & \pref{Name} & yes & Name of the cloud operator \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -246,10 +235,26 @@ operator & \pref{Name} & yes & Name of the cloud operator \\ \hline
 \begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 address & \pref{Address} & yes & Network address. \\ \hline
-authenticationInfo & \pref{String} & no & Public key of the client certificate. \\ \hline
-metadata & \hyperref[sec:model:Metadata]{Metadata} & no & Metadata \\ \hline
+authenticationInfo & \pref{String} & yes in case of provider & Public key of the client certificate. \\ \hline
+metadata & \hyperref[sec:model:Metadata]{Metadata} & no & Metadata. \\ \hline
 port & \pref{PortNumber} & yes & Port of the system. \\ \hline
 systemName &\pref{Name} & yes & Name of the system. \\ \hline
+\end{tabularx}
+\end{table}
+
+\msubsection{struct}{Metadata}
+\label{sec:model:Metadata}
+
+An \pref{Object} which maps \pref{String} key-value pairs.
+
+\msubsection{struct}{CloudDescriptor}
+\label{sec:model:CloudDescriptor}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
+name & \pref{Name} & yes & Name of the cloud. \\ \hline
+operator & \pref{Name} & yes & Name of the cloud operator. \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -263,7 +268,7 @@ systemName &\pref{Name} & yes & Name of the system. \\ \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 provider & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & yes & Descriptor of the provider system. \\ \hline
 interfaces & \pref{List}$<$\pref{Name}$>$ & yes & List of interface names. \\ \hline
-tokenDuration &  \pref{Number} & yes & Validity period of the token in seconds \\ \hline
+tokenDuration &  \pref{Number} & no & Validity period of the token in se\-conds. \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -296,7 +301,7 @@ tokenData & \pref{List}$<$\hyperref[sec:model:TokenData]{TokenData}$>$ & List of
 providerAddress & \pref{Address} & Network address of the system. \\ \hline
 providerPort & \pref{PortNumber} & Port of the system. \\ \hline
 providerName & \pref{Name} & Name of the system. \\ \hline
-tokens &  \pref{Map}$<$\pref{Interface},\hyperref[sec:model:JWT]{JWT}$>$ & Interface-token pairs \\ \hline 
+tokens &  \pref{Map}$<$\pref{Interface},\hyperref[sec:model:JWT]{JWT}$>$ & Interface-token pairs. \\ \hline 
 \end{tabularx}
 \end{table}
 
@@ -307,7 +312,7 @@ A \pref{String} format credential (token) which were created by encrypting a JSO
 
 \clearpage
 
-A JWT token genereated by this service, holds the following JSON object:
+A JWT token generated by this service, holds the following JSON object:
 
 \begin{lstlisting}[language=http,label={lst:authorization},caption={Content of a \fref{JWT token} generated by this service.}]
 {
@@ -318,8 +323,8 @@ A JWT token genereated by this service, holds the following JSON object:
   "payload": {
     "iss": "Authorization",
     "iat": 1516239022,
-    "nbf": 1516239122, // optional
-    "exp": 1516242622,
+    "nbf": 1516239122,
+    "exp": 1516242622, // optional
     "cid": "<system-name>.<cloud-name>.<cloud-operator>",
     "sid": "<service-name>",
     "iid": "<interface-identifier>",
@@ -341,19 +346,14 @@ A JWT token genereated by this service, holds the following JSON object:
     \item The \textbf{signature} is always coming from the private key of the issuer (Authorization Core System) and can be verified with the public key of the issuer.
 \end{itemize}
 
-\msubsection{struct}{Metadata}
-\label{sec:model:Metadata}
-
-An \pref{Object} which maps \pref{String} key-value pairs.
-
-\newpage
-
 \subsection{Primitives}
 \label{sec:model:primitives}
 
 As all messages are encoded using the JSON format \cite{bray2014json}, the following primitive constructs, part of that standard, become available.
 Note that the official standard is defined in terms of parsing rules, while this list only concerns syntactic information.
 Furthermore, the \pref{Object} and \pref{Array} types are given optional generic type parameters, which are used in this document to signify when pair values or elements are expected to conform to certain types. 
+
+\clearpage
 
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | X |} \hline
@@ -369,7 +369,7 @@ Furthermore, the \pref{Object} and \pref{Array} types are given optional generic
 \end{table}
 
 With these primitives now available, we proceed to define all the types specified in the \textbf{token-generation-multi-service} SD document without a direct equivalent among the JSON types.
-Concretely, we define the \textbf{token-generation} SD primitives either as \textit{aliases} or \textit{structs}.
+Concretely, we define the \textbf{token-generation-multi-service} SD primitives either as \textit{aliases} or \textit{structs}.
 An \textit{alias} is a renaming of an existing type, but with some further details about how it is intended to be used.
 Structs are described in the beginning of the parent section.
 The types are listed by name in alphabetical order.
