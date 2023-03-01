@@ -108,10 +108,8 @@ The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
 In Section \ref{sec:model}, we end the document by presenting the data types used by the mentioned functions.
 
-\newpage
-
 \subsection{How This Service Is Meant to Be Used}
-Primarily the Event Handler Supporting Core System should consume this service to verify the access right of a consumer (for the given provider) at the time of its subscription and when Event Handler receives notification from the Authorization about the fact that changes have happened in the authorization rules. 
+Primarily the Event Handler Supporting Core System should consume this service to verify the access right of a consumer (for the given provider) at the time of its subscription and when the Event Handler receives notification from the Authorization about the fact that changes have happened in the authorization rules. 
 
 \subsection{Important Delimitations}
 \label{sec:delimitations}
@@ -135,7 +133,7 @@ Input and output types are only denoted when accepted or returned, respectively,
 
 The following interfaces are available.
 
-\fsubsection{HTTP/TLS/JSON}{CheckAuthSubscription}{CheckAuthSubscription}
+\fsubsection{HTTP/TLS/JSON}{CheckAuthSubscriptionRequest}{CheckAuthSubscriptionResponse}
 
 \begin{table}[ht!]
   \centering
@@ -160,8 +158,8 @@ provides to the hosting System are listed in alphabetic order.
 Note that each subsection, which describes one type of object, begins with the \textit{struct} keyword, which is used to denote a collection of named fields, each with its own data type.
 As a complement to the explicitly defined types in this section, there is also a list of implicit primitive types in Section \ref{sec:model:primitives}, which are used to represent things like hashes and identifiers.
 
-\msubsection{struct}{CheckAuthSubscription}
-\label{sec:model:CheckAuthSubscription}
+\msubsection{struct}{CheckAuthSubscriptionRequest}
+\label{sec:model:CheckAuthSubscriptionRequest}
  
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | p{4cm} | p{2cm} | X |} \hline
@@ -190,7 +188,36 @@ systemName &\pref{Name} & yes & Name of the system. \\ \hline
 
 An \pref{Object} which maps \pref{String} key-value pairs.
 
+\msubsection{struct}{CheckAuthSubscriptionResponse}
+\label{sec:model:CheckAuthSubscriptionResponse}
+ 
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{3cm} | p{4cm} | p{2cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
+consumer & \hyperref[sec:model:SystemRecord]{SystemRecord} & yes & Descriptor of the consumer system. \\ \hline
+publishers & \pref{List}$<$\hyperref[sec:model:SystemRecord]{SystemRecord}$>$ & yes & Descriptor of the authorized publisher systems. \\ \hline
+\end{tabularx}
+\end{table}
+
 \clearpage
+
+\msubsection{struct}{SystemRecord}
+\label{sec:model:SystemRecord}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Description \\ \hline
+
+address &\pref{Address} & Network address of the system. \\ \hline
+authenticationInfo &\pref{String} & X.509 public key of the system. \\ \hline
+createdAt & \pref{DateTime} & System instance record was created at this UTC time\-stamp. \\ \hline
+id & \pref{Number} & Identifier of the system instance. \\ \hline
+metadata &\hyperref[sec:model:Metadata]{Metadata} & Additional information about the system. \\ \hline
+port &\pref{PortNumber} & Port of the system. \\ \hline
+systemName &\pref{Name} & Name of the system. \\ \hline
+updatedAt & \pref{DateTime} & System instance record was modified at this UTC time\-stamp. \\ \hline
+\end{tabularx}
+\end{table}
 
 \subsection{Primitives}
 \label{sec:model:primitives}
@@ -202,7 +229,8 @@ The concrete interpretations of each of these types and structures must be provi
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | X |} \hline
 \rowcolor{gray!33} Type & Description \\ \hline
-\pdef{Address}          & A string representation of the address \\ \hline
+\pdef{Address}          & A string representation of the address. \\ \hline
+\pdef{DateTime}         & Pinpoints a specific moment in time. \\ \hline
 \pdef{Object}           & Set of primitives and possible further objects. \\ \hline
 \pdef{List}$<$A$>$      & An \textit{array} of a known number of items, each having type A. \\ \hline
 \pdef{Name}             & A string identifier that is intended to be both human and machine-readable. \\ \hline

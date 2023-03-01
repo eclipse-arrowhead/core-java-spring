@@ -125,14 +125,14 @@ This document describes the \textbf{authorization-control-subscription} service 
 This document provides the Interface Design Description IDD to the \textit{authorization-control-subscription -- Service Description} document.
 For further details about how this service is meant to be used, please consult that document.
 
-The rest of this document describes how to realize the \textit{authorization-control-subscription} service HTTP/TLS/JSON interface in details.
+The rest of this document describes how to realize the \textit{authorization-control-subscription} service HTTP/ TLS/JSON interface in details.
 
 \newpage
 
 \section{Interface Description}
 \label{sec:functions}
 
-The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are, \texttt{400 Bad Request} if request is malformed, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Authorizator is unavailable.
+The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are, \texttt{400 Bad Request} if request is malformed, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Authorization is unavailable.
 
 \begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{authorization-control-subscription} invocation.}]
 POST /authorization/subscription/check HTTP/1.1
@@ -173,25 +173,31 @@ POST /authorization/subscription/check HTTP/1.1
   "consumer": {
     "address": "string",
     "authenticationInfo": "string",
+    "createdAt": "string",
+    "id": 0,
     "metadata": {
       "additionalProp1": "string",
       "additionalProp2": "string",
       "additionalProp3": "string"
     },
     "port": 0,
-    "systemName": "string"
+    "systemName": "string",
+    "updatedAt": "string"
   },
   "publishers": [
     {
       "address": "string",
       "authenticationInfo": "string",
+      "createdAt": "string",
+      "id": 0,
       "metadata": {
         "additionalProp1": "string",
         "additionalProp2": "string",
         "additionalProp3": "string"
       },
       "port": 0,
-      "systemName": "string"
+      "systemName": "string",
+      "updatedAt": "string"
     }
   ]
 }
@@ -206,14 +212,14 @@ Here, all data objects that can be part of the service calls associated with thi
 Note that each subsection, which describes one type of object, begins with the \textit{struct} keyword, which is meant to denote a JSON \pref{Object} that must contain certain fields, or names, with values conforming to explicitly named types.
 As a complement to the primary types defined in this section, there is also a list of secondary types in Section \ref{sec:model:primitives}, which are used to represent things like hashes, identifiers and texts.
 
-\msubsection{struct}{CheckAuthSubscription}
-\label{sec:model:CheckAuthSubscription}
+\msubsection{struct}{CheckAuthSubscriptionRequest}
+\label{sec:model:CheckAuthSubscriptionRequest}
  
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | p{4cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 consumer & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & yes & Descriptor of the consumer system. \\ \hline
-publishers & \pref{List}$<$\hyperref[sec:model:SystemDescriptor]{SystemDescriptor}$>$ & yes & Descriptor of the publisher systems. (The output contains only the authorized publishers) \\ \hline
+publishers & \pref{List}$<$\hyperref[sec:model:SystemDescriptor]{SystemDescriptor}$>$ & yes & Descriptor of the publisher systems. \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -225,7 +231,7 @@ publishers & \pref{List}$<$\hyperref[sec:model:SystemDescriptor]{SystemDescripto
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 address & \pref{Address} & yes & Network address. \\ \hline
 authenticationInfo & \pref{String} & no & Public key of the client certificate. \\ \hline
-metadata & \hyperref[sec:model:Metadata]{Metadata} & no & Metadata \\ \hline
+metadata & \hyperref[sec:model:Metadata]{Metadata} & no & Metadata. \\ \hline
 port & \pref{PortNumber} & yes & Port of the system. \\ \hline
 systemName &\pref{Name} & yes & Name of the system. \\ \hline
 \end{tabularx}
@@ -236,7 +242,36 @@ systemName &\pref{Name} & yes & Name of the system. \\ \hline
 
 An \pref{Object} which maps \pref{String} key-value pairs.
 
-\newpage
+\msubsection{struct}{CheckAuthSubscriptionResponse}
+\label{sec:model:CheckAuthSubscriptionResponse}
+ 
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{3cm} | p{4cm} | p{2cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
+consumer & \hyperref[sec:model:SystemRecord]{SystemRecord} & yes & Descriptor of the consumer system. \\ \hline
+publishers & \pref{List}$<$\hyperref[sec:model:SystemRecord]{SystemRecord}$>$ & yes & Descriptor of the publisher systems. \\ \hline
+\end{tabularx}
+\end{table}
+
+\clearpage
+
+\msubsection{struct}{SystemRecord}
+\label{sec:model:SystemRecord}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Description \\ \hline
+
+address &\pref{Address} & Network address of the system. \\ \hline
+authenticationInfo &\pref{String} & X.509 public key of the system. \\ \hline
+createdAt & \pref{DateTime} & System instance record was created at this UTC time\-stamp. \\ \hline
+id & \pref{Number} & Identifier of the system instance. \\ \hline
+metadata &\hyperref[sec:model:Metadata]{Metadata} & Additional information about the system. \\ \hline
+port &\pref{PortNumber} & Port of the system. \\ \hline
+systemName &\pref{Name} & Name of the system. \\ \hline
+updatedAt & \pref{DateTime} & System instance record was modified at this UTC time\-stamp. \\ \hline
+\end{tabularx}
+\end{table}
 
 \subsection{Primitives}
 \label{sec:model:primitives}
@@ -267,6 +302,11 @@ The types are listed by name in alphabetical order.
 \subsubsection{alias \pdef{Address} = \pref{String}}
 
 A string representation of a network address. An address can be a version 4 IP address (RFC 791), a version 6 IP address (RFC 2460) or a DNS name (RFC 1034).
+
+\subsubsection{alias \pdef{DateTime} = \pref{String}}
+
+Pinpoints a moment in time in the format of ISO8601 standard "yyyy-mm-ddThh:mm:ss", where "yyy" denotes year (4 digits), "mm" denotes month starting from 01, "dd" denotes day starting from 01, "T" is the separator between date and time part, "hh" denotes hour in the 24-hour format (00-23), "MM" denotes minute (00-59), "SS" denotes second (00-59). " " is used as separator between the date and the time.
+An example of a valid date/time string is "2020-12-05T12:00:00"
 
 \subsubsection{alias \pdef{List}$<$A$>$ = \pref{Array}$<$A$>$}
 There is no difference.
