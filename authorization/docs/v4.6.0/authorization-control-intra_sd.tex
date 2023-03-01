@@ -108,20 +108,18 @@ The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
 In Section \ref{sec:model}, we end the document by presenting the data types used by the mentioned functions.
 
-\newpage
-
 \subsection{How This Service Is Meant to Be Used}
 Primarily the Orchestrator Core System should consume this service during the orchestration process to check whether the specified consumer system has right to consume the actually matching provider-service-interface triplet. 
 
 \subsection{Important Delimitations}
 \label{sec:delimitations}
 
-The intra-cloud authorization rules are possible to define by database record ids, so when a system or  service definition or iterface name has been unregistered or removed, than the authorization rule is going to be remvoed as well.
+The intra-cloud authorization rules are possible to define by database record ids, so when a system or  service definition or interface name has been unregistered or removed, then the authorization rule is going to be removed as well.
 
 \subsection{Access policy}
 \label{sec:accesspolicy}
 
-This service is available only for the Orchestrator and the Choreographer Core Systems.
+This service is available only for the Orchestrator and the Gatekeeper Core Systems.
 
 \newpage
 
@@ -164,10 +162,10 @@ As a complement to the explicitly defined types in this section, there is also a
 \label{sec:model:CheckAuthRuleRequest}
  
 \begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{3cm} | p{6cm} | p{2cm} | X |} \hline
+\begin{tabularx}{\textwidth}{| p{3cm} | p{5cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 consumer & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & yes & Descriptor of the consumer system. \\ \hline
-providerInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & yes & Array of provider and interface reference objects \\ \hline
+providerInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & yes & Array of provider and interface reference objects. \\ \hline
 serviceDefinitionId &\pref{Number} & yes & Identifier of the service definition database record. \\ \hline
 \end{tabularx}
 \end{table}
@@ -180,7 +178,7 @@ serviceDefinitionId &\pref{Number} & yes & Identifier of the service definition 
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 address & \pref{Address} & yes & Network address. \\ \hline
 authenticationInfo & \pref{String} & no & Public key of the client certificate. \\ \hline
-metadata & \hyperref[sec:model:Metadata]{Metadata} & no & Metadata \\ \hline
+metadata & \hyperref[sec:model:Metadata]{Metadata} & no & Metadata. \\ \hline
 port & \pref{PortNumber} & yes & Port of the system. \\ \hline
 systemName &\pref{Name} & yes & Name of the system. \\ \hline
 \end{tabularx}
@@ -192,22 +190,8 @@ systemName &\pref{Name} & yes & Name of the system. \\ \hline
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-id & \pref{Number} & yes & Database record identifier of the provider system \\ \hline
+id & \pref{Number} & yes & Database record identifier of the provider system. \\ \hline
 idList & \pref{List}$<$\pref{Number}$>$ & yes & List of interface database record identifiers. \\ \hline
-\end{tabularx}
-\end{table}
-
-\clearpage
-
-\msubsection{struct}{CheckAuthRuleResponse}
-\label{sec:model:CheckAuthRuleResponse}
- 
-\begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{5cm} | p{5cm} | X |} \hline
-\rowcolor{gray!33} Field & Type & Description \\ \hline
-authorizedProviderInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & Array of the authorized provider and interface reference objects \\ \hline
-consumer & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} &  Descriptor of the consumer system. \\ \hline
-serviceDefinitionId &\pref{Number} & Identifier of the service definition database record. \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -217,6 +201,36 @@ serviceDefinitionId &\pref{Number} & Identifier of the service definition databa
 An \pref{Object} which maps \pref{String} key-value pairs.
 
 \clearpage
+
+\msubsection{struct}{CheckAuthRuleResponse}
+\label{sec:model:CheckAuthRuleResponse}
+ 
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{5cm} | p{5cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Description \\ \hline
+authorizedProviderInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & Array of the authorized provider and interface reference objects. \\ \hline
+consumer & \hyperref[sec:model:SystemRecord]{SystemRecord} &  Descriptor of the consumer system. \\ \hline
+serviceDefinitionId &\pref{Number} & Identifier of the service definition database record. \\ \hline
+\end{tabularx}
+\end{table}
+
+\msubsection{struct}{SystemRecord}
+\label{sec:model:SystemRecord}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Description \\ \hline
+
+address &\pref{Address} & Network address of the system. \\ \hline
+authenticationInfo &\pref{String} & X.509 public key of the system. \\ \hline
+createdAt & \pref{DateTime} & System instance record was created at this UTC time\-stamp. \\ \hline
+id & \pref{Number} & Identifier of the system instance. \\ \hline
+metadata &\hyperref[sec:model:Metadata]{Metadata} & Additional information about the system. \\ \hline
+port &\pref{PortNumber} & Port of the system. \\ \hline
+systemName &\pref{Name} & Name of the system. \\ \hline
+updatedAt & \pref{DateTime} & System instance record was modified at this UTC time\-stamp. \\ \hline
+\end{tabularx}
+\end{table}
 
 \subsection{Primitives}
 \label{sec:model:primitives}
@@ -228,7 +242,8 @@ The concrete interpretations of each of these types and structures must be provi
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | X |} \hline
 \rowcolor{gray!33} Type & Description \\ \hline
-\pdef{Address}          & A string representation of the address \\ \hline
+\pdef{Address}          & A string representation of the address. \\ \hline
+\pdef{DateTime}         & Pinpoints a specific moment in time. \\ \hline
 \pdef{Object}           & Set of primitives and possible further objects. \\ \hline
 \pdef{List}$<$A$>$      & An \textit{array} of a known number of items, each having type A. \\ \hline
 \pdef{Name}             & A string identifier that is intended to be both human and machine-readable. \\ \hline

@@ -132,7 +132,7 @@ The rest of this document describes how to realize the \textit{authorization-con
 \section{Interface Description}
 \label{sec:functions}
 
-The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are, \texttt{400 Bad Request} if request is malformed, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Authorizator is unavailable.
+The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are, \texttt{400 Bad Request} if request is malformed, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Authorization is unavailable.
 
 \begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{authorization-control-intra} invocation.}]
 POST /authorization/intracloud/check HTTP/1.1
@@ -161,8 +161,6 @@ POST /authorization/intracloud/check HTTP/1.1
 }
 
 \end{lstlisting}
-
-\clearpage
 
 \begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{authorization-control-intra} response.}]
 {
@@ -205,10 +203,10 @@ As a complement to the primary types defined in this section, there is also a li
 \label{sec:model:CheckAuthRuleRequest}
  
 \begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{5cm} | p{4cm} | p{2cm} | X |} \hline
+\begin{tabularx}{\textwidth}{| p{5cm} | p{4.5cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 consumer & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & yes & Descriptor of the consumer system. \\ \hline
-providerIdsWithInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & yes & Array of provider and interface reference objects \\ \hline
+providerIdsWithInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & yes & Array of provider and interface reference object.\\ \hline
 serviceDefinitionId &\pref{Number} & yes & Identifier of the service definition database record. \\ \hline
 \end{tabularx}
 \end{table}
@@ -221,7 +219,7 @@ serviceDefinitionId &\pref{Number} & yes & Identifier of the service definition 
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 address & \pref{Address} & yes & Network address. \\ \hline
 authenticationInfo & \pref{String} & no & Public key of the client certificate. \\ \hline
-metadata & \hyperref[sec:model:Metadata]{Metadata} & no & Metadata \\ \hline
+metadata & \hyperref[sec:model:Metadata]{Metadata} & no & Metadata. \\ \hline
 port & \pref{PortNumber} & yes & Port of the system. \\ \hline
 systemName &\pref{Name} & yes & Name of the system. \\ \hline
 \end{tabularx}
@@ -233,22 +231,8 @@ systemName &\pref{Name} & yes & Name of the system. \\ \hline
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-id & \pref{Number} & yes & Database record identifier of the provider system \\ \hline
+id & \pref{Number} & yes & Database record identifier of the provider system. \\ \hline
 idList & \pref{List}$<$\pref{Number}$>$ & yes & List of interface database record identifiers. \\ \hline
-\end{tabularx}
-\end{table}
-
-\clearpage
-
-\msubsection{struct}{CheckAuthRuleResponse}
-\label{sec:model:CheckAuthRuleResponse}
- 
-\begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{6cm} | p{4cm} | p{2cm} | X |} \hline
-\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-authorizedProviderIdsWithInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & yes & Array of the authorized provider and interface reference objects \\ \hline
-consumer & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & yes & Descriptor of the consumer system. \\ \hline
-serviceDefinitionId &\pref{Number} & yes & Identifier of the service definition database record. \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -257,7 +241,37 @@ serviceDefinitionId &\pref{Number} & yes & Identifier of the service definition 
 
 An \pref{Object} which maps \pref{String} key-value pairs.
 
-\newpage
+\clearpage
+
+\msubsection{struct}{CheckAuthRuleResponse}
+\label{sec:model:CheckAuthRuleResponse}
+ 
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{6cm} | p{4cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Description \\ \hline
+authorizedProviderIdsWithInterfaceIds & \pref{List}$<$\hyperref[sec:model:ProviderInterfaceIds]{ProviderInterfaceIds}$>$ & Array of the authorized provider and interface re\-ference objects. \\ \hline
+consumer & \hyperref[sec:model:SystemRecord]{SystemRecord}s & Descriptor of the consumer system. \\ \hline
+serviceDefinitionId &\pref{Number} & Identifier of the service definition database record. \\ \hline
+\end{tabularx}
+\end{table}
+
+\msubsection{struct}{SystemRecord}
+\label{sec:model:SystemRecord}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Description \\ \hline
+
+address &\pref{Address} & Network address of the system. \\ \hline
+authenticationInfo &\pref{String} & X.509 public key of the system. \\ \hline
+createdAt & \pref{DateTime} & System instance record was created at this UTC time\-stamp. \\ \hline
+id & \pref{Number} & Identifier of the system instance. \\ \hline
+metadata &\hyperref[sec:model:Metadata]{Metadata} & Additional information about the system. \\ \hline
+port &\pref{PortNumber} & Port of the system. \\ \hline
+systemName &\pref{Name} & Name of the system. \\ \hline
+updatedAt & \pref{DateTime} & System instance record was modified at this UTC time\-stamp. \\ \hline
+\end{tabularx}
+\end{table}
 
 \subsection{Primitives}
 \label{sec:model:primitives}
@@ -288,6 +302,11 @@ The types are listed by name in alphabetical order.
 \subsubsection{alias \pdef{Address} = \pref{String}}
 
 A string representation of a network address. An address can be a version 4 IP address (RFC 791), a version 6 IP address (RFC 2460) or a DNS name (RFC 1034).
+
+\subsubsection{alias \pdef{DateTime} = \pref{String}}
+
+Pinpoints a moment in time in the format of ISO8601 standard "yyyy-mm-ddThh:mm:ss", where "yyy" denotes year (4 digits), "mm" denotes month starting from 01, "dd" denotes day starting from 01, "T" is the separator between date and time part, "hh" denotes hour in the 24-hour format (00-23), "MM" denotes minute (00-59), "SS" denotes second (00-59). " " is used as separator between the date and the time.
+An example of a valid date/time string is "2020-12-05T12:00:00"
 
 \subsubsection{alias \pdef{List}$<$A$>$ = \pref{Array}$<$A$>$}
 There is no difference.
