@@ -132,7 +132,7 @@ The rest of this document describes how to realize the \textit{auth-public-key} 
 \section{Interface Description}
 \label{sec:functions}
 
-The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are, \texttt{400 Bad Request} if request is malformed, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Authorizator is unavailable.
+The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are, \texttt{401 Unauthorized} if improper client side certificate is provided and \texttt{500 Internal Server Error} if Authorization is unavailable.
 
 \begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{auth-public-key} invocation.}]
 POST /authorization/publickey HTTP/1.1
