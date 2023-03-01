@@ -140,11 +140,11 @@ The system configuration properties can be found in the \texttt{application.prop
 \begin{itemize}
     \item \textbf{sr\_address}
   
-    The address of Sercive Registry Core System in the Local Cloud.
+    The address of Service Registry Core System in the Local Cloud.
     
     \item \textbf{sr\_port}
   
-    The port of Sercive Registry Core System in the Local Cloud.
+    The port of Service Registry Core System in the Local Cloud.
     
     \item \textbf{use\_strict\_service\_intf\_name\_verifier}
   
@@ -155,8 +155,6 @@ The system configuration properties can be found in the \texttt{application.prop
     Set to 'true' if Event Handler Core System is deployed within the Local Cloud.
     
 \end{itemize}
-
-\clearpage
 
 \subsection {Non functional properties implementation}
 
@@ -286,7 +284,7 @@ The system configuration properties can be found in the \texttt{application.prop
   
 The logging configuration properties can be found in the \texttt{log4j2.xml} file located at \texttt{src/main/resources} folder.
 
-\textit{Note:} During the build process this file is going to be built into the executable jar, but it is also possible to override it from by an external file. For that use the following command when starting the system: \texttt{java -jar arrowhead-serviceregistry-x.x.x -Dlog4j.configurationFile={path-to-external-file}}
+\textit{Note:} During the build process this file is going to be built into the executable jar, but it is also possible to override it from by an external file. For that use the following command when starting the system: \texttt{java -jar arrowhead-authorization-x.x.x -Dlog4j.configurationFile={path-to-external-file}}
 
 \begin{itemize}
     \item \textbf{JDBC\_LEVEL}
@@ -338,6 +336,8 @@ The logging configuration properties can be found in the \texttt{log4j2.xml} fil
     
   \end{tabular}
 \end{table*}
+
+\newpage
 
 \bibliographystyle{IEEEtran}
 \bibliography{bibliography}
