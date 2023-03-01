@@ -132,9 +132,9 @@ The rest of this document describes how to realize the \textit{token-generation}
 \section{Interface Description}
 \label{sec:functions}
 
-The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are, \texttt{400 Bad Request} if request is malformed, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Authorizator is unavailable.
+The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are, \texttt{400 Bad Request} if request is malformed, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Authorization is unavailable.
 
-\begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{token-generation} invocation.}]
+\begin{lstlisting}[language=http,label={lst:authorization},caption={A \fref{token-generation} invocation.}]
 POST /authorization/token HTTP/1.1
 
 {
@@ -179,7 +179,7 @@ POST /authorization/token HTTP/1.1
 
 \clearpage
 
-\begin{lstlisting}[language=http,label={lst:authorization},caption={An \fref{token-generation} response.}]
+\begin{lstlisting}[language=http,label={lst:authorization},caption={A \fref{token-generation} response.}]
 {
   "tokenData": [
     {
@@ -187,9 +187,9 @@ POST /authorization/token HTTP/1.1
       "providerName": "string",
       "providerPort": 0,
       "tokens": {
-        "additionalProp1": "string",
-        "additionalProp2": "string",
-        "additionalProp3": "string"
+        "interface1": "string",
+        "interface2": "string",
+        "interface3": "string"
       }
     }
   ]
@@ -213,19 +213,8 @@ As a complement to the primary types defined in this section, there is also a li
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 consumer & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & yes & Descriptor of the consumer system. \\ \hline
 consumerCloud & \hyperref[sec:model:CloudDescriptor]{CloudDescriptor} & no &  Descriptor of the consumer cloud. \\ \hline
-providers &  \pref{List}$<$\hyperref[sec:model:TokenGenerationDescriptor]{TokenGenerationDescriptor}$>$ & yes & Array of token generation descriptors \\ \hline
+providers &  \pref{List}$<$\hyperref[sec:model:TokenGenerationDescriptor]{TokenGenerationDescriptor}$>$ & yes & Array of token generation descriptors. \\ \hline
 service &\pref{Name} & yes & Identifier of the service. \\ \hline
-\end{tabularx}
-\end{table}
-
-\msubsection{struct}{CloudDescriptor}
-\label{sec:model:CloudDescriptor}
-
-\begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
-\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-name & \pref{Name} & yes & Name of the cloud \\ \hline
-operator & \pref{Name} & yes & Name of the cloud operator \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -236,10 +225,26 @@ operator & \pref{Name} & yes & Name of the cloud operator \\ \hline
 \begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 address & \pref{Address} & yes & Network address. \\ \hline
-authenticationInfo & \pref{String} & no & Public key of the client certificate. \\ \hline
-metadata & \hyperref[sec:model:Metadata]{Metadata} & no & Metadata \\ \hline
+authenticationInfo & \pref{String} & yes in case of providers & Public key of the client certificate. \\ \hline
+metadata & \hyperref[sec:model:Metadata]{Metadata} & no & Metadata. \\ \hline
 port & \pref{PortNumber} & yes & Port of the system. \\ \hline
 systemName &\pref{Name} & yes & Name of the system. \\ \hline
+\end{tabularx}
+\end{table}
+
+\msubsection{struct}{Metadata}
+\label{sec:model:Metadata}
+
+An \pref{Object} which maps \pref{String} key-value pairs.
+
+\msubsection{struct}{CloudDescriptor}
+\label{sec:model:CloudDescriptor}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
+name & \pref{Name} & yes & Name of the cloud \\ \hline
+operator & \pref{Name} & yes & Name of the cloud operator \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -253,7 +258,7 @@ systemName &\pref{Name} & yes & Name of the system. \\ \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 provider & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & yes & Descriptor of the provider system. \\ \hline
 interfaces & \pref{List}$<$\pref{Name}$>$ & yes & List of interface names. \\ \hline
-tokenDuration &  \pref{Number} & yes & Validity period of the token in seconds \\ \hline
+tokenDuration &  \pref{Number} & no & Validity period of the token in se\-conds. \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -276,7 +281,7 @@ tokenData & \pref{List}$<$\hyperref[sec:model:TokenData]{TokenData}$>$ & List of
 providerAddress & \pref{Address} & Network address of the system. \\ \hline
 providerPort & \pref{PortNumber} & Port of the system. \\ \hline
 providerName & \pref{Name} & Name of the system. \\ \hline
-tokens &  \pref{Map}$<$\pref{Interface},\hyperref[sec:model:JWT]{JWT}$>$ & Interface-token pairs \\ \hline 
+tokens &  \pref{Map}$<$\pref{Interface},\hyperref[sec:model:JWT]{JWT}$>$ & Interface-token pairs. \\ \hline 
 \end{tabularx}
 \end{table}
 
@@ -285,7 +290,7 @@ tokens &  \pref{Map}$<$\pref{Interface},\hyperref[sec:model:JWT]{JWT}$>$ & Inter
 
 A \pref{String} format credential (token) which were created by encrypting a JSON object \cite{bray2014json}. JSON Web Tokens (JWT) are an open, industry standard RFC 7519 method for representing claims securely between two parties.
 
-A JWT token genereated by this service, holds the following JSON object:
+A JWT token generated by this service, holds the following JSON object:
 
 \begin{lstlisting}[language=http,label={lst:authorization},caption={Content of a \fref{JWT token} generated by this service.}]
 {
@@ -296,8 +301,8 @@ A JWT token genereated by this service, holds the following JSON object:
   "payload": {
     "iss": "Authorization",
     "iat": 1516239022,
-    "nbf": 1516239122, // optional
-    "exp": 1516242622,
+    "nbf": 1516239122,
+    "exp": 1516242622, // optional
     "cid": "<system-name>.<cloud-name>.<cloud-operator>",
     "sid": "<service-name>",
     "iid": "<interface-identifier>",
@@ -318,13 +323,6 @@ A JWT token genereated by this service, holds the following JSON object:
     \item The \textbf{iid} stands for "interface identifier" and used to identify the interface which the token was generated for. The value is always the exact interface name.
     \item The \textbf{signature} is always coming from the private key of the issuer (Authorization Core System) and can be verified with the public key of the issuer.
 \end{itemize}
-
-\msubsection{struct}{Metadata}
-\label{sec:model:Metadata}
-
-An \pref{Object} which maps \pref{String} key-value pairs.
-
-\newpage
 
 \subsection{Primitives}
 \label{sec:model:primitives}

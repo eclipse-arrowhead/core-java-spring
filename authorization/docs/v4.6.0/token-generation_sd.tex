@@ -108,8 +108,6 @@ The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
 In Section \ref{sec:model}, we end the document by presenting the data types used by the mentioned functions.
 
-\newpage
-
 \subsection{How This Service Is Meant to Be Used}
 Primarily the Orchestrator Core System should consume this service during the orchestration process, when a registered provider - which could be fulfill the consumer's orchestration request - requires \texttt{TOKEN} level security.
 
@@ -128,6 +126,8 @@ The generated token has to meet the following criteria:
 
 \subsection{Important Delimitations}
 \label{sec:delimitations}
+
+The access token generation is possible only when the hosting system is in secure mode.
 
 Supported token types:
 
@@ -152,7 +152,7 @@ Input and output types are only denoted when accepted or returned, respectively,
 
 The following interfaces are available.
 
-\fsubsection{HTTP/TLS/JSON}{TokenGenerationRequest}{TokenGenerationResponse}
+\fsubsection{HTTP/TLS/JSON}{TokenGenerationRequest}{TokenGenerationRes-ponse}
 
 \begin{table}[ht!]
   \centering
@@ -185,19 +185,8 @@ As a complement to the explicitly defined types in this section, there is also a
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 consumer & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & yes & Descriptor of the consumer system. \\ \hline
 consumerCloud & \hyperref[sec:model:CloudDescriptor]{CloudDescriptor} & no &  Descriptor of the consumer cloud. \\ \hline
-providers &  \pref{List}$<$\hyperref[sec:model:TokenGenerationDescriptor]{TokenGenerationDescriptor}$>$ & yes & Array of token generation descriptors \\ \hline
+providers &  \pref{List}$<$\hyperref[sec:model:TokenGenerationDescriptor]{TokenGenerationDescriptor}$>$ & yes & Array of token generation descriptors. \\ \hline
 service &\pref{Name} & yes & Identifier of the service. \\ \hline
-\end{tabularx}
-\end{table}
-
-\msubsection{struct}{CloudDescriptor}
-\label{sec:model:CloudDescriptor}
-
-\begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
-\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-name & \pref{Name} & yes & Name of the cloud \\ \hline
-operator & \pref{Name} & yes & Name of the cloud operator \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -208,10 +197,26 @@ operator & \pref{Name} & yes & Name of the cloud operator \\ \hline
 \begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 address & \pref{Address} & yes & Network address. \\ \hline
-authenticationInfo & \pref{String} & no & Public key of the client certificate. \\ \hline
-metadata & \hyperref[sec:model:Metadata]{Metadata} & no & Metadata \\ \hline
+authenticationInfo & \pref{String} & yes in case of providers & Public key of the client certificate. \\ \hline
+metadata & \hyperref[sec:model:Metadata]{Metadata} & no & Metadata. \\ \hline
 port & \pref{PortNumber} & yes & Port of the system. \\ \hline
 systemName &\pref{Name} & yes & Name of the system. \\ \hline
+\end{tabularx}
+\end{table}
+
+\msubsection{struct}{Metadata}
+\label{sec:model:Metadata}
+
+An \pref{Object} which maps \pref{String} key-value pairs.
+
+\msubsection{struct}{CloudDescriptor}
+\label{sec:model:CloudDescriptor}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Mandatory & Description. \\ \hline
+name & \pref{Name} & yes & Name of the cloud. \\ \hline
+operator & \pref{Name} & yes & Name of the cloud operator. \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -225,7 +230,7 @@ systemName &\pref{Name} & yes & Name of the system. \\ \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 provider & \hyperref[sec:model:SystemDescriptor]{SystemDescriptor} & yes & Descriptor of the provider system. \\ \hline
 interfaces & \pref{List}$<$\pref{Name}$>$ & yes & List of interface names. \\ \hline
-tokenDuration &  \pref{Number} & yes & Validity period of the token in seconds \\ \hline
+tokenDuration &  \pref{Number} & no & Validity period of the token in se\-conds. \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -248,7 +253,7 @@ tokenData & \pref{List}$<$\hyperref[sec:model:TokenData]{TokenData}$>$ & List of
 providerAddress & \pref{Address} & Network address of the system. \\ \hline
 providerPort & \pref{PortNumber} & Port of the system. \\ \hline
 providerName & \pref{Name} & Name of the system. \\ \hline
-tokens &  \pref{Map}$<$\pref{Interface},\hyperref[sec:model:Token]{Token}$>$ & Interface-token pairs \\ \hline 
+tokens &  \pref{Map}$<$\pref{Interface},\hyperref[sec:model:Token]{Token}$>$ & Interface-token pairs. \\ \hline 
 
 \end{tabularx}
 \end{table}
@@ -256,14 +261,7 @@ tokens &  \pref{Map}$<$\pref{Interface},\hyperref[sec:model:Token]{Token}$>$ & I
 \msubsection{struct}{Token}
 \label{sec:model:Token}
 
-An encrypted \pref{String} format credential which, holds system, cloud, service and session information.
-
-\msubsection{struct}{Metadata}
-\label{sec:model:Metadata}
-
-An \pref{Object} which maps \pref{String} key-value pairs.
-
-\clearpage
+An encrypted \pref{String} format credential which holds system, cloud, service and session information.
 
 \subsection{Primitives}
 \label{sec:model:primitives}
@@ -275,7 +273,7 @@ The concrete interpretations of each of these types and structures must be provi
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | X |} \hline
 \rowcolor{gray!33} Type & Description \\ \hline
-\pdef{Address}          & A string representation of the address \\ \hline
+\pdef{Address}          & A string representation of the address. \\ \hline
 \pdef{Object}           & Set of primitives and possible further objects. \\ \hline
 \pdef{Interface}        & Any suitable type chosen by the implementor of service \\ \hline
 \pdef{List}$<$A$>$      & An \textit{array} of a known number of items, each having type A. \\ \hline
