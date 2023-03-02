@@ -108,8 +108,6 @@ The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
 In Section \ref{sec:model}, we end the document by presenting the data types used by the mentioned functions.
 
-\newpage
-
 \subsection{How This Service Is Meant to Be Used}
 The given core system is required to submit a list of service query forms, in which the requirements for each systems are defined.
 \subsection{Important Delimitations}
@@ -140,7 +138,7 @@ Input and output types are only denoted when accepted or returned, respectively,
 
 The following interfaces are available.
 
-\fsubsection{HTTP/TLS/JSON}{ServiceQueryForm}{ServiceQueryResult}
+\fsubsection{HTTP/TLS/JSON}{ServiceQueryFormList}{ServiceQueryResultList}
 
 \begin{table}[ht!]
   \centering
@@ -166,116 +164,126 @@ Note that each subsection, which describes one type of object, begins with the \
 As a complement to the explicitly defined types in this section, there is also a list of implicit primitive types in Section \ref{sec:model:primitives}, which are used to represent things like hashes and identifiers.
 
 \msubsection{struct}{ServiceQueryFormList}
+\label{sec:model:ServiceQueryFormList}
 
 \begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{5cm} | p{3cm} | p{2cm} | X |} \hline
+\begin{tabularx}{\textwidth}{| p{5cm} | p{4cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-forms &\pref{Array}$<$\pref{Object}$>$ & yes & List of service requirements form. \\ \hline
+forms &\pref{List}$<$\hyperref[sec:model:ServiceQueryForm]{ServiceQueryForm}$>$ & yes & List of service requirements form. \\ \hline
 \end{tabularx}
 \end{table}
 
-\msubsubsection{struct}{forms}
+\msubsection{struct}{ServiceQueryForm}
+\label{sec:model:ServiceQueryForm}
 
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{5cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-interfaceRequirements &\pref{Array}$<$\pref{Interface}$>$ & no & Names of the required interfaces. If specified at least one of the interfaces must match for having result(s). \\ \hline
-maxVersionRequirement &\pref{Number} & no & Required maximum version of the service. If specified version must be equals or lower or having result(s). Ignored if \textit{versionRequirement} is specified. \\ \hline
-metadataRequirements &\pref{Metadata} & no & Service metadata requirements. If specified the whole content of
+interfaceRequirements &\pref{List}$<$\pref{Interface}$>$ & no & Names of the required interfaces. If specified at least one of the interfaces must match for having result(s). \\ \hline
+maxVersionRequirement &\pref{Number} & no & Required maximum version of the ser\-vice. If specified version must be equals or lower or having result(s). Ignored if \textit{versionRequirement} is specified. \\ \hline
+metadataRequirements &\hyperref[sec:model:Metadata]{Metadata} & no & Service metadata requirements. If spe\-cified the whole content of
 the map must match for having result(s) \\ \hline
-minVersionRequirement &\pref{Number} & no & Required minimum version of the service. If specified version must be equals or higher or having result(s). Ignored if \textit{versionRequirement} is specified. \\ \hline
+minVersionRequirement &\pref{Number} & no & Required minimum version of the ser\-vice. If specified version must be equals or higher or having result(s). Ignored if \textit{versionRequirement} is specified. \\ \hline
 pingProviders &\pref{Boolean} & no & Whether or not the provider should be pinged. If \textit{true} only the responding providers will comply. \\ \hline
-securityRequirements &\pref{Array}$<$\pref{SecureType}$>$ & no & Types of the required security levels. If specified at least one of the types must match for having result(s). \\ \hline
+securityRequirements &\pref{List}$<$\pref{SecureType}$>$ & no & Types of the required security levels. If specified at least one of the types must match for having result(s). \\ \hline
 serviceDefinitionRequirement &\pref{Name} & yes & Identifier of the service. \\ \hline
-versionRequirement &\pref{Number} & no & Required version of the service. If specified version must match for having result(s) \\ \hline
+versionRequirement &\pref{Number} & no & Required version of the service. If spe\-cified version must match for having result(s) \\ \hline
 \end{tabularx}
 \end{table}
 
-\msubsubsection{struct}{Metadata}
+\msubsection{struct}{Metadata}
+\label{sec:model:Metadata}
 
-A JSON \pref{Object} which maps \pref{String} key-value pairs
-
-\clearpage
+An \pref{Object} which maps \pref{String} key-value pairs.
 
 \msubsection{struct}{ServiceQueryResultList}
+\label{sec:model:ServiceQueryResultList}
 
 \begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
+\begin{tabularx}{\textwidth}{| p{4.25cm} | p{4.5cm} | X |} \hline
 \rowcolor{gray!33} Field & Type      & Description \\ \hline
-results & \pref{Array}$<$\pref{Object}$>$     & List of service query results \\ \hline
+results & \pref{List}$<$\hyperref[sec:model:ServiceQueryResult]{ServiceQueryResult}$>$     & List of service query results \\ \hline
 \end{tabularx}
 \end{table}
 
-\msubsubsection{struct}{results}
+\msubsection{struct}{ServiceQueryResult}
+\label{sec:model:ServiceQueryResult}
 
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | p{6cm} | X |} \hline
 \rowcolor{gray!33} Field & Type      & Description \\ \hline
-serviceQueryData & \pref{Array}$<$\pref{ServiceRegistryResponse}$>$     & List of service instance results \\ \hline
+serviceQueryData & \pref{List}$<$\hyperref[sec:model:ServiceRegistryResponse]{ServiceRegistryResponse}$>$     & List of service instance results \\ \hline
 unfilteredHits & \pref{Number} & Number of service instances not included by \textit{serviceQueryData} due to the specified filters. \\ \hline
 \end{tabularx}
 \end{table}
 
-\msubsubsection{struct}{ServiceRegistryResponse}
+\msubsection{struct}{ServiceRegistryResponse}
+\label{sec:model:ServiceRegistryResponse}
 
 \begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
+\begin{tabularx}{\textwidth}{| p{4.25cm} | p{4cm} | X |} \hline
 \rowcolor{gray!33} Field & Type      & Description \\ \hline
 createdAt & \pref{DateTime} & Service instance record was created at this UTC timestamp. \\ \hline
 endOfValidity & \pref{DateTime} & Service is available until this UTC timestamp. \\ \hline
-id & \pref{Number} & Identifier of the service instance \\ \hline
-interfaces & \pref{Array}$<$\pref{Object}$>$     & List of interfaces the service supports. \\ \hline
-provider & \pref{Object} & Descriptor of the provider system record. \\ \hline
+id & \pref{Number} & Identifier of the service instance. \\ \hline
+interfaces & \pref{List}$<$\hyperref[sec:model:InterfaceRecord]{InterfaceRecord}$>$ & List of interfaces the service supports. \\ \hline
+provider & \hyperref[sec:model:SystemRecord]{SystemRecord} & Descriptor of the provider system record. \\ \hline
 secure &\pref{SecureType}  & Type of security the service uses. \\ \hline
-serviceDefinitionResponse & \pref{Object} & Descriptor of the serviceDefinition record. \\ \hline
-serviceUri &\pref{URI}         & URI of the service. \\ \hline
-metadata & \pref{Metadata}     & Service metadata \\ \hline
+serviceDefinitionResponse & \hyperref[sec:model:ServiceDefinitionRecord]{ServiceDefinitionRecord} & Descriptor of the serviceDefinition record. \\ \hline
+serviceUri & \pref{String} & Path of the service on the provider. \\ \hline
+metadata & \hyperref[sec:model:Metadata]{Metadata}  & Service metadata. \\ \hline
 updatedAt & \pref{DateTime} & Service instance record was modified at this UTC timestamp. \\ \hline
 version &\pref{Version}     & Version of the service. \\ \hline
 \end{tabularx}
 \end{table}
 
-\msubsubsection{struct}{interfaces}
+\msubsection{struct}{InterfaceRecord}
+\label{sec:model:InterfaceRecord}
 
 \begin{table}[ht!]
-\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
+\begin{tabularx}{\textwidth}{| p{4.25cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type      & Description \\ \hline
 createdAt & \pref{DateTime} & Interface instance record was created at this UTC timestamp. \\ \hline
-id & \pref{Number} & Identifier of the interface instance \\ \hline
-interfaceName &\pref{Interface}  & Specified name of the interface. \\ \hline
+id & \pref{Number} & Identifier of the interface instance. \\ \hline
+interfaceName & \pref{Interface}  & Specified name of the interface. \\ \hline
 updatedAt & \pref{DateTime} & Interface instance record was modified at this UTC timestamp. \\ \hline
 \end{tabularx}
 \end{table}
 
 \clearpage
 
-\msubsubsection{struct}{provider}
+\msubsection{struct}{SystemRecord}
+\label{sec:model:SystemRecord}
 
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
-\rowcolor{gray!33} Field & Type      & Description \\ \hline
-address & \pref{String} & Network address. \\ \hline
-authenticationInfo & \pref{String}     & Public key of the client certificate. \\ \hline
-createdAt & \pref{DateTime} & System instance record was created at this UTC timestamp. \\ \hline
-id & \pref{Number} & Identifier of the system instance \\ \hline
-metadata & \pref{Metadata}     & Metadata \\ \hline
-port & \pref{PortNumber} & Port of the system. \\ \hline
-systemName &\pref{Name}  & Name of the system. \\ \hline
-updatedAt & \pref{DateTime} & System instance record was modified at this UTC timestamp. \\ \hline
+\rowcolor{gray!33} Field & Type & Description \\ \hline
+
+address &\pref{Address} & Network address of the system. \\ \hline
+authenticationInfo &\pref{String} & X.509 public key of the system. \\ \hline
+createdAt & \pref{DateTime} & System instance record was created at this UTC time\-stamp. \\ \hline
+id & \pref{Number} & Identifier of the system instance. \\ \hline
+metadata &\hyperref[sec:model:Metadata]{Metadata} & Additional information about the system. \\ \hline
+port &\pref{PortNumber} & Port of the system. \\ \hline
+systemName &\pref{Name} & Name of the system. \\ \hline
+updatedAt & \pref{DateTime} & System instance record was modified at this UTC time\-stamp. \\ \hline
 \end{tabularx}
 \end{table}
 
-\msubsubsection{struct}{serviceDefinition}
+\msubsection{struct}{ServiceDefinitionRecord}
+\label{sec:model:ServiceDefinitionRecord}
 
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
 \rowcolor{gray!33} Field & Type      & Description \\ \hline
 createdAt & \pref{DateTime} & Service definition instance record was created at this UTC timestamp. \\ \hline
-id & \pref{Number} & Identifier of the service definition instance \\ \hline
+id & \pref{Number} & Identifier of the service definition instance. \\ \hline
 serviceDefinition &\pref{Name}  & Name of the service definition. \\ \hline
 updatedAt & \pref{DateTime} & Service definition instance record was modified at this UTC timestamp. \\ \hline
 \end{tabularx}
 \end{table}
+
+\clearpage
 
 \subsection{Primitives}
 \label{sec:model:primitives}
@@ -283,19 +291,20 @@ updatedAt & \pref{DateTime} & Service definition instance record was modified at
 Types and structures mentioned throughout this document that are assumed to be available to implementations of this service.
 The concrete interpretations of each of these types and structures must be provided by any IDD document claiming to implement this service.
 
-
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | X |} \hline
 \rowcolor{gray!33} Type & Description \\ \hline
 \pdef{Address}          & A string representation of the address \\ \hline
 \pdef{Boolean}          & One out of \texttt{true} or \texttt{false}. \\ \hline
 \pdef{DateTime}         & Pinpoints a specific moment in time. \\ \hline
-\pdef{Object}           & Set of primitives and possible further objects. \\ \hline
 \pdef{Interface}        & Any suitable type chosen by the implementor of service \\ \hline
 \pdef{List}$<$A$>$      & An \textit{array} of a known number of items, each having type A. \\ \hline
+\pdef{Object}           & Set of primitives and possible further objects. \\ \hline
+\pdef{PortNumber}       & A \pref{Number} between 0 and 65535. \\ \hline
 \pdef{Name}             & A string identifier that is intended to be both human and machine-readable. \\ \hline
 \pdef{Number}           & Decimal number \\ \hline
 \pdef{SecureType}       & Any suitable type chosen by the implementor of service \\ \hline
+\pdef{String}           & A chain of characters. \\ \hline
 \pdef{Version}          & Specifies a service version. \\ \hline
 \end{tabularx}
 \end{table}
