@@ -108,8 +108,6 @@ The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
 In Section \ref{sec:model}, we end the document by presenting the data types used by the mentioned functions.
 
-\newpage
-
 \subsection{How This Service Is Meant to Be Used}
 The given service provider application system is required to use the  \textbf{service-unregister} service right before, when the service instance is no longer provided. Figure \ref{fig:activity_uml} describes the processing of unregistration data submitted by the application system.
 
@@ -143,7 +141,7 @@ Input and output types are only denoted when accepted or returned, respectively,
 
 The following interfaces are available.
 
-\fsubsection{HTTP/TLS/JSON}{QueryParams}{void}
+\fsubsection{HTTP/TLS/JSON}{QueryParams}{Void}
 
 \begin{table}[ht!]
   \centering
@@ -169,6 +167,7 @@ Note that each subsection, which describes one type of object, begins with the \
 As a complement to the explicitly defined types in this section, there is also a list of implicit primitive types in Section \ref{sec:model:primitives}, which are used to represent things like hashes and identifiers.
 
 \msubsection{struct}{QueryParams}
+\label{sec:model:QueryParams}
  
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
@@ -177,11 +176,9 @@ serviceDefinition &\pref{Name} & yes & Identifier of the service. \\ \hline
 providerName & \pref{Name} & yes & Identifier of the provider system. \\ \hline
 providerAddress & \pref{Address} & no & Network address. \\ \hline
 providerPort &\pref{PortNumber} & yes & Port of the system. \\ \hline
-serviceUri &\pref{URI} & yes & URI of the service. \\ \hline
+serviceUri & \pref{String} & no & Path of the service on the provider. \\ \hline
 \end{tabularx}
 \end{table}
-
-\clearpage
 
 \subsection{Primitives}
 \label{sec:model:primitives}
@@ -193,10 +190,11 @@ The concrete interpretations of each of these types and structures must be provi
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | X |} \hline
 \rowcolor{gray!33} Type & Description \\ \hline
-\pdef{Address}          & A string representation of the address \\ \hline
+\pdef{Address}          & A string representation of the address. \\ \hline
 \pdef{Name}             & A string identifier that is intended to be both human and machine-readable. \\ \hline
-\pdef{Number}           & Decimal number \\ \hline
-\pdef{PortNumber}       & Decimal number in the range of 0-65535 \\ \hline
+\pdef{Number}           & Decimal number. \\ \hline
+\pdef{PortNumber}       & Decimal number in the range of 0-65535. \\ \hline
+\pdef{String}           & A chain of characters. \\ \hline
 \end{tabularx}
 \end{table}
 

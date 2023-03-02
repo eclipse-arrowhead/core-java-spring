@@ -178,45 +178,39 @@ Note that each subsection, which describes one type of object, begins with the \
 As a complement to the primary types defined in this section, there is also a list of secondary types in Section \ref{sec:model:primitives}, which are used to represent things like hashes, identifiers and texts.
 
 \msubsection{struct}{SystemRequest}
-
-This structure is used to register a system into the Service Registry.
-
+\label{sec:model:SystemRequest}
+ 
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
-address & \pref{Address} & yes & A string representation of the network address. \\ \hline
-authenticationInfo & \pref{String} & no & Public key of the client certificate. \\ \hline
-metadata & \pref{Metadata} & no & Metadata \\ \hline
+address & \pref{Address} & yes & Network address. \\ \hline
+authenticationInfo &\pref{String} & no & X.509 public key of the system. \\ \hline
+metadata &\hyperref[sec:model:Metadata]{Metadata} & no & Additional information about the system. \\ \hline
 port & \pref{PortNumber} & yes & Port of the system. \\ \hline
 systemName &\pref{Name} & yes & Name of the system. \\ \hline
 \end{tabularx}
 \end{table}
 
-\msubsubsection{struct}{Metadata}
+\msubsection{struct}{Metadata}
+\label{sec:model:Metadata}
 
-A JSON \pref{Object} which maps \pref{String} key-value pairs.
+An \pref{Object} which maps \pref{String} key-value pairs.
 
 \msubsection{struct}{SystemResponse}
-
+ 
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
 \rowcolor{gray!33} Field & Type      & Description \\ \hline
-address & \pref{Address} & A string representation of the network address. \\ \hline
-authenticationInfo & \pref{String}     & Public key of the client certificate. \\ \hline
+address & \pref{Address} & Network address. \\ \hline
+authenticationInfo & \pref{String}     & X.509 public key of the system. \\ \hline
 createdAt & \pref{DateTime} & System instance record was created at this UTC timestamp. \\ \hline
-id & \pref{Number} & Identifier of the system instance \\ \hline
-metadata & \pref{Metadata}     & Metadata \\ \hline
+id & \pref{Number} & Identifier of the system instance. \\ \hline
+metadata &\hyperref[sec:model:Metadata]{Metadata} & Additional information about the system. \\ \hline
 port & \pref{PortNumber} & Port of the system. \\ \hline
 systemName &\pref{Name}  & Name of the system. \\ \hline
 updatedAt & \pref{DateTime} & System instance record was modified at this UTC timestamp. \\ \hline
 \end{tabularx}
 \end{table}
-
-\msubsubsection{struct}{Metadata}
-
-A JSON \pref{Object} which maps \pref{String} key-value pairs.
-
-\newpage
 
 \subsubsection{Primitives}
 \label{sec:model:primitives}
@@ -242,6 +236,10 @@ Concretely, we define the \textbf{register-system} SD primitives either as \text
 An \textit{alias} is a renaming of an existing type, but with some further details about how it is intended to be used.
 Structs are described in the beginning of the parent section.
 The types are listed by name in alphabetical order.
+
+\subsubsection{alias \pdef{Address} = \pref{String}}
+
+A string representation of a network address. An address can be a version 4 IP address (RFC 791), a version 6 IP address (RFC 2460) or a DNS name (RFC 1034).
 
 \subsubsection{alias \pdef{DateTime} = \pref{String}}
 

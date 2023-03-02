@@ -108,8 +108,6 @@ The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
 In Section \ref{sec:model}, we end the document by presenting the data types used by the mentioned functions.
 
-\newpage
-
 \subsection{How This Service Is Meant to Be Used}
 The given service consumer application system is required to use the  \textbf{register-system} service at its startup or at least before looking for services.
 
@@ -167,21 +165,23 @@ Note that each subsection, which describes one type of object, begins with the \
 As a complement to the explicitly defined types in this section, there is also a list of implicit primitive types in Section \ref{sec:model:primitives}, which are used to represent things like hashes and identifiers.
 
 \msubsection{struct}{SystemRequest}
+\label{sec:model:SystemRequest}
  
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 address & \pref{Address} & yes & Network address. \\ \hline
-authenticationInfo & \pref{String} & no & Public key of the client certificate. \\ \hline
-metadata & \pref{Metadata} & no & Metadata \\ \hline
+authenticationInfo &\pref{String} & no & X.509 public key of the system. \\ \hline
+metadata &\hyperref[sec:model:Metadata]{Metadata} & no & Additional information about the system. \\ \hline
 port & \pref{PortNumber} & yes & Port of the system. \\ \hline
 systemName &\pref{Name} & yes & Name of the system. \\ \hline
 \end{tabularx}
 \end{table}
 
-\msubsubsection{struct}{Metadata}
+\msubsection{struct}{Metadata}
+\label{sec:model:Metadata}
 
-A JSON \pref{Object} which maps \pref{String} key-value pairs.
+An \pref{Object} which maps \pref{String} key-value pairs.
 
 \msubsection{struct}{SystemResponse}
  
@@ -189,19 +189,17 @@ A JSON \pref{Object} which maps \pref{String} key-value pairs.
 \begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
 \rowcolor{gray!33} Field & Type      & Description \\ \hline
 address & \pref{Address} & Network address. \\ \hline
-authenticationInfo & \pref{String}     & Public key of the client certificate. \\ \hline
+authenticationInfo & \pref{String}     & X.509 public key of the system. \\ \hline
 createdAt & \pref{DateTime} & System instance record was created at this UTC timestamp. \\ \hline
-id & \pref{Number} & Identifier of the system instance \\ \hline
-metadata & \pref{Metadata}     & Metadata \\ \hline
+id & \pref{Number} & Identifier of the system instance. \\ \hline
+metadata &\hyperref[sec:model:Metadata]{Metadata} & Additional information about the system. \\ \hline
 port & \pref{PortNumber} & Port of the system. \\ \hline
 systemName &\pref{Name}  & Name of the system. \\ \hline
 updatedAt & \pref{DateTime} & System instance record was modified at this UTC timestamp. \\ \hline
 \end{tabularx}
 \end{table}
 
-\msubsubsection{struct}{Metadata}
-
-A JSON \pref{Object} which maps \pref{String} key-value pairs.
+\clearpage
 
 \subsection{Primitives}
 \label{sec:model:primitives}
@@ -209,17 +207,16 @@ A JSON \pref{Object} which maps \pref{String} key-value pairs.
 Types and structures mentioned throughout this document that are assumed to be available to implementations of this service.
 The concrete interpretations of each of these types and structures must be provided by any IDD document claiming to implement this service.
 
-
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | X |} \hline
-\rowcolor{gray!33} JSON Type & Description \\ \hline
-\pdef{Value}                 & Any out of \pref{Object}, \pref{Array}, \pref{String}, \pref{Number}, \pref{Boolean} or \pref{Null}. \\ \hline
-\pdef{Object}$<$A$>$         & An unordered collection of $[$\pref{String}: \pref{Value}$]$ pairs, where each \pref{Value} conforms to type A. \\ \hline
-\pdef{Array}$<$A$>$          & An ordered collection of \pref{Value} elements, where each element conforms to type A. \\ \hline
-\pdef{String}                & An arbitrary UTF-8 string. \\ \hline
-\pdef{Number}                & Any IEEE 754 binary64 floating point number \cite{cowlishaw2019floating}, except for \textit{+Inf}, \textit{-Inf} and \textit{NaN}. \\ \hline
-\pdef{Boolean}               & One out of \texttt{true} or \texttt{false}. \\ \hline
-\pdef{Null}                  & Must be \texttt{null}. \\ \hline
+\rowcolor{gray!33} Type & Description \\ \hline
+\pdef{Address}          & A string representation of the address \\ \hline
+\pdef{DateTime}         & Pinpoints a specific moment in time. \\ \hline
+\pdef{Name}             & A string identifier that is intended to be both human and machine-readable. \\ \hline
+\pdef{Number}           & Decimal number \\ \hline
+\pdef{Object}           & Set of primitives and possible further objects. \\ \hline
+\pdef{PortNumber}       & A \pref{Number} between 0 and 65535. \\ \hline
+\pdef{String}           & A chain of characters. \\ \hline
 \end{tabularx}
 \end{table}
 
