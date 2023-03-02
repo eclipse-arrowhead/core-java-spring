@@ -125,7 +125,7 @@ This document describes the \textbf{echo} service interface, which enables an â€
 This document provides the Interface Design Description IDD to the \textit{echo -- Service Description} document.
 For further details about how this service is meant to be used, please consult that document.
 
-The rest of this document describes how to realize the echo service HTTP/TLS/TEXT interface in details.
+The rest of this document describes how to realize the \textbf{echo} service HTTP/TLS/TEXT interface in details.
 
 \newpage
 
@@ -135,11 +135,11 @@ The rest of this document describes how to realize the echo service HTTP/TLS/TEX
 The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are \texttt{401 Unauthorized} if improper client side certificate is provided and \texttt{500 Internal
   Server Error} if the system is unavailable.
 
-\begin{lstlisting}[language=http,label={lst:echo},caption={A \fref{echo} invocation.}]
+\begin{lstlisting}[language=http,label={lst:echo},caption={An \fref{echo} invocation.}]
 GET /orchestrator/echo HTTP/1.1
 \end{lstlisting}
 
-\begin{lstlisting}[language=http,label={lst:echo_response},caption={A \fref{echo} response.}]
+\begin{lstlisting}[language=http,label={lst:echo_response},caption={An \fref{echo} response.}]
 Got it!
 \end{lstlisting}
 
