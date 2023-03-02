@@ -172,6 +172,7 @@ Note that each subsection, which describes one type of object, begins with the \
 As a complement to the primary types defined in this section, there is also a list of secondary types in Section \ref{sec:model:primitives}, which are used to represent things like hashes, identifiers and texts.
 
 \msubsection{struct}{QueryParams}
+\label{sec:model:QueryParams}
 
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
@@ -184,36 +185,38 @@ sortField &\pref{String} & no & Field name used as the basis of the sorting. \\ 
 \end{table}
 
 \msubsection{struct}{SystemListResponse}
+\label{sec:model:SystemListResponse}
 
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
 \rowcolor{gray!33} Field & Type      & Description \\ \hline
-data & \pref{Array}$<$\pref{Object}$>$     & List of service instances \\ \hline
+data & \pref{List}$<$\hyperref[sec:model:SystemRecord]{SystemRecord}$>$     & List of service instances \\ \hline
 count & \pref{Number} & Size of the result list. \\ \hline
 \end{tabularx}
 \end{table}
 
-\msubsubsection{struct}{data}
+\msubsection{struct}{SystemRecord}
+\label{sec:model:SystemRecord}
 
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
-\rowcolor{gray!33} Field & Type      & Description \\ \hline
-address & \pref{String} & Network address. \\ \hline
-authenticationInfo & \pref{String}     & Public key of the client certificate. \\ \hline
-createdAt & \pref{DateTime} & System instance record was created at this UTC timestamp. \\ \hline
-id & \pref{Number} & Identifier of the system instance \\ \hline
-metadata & \pref{Metadata}     & Metadata \\ \hline
-port & \pref{PortNumber} & Port of the system. \\ \hline
-systemName &\pref{Name}  & Name of the system. \\ \hline
-updatedAt & \pref{DateTime} & System instance record was modified at this UTC timestamp. \\ \hline
+\rowcolor{gray!33} Field & Type & Description \\ \hline
+
+address &\pref{Address} & Network address of the system. \\ \hline
+authenticationInfo &\pref{String} & X.509 public key of the system. \\ \hline
+createdAt & \pref{DateTime} & System instance record was created at this UTC time\-stamp. \\ \hline
+id & \pref{Number} & Identifier of the system instance. \\ \hline
+metadata &\hyperref[sec:model:Metadata]{Metadata} & Additional information about the system. \\ \hline
+port &\pref{PortNumber} & Port of the system. \\ \hline
+systemName &\pref{Name} & Name of the system. \\ \hline
+updatedAt & \pref{DateTime} & System instance record was modified at this UTC time\-stamp. \\ \hline
 \end{tabularx}
 \end{table}
 
-\msubsubsection{struct}{Metadata}
+\msubsection{struct}{Metadata}
+\label{sec:model:Metadata}
 
-A JSON \pref{Object} which maps \pref{String} key-value pairs.
-
-\newpage
+An \pref{Object} which maps \pref{String} key-value pairs.
 
 \subsubsection{Primitives}
 \label{sec:model:primitives}
@@ -240,6 +243,10 @@ An \textit{alias} is a renaming of an existing type, but with some further detai
 Structs are described in the beginning of the parent section.
 The types are listed by name in alphabetical order.
 
+\subsubsection{alias \pdef{Address} = \pref{String}}
+
+A string representation of a network address. An address can be a version 4 IP address (RFC 791), a version 6 IP address (RFC 2460) or a DNS name (RFC 1034).
+
 \subsubsection{alias \pdef{DateTime} = \pref{String}}
 
 Pinpoints a moment in time in the format of ISO8601 standard "yyyy-mm-ddThh:mm:ss", where "yyy" denotes year (4 digits), "mm" denotes month starting from 01, "dd" denotes day starting from 01, "T" is the separator between date and time part, "hh" denotes hour in the 24-hour format (00-23), "MM" denotes minute (00-59), "SS" denotes second (00-59). " " is used as separator between the date and the time.
@@ -248,6 +255,9 @@ An example of a valid date/time string is "2020-12-05T12:00:00"
 \subsubsection{alias \pdef{Direction} = \pref{String}}
 
 Sorting direction string could be only \texttt{ASC} or \texttt{DESC} . 
+
+\subsubsection{alias \pdef{List}$<$A$>$ = \pref{Array}$<$A$>$}
+There is no difference.
 
 \subsubsection{alias \pdef{id} = \pref{Number}}
 
