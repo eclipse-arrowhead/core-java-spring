@@ -108,8 +108,6 @@ The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
 In Section \ref{sec:model}, we end the document by presenting the data types used by the mentioned functions.
 
-\newpage
-
 \subsection{How This Service Is Meant to Be Used}
 The given application system is required to use the  \textbf{unregister-system} service right before its shutdown or any time when no longer wanted to being part of the local cloud.
 
@@ -136,7 +134,7 @@ Input and output types are only denoted when accepted or returned, respectively,
 
 The following interfaces are available.
 
-\fsubsection{HTTP/TLS/JSON}{QueryParams}{void}
+\fsubsection{HTTP/TLS/JSON}{QueryParams}{Void}
 
 \begin{table}[ht!]
   \centering
@@ -162,6 +160,7 @@ Note that each subsection, which describes one type of object, begins with the \
 As a complement to the explicitly defined types in this section, there is also a list of implicit primitive types in Section \ref{sec:model:primitives}, which are used to represent things like hashes and identifiers.
 
 \msubsection{struct}{QueryParams}
+\label{sec:model:QueryParams}
  
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | p{3cm} | p{2cm} | X |} \hline
@@ -171,8 +170,6 @@ address & \pref{Address} & no & Network address. \\ \hline
 port &\pref{PortNumber} & yes & Port of the system. \\ \hline
 \end{tabularx}
 \end{table}
-
-\clearpage
 
 \subsection{Primitives}
 \label{sec:model:primitives}

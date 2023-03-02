@@ -170,12 +170,14 @@ port &\pref{PortNumber} & yes & Port of the system. \\ \hline
 
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | X |} \hline
-\rowcolor{gray!33} Type & Description \\ \hline
-\pdef{Address}          & A string representation of the address \\ \hline
-\pdef{Name}             & A string identifier that is intended to be both human and machine-readable. \\ \hline
-\pdef{Number}           & Decimal number \\ \hline
-\pdef{PortNumber}       & Decimal number in the range of 0-65535 \\ \hline
-\pdef{String}           & An arbitrary UTF-8 string. \\ \hline
+\rowcolor{gray!33} JSON Type & Description \\ \hline
+\pdef{Value}                 & Any out of \pref{Object}, \pref{Array}, \pref{String}, \pref{Number}, \pref{Boolean} or \pref{Null}. \\ \hline
+\pdef{Object}$<$A$>$         & An unordered collection of $[$\pref{String}: \pref{Value}$]$ pairs, where each \pref{Value} conforms to type A. \\ \hline
+\pdef{Array}$<$A$>$          & An ordered collection of \pref{Value} elements, where each element conforms to type A. \\ \hline
+\pdef{String}                & An arbitrary UTF-8 string. \\ \hline
+\pdef{Number}                & Any IEEE 754 binary64 floating point number \cite{cowlishaw2019floating}, except for \textit{+Inf}, \textit{-Inf} and \textit{NaN}. \\ \hline
+\pdef{Boolean}               & One out of \texttt{true} or \texttt{false}. \\ \hline
+\pdef{Null}                  & Must be \texttt{null}. \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -184,6 +186,10 @@ Concretely, we define the \textbf{uregister-system} SD primitives either as \tex
 An \textit{alias} is a renaming of an existing type, but with some further details about how it is intended to be used.
 Structs are described in the beginning of the parent section.
 The types are listed by name in alphabetical order.
+
+\subsubsection{alias \pdef{Address} = \pref{String}}
+
+A string representation of a network address. An address can be a version 4 IP address (RFC 791), a version 6 IP address (RFC 2460) or a DNS name (RFC 1034).
 
 \subsubsection{alias \pdef{Name} = \pref{String}}
 
