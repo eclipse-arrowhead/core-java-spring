@@ -111,13 +111,13 @@ This document describes the \textbf{echo} service interface, which enables an â€
 \begin{table}[ht!]
   \centering
   \begin{tabular}{|l|l|l|l|}
-    \rowcolor{gray!33} Profile ype & Type & Version \\ \hline
+    \rowcolor{gray!33} Profile type & Type & Version \\ \hline
     Transfer protocol & HTTP & 1.1 \\ \hline
     Data encryption & TLS & 1.3 \\ \hline
     Encoding & TEXT & - \\ \hline
     Compression & N/A & - \\ \hline
   \end{tabular}
-  \caption{Communication and sematics details used for the \textbf{echo}
+  \caption{Communication and semantics details used for the \textbf{echo}
     service interface}
   \label{tab:comunication_semantics_profile}
 \end{table}
@@ -125,7 +125,7 @@ This document describes the \textbf{echo} service interface, which enables an â€
 This document provides the Interface Design Description IDD to the \textit{echo -- Service Description} document.
 For further details about how this service is meant to be used, please consult that document.
 
-The rest of this document describes how to realize the echo service HTTP/TLS/TEXT interface in details.
+The rest of this document describes how to realize the \textbf{echo} service HTTP/TLS/TEXT interface in details.
 
 \newpage
 
@@ -137,11 +137,11 @@ The service responses with the status code \texttt{200
 improper client side certificate is provided and \texttt{500 Internal
   Server Error} if the system is unavailable.
 
-\begin{lstlisting}[language=http,label={lst:echo},caption={A \fref{echo} invocation.}]
+\begin{lstlisting}[language=http,label={lst:echo},caption={An \fref{echo} invocation.}]
 GET /serviceregistry/echo HTTP/1.1
 \end{lstlisting}
 
-\begin{lstlisting}[language=http,label={lst:echo_response},caption={A \fref{echo} response.}]
+\begin{lstlisting}[language=http,label={lst:echo_response},caption={An \fref{echo} response.}]
 Got it!
 \end{lstlisting}
 

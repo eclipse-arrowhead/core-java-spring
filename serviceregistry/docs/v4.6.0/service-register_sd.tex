@@ -102,7 +102,7 @@
 
 \section{Overview}
 \label{sec:overview}
-This document describes the \textbf{service-register} service, which enables autonomous service registration, therefore it is an integral part of the implementation of service discovery requirements in Service Registry Mandatory Core System. Examples of this interaction is a system that has the capability to provide some kind of service. To enable other systems to use, to consume it, this service needs to be offered through the ServiceRegistry.
+This document describes the \textbf{service-register} service, which enables autonomous service registration, therefore it is an integral part of the implementation of service discovery requirements in Service Registry Mandatory Core System. Example of this interaction is a system that has the capability to provide some kind of service. To enable other systems to use, to consume it, this service needs to be offered through the ServiceRegistry.
 
 The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
@@ -159,7 +159,7 @@ The following interfaces are available.
 \begin{table}[ht!]
   \centering
   \begin{tabular}{|l|l|l|l|}
-    \rowcolor{gray!33} Profile ype & Type & Version \\ \hline
+    \rowcolor{gray!33} Profile type & Type & Version \\ \hline
     Transfer protocol & HTTP & 1.1 \\ \hline
     Data encryption & TLS & 1.3 \\ \hline
     Encoding & JSON & RFC 8259 \cite{rfc8259} \\ \hline
@@ -229,7 +229,7 @@ interfaces & \pref{List}$<$\hyperref[sec:model:InterfaceRecord]{InterfaceRecord}
 metadata & \hyperref[sec:model:Metadata]{Metadata} & Additional information about the system. \\ \hline
 providerSystem & \hyperref[sec:model:SystemRecord]{SystemRecord} & Descriptor of the provider system record. \\ \hline
 secure &\pref{SecureType}  & Type of security the service uses. \\ \hline
-serviceDefinition & \hyperref[sec:model:ServiceDefinitionRecord]{ServiceDefinitionRecord} & Descriptor of the serviceDefinition record. \\ \hline
+serviceDefinition & \hyperref[sec:model:ServiceDefinitionRecord]{ServiceDefinitionRecord} & Descriptor of the service definition record. \\ \hline
 serviceUri & \pref{String} & Path of the service on the provider. \\ \hline
 updatedAt & \pref{DateTime} & Service instance record was modified at this UTC timestamp. \\ \hline
 version &\pref{Version}     & Version of the service. \\ \hline
@@ -242,10 +242,10 @@ version &\pref{Version}     & Version of the service. \\ \hline
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
 \rowcolor{gray!33} Field & Type      & Description \\ \hline
-createdAt & \pref{DateTime} & Interface instance record was created at this UTC timestamp. \\ \hline
+createdAt & \pref{DateTime} & Interface instance record was created at this UTC time\-stamp. \\ \hline
 id & \pref{Number} & Identifier of the interface instance \\ \hline
 interfaceName & \pref{Interface}  & Specified name of the interface. \\ \hline
-updatedAt & \pref{DateTime} & Interface instance record was modified at this UTC timestamp. \\ \hline
+updatedAt & \pref{DateTime} & Interface instance record was modified at this UTC time\-stamp. \\ \hline
 \end{tabularx}
 \end{table}
 

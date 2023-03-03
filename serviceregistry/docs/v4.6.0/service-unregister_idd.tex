@@ -57,7 +57,7 @@
 \begin{document}
 
 %% Arrowhead Document Properties
-\ArrowheadTitle{service-unregister HTTP/TLS/JSON} %e.g. ServiceDiscovery HTTP/TLS/JSON
+\ArrowheadTitle{service-unregister HTTP/TLS/URL} %e.g. ServiceDiscovery HTTP/TLS/JSON
 \ArrowheadServiceID{service-unregister} % e.g. register
 \ArrowheadType{Interface Design Description}
 \ArrowheadTypeShort{IDD}
@@ -92,7 +92,7 @@
   % Front Page Abstract
   \begin{abstract}
     This document describes a HTTP protocol with TLS payload
-    security and JSON payload encoding variant of the \textbf{service-unregister} service.
+    security and URL encoding variant of the \textbf{service-unregister} service.
   \end{abstract}
   \vspace*{1cm}
 
@@ -112,13 +112,13 @@ which is enables autonomous service unregistration. It's implemented using proto
 \begin{table}[ht!]
   \centering
   \begin{tabular}{|l|l|l|l|}
-    \rowcolor{gray!33} Profile ype & Type & Version \\ \hline
+    \rowcolor{gray!33} Profile type & Type & Version \\ \hline
     Transfer protocol & HTTP & 1.1 \\ \hline
     Data encryption & TLS & 1.3 \\ \hline
-    Encoding & URL & RFC 1738 \\ \hline
+    Encoding & URL & - \\ \hline
     Compression & N/A & - \\ \hline
   \end{tabular}
-  \caption{Communication and sematics details used for the \textbf{service-unregister}
+  \caption{Communication and semantics details used for the \textbf{service-unregister}
     service interface}
   \label{tab:comunication_semantics_profile}
 \end{table}
@@ -126,7 +126,7 @@ which is enables autonomous service unregistration. It's implemented using proto
 This document provides the Interface Design Description IDD to the \textit{service-unregister -- Service Description} document.
 For further details about how this service is meant to be used, please consult that document.
 
-The rest of this document describes how to realize the service-unregister service HTTP/TLS/JSON interface in details.
+The rest of this document describes how to realize the \textbf{service-unregister} service HTTP/TLS/URL interface in details.
 
 \newpage
 
@@ -149,7 +149,7 @@ DELETE /serviceregistry/unregister?service_definition={serviceDefinition}&system
 \label{sec:model}
 
 Here, all data objects that can be part of the service calls associated with this service are listed in alphabetic order.
-Note that each subsection, which describes one type of object, begins with the \textit{struct} keyword, which is meant to denote a JSON \pref{Object} that must contain certain fields, or names, with values conforming to explicitly named types.
+Note that each subsection, which describes one type of object, begins with the \textit{struct} keyword, which is meant to denote an \pref{Object} that must contain certain fields, or names, with values conforming to explicitly named types.
 As a complement to the primary types defined in this section, there is also a list of secondary types in Section \ref{sec:model:primitives}, which are used to represent things like hashes, identifiers and texts.
 
 \msubsection{struct}{QueryParams}
@@ -167,27 +167,25 @@ serviceUri & \pref{String} & no & Path of the service on the provider. \\ \hline
 \end{tabularx}
 \end{table}
 
-\newpage
-
 \subsection{Primitives}
 \label{sec:model:primitives}
 
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | X |} \hline
 \rowcolor{gray!33} Type & Description \\ \hline
-\pdef{Address}          & A string representation of the address \\ \hline
-\pdef{Name}             & A string identifier that is intended to be both human and machine-readable. \\ \hline
-\pdef{Number}           & Decimal number \\ \hline
-\pdef{PortNumber}       & Decimal number in the range of 0-65535 \\ \hline
-\pdef{String}           & An arbitrary UTF-8 string. \\ \hline
+\pdef{String}                & An arbitrary UTF-8 string. \\ \hline
+\pdef{Number}                & Any IEEE 754 binary64 floating point number \cite{cowlishaw2019floating}, except for \textit{+Inf}, \textit{-Inf} and \textit{NaN}. \\ \hline
 \end{tabularx}
 \end{table}
 
-With these primitives now available, we proceed to define all the types specified in the \textbf{service-uregister} SD document without a direct equivalent among the JSON types.
-Concretely, we define the \textbf{service-uregister} SD primitives either as \textit{aliases} or \textit{structs}.
+With these primitives now available, we proceed to define all the types specified in the \textbf{service-uregister} SD primitives either as \textit{aliases} or \textit{structs}.
 An \textit{alias} is a renaming of an existing type, but with some further details about how it is intended to be used.
 Structs are described in the beginning of the parent section.
 The types are listed by name in alphabetical order.
+
+\subsubsection{alias \pdef{Address} = \pref{String}}
+
+A string representation of a network address. An address can be a version 4 IP address (RFC 791), a version 6 IP address (RFC 2460) or a DNS name (RFC 1034)
 
 \subsubsection{alias \pdef{Name} = \pref{String}}
 
@@ -196,11 +194,6 @@ A \pref{String} indentifier that is intended to be both human and machine-readab
 \subsubsection{alias \pdef{PortNumber} = \pref{Number}}
 
 Decimal \pref{Number} in the range of 0-65535.
-
-
-\subsubsection{alias \pdef{URI} = \pref{String}}
-
-A \pref{String} that represents the URL subpath where the offered service is reachable, starting with a slash ("/"). An example of a valid URI is "/temperature".
 
 \newpage
 

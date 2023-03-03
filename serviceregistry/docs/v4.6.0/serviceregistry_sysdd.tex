@@ -158,19 +158,19 @@ The system configuration properties can be found in the \texttt{application.prop
     
     \item \textbf{use\_strict\_service\_intf\_name\_verifier}
   
-    Interface names has to follow this format \texttt{PROTOCOL-SECURITY-FORMAT}, where security can be \texttt{SECURE} or \texttt{INSECURE} and protocol and format must be a sequence of letters, numbers and underscore. A regexp checker will verify that. If this setting is set to true then the \texttt{PROTOCOL} and \texttt{FORMAT} must come from a predefined set.
+    Interface names have to follow this format \texttt{PROTOCOL-SECURITY-FORMAT}, where security can be \texttt{SECURE} or \texttt{INSECURE} and protocol and format must be a sequence of letters, numbers and underscore. A regular expression checker will verify that. If this setting is set to true then the \texttt{PROTOCOL} and \texttt{FORMAT} must come from a predefined set.
     
     \item \textbf{use\_strict\_service\_definition\_verifier}
   
-    If 'true', service definitions has to follow these rules: They only contains letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).
+    If 'true', service definitions have to follow these rules: They only contain letters (english alphabet), numbers and dash (-), and have to start with a letter (also cannot end with dash).
     
     \item \textbf{use\_network\_address\_detector}
   
-    If 'true', address detection from HttpServletRequest will be performed at the time of systems and service registration/unregistration.
+    If 'true', address detection will be performed at the time of systems and service registration/unregistration.
     
     \item \textbf{filter\_proxy\_addresses}
   
-    Comma separated list representing the possible proxy servers like load-balancer etc... before ServiceRegistry.
+    Comma separated list representing the possible proxy servers like load-balancer etc. before ServiceRegistry.
     
     \item \textbf{allow\_self\_addressing}
   
@@ -230,11 +230,11 @@ The system configuration properties can be found in the \texttt{application.prop
   
   \item \textbf{spring.jpa.show-sql}
   
-  Set to true in order to log out the mysql queries.
+  Set to true in order to log out the SQL queries.
   
   \item \textbf{spring.jpa.properties.hibernate.format\_sql}
   
-  Set to true to log out mysql queries in pretty format. (Effective only when 'spring.jpa.show-sql' is 'true')
+  Set to true to log out SQL queries in pretty format. (Effective only when 'spring.jpa.show-sql' is 'true')
   
   \item \textbf{spring.jpa.hibernate.ddl-auto}
   
@@ -278,7 +278,7 @@ The system configuration properties can be found in the \texttt{application.prop
   
   \item \textbf{server.ssl.key-store-password}
   
-  Password to the key store..
+  Password to the key store.
   
   \item \textbf{server.ssl.key-alias}
   

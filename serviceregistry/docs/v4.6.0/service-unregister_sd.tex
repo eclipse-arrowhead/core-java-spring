@@ -102,7 +102,7 @@
 
 \section{Overview}
 \label{sec:overview}
-This document describes the \textbf{service-unregister} service, which enables autonomous service unregistration, therefore it is an integral part of the implementation of service discovery requirements in Service Registry Mandatory Core System. Examples of this interaction is a system that offers a service through the Service Registry, but for certain reason the service should be terminated. To prevent that this service instance could be offered for other systems, the service provider system is required to remove its service from Service Registry. 
+This document describes the \textbf{service-unregister} service, which enables autonomous service unregistration, therefore it is an integral part of the implementation of service discovery requirements in Service Registry Mandatory Core System. Example of this interaction is a system that offers a service through the Service Registry, but for certain reason the service should be terminated. To prevent that this service instance could be offered for other systems, the service provider system is required to remove its service from Service Registry. 
 
 The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
@@ -141,18 +141,18 @@ Input and output types are only denoted when accepted or returned, respectively,
 
 The following interfaces are available.
 
-\fsubsection{HTTP/TLS/JSON}{QueryParams}{Void}
+\fsubsection{HTTP/TLS/URL}{QueryParams}{Void}
 
 \begin{table}[ht!]
   \centering
   \begin{tabular}{|l|l|l|l|}
-    \rowcolor{gray!33} Profile ype & Type & Version \\ \hline
+    \rowcolor{gray!33} Profile type & Type & Version \\ \hline
     Transfer protocol & HTTP & 1.1 \\ \hline
     Data encryption & TLS & 1.3 \\ \hline
-    Encoding & URL & RFC 1738 \\ \hline
+    Encoding & URL & - \\ \hline
     Compression & N/A & - \\ \hline
   \end{tabular}
-  \caption{HTTP/TLS/JSON communication details.}
+  \caption{HTTP/TLS/URL communication details.}
   \label{tab:comunication_semantics_profile}
 \end{table}
 
@@ -192,7 +192,6 @@ The concrete interpretations of each of these types and structures must be provi
 \rowcolor{gray!33} Type & Description \\ \hline
 \pdef{Address}          & A string representation of the address. \\ \hline
 \pdef{Name}             & A string identifier that is intended to be both human and machine-readable. \\ \hline
-\pdef{Number}           & Decimal number. \\ \hline
 \pdef{PortNumber}       & Decimal number in the range of 0-65535. \\ \hline
 \pdef{String}           & A chain of characters. \\ \hline
 \end{tabularx}
