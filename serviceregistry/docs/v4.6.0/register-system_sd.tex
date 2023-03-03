@@ -102,7 +102,7 @@
 
 \section{Overview}
 \label{sec:overview}
-This document describes the \textbf{register-system} service, which enables autonomous system registration, therefore it is an integral part of the implementation of service discovery requirements in Service Registry Mandatory Core System. Examples of this interaction is a system that has the purpose of consuming some kind of service. To enable the system being authorized to consume, the system must be a registered member of the local cloud.
+This document describes the \textbf{register-system} service, which enables autonomous system registration, therefore it is an integral part of the implementation of service discovery requirements in Service Registry Mandatory Core System. Example of this interaction is a system that has the purpose of consuming some kind of service. To enable the system being authorized to consume, the system must be a registered member of the local cloud.
 
 The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
@@ -144,7 +144,7 @@ The following interfaces are available.
 \begin{table}[ht!]
   \centering
   \begin{tabular}{|l|l|l|l|}
-    \rowcolor{gray!33} Profile ype & Type & Version \\ \hline
+    \rowcolor{gray!33} Profile type & Type & Version \\ \hline
     Transfer protocol & HTTP & 1.1 \\ \hline
     Data encryption & TLS & 1.3 \\ \hline
     Encoding & JSON & RFC 8259 \cite{rfc8259} \\ \hline
@@ -190,12 +190,12 @@ An \pref{Object} which maps \pref{String} key-value pairs.
 \rowcolor{gray!33} Field & Type      & Description \\ \hline
 address & \pref{Address} & Network address. \\ \hline
 authenticationInfo & \pref{String}     & X.509 public key of the system. \\ \hline
-createdAt & \pref{DateTime} & System instance record was created at this UTC timestamp. \\ \hline
+createdAt & \pref{DateTime} & System instance record was created at this UTC time\-stamp. \\ \hline
 id & \pref{Number} & Identifier of the system instance. \\ \hline
 metadata &\hyperref[sec:model:Metadata]{Metadata} & Additional information about the system. \\ \hline
 port & \pref{PortNumber} & Port of the system. \\ \hline
 systemName &\pref{Name}  & Name of the system. \\ \hline
-updatedAt & \pref{DateTime} & System instance record was modified at this UTC timestamp. \\ \hline
+updatedAt & \pref{DateTime} & System instance record was modified at this UTC time\-stamp. \\ \hline
 \end{tabularx}
 \end{table}
 

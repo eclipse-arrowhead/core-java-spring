@@ -102,14 +102,14 @@
 
 \section{Overview}
 \label{sec:overview}
-This document describes the \textbf{unregister-system} service, which enables autonomous system unregistration, therefore it is an integral part of the implementation of service discovery requirements in Service Registry Mandatory Core System. Examples of this interaction is a system that part of the Local Cloud, but for certain reasons the system should be terminated.
+This document describes the \textbf{unregister-system} service, which enables autonomous system unregistration, therefore it is an integral part of the implementation of service discovery requirements in Service Registry Mandatory Core System. Example of this interaction is a system that part of the Local Cloud, but for certain reasons the system should be terminated.
 
 The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
 In Section \ref{sec:model}, we end the document by presenting the data types used by the mentioned functions.
 
 \subsection{How This Service Is Meant to Be Used}
-The given application system is required to use the  \textbf{unregister-system} service right before its shutdown or any time when no longer wanted to being part of the local cloud.
+The given application system is required to use the  \textbf{unregister-system} service any time when no longer wanted to being part of the local cloud.
 
 \subsection{Important Delimitations}
 \label{sec:delimitations}
@@ -134,15 +134,15 @@ Input and output types are only denoted when accepted or returned, respectively,
 
 The following interfaces are available.
 
-\fsubsection{HTTP/TLS/JSON}{QueryParams}{Void}
+\fsubsection{HTTP/TLS/URL}{QueryParams}{Void}
 
 \begin{table}[ht!]
   \centering
   \begin{tabular}{|l|l|l|l|}
-    \rowcolor{gray!33} Profile ype & Type & Version \\ \hline
+    \rowcolor{gray!33} Profile type & Type & Version \\ \hline
     Transfer protocol & HTTP & 1.1 \\ \hline
     Data encryption & TLS & 1.3 \\ \hline
-    Encoding & URL & RFC 1738 \\ \hline
+    Encoding & URL & - \\ \hline
     Compression & N/A & - \\ \hline
   \end{tabular}
   \caption{HTTP/TLS/JSON communication details.}
