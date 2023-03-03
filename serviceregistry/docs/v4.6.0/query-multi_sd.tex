@@ -102,7 +102,7 @@
 
 \section{Overview}
 \label{sec:overview}
-This document describes the \textbf{query-multi} service, which enables autonomous service look up for multiple services by one request, therefore it is an integral part of the implementation of service discovery requirements in Service Registry Mandatory Core System. Examples of this interaction is a core system that needs the available information for services that fulfill certain requirements. The look up process itself is exactly the same as in case of the \textit{query} service.
+This document describes the \textbf{query-multi} service, which enables autonomous service look up for multiple services by one request, therefore it is an integral part of the implementation of service discovery requirements in Service Registry Mandatory Core System. Example of this interaction is a core system that needs the available information for services that fulfill certain requirements. The look up process itself is exactly the same as in case of the \textbf{query} service.
 
 The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
@@ -124,7 +124,7 @@ The query data must meet the following criteria:
 \subsection{Access policy}
 \label{sec:accesspolicy}
 
-Available only for the following core systems: \textit{Authorizationt, Orchestrator, Certificate Authority, Choreographer, Device Registry, Event Handler, HawkBit Configuration Manager, MSCV, Plant Description Engine, QoS-Monitor, System Registry}
+Available only for the following core systems: \textit{Authorization, Orchestrator, Certificate Authority, Workflow Choreographer, Device Registry, Event Handler, HawkBit Configuration Manager, MSCV, Plant Description Engine, QoS-Monitor, System Registry}.
 
 \newpage
 
@@ -143,7 +143,7 @@ The following interfaces are available.
 \begin{table}[ht!]
   \centering
   \begin{tabular}{|l|l|l|l|}
-    \rowcolor{gray!33} Profile ype & Type & Version \\ \hline
+    \rowcolor{gray!33} Profile type & Type & Version \\ \hline
     Transfer protocol & HTTP & 1.1 \\ \hline
     Data encryption & TLS & 1.3 \\ \hline
     Encoding & JSON & RFC 8259 \cite{rfc8259} \\ \hline
@@ -180,14 +180,14 @@ forms &\pref{List}$<$\hyperref[sec:model:ServiceQueryForm]{ServiceQueryForm}$>$ 
 \begin{tabularx}{\textwidth}{| p{5cm} | p{3cm} | p{2cm} | X |} \hline
 \rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
 interfaceRequirements &\pref{List}$<$\pref{Interface}$>$ & no & Names of the required interfaces. If specified at least one of the interfaces must match for having result(s). \\ \hline
-maxVersionRequirement &\pref{Number} & no & Required maximum version of the ser\-vice. If specified version must be equals or lower or having result(s). Ignored if \textit{versionRequirement} is specified. \\ \hline
+maxVersionRequirement &\pref{Number} & no & Required maximum version of the ser\-vice. If specified version must be equals or lower for having result(s). Ignored if \textit{versionRequirement} is specified. \\ \hline
 metadataRequirements &\hyperref[sec:model:Metadata]{Metadata} & no & Service metadata requirements. If spe\-cified the whole content of
-the map must match for having result(s) \\ \hline
-minVersionRequirement &\pref{Number} & no & Required minimum version of the ser\-vice. If specified version must be equals or higher or having result(s). Ignored if \textit{versionRequirement} is specified. \\ \hline
+the map must match for having result(s). \\ \hline
+minVersionRequirement &\pref{Number} & no & Required minimum version of the ser\-vice. If specified version must be equals for higher or having result(s). Ignored if \textit{versionRequirement} is specified. \\ \hline
 pingProviders &\pref{Boolean} & no & Whether or not the provider should be pinged. If \textit{true} only the responding providers will comply. \\ \hline
 securityRequirements &\pref{List}$<$\pref{SecureType}$>$ & no & Types of the required security levels. If specified at least one of the types must match for having result(s). \\ \hline
 serviceDefinitionRequirement &\pref{Name} & yes & Identifier of the service. \\ \hline
-versionRequirement &\pref{Number} & no & Required version of the service. If spe\-cified version must match for having result(s) \\ \hline
+versionRequirement &\pref{Number} & no & Required version of the service. If spe\-cified version must match for having result(s). \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -202,7 +202,7 @@ An \pref{Object} which maps \pref{String} key-value pairs.
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{4.25cm} | p{4.5cm} | X |} \hline
 \rowcolor{gray!33} Field & Type      & Description \\ \hline
-results & \pref{List}$<$\hyperref[sec:model:ServiceQueryResult]{ServiceQueryResult}$>$     & List of service query results \\ \hline
+results & \pref{List}$<$\hyperref[sec:model:ServiceQueryResult]{ServiceQueryResult}$>$     & List of service query results. \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -212,8 +212,8 @@ results & \pref{List}$<$\hyperref[sec:model:ServiceQueryResult]{ServiceQueryResu
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | p{6cm} | X |} \hline
 \rowcolor{gray!33} Field & Type      & Description \\ \hline
-serviceQueryData & \pref{List}$<$\hyperref[sec:model:ServiceRegistryResponse]{ServiceRegistryResponse}$>$     & List of service instance results \\ \hline
-unfilteredHits & \pref{Number} & Number of service instances not included by \textit{serviceQueryData} due to the specified filters. \\ \hline
+serviceQueryData & \pref{List}$<$\hyperref[sec:model:ServiceRegistryResponse]{ServiceRegistryResponse}$>$     & List of service instance results. \\ \hline
+unfilteredHits & \pref{Number} & Number of service instances without the specified filters. \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -229,7 +229,7 @@ id & \pref{Number} & Identifier of the service instance. \\ \hline
 interfaces & \pref{List}$<$\hyperref[sec:model:InterfaceRecord]{InterfaceRecord}$>$ & List of interfaces the service supports. \\ \hline
 provider & \hyperref[sec:model:SystemRecord]{SystemRecord} & Descriptor of the provider system record. \\ \hline
 secure &\pref{SecureType}  & Type of security the service uses. \\ \hline
-serviceDefinitionResponse & \hyperref[sec:model:ServiceDefinitionRecord]{ServiceDefinitionRecord} & Descriptor of the serviceDefinition record. \\ \hline
+serviceDefinitionResponse & \hyperref[sec:model:ServiceDefinitionRecord]{ServiceDefinitionRecord} & Descriptor of the service definition record. \\ \hline
 serviceUri & \pref{String} & Path of the service on the provider. \\ \hline
 metadata & \hyperref[sec:model:Metadata]{Metadata}  & Service metadata. \\ \hline
 updatedAt & \pref{DateTime} & Service instance record was modified at this UTC timestamp. \\ \hline
@@ -294,7 +294,7 @@ The concrete interpretations of each of these types and structures must be provi
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | X |} \hline
 \rowcolor{gray!33} Type & Description \\ \hline
-\pdef{Address}          & A string representation of the address \\ \hline
+\pdef{Address}          & A string representation of the address. \\ \hline
 \pdef{Boolean}          & One out of \texttt{true} or \texttt{false}. \\ \hline
 \pdef{DateTime}         & Pinpoints a specific moment in time. \\ \hline
 \pdef{Interface}        & Any suitable type chosen by the implementor of service \\ \hline

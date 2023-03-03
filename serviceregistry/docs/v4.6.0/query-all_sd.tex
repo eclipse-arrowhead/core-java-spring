@@ -102,7 +102,7 @@
 
 \section{Overview}
 \label{sec:overview}
-This document describes the \textbf{query-all} service, which enables dedicated core systems to get data about all service registry instance by one request, therefore it is an integral part of the implementation of service discovery requirements in Service Registry Mandatory Core System. Examples of this interaction is a core system that needs the available information about every service instance from Service Registry.
+This document describes the \textbf{query-all} service, which enables dedicated core systems to get data about all service registry instance by one request, therefore it is an integral part of the implementation of service discovery requirements in Service Registry Mandatory Core System. Example of this interaction is a core system that needs the available information about every service instance from Service Registry.
 
 The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
@@ -137,7 +137,7 @@ The following interfaces are available.
 \begin{table}[ht!]
   \centering
   \begin{tabular}{|l|l|l|l|}
-    \rowcolor{gray!33} Profile ype & Type & Version \\ \hline
+    \rowcolor{gray!33} Profile type & Type & Version \\ \hline
     Transfer protocol & HTTP & 1.1 \\ \hline
     Data encryption & TLS & 1.3 \\ \hline
     Encoding & JSON & RFC 8259 \cite{rfc8259} \\ \hline
@@ -162,7 +162,7 @@ As a complement to the explicitly defined types in this section, there is also a
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{4.25cm} | p{5cm} | X |} \hline
 \rowcolor{gray!33} Field & Type      & Description \\ \hline
-data & \pref{List}$<$\hyperref[sec:model:ServiceRegistryResponse]{ServiceRegistryResponse}$>$     & List of service instances \\ \hline
+data & \pref{List}$<$\hyperref[sec:model:ServiceRegistryResponse]{ServiceRegistryResponse}$>$     & List of service instances. \\ \hline
 count & \pref{Number} & Size of the result list. \\ \hline
 \end{tabularx}
 \end{table}
@@ -249,7 +249,7 @@ The concrete interpretations of each of these types and structures must be provi
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{3cm} | X |} \hline
 \rowcolor{gray!33} Type & Description \\ \hline
-\pdef{Address}          & A string representation of the address \\ \hline
+\pdef{Address}          & A string representation of the address. \\ \hline
 \pdef{Boolean}          & One out of \texttt{true} or \texttt{false}. \\ \hline
 \pdef{DateTime}         & Pinpoints a specific moment in time. \\ \hline
 \pdef{Interface}        & Any suitable type chosen by the implementor of service \\ \hline

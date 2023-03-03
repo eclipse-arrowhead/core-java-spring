@@ -111,13 +111,13 @@ This document describes the \textbf{query-by-system} service interface, which en
 \begin{table}[ht!]
   \centering
   \begin{tabular}{|l|l|l|l|}
-    \rowcolor{gray!33} Profile ype & Type & Version \\ \hline
+    \rowcolor{gray!33} Profile type & Type & Version \\ \hline
     Transfer protocol & HTTP & 1.1 \\ \hline
     Data encryption & TLS & 1.3 \\ \hline
     Encoding & JSON & RFC 8259 \cite{rfc8259} \\ \hline
     Compression & N/A & - \\ \hline
   \end{tabular}
-  \caption{Communication and sematics details used for the \textbf{query-by-system}
+  \caption{Communication and semantics details used for the \textbf{query-by-system}
     service interface}
   \label{tab:comunication_semantics_profile}
 \end{table}
@@ -125,7 +125,7 @@ This document describes the \textbf{query-by-system} service interface, which en
 This document provides the Interface Design Description IDD to the \textit{query-by-system -- Service Description} document.
 For further details about how this service is meant to be used, please consult that document.
 
-The rest of this document describes how to realize the query-by-system service HTTP/TLS/JSON interface in details.
+The rest of this document describes how to realize the \textbf{query-by-system} service HTTP/TLS/JSON interface in details.
 
 \newpage
 
@@ -133,7 +133,7 @@ The rest of this document describes how to realize the query-by-system service H
 \label{sec:functions}
 
 The service responses with the status code \texttt{200
-  Created} if called successfully. The error codes are, \texttt{400
+  Ok} if called successfully. The error codes are, \texttt{400
   Bad Request} if request is malformed, \texttt{401 Unauthorized} if
 improper client side certificate is provided, \texttt{500 Internal
   Server Error} if Service Registry is unavailable.
@@ -249,10 +249,6 @@ A string representation of a network address. An address can be a version 4 IP a
 
 Pinpoints a moment in time in the format of ISO8601 standard "yyyy-mm-ddThh:mm:ss", where "yyy" denotes year (4 digits), "mm" denotes month starting from 01, "dd" denotes day starting from 01, "T" is the separator between date and time part, "hh" denotes hour in the 24-hour format (00-23), "MM" denotes minute (00-59), "SS" denotes second (00-59). " " is used as separator between the date and the time.
 An example of a valid date/time string is "2020-12-05T12:00:00"
-
-\subsubsection{alias \pdef{id} = \pref{Number}}
-
-An identifier generated for each \pref{Object} that enables to distinguish them and later to refer to a specific \pref{Object}.
 
 \subsubsection{alias \pdef{Name} = \pref{String}}
 

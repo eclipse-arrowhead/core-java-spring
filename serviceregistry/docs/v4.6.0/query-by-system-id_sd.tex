@@ -102,7 +102,7 @@
 
 \section{Overview}
 \label{sec:overview}
-This document describes the \textbf{query-by-system-id} service, which enables the systems to query for specific system details based on its record id. Examples of this interaction is a dedicated core system that needs the available information for a specific system.
+This document describes the \textbf{query-by-system-id} service, which enables the systems to query for specific system details based on its record id. Example of this interaction is a dedicated core system that needs the available information for a specific system.
 
 The rest of this document is organized as follows.
 In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
@@ -137,7 +137,7 @@ The following interfaces are available.
 \begin{table}[ht!]
   \centering
   \begin{tabular}{|l|l|l|l|}
-    \rowcolor{gray!33} Profile ype & Type & Version \\ \hline
+    \rowcolor{gray!33} Profile type & Type & Version \\ \hline
     Transfer protocol & HTTP & 1.1 \\ \hline
     Data encryption & TLS & 1.3 \\ \hline
     Encoding & JSON & RFC 8259 \cite{rfc8259} \\ \hline
@@ -194,7 +194,7 @@ The concrete interpretations of each of these types and structures must be provi
 \pdef{DateTime}         & Pinpoints a specific moment in time. \\ \hline
 \pdef{Object}           & Set of primitives and possible further objects. \\ \hline
 \pdef{Name}             & A string identifier that is intended to be both human and machine-readable. \\ \hline
-\pdef{Number}           & Decimal number \\ \hline
+\pdef{Number}           & Decimal number. \\ \hline
 \pdef{PortNumber}       & A \pref{Number} between 0 and 65535. \\ \hline
 \pdef{String}           & A chain of characters. \\ \hline
 \end{tabularx}

@@ -111,13 +111,13 @@ This document describes the \textbf{pull-systems} service interface, which enabl
 \begin{table}[ht!]
   \centering
   \begin{tabular}{|l|l|l|l|}
-    \rowcolor{gray!33} Profile ype & Type & Version \\ \hline
+    \rowcolor{gray!33} Profile type & Type & Version \\ \hline
     Transfer protocol & HTTP & 1.1 \\ \hline
     Data encryption & TLS & 1.3 \\ \hline
     Encoding & JSON & RFC 8259 \cite{rfc8259} \\ \hline
     Compression & N/A & - \\ \hline
   \end{tabular}
-  \caption{Communication and sematics details used for the \textbf{pull-systems}
+  \caption{Communication and semantics details used for the \textbf{pull-systems}
     service interface}
   \label{tab:comunication_semantics_profile}
 \end{table}
@@ -125,7 +125,7 @@ This document describes the \textbf{pull-systems} service interface, which enabl
 This document provides the Interface Design Description IDD to the \textit{pull-systems -- Service Description} document.
 For further details about how this service is meant to be used, please consult that document.
 
-The rest of this document describes how to realize the pull-systems service HTTP/TLS/JSON interface in details.
+The rest of this document describes how to realize the \textbf{pull-systems} service HTTP/TLS/JSON interface in details.
 
 \newpage
 
@@ -139,7 +139,7 @@ improper client side certificate is provided, \texttt{500 Internal
   Server Error} if Service Registry is unavailable.
 
 \begin{lstlisting}[language=http,label={lst:register},caption={A \fref{pull-systems} invocation.}]
-GET /serviceregistry/pull-systems HTTP?direction={direction}&page={page}&item_per_page={size}&sort_field={sortField}/1.1
+GET /serviceregistry/pull-systems?direction={direction}&page={page}&item_per_page={size}&sort_field={sortField} HTTP/1.1
 \end{lstlisting}
 
 \begin{lstlisting}[language=http,label={lst:register_response},caption={A \fref{pull-systems} response.}]
@@ -190,7 +190,7 @@ sortField &\pref{String} & no & Field name used as the basis of the sorting. \\ 
 \begin{table}[ht!]
 \begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
 \rowcolor{gray!33} Field & Type      & Description \\ \hline
-data & \pref{List}$<$\hyperref[sec:model:SystemRecord]{SystemRecord}$>$     & List of service instances \\ \hline
+data & \pref{List}$<$\hyperref[sec:model:SystemRecord]{SystemRecord}$>$     & List of service instances. \\ \hline
 count & \pref{Number} & Size of the result list. \\ \hline
 \end{tabularx}
 \end{table}
@@ -258,10 +258,6 @@ Sorting direction string could be only \texttt{ASC} or \texttt{DESC} .
 
 \subsubsection{alias \pdef{List}$<$A$>$ = \pref{Array}$<$A$>$}
 There is no difference.
-
-\subsubsection{alias \pdef{id} = \pref{Number}}
-
-An identifier generated for each \pref{Object} that enables to distinguish them and later to refer to a specific \pref{Object}.
 
 \subsubsection{alias \pdef{Name} = \pref{String}}
 
