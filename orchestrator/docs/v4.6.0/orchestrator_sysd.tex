@@ -141,7 +141,7 @@ Orchestrator solves the following needs to fulfill the requirements of orchestra
 \end{itemize}
 
 \subsubsection {Non functional properties of the system}
-The Orchestrator implements certain authentication capabilites, meaning that Orchestrator makes decision whether a given system has right to use its services (i.e. only the Workflow Choreographer can orchestrate providers for some other systems).
+The Orchestrator implements certain authentication capabilities, meaning that Orchestrator makes decision whether a given system has right to use its services (i.e. only the Workflow Choreographer can orchestrate providers for some other systems).
 
 \subsubsection {Data stored by the system}
 In order to achieve the mentioned functionalities, Orchestrator is capable to store the information set described by figure \ref{fig:information_overview}.
@@ -158,7 +158,7 @@ In order to achieve the mentioned functionalities, Orchestrator is capable to st
 \subsection{Important Delimitations}
 \label{sec:delimitations}
 
-While Orchestrator Core System is capable of using two types of matching rules (fix rules where every pairing is referencing a consumer and a provider instance, or flexible rules where both consumer and provider can be described with their names and/or their settings), can't use both simultaneously. Administators have to choose between the two modes when deploying the system.
+While Orchestrator Core System is capable of using two types of matching rules (fix rules where every pairing is referencing a consumer and a provider instance, or flexible rules where both consumer and provider can be described with their names and/or their settings), can't use both simultaneously. Administrators have to choose between the two modes when deploying the system.
 
 Also, the Orchestrator can't work alone. It needs a Service Registry Core System and a Authorization Core System to operate. To enable inter-cloud orchestration, it also needs at least a running Gatekeeper Core System and depending on networking a Gateway Core System, too. To enable Quality-of-Service requirement matching, a QoS Monitor Core System is needed.
 
