@@ -159,6 +159,8 @@ The Gateway Core System does not need any persistent storage.
 
 The Gateway Core System can only run in secure mode.
 
+The gateway tunnel only supports services with secured interfaces that use TCP-based protocols.
+
 Also, it needs at least one external relay application that is accessible from both participating clouds to enable the communication between application systems of the clouds. Furthermore, the Gatekeeper Core System is also needed to initiate the Gateway's tunnel creation operation.
 
 \newpage
@@ -172,11 +174,11 @@ The purpose of this service is to test the system availability. The service is o
 \msubsection{service}{gw-public-key}
 The purpose of this service is to provide the public key of the Gateway Core System. It is necessary to ensure the secure communication between the Gateways. 
 
+\msubsection{service}{gw-connect-provider}
+The purpose of this service is to create a proxy that can consume a specific provider's service in the local cloud in the name of a consumer beyond the cloud boundaries.
+
 \msubsection{service}{gw-connect-consumer}
 The purpose of this service is to create an access point for the consumer to consume a specific service beyond the cloud boundaries. 
-
-\msubsection{service}{gw-connect-provider}
-The purpose of this service is to create a proxy that can consume a specific provider of the cloud in the name of a consumer beyond the cloud boundaries.
 
 \msubsection{service}{gw-close-sessions}
 The purpose of this service is to destroys the specified gateway tunnels and release their resources.
