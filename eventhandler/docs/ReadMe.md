@@ -1,3 +1,7 @@
+# Event Handler
+
+<a name="event_handler_sdd" />
+
 ## System Design Overview
 ![Alt text](/documentation/eventhandler/sysd/event_handler_controller.jpg)
 
@@ -26,14 +30,14 @@ The Event Handler consumes the following services:
 
 The Event Handler has the following use cases:
 * [Publish Event](documentation/eventhandler/use_cases/EH_use_case_1.md)
-![Alt text](../../documentation/eventhandler/use_cases/PublishEvent.png)
+![Alt text](/documentation/eventhandler/use_cases/PublishEvent.png)
 * [Register Subscription](documentation/eventhandler/use_cases/EH_use_case_2.md)
-![Alt text](../../documentation/eventhandler/use_cases/RegisterSubscription.png)
+![Alt text](/documentation/eventhandler/use_cases/RegisterSubscription.png)
 * [Unregister Subscription](documentation/eventhandler/use_cases/EH_use_case_3.md)
-![Alt text](../../documentation/eventhandler/use_cases/Unsubscribe.png)
+![Alt text](/documentation/eventhandler/use_cases/Unsubscribe.png)
 * [Update Authorization](documentation/eventhandler/use_cases/EH_use_case_4.md)
-![Alt text](../../documentation/authorization/SubscriptionAuthUpdate.png)
-![Alt text](../../documentation/eventhandler/use_cases/PublishAuthUpdate.png)
+![Alt text](/documentation/authorization/SubscriptionAuthUpdate.png)
+![Alt text](/documentation/eventhandler/use_cases/PublishAuthUpdate.png)
 
 <a name="event_handler_endpoints" />
 
