@@ -21,18 +21,18 @@ Some help for the installation:
 
 [ActiveMQ Classic Documentation](https://activemq.apache.org/using-activemq)
 
-[A Guide to installing ActiveMQ on Ubuntu 18.04](https://www.osradar.com/install-apachemq-ubuntu-18-04/)
+[A Guide to installing ActiveMQ on Ubuntu 18.04](https://websiteforstudents.com/how-to-install-apache-activemq-on-ubuntu-18-04-16-04/)
 
 Before starting the ActiveMQ server you have to modify the configuration. The `activemq.xml` file contains all settings of the server which is located in the `conf` subfolder of the ActiveMQ installation folder.
 
-In the first step you have to make sure that ActiveMQ cleans up all the unused queues because the Arrowhead Gatekeeper and Gateway systems create a lot of queues but don't/can't delete them.
+In the first step you have to make sure that ActiveMQ cleans up all the possibly stucked queues. Even though Arrowhead Gatekeeper and Gateway systems have full control on creating and removing queues, some of them could stuck when for example unexpected hard shutdown of Gatekeeper/Gateway have happened.
 - Find the tag `<broker>` in the configuration file and add an attribute to it:
-```schedulePeriodForDestinationPurge="10000"```
-- Then find the tag `<policyEntries>` under the `<broker>` tag and append a new entry:
-```<policyEntry queue=">" gcInactiveDestinations="true" inactiveTimoutBeforeGC="60000"/>```
+```schedulePeriodForDestinationPurge="60000"```
+- Then find the tag `<policyEntries>` under the `<broker>` tag and append a new entry. Set `inactiveTimeoutBeforeGC` at least five time bigger then the `inactive_gateway_bridge_timeout` in the Gateway Core system :
+```<policyEntry queue=">" gcInactiveDestinations="true" inactiveTimoutBeforeGC="300000"/>```
 - After these modifications your configuration files should look similar than this:
 ```
- <broker xmlns="http://activemq.apache.org/schema/core" brokerName="localhost" dataDirectory="${activemq.data}" schedulePeriodForDestinationPurge="10000">
+ <broker xmlns="http://activemq.apache.org/schema/core" brokerName="localhost" dataDirectory="${activemq.data}" schedulePeriodForDestinationPurge="60000">
 
         <destinationPolicy>
             <policyMap>
@@ -50,7 +50,7 @@ In the first step you have to make sure that ActiveMQ cleans up all the unused q
                     <constantPendingMessageLimitStrategy limit="1000"/>
                   </pendingMessageLimitStrategy>
                 </policyEntry>
-                <policyEntry queue=">" gcInactiveDestinations="true" inactiveTimeoutBeforeGC="60000"/>
+                <policyEntry queue=">" gcInactiveDestinations="true" inactiveTimeoutBeforeGC="300000"/>
               </policyEntries>
             </policyMap>
         </destinationPolicy>

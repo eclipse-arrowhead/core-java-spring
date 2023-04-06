@@ -16,6 +16,9 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class QoSReservationResponseDTO implements Serializable {
 
 	//=================================================================================================
@@ -77,5 +80,15 @@ public class QoSReservationResponseDTO implements Serializable {
 	public void setReservedTo(final String reservedTo) { this.reservedTo = reservedTo; }
 	public void setTemporaryLock(final boolean temporaryLock) { this.temporaryLock = temporaryLock; }
 	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
-	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }	
+	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

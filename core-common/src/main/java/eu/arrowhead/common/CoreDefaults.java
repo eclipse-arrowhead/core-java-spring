@@ -59,10 +59,13 @@ public class CoreDefaults {
 	public static final boolean DEFAULT_GATEKEEPER_IS_GATEWAY_PRESENT = false;
 	public static final boolean DEFAULT_GATEKEEPER_IS_GATEWAY_MANDATORY = false;
 	
+	public static final int DEFAULT_GATEWAY_INACTIVE_BRIDGE_TIMEOUT = 60; // in seconds
 	public static final int DEFAULT_GATEWAY_SOCKET_TIMEOUT = 30000;
 	public static final int DEFAULT_GATEWAY_MIN_PORT = 8000;
 	public static final int DEFAULT_GATEWAY_MAX_PORT = 8100;
 	public static final int DEFAULT_GATEWAY_PROVIDER_SIDE_MAX_REQUEST_PER_SOCKET = 50;
+	
+	public static final boolean DEFAULT_CHOREOGRAPHER_IS_GATEKEEPER_PRESENT = false;
 
 	public static final boolean DEFAULT_EVENTHANDLER_TTL_SCHEDULED = false;
 	public static final int DEFAULT_EVENTHANDLER_TTL_INTERVAL_MINUTES = 17;
@@ -101,8 +104,10 @@ public class CoreDefaults {
 	public static final int DEFAULT_RELAY_TEST_TIMEOUT = 5000; // in milliseconds
 	public static final int DEFAULT_RELAY_TEST_MESSAGE_SIZE = 2048; // in bytes
 	public static final boolean DEFAULT_RELAY_TEST_LOG_MEASUREMENTS_IN_DB = true;
-
-    public static final int DEFAULT_VERIFICATION_INTERVAL = 3600; // in seconds
+	
+	public static final long DEFAULT_CHOREOGRAPHER_MAX_PLAN_ITERATION = Long.MAX_VALUE;
+	
+	public static final int DEFAULT_VERIFICATION_INTERVAL = 3600; // in seconds
 
     //=================================================================================================
 	// assistant methods

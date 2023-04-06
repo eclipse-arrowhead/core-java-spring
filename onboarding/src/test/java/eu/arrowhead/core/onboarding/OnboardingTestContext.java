@@ -26,6 +26,7 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Primary;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.core.onboarding.service.OnboardingService;
 
 @Configuration
@@ -45,5 +46,12 @@ public class OnboardingTestContext {
     @Primary // This bean is primary only in test context
     public OnboardingService mockOnboardingDBService() {
         return Mockito.mock(OnboardingService.class);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    @Bean
+    @Primary // This bean is primary only in test context
+    public CommonDBService mockCommonDBService() {
+        return Mockito.mock(CommonDBService.class);
     }
 }

@@ -18,10 +18,11 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonInclude(Include.NON_NULL)
 public class ServiceRegistryResponseDTO implements Serializable {
@@ -75,19 +76,11 @@ public class ServiceRegistryResponseDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", ServiceRegistryResponseDTO.class.getSimpleName() + "[", "]")
-				.add("id=" + id)
-				.add("serviceDefinition=" + serviceDefinition)
-				.add("provider=" + provider)
-				.add("serviceUri='" + serviceUri + "'")
-				.add("endOfValidity='" + endOfValidity + "'")
-				.add("secure=" + secure)
-				.add("metadata=" + metadata)
-				.add("version=" + version)
-				.add("interfaces=" + interfaces)
-				.add("createdAt='" + createdAt + "'")
-				.add("updatedAt='" + updatedAt + "'")
-				.toString();
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------

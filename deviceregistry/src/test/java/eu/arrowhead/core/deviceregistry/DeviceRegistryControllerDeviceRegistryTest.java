@@ -47,6 +47,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.internal.DeviceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.shared.DeviceRegistryRequestDTO;
 import eu.arrowhead.common.dto.shared.DeviceRegistryResponseDTO;
@@ -99,6 +100,9 @@ public class DeviceRegistryControllerDeviceRegistryTest {
 
     @MockBean(name = "mockDeviceRegistryDBService")
     private DeviceRegistryDBService deviceRegistryDBService;
+    
+    @MockBean(name = "mockCommonDBService")
+    private CommonDBService commonDBService;
 
     //=================================================================================================
     // methods

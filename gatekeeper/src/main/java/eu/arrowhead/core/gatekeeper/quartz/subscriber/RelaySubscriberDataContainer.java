@@ -36,6 +36,7 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
+import eu.arrowhead.core.gatekeeper.quartz.RelaySupervisor;
 import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClient;
 import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClientFactory;
 
@@ -79,8 +80,8 @@ public class RelaySubscriberDataContainer {
 		final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
 		final PrivateKey privateKey = (PrivateKey) arrowheadContext.get(CommonConstants.SERVER_PRIVATE_KEY);
 
-		this.gatekeeperRelayClient = GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, sslProps, timeout, false);
-		this.gatekeeperRelayClientWithCache = GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, sslProps, timeout, true);
+		this.gatekeeperRelayClient = GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, sslProps, timeout, false, RelaySupervisor.getRegistry());
+		this.gatekeeperRelayClientWithCache = GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, sslProps, timeout, true, RelaySupervisor.getRegistry());
 
 		initialized = true;
 	}
@@ -97,9 +98,9 @@ public class RelaySubscriberDataContainer {
 			for (final RelayResource resource : relayResources.values()) {
 				resource.close(gatekeeperRelayClient);
 			}
+
+			relayResources.clear();
 		}
-		
-		relayResources.clear();
 	}
 	
 	//-------------------------------------------------------------------------------------------------

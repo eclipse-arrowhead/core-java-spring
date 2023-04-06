@@ -15,29 +15,33 @@
 package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
-import java.util.StringJoiner;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CertificateCreationRequestDTO implements Serializable {
 
     //=================================================================================================
     // members
-    private static final long serialVersionUID = 1L;
-
-    private String commonName;
+ 
+	private static final long serialVersionUID = 4798265080935778603L;
+	
+	private String commonName;
     private KeyPairDTO keyPairDTO;
-
 
     //=================================================================================================
     // constructors
 
-    public CertificateCreationRequestDTO() {
-    }
+    //-------------------------------------------------------------------------------------------------
+	public CertificateCreationRequestDTO() {}
 
-    public CertificateCreationRequestDTO(final String commonName) {
+    //-------------------------------------------------------------------------------------------------
+	public CertificateCreationRequestDTO(final String commonName) {
         this.commonName = commonName;
     }
 
-    public CertificateCreationRequestDTO(final String commonName, final KeyPairDTO keyPairDTO) {
+    //-------------------------------------------------------------------------------------------------
+	public CertificateCreationRequestDTO(final String commonName, final KeyPairDTO keyPairDTO) {
         this.commonName = commonName;
         this.keyPairDTO = keyPairDTO;
     }
@@ -45,26 +49,21 @@ public class CertificateCreationRequestDTO implements Serializable {
     //=================================================================================================
     // methods
 
-    public String getCommonName() {
-        return commonName;
-    }
-    public void setCommonName(String commonName) {
-        this.commonName = commonName;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public String getCommonName() { return commonName; }
+	public KeyPairDTO getKeyPairDTO() { return keyPairDTO; }
+    
+	//-------------------------------------------------------------------------------------------------
+	public void setCommonName(final String commonName) { this.commonName = commonName; }
+    public void setKeyPairDTO(final KeyPairDTO keyPairDTO) { this.keyPairDTO = keyPairDTO; }
 
-    public KeyPairDTO getKeyPairDTO() {
-        return keyPairDTO;
-    }
-
-    public void setKeyPairDTO(final KeyPairDTO keyPairDTO) {
-        this.keyPairDTO = keyPairDTO;
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", CertificateCreationRequestDTO.class.getSimpleName() + "[", "]")
-                .add("commonName='" + commonName + "'")
-                .add("keyPairDTO=" + keyPairDTO)
-                .toString();
-    }
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

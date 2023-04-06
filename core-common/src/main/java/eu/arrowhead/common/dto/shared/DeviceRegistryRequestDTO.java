@@ -16,10 +16,11 @@ package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
 import java.util.Map;
-import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonInclude(Include.NON_NULL)
 public class DeviceRegistryRequestDTO implements Serializable {
@@ -37,10 +38,12 @@ public class DeviceRegistryRequestDTO implements Serializable {
 	//=================================================================================================
 	// methods
 
-	public DeviceRegistryRequestDTO() {
-	}
+	//-------------------------------------------------------------------------------------------------
+	public DeviceRegistryRequestDTO() {}
 
-	public DeviceRegistryRequestDTO(final DeviceRequestDTO device, final String endOfValidity) {this.device = device;
+	//-------------------------------------------------------------------------------------------------
+	public DeviceRegistryRequestDTO(final DeviceRequestDTO device, final String endOfValidity) {
+		this.device = device;
 		this.endOfValidity = endOfValidity;
 	}
 
@@ -64,13 +67,13 @@ public class DeviceRegistryRequestDTO implements Serializable {
 	public void setMetadata(final Map<String,String> metadata) { this.metadata = metadata; }
 	public void setVersion(final Integer version) { this.version = version; }
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", DeviceRegistryRequestDTO.class.getSimpleName() + "[", "]")
-				.add("device=" + device)
-				.add("endOfValidity='" + endOfValidity + "'")
-				.add("metadata=" + metadata)
-				.add("version=" + version)
-				.toString();
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
 	}
 }

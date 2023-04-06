@@ -24,6 +24,9 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
 import eu.arrowhead.common.exception.BadPayloadException;
 
@@ -123,6 +126,16 @@ public class OrchestrationFormRequestDTO implements Serializable {
 
         return this;
     }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 	
 	//=================================================================================================
 	// assistant methods

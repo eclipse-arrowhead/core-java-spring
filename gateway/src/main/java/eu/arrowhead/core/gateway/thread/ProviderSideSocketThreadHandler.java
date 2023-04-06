@@ -16,12 +16,14 @@ package eu.arrowhead.core.gateway.thread;
 
 import java.io.IOException;
 import java.security.PublicKey;
+import java.time.ZonedDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
@@ -59,10 +61,14 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 	private final int timeout;
 	private final int maxRequestPerSocket;
 	private final ConcurrentMap<String,ActiveSessionDTO> activeSessions;
+	private final ConcurrentMap<String,ProviderSideSocketThreadHandler> activeProviderSideSocketThreadHandlers;
 	private final SSLProperties sslProperties;
 	
 	private String queueId;
 	private MessageProducer sender;
+	private MessageProducer senderControl;
+	private MessageConsumer consumer;
+	private MessageConsumer consumerControl;
 	
 	private SSLSocketFactory socketFactory;
 	private ProviderSideSocketThread oldThread;
@@ -73,6 +79,8 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 	private boolean countRequests = false;
 	
 	private boolean initialized = false;
+	private boolean communicationStarted = false;
+	
 	
 	//=================================================================================================
 	// methods
@@ -95,18 +103,26 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 		this.maxRequestPerSocket = maxRequestPerSocket;
 		this.consumerGatewayPublicKey = Utilities.getPublicKeyFromBase64EncodedString(this.connectionRequest.getConsumerGWPublicKey());
 		this.activeSessions = appContext.getBean(CoreCommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentHashMap.class);
+		this.activeProviderSideSocketThreadHandlers = appContext.getBean(CoreCommonConstants.GATEWAY_ACTIVE_PROVIDER_SIDE_SOCKET_THREAD_HANDLER_MAP, ConcurrentHashMap.class);
 		this.sslProperties = appContext.getBean(SSLProperties.class);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public void init(final String queueId, final MessageProducer sender) {
+	public void init(final String queueId, final MessageProducer sender, final MessageProducer senderControl,
+					 final MessageConsumer consumer, final MessageConsumer consumerControl) {
 		logger.debug("Provider handler init started...");
 		
 		Assert.isTrue(!Utilities.isEmpty(queueId), "Queue id is null or blank.");
 		Assert.notNull(sender, "sender is null.");
+		Assert.notNull(senderControl, "senderControl is null.");
+		Assert.notNull(consumer, "consumer is null.");
+		Assert.notNull(consumerControl, "consumerControl is null.");
 		
 		this.queueId = queueId;
 		this.sender = sender;
+		this.senderControl = senderControl;
+		this.consumer = consumer;
+		this.consumerControl = consumerControl;
 		
 		final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(sslProperties);
 		socketFactory = sslContext.getSocketFactory();
@@ -128,6 +144,16 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 	public boolean isInitialized() {
 		return initialized;
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public boolean isCommunicationStarted() {
+		return communicationStarted;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ZonedDateTime getLastInteractionTime() {
+		return this.currentThread.getLastInteractionTime();
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
@@ -140,11 +166,13 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 		
 		try {
 			if (isControlMessage(message)) {
-				relayClient.handleCloseControlMessage(message, relaySession);
+				relayClient.handleCloseControlMessage(message, null); // just verifying the control msg, but not close the connection
 				close();
 			} else {
 				Assert.notNull(currentThread.getOutputStream(), "Output stream is null.");
+				currentThread.setNowAsLastInteractionTime();
 				final byte[] bytes = relayClient.getBytesFromMessage(message, consumerGatewayPublicKey);
+				communicationStarted = true;
 				
 				if (firstMessage) { // need to decide whether use request counter or not
 					initCountRequestsFlag(bytes);
@@ -176,9 +204,35 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 		
 		if (currentThread != null) {
 			currentThread.closeAndInterrupt();
+		}		
+		
+		//Unsubscribe from the request (REQ-...) queue
+		try {
+			unsubscribeFromRequestQueues();
+		} catch (final JMSException ex) {
+			logger.debug("Error while unsubscribing from request queues: {}", ex.getMessage());
+			logger.debug("Stacktrace:", ex);
 		}
 		
-		relayClient.closeConnection(relaySession);
+		//Attempt to destroy destinations (RESP-... queues) which this provider side gateway writes on and the connection after
+		boolean canCloseRelayConnection = false;
+		try {
+			canCloseRelayConnection = destroyResponseQueues();
+		} catch (final JMSException ex) {
+			logger.debug("Error while closing relay destination: {}", ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+		}
+		
+		if (!canCloseRelayConnection) {
+			logger.debug("Relay connection is not closeable yet");
+			
+		} else {
+			relayClient.closeConnection(relaySession);
+			if (relayClient.isConnectionClosed(relaySession) && activeProviderSideSocketThreadHandlers != null && queueId != null) {
+				activeProviderSideSocketThreadHandlers.remove(queueId);
+				logger.debug("Relay connection has been closed");
+			}			
+		}			
 	}
 
 	//=================================================================================================
@@ -281,5 +335,22 @@ public class ProviderSideSocketThreadHandler implements MessageListener {
 			logger.debug("Request counter is off");
 			countRequests = false; // not HTTP
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void unsubscribeFromRequestQueues() throws JMSException {
+		if (relaySession != null) {
+			relayClient.unsubscribeFromQueues(consumer, consumerControl);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean destroyResponseQueues() throws JMSException {
+		logger.debug("destroyResponseQueues started...");
+		
+		if (relaySession != null) {
+			return relayClient.destroyQueues(relaySession, sender, senderControl);
+		}		
+		return false;
 	}
 }

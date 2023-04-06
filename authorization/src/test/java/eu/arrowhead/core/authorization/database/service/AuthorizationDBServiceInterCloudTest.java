@@ -53,6 +53,7 @@ import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.internal.AuthorizationInterCloudCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.IdIdListDTO;
+import eu.arrowhead.common.dto.shared.AddressType;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
 @RunWith(SpringRunner.class)
@@ -333,7 +334,7 @@ public class AuthorizationDBServiceInterCloudTest {
 	private Page<AuthorizationInterCloud> createPageForMockingAuthorizationInterCloudRepository(final int numberOfRequestedEntry) {
 		final List<AuthorizationInterCloud> entries = new ArrayList<>(numberOfRequestedEntry);
 		final Cloud cloud = getValidTestCloud();
-		final System provider = new System("testSystem", "testAddr", 2000, "TOKEN", null);
+		final System provider = new System("testSystem", "testAddr", AddressType.HOSTNAME, 2000, "TOKEN", null);
 		provider.setId(1);
 		for (int i = 1; i <= numberOfRequestedEntry; ++i) {			
 			final ServiceDefinition serviceDefinition = new ServiceDefinition("testService" + i);

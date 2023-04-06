@@ -22,6 +22,9 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class ServiceQueryFormDTO implements Serializable {
 	
 	//=================================================================================================
@@ -36,6 +39,7 @@ public class ServiceQueryFormDTO implements Serializable {
 	private Integer versionRequirement; // if specified version must match
 	private Integer minVersionRequirement; // if specified version must be equals or higher; ignored if versionRequirement is specified
 	private Integer maxVersionRequirement; // if specified version must be equals or lower; ignored if versionRequirement is specified
+	private List<AddressType> providerAddressTypeRequirements; // if specified one of the address types must match
 	
 	private boolean pingProviders = false;
 	
@@ -54,6 +58,7 @@ public class ServiceQueryFormDTO implements Serializable {
 	public Integer getMinVersionRequirement() { return minVersionRequirement; }
 	public Integer getMaxVersionRequirement() { return maxVersionRequirement; }
 	public boolean getPingProviders() { return pingProviders; }
+	public List<AddressType> getProviderAddressTypeRequirements() { return providerAddressTypeRequirements; }
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setServiceDefinitionRequirement(final String serviceDefinitionRequirement) { this.serviceDefinitionRequirement = serviceDefinitionRequirement; }
@@ -64,6 +69,17 @@ public class ServiceQueryFormDTO implements Serializable {
 	public void setMinVersionRequirement(final Integer minVersionRequirement) { this.minVersionRequirement = minVersionRequirement; }
 	public void setMaxVersionRequirement(final Integer maxVersionRequirement) { this.maxVersionRequirement = maxVersionRequirement; }
 	public void setPingProviders(final boolean pingProviders) { this.pingProviders = pingProviders; }
+	public void setProviderAddressTypeRequirements(final List<AddressType> providerAddressTypeRequirements) { this.providerAddressTypeRequirements = providerAddressTypeRequirements; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 	
 	//=================================================================================================
 	// assistant methods
@@ -78,11 +94,12 @@ public class ServiceQueryFormDTO implements Serializable {
 		this.minVersionRequirement = builder.minVersionRequirement;
 		this.maxVersionRequirement = builder.maxVersionRequirement;
 		this.pingProviders = builder.pingProviders;
+		this.providerAddressTypeRequirements = builder.providerAddressTypeRequirements;
 	}
 	
 	//=================================================================================================
 	// nested classes
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public static class Builder {
 		
@@ -96,6 +113,7 @@ public class ServiceQueryFormDTO implements Serializable {
 		private Integer versionRequirement; 
 		private Integer minVersionRequirement; 
 		private Integer maxVersionRequirement; 
+		private List<AddressType> providerAddressTypeRequirements;
 		
 		private boolean pingProviders = false;
 
@@ -160,6 +178,18 @@ public class ServiceQueryFormDTO implements Serializable {
 		//-------------------------------------------------------------------------------------------------
 		public Builder pingProviders(final boolean pingProviders) {
 			this.pingProviders = pingProviders;
+			return this;
+		}
+		
+		//-------------------------------------------------------------------------------------------------
+		public Builder providerAddressTypes(final AddressType... addressTypes) {
+			this.providerAddressTypeRequirements = addressTypes == null || addressTypes.length == 0 ? null : List.of(addressTypes);
+			return this;
+		}
+		
+		//-------------------------------------------------------------------------------------------------
+		public Builder providerAddressTypes(final List<AddressType> addressTypes) {
+			this.providerAddressTypeRequirements = addressTypes;
 			return this;
 		}
 		

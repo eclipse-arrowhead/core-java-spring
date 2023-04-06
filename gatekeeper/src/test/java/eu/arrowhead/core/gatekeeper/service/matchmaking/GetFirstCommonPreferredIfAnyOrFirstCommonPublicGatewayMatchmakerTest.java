@@ -307,6 +307,116 @@ public class GetFirstCommonPreferredIfAnyOrFirstCommonPublicGatewayMatchmakerTes
 		assertNull(relayMatch);	
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoMatchmakingWithHavingCommonPreferredRelaysUsingAuthenticationInfo() {
+		final Cloud localInstanceOfRequesterCloud = new Cloud();
+		localInstanceOfRequesterCloud.setId(1);
+		localInstanceOfRequesterCloud.setOperator("test-operator");
+		localInstanceOfRequesterCloud.setName("test-name");
+		localInstanceOfRequesterCloud.setSecure(true);
+		localInstanceOfRequesterCloud.setNeighbor(true);
+		localInstanceOfRequesterCloud.setOwnCloud(false);
+		localInstanceOfRequesterCloud.setAuthenticationInfo("test-auth-info");
+		
+		final String commonRelayAddress1 = "test-address-1";
+		final int commonRelayPort1 = 1000;		
+		final String commonRelayAddress2 = "test-address-2";
+		final int commonRelayPort2 = 2000;
+		
+		final Relay localInstanceOfPreferredRelay1 = new Relay();
+		localInstanceOfPreferredRelay1.setId(3);
+		localInstanceOfPreferredRelay1.setAddress(commonRelayAddress1);
+		localInstanceOfPreferredRelay1.setPort(commonRelayPort1);
+		localInstanceOfPreferredRelay1.setAuthenticationInfo("test");
+		localInstanceOfPreferredRelay1.setSecure(true);
+		localInstanceOfPreferredRelay1.setExclusive(true);
+		localInstanceOfPreferredRelay1.setType(RelayType.GATEWAY_RELAY);
+		
+		final RelayRequestDTO preferredRelay1 = new RelayRequestDTO();
+		preferredRelay1.setAddress("test-address-3");
+		preferredRelay1.setPort(commonRelayPort1);
+		preferredRelay1.setAuthenticationInfo("test");
+		
+		final Relay localInstanceOfPublicRelay2 = new Relay();
+		localInstanceOfPublicRelay2.setId(4);
+		localInstanceOfPublicRelay2.setAddress(commonRelayAddress2);
+		localInstanceOfPublicRelay2.setPort(commonRelayPort2);
+		localInstanceOfPublicRelay2.setSecure(true);
+		localInstanceOfPublicRelay2.setExclusive(false);
+		localInstanceOfPublicRelay2.setType(RelayType.GATEWAY_RELAY);
+		
+		final RelayRequestDTO preferredRelay2 = new RelayRequestDTO();
+		preferredRelay2.setAddress("test-address-4");
+		preferredRelay2.setPort(commonRelayPort2);
+		
+		final RelayMatchmakingParameters parameters = createRelayMatchmakingParametersWithLocalRelayConnsOfRequesterCloud(localInstanceOfRequesterCloud,
+																														  List.of(localInstanceOfPreferredRelay1, localInstanceOfPublicRelay2),
+																														  System.currentTimeMillis());
+		parameters.setPreferredGatewayRelays(List.of(preferredRelay1, preferredRelay2));
+		
+		final Relay relayMatch = algorithm.doMatchmaking(parameters);
+		
+		assertEquals(localInstanceOfPreferredRelay1.getId(), relayMatch.getId());	
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoMatchmakingWithHavingCommonPublicGatewayRelaysUsingAuthenticationInfo() {
+		final Cloud localInstanceOfRequesterCloud = new Cloud();
+		localInstanceOfRequesterCloud.setId(1);
+		localInstanceOfRequesterCloud.setOperator("test-operator");
+		localInstanceOfRequesterCloud.setName("test-name");
+		localInstanceOfRequesterCloud.setSecure(true);
+		localInstanceOfRequesterCloud.setNeighbor(true);
+		localInstanceOfRequesterCloud.setOwnCloud(false);
+		localInstanceOfRequesterCloud.setAuthenticationInfo("test-auth-info");
+		
+		final String commonRelayAddress1 = "test-address-1";
+		final int commonRelayPort1 = 1000;		
+		final String commonRelayAddress2 = "test-address-2";
+		final int commonRelayPort2 = 2000;
+		
+		final Relay localInstanceOfPreferredRelay1 = new Relay();
+		localInstanceOfPreferredRelay1.setId(3);
+		localInstanceOfPreferredRelay1.setAddress(commonRelayAddress1);
+		localInstanceOfPreferredRelay1.setPort(commonRelayPort1);
+		localInstanceOfPreferredRelay1.setAuthenticationInfo("test");
+		localInstanceOfPreferredRelay1.setSecure(true);
+		localInstanceOfPreferredRelay1.setExclusive(true);
+		localInstanceOfPreferredRelay1.setType(RelayType.GATEWAY_RELAY);
+		
+		final RelayRequestDTO preferredRelay1 = new RelayRequestDTO();
+		preferredRelay1.setAddress("test-address-3");
+		preferredRelay1.setPort(commonRelayPort1);
+		
+		final Relay localInstanceOfPublicRelay2 = new Relay();
+		localInstanceOfPublicRelay2.setId(4);
+		localInstanceOfPublicRelay2.setAddress(commonRelayAddress2);
+		localInstanceOfPublicRelay2.setPort(commonRelayPort2);
+		localInstanceOfPublicRelay2.setAuthenticationInfo("test2");
+		localInstanceOfPublicRelay2.setSecure(true);
+		localInstanceOfPublicRelay2.setExclusive(false);
+		localInstanceOfPublicRelay2.setType(RelayType.GATEWAY_RELAY);
+		
+		final RelayRequestDTO publicRelay = new RelayRequestDTO();
+		publicRelay.setAddress("test-address-4");
+		publicRelay.setPort(commonRelayPort2);
+		publicRelay.setAuthenticationInfo("test2");
+		
+		when(gatekeeperDBService.getPublicGatewayRelays()).thenReturn(List.of(localInstanceOfPublicRelay2));
+		
+		final RelayMatchmakingParameters parameters = createRelayMatchmakingParametersWithLocalRelayConnsOfRequesterCloud(localInstanceOfRequesterCloud,
+																														  List.of(localInstanceOfPreferredRelay1, localInstanceOfPublicRelay2),
+																														  System.currentTimeMillis());
+		parameters.setPreferredGatewayRelays(List.of(preferredRelay1));
+		parameters.setKnownGatewayRelays(List.of(publicRelay));		
+		
+		final Relay relayMatch = algorithm.doMatchmaking(parameters);
+		
+		assertEquals(localInstanceOfPublicRelay2.getId(), relayMatch.getId());	
+	}
+	
 	//=================================================================================================
 	// assistant methods
 

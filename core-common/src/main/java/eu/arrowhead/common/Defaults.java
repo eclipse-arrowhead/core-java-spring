@@ -19,6 +19,8 @@ public class Defaults {
 	//=================================================================================================
 	// members
 	
+	public static final int DEFAULT_VERSION = 1;
+	
 	public static final boolean DEFAULT_SSL_SERVER_ENABLED = true;
 	public static final boolean DEFAULT_WEBSOCKETS_ENABLED = false;
 	public static final String DEFAULT_KEYSTORE_TYPE = "PKCS12";

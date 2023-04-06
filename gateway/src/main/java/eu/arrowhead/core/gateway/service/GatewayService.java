@@ -77,6 +77,12 @@ public class GatewayService {
 	@Resource(name = CoreCommonConstants.GATEWAY_ACTIVE_SESSION_MAP)
 	private ConcurrentMap<String,ActiveSessionDTO> activeSessions;
 	
+	@Resource(name = CoreCommonConstants.GATEWAY_ACTIVE_CONSUMER_SIDE_SOCKET_THREAD_MAP)
+	private ConcurrentMap<String,ConsumerSideServerSocketThread> activeConsumerSideSocketThreads;
+	
+	@Resource(name = CoreCommonConstants.GATEWAY_ACTIVE_PROVIDER_SIDE_SOCKET_THREAD_HANDLER_MAP)
+	private ConcurrentMap<String,ProviderSideSocketThreadHandler> activeProviderSideSocketThreadHandlers;
+	
 	@Resource(name = CoreCommonConstants.GATEWAY_AVAILABLE_PORTS_QUEUE)
 	private ConcurrentLinkedQueue<Integer> availablePorts;
 	
@@ -132,7 +138,8 @@ public class GatewayService {
 		try {
 			handler = new ProviderSideSocketThreadHandler(appContext, relayClient, session, request, gatewaySocketTimeout, gatewayProviderSideMaxRequestPerSocket);
 			final ProviderSideRelayInfo info = relayClient.initializeProviderSideRelay(session, handler);
-			handler.init(info.getQueueId(), info.getMessageSender());
+			handler.init(info.getQueueId(), info.getMessageSender(), info.getControlMessageSender(), info.getMessageConsumer(), info.getControlMessageConsumer());
+			activeProviderSideSocketThreadHandlers.put(info.getQueueId(), handler);
 			final ActiveSessionDTO activeSession = new ActiveSessionDTO(info.getQueueId(), info.getPeerName(), request.getConsumer(), request.getConsumerCloud(), request.getProvider(),
 																		request.getProviderCloud(), request.getServiceDefinition(), request.getRelay(), Utilities.convertZonedDateTimeToUTCString(now),
 																		null);
@@ -179,14 +186,19 @@ public class GatewayService {
 			thread = new ConsumerSideServerSocketThread(appContext, serverPort, relayClient, session, request.getProviderGWPublicKey(), request.getQueueId(), gatewaySocketTimeout, 
 														request.getConsumer().getSystemName(), request.getServiceDefinition());
 			final ConsumerSideRelayInfo info = relayClient.initializeConsumerSideRelay(session, thread, request.getPeerName(), request.getQueueId());
-			thread.init(info.getMessageSender());
+			thread.init(info.getMessageSender(), info.getControlResponseMessageSender(), info.getMessageConsumer(), info.getControlRequestMessageConsumer());
 			thread.start();
 			
+			activeConsumerSideSocketThreads.put(request.getQueueId(), thread);			
 			return serverPort;
+			
 		} catch (final JMSException ex) {
+			activeSessions.remove(request.getQueueId());
 			relayClient.closeConnection(session);
 			throw new ArrowheadException("Error occured when initialize relay communication.", HttpStatus.SC_BAD_GATEWAY, ex);
+			
 		} catch (final ArrowheadException ex) {
+			activeSessions.remove(request.getQueueId());
 			relayClient.closeConnection(session);
 			
 			if (thread != null && thread.isInitialized()) {
@@ -217,6 +229,24 @@ public class GatewayService {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public String closeSession(final int port) { 
+		logger.debug("closeSession started...");
+		
+		final ActiveSessionDTO session = findSessionForPort(port);
+		if (session == null) {
+			return "Active session not found.";
+		}
+
+		try {
+			closeSession(session);
+			
+			return null;
+		} catch (final ArrowheadException ex) {
+			return ex.getMessage();
+		}
+	}
+
 	//=================================================================================================
 	// assistant methods
 
@@ -369,6 +399,8 @@ public class GatewayService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private Session getRelaySession(final RelayRequestDTO relay) {
+		logger.debug("getRelaySession started...");
+		
 		try {
 			return relayClient.createConnection(relay.getAddress(), relay.getPort(), relay.isSecure());
 		} catch (final JMSException ex) {
@@ -378,5 +410,18 @@ public class GatewayService {
 			
 			throw new ArrowheadException("Error while trying to connect relay at " + relay.getAddress() + ":" + relay.getPort(), ex);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private ActiveSessionDTO findSessionForPort(int port) {
+		logger.debug("findSessionForPort started...");
+		
+		for (final ActiveSessionDTO session : activeSessions.values()) {
+			if (port == session.getConsumerServerSocketPort().intValue()) {
+				return session;
+			}
+		}
+		
+		return null;
 	}
 }

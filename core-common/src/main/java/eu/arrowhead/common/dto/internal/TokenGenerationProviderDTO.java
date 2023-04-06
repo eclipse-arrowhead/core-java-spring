@@ -20,6 +20,9 @@ import java.util.List;
 
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
 public class TokenGenerationProviderDTO implements Serializable {
@@ -58,4 +61,14 @@ public class TokenGenerationProviderDTO implements Serializable {
 	public void setProvider(final SystemRequestDTO provider) { this.provider = provider; }
 	public void setTokenDuration(final int tokenDuration) { this.tokenDuration = tokenDuration; }
 	public void setServiceInterfaces(final List<String> serviceInterfaces) { this.serviceInterfaces = serviceInterfaces; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

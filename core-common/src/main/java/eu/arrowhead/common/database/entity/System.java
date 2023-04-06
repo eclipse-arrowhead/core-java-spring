@@ -21,6 +21,8 @@ import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -37,6 +39,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import eu.arrowhead.common.CoreDefaults;
+import eu.arrowhead.common.dto.shared.AddressType;
 
 @Entity
 @Table(name = "system_", uniqueConstraints = @UniqueConstraint(columnNames = { "systemName", "address", "port" }))
@@ -60,6 +63,10 @@ public class System {
 	
 	@Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
 	private String address;
+	
+	@Column(nullable = true)
+	@Enumerated(EnumType.STRING)
+	private AddressType addressType;
 	
 	@Column(nullable = false)
 	private int port;
@@ -99,9 +106,10 @@ public class System {
 	public System() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public System(final String systemName, final String address, final int port, final String authenticationInfo, final String metadata) {
+	public System(final String systemName, final String address, final AddressType addressType, final int port, final String authenticationInfo, final String metadata) {
 		this.systemName = systemName;
 		this.address = address;
+		this.addressType = addressType;
 		this.port = port;
 		this.authenticationInfo = authenticationInfo;
 		this.metadata = metadata;
@@ -124,6 +132,7 @@ public class System {
 	public long getId() { return id; }
 	public String getSystemName() { return systemName; }
 	public String getAddress() { return address; }
+	public AddressType getAddressType() { return addressType; }
 	public int getPort() { return port; }
 	public String getAuthenticationInfo() { return authenticationInfo; }
 	public String getMetadata() { return metadata; }
@@ -138,6 +147,7 @@ public class System {
 	public void setId(final long id) { this.id = id; }
 	public void setSystemName(final String systemName) { this.systemName = systemName; }
 	public void setAddress(final String address) { this.address = address; }
+	public void setAddressType(final AddressType addressType) { this.addressType = addressType; }
 	public void setPort(final int port) { this.port = port; }
 	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
 	public void setMetadata(final String metadata) { this.metadata = metadata; }

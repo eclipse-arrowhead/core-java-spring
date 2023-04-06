@@ -16,83 +16,97 @@ package eu.arrowhead.common.dto.shared;
 
 import java.util.Date;
 import java.util.TimeZone;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.Serializable;
 
 
 public class TimeManagerTimeResponseDTO implements Serializable {
 
-        //=================================================================================================
-        // members
+    //=================================================================================================
+    // members
+    
+    private static final long serialVersionUID = 1648756742138137282L;
+
+    private long epoch;
+    private long epochMs;
+    private String tz;
+    private boolean dst;
+    private boolean trusted;
+            
+    //=================================================================================================
+    // methods
+    
+    //-------------------------------------------------------------------------------------------------
+    public TimeManagerTimeResponseDTO() {}
+
+    //-------------------------------------------------------------------------------------------------
+    public TimeManagerTimeResponseDTO(final String tz) {
+        this.tz = tz;
         
-        private static final long serialVersionUID = 1648756742138137282L;
+        final Date date = new Date();
+        epochMs = date.getTime();
+        epoch = epochMs / 1000;
 
-        private long epoch;
-        private long epochMs;
-        private String tz;
-        private boolean dst;
-        private boolean trusted;
-                
-        //=================================================================================================
-        // methods
+        dst = TimeZone.getTimeZone(this.tz).inDaylightTime(date);
+        trusted = false;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+	public TimeManagerTimeResponseDTO(final String tz, final boolean trusted) {
+        this.tz = tz;
         
-        //-------------------------------------------------------------------------------------------------
-        public TimeManagerTimeResponseDTO() {
-        }
+        final Date date = new Date();
+        epochMs = date.getTime();
+        epoch = epochMs / 1000;
 
-        //-------------------------------------------------------------------------------------------------
-        public TimeManagerTimeResponseDTO(final String tz) {
-                this.tz = tz;
-                
-                Date date = new Date();
-                epochMs = date.getTime();
-                epoch = epochMs / 1000;
+        dst = TimeZone.getTimeZone(this.tz).inDaylightTime(date);
+        this.trusted = trusted;
+    }
 
-                dst = TimeZone.getTimeZone(this.tz).inDaylightTime(date);
-                trusted = false;
-        }
+    //-------------------------------------------------------------------------------------------------
+    public TimeManagerTimeResponseDTO(final long epoch, final String tz, final boolean trusted) {
+        final Date date = new Date(epoch * 1000);
+        this.epoch = epoch;
+        this.epochMs = epoch * 1000;
+        this.tz = tz;
 
-        public TimeManagerTimeResponseDTO(final String tz, final boolean trusted) {
-                this.tz = tz;
-                
-                Date date = new Date();
-                epochMs = date.getTime();
-                epoch = epochMs / 1000;
+        this.dst = TimeZone.getTimeZone(this.tz).inDaylightTime(date);
+        this.trusted = trusted;
+    }
 
-                dst = TimeZone.getTimeZone(this.tz).inDaylightTime(date);
-                this.trusted = trusted;
-        }
+    //-------------------------------------------------------------------------------------------------
+    public TimeManagerTimeResponseDTO(final long epoch, final long epochMs, final String tz, final boolean dst, final boolean trusted) {
+        this.epoch = epoch;
+        this.epochMs = epochMs;
+        this.tz = tz;
+        this.dst = dst;
+        this.trusted = trusted;
+    }
 
-        //-------------------------------------------------------------------------------------------------
-        public TimeManagerTimeResponseDTO(final long epoch, final String tz, final boolean trusted) {
-                Date date = new Date(epoch*1000);
-                this.epoch = epoch;
-                this.epochMs = epoch * 1000;
-                this.tz = tz;
+    //-------------------------------------------------------------------------------------------------
+    public long getEpoch() { return epoch; }
+    public long getEpochMs() { return epochMs; }
+    public String getTz() { return tz; }
+    public boolean getDst() { return dst; }
+    public boolean getTrusted() {return trusted; }
 
-                this.dst = TimeZone.getTimeZone(this.tz).inDaylightTime(date);
-                this.trusted = trusted;
-        }
-
-        //-------------------------------------------------------------------------------------------------
-        public TimeManagerTimeResponseDTO(final long epoch, final long epochMs, final String tz, final boolean dst, final boolean trusted) {
-                this.epoch = epoch;
-                this.epochMs = epochMs;
-                this.tz = tz;
-                this.dst = dst;
-                this.trusted = trusted;
-        }
-
-        //-------------------------------------------------------------------------------------------------
-        public long getEpoch() { return epoch; }
-        public long getEpochMs() { return epochMs; }
-        public String getTz() { return tz; }
-        public boolean getDst() { return dst; }
-        public boolean getTrusted() {return trusted; }
-
-        //-------------------------------------------------------------------------------------------------
-        public void setEpoch(long epoch) { this.epoch = epoch; }
-        public void setEpochMs(long epochMs) { this.epochMs = epochMs; }
-        public void setTz(String tz) { this.tz = tz; }
-        public void setDst(boolean dst) { this.dst = dst; }
-        public void setTrusted(boolean trusted) { this.trusted = trusted; }
+    //-------------------------------------------------------------------------------------------------
+    public void setEpoch(final long epoch) { this.epoch = epoch; }
+    public void setEpochMs(final long epochMs) { this.epochMs = epochMs; }
+    public void setTz(final String tz) { this.tz = tz; }
+    public void setDst(final boolean dst) { this.dst = dst; }
+    public void setTrusted(final boolean trusted) { this.trusted = trusted; }
+    
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

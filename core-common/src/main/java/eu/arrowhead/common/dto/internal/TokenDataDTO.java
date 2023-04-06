@@ -21,6 +21,8 @@ import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
@@ -65,4 +67,14 @@ public class TokenDataDTO implements Serializable {
 	public void setProviderAddress(final String providerAddress) { this.providerAddress = providerAddress; }
 	public void setProviderPort(final int providerPort) { this.providerPort = providerPort; }
 	public void setTokens(final Map<String,String> tokens) { this.tokens = tokens; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

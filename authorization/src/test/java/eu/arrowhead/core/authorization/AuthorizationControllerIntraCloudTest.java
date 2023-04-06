@@ -56,6 +56,7 @@ import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudRequestDTO;
 import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.IdIdListDTO;
+import eu.arrowhead.common.dto.shared.AddressType;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.core.authorization.database.service.AuthorizationDBService;
@@ -507,13 +508,13 @@ public class AuthorizationControllerIntraCloudTest {
 	//-------------------------------------------------------------------------------------------------
 	private Page<AuthorizationIntraCloud> createPageForMockingAuthorizationDBService(final int numberOfRequestedEntry) {
 		final List<AuthorizationIntraCloud> entries = new ArrayList<>(numberOfRequestedEntry);
-		final System consumer = new System("Consumer", "0.0.0.0.", 1000, null, null);
+		final System consumer = new System("Consumer", "0.0.0.0.", AddressType.IPV4, 1000, null, null);
 		consumer.setId(1);
 		
 		for (int i = 1; i <= numberOfRequestedEntry; ++i) {
 			final ServiceDefinition serviceDefinition = new ServiceDefinition("testService" + i);
 			serviceDefinition.setId(i);
-			final System provider = new System("Provider" + i, i + "." + i + "." + i + "." + i, i * 1000, null, null);
+			final System provider = new System("Provider" + i, i + "." + i + "." + i + "." + i, AddressType.IPV4, i * 1000, null, null);
 			provider.setId(i);
 			final AuthorizationIntraCloud entry = new AuthorizationIntraCloud(consumer, provider, serviceDefinition);
 			entry.setId(i);

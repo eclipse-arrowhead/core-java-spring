@@ -32,6 +32,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.UnknownHostException;
 import java.security.PublicKey;
+import java.time.ZonedDateTime;
 
 import javax.jms.BytesMessage;
 import javax.jms.CompletionListener;
@@ -319,10 +320,12 @@ public class ProviderSideSocketThreadTest {
 		
 		when(socketFactory.createSocket(anyString(), anyInt())).thenReturn(getDummySSLSocket(new byte[0]));
 		
+		Assert.assertNull(testingObject.getLastInteractionTime());
 		testingObject.init();
 		
 		initialized = (Boolean) ReflectionTestUtils.getField(testingObject, "initialized");
 		Assert.assertTrue(initialized);
+		Assert.assertNotNull(testingObject.getLastInteractionTime());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -352,7 +355,7 @@ public class ProviderSideSocketThreadTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testRunWhenInputStreamIsClosed() throws JMSException, UnknownHostException, IOException {
+	public void testRunWhenInputStreamIsClosed() throws JMSException, UnknownHostException, IOException, InterruptedException {
 		final byte[] bytes = new byte[2000];
 		for (int i = 0; i < bytes.length; ++i) {
 			bytes[i] = (byte) (i % 127);
@@ -362,16 +365,20 @@ public class ProviderSideSocketThreadTest {
 		when(socketFactory.createSocket(anyString(), anyInt())).thenReturn(getDummySSLSocket(bytes));
 		
 		testingObject.init();
+		Thread.sleep(0, 1);
+		final ZonedDateTime afterInit = testingObject.getLastInteractionTime();
 		boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertFalse(interrupted);
 		
 		testingObject.run();
+		final ZonedDateTime afterRun = testingObject.getLastInteractionTime();
 		
 		verify(relayClient, times(2)).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
 
 		// because of input stream is empty
 		interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(interrupted);
+		Assert.assertTrue(afterRun.isAfter(afterInit));
 	}
 
 	
@@ -424,7 +431,7 @@ public class ProviderSideSocketThreadTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private GatewayProviderConnectionRequestDTO getTestGatewayProviderConnectionRequestDTO() {
-		final RelayRequestDTO relay = new RelayRequestDTO("localhost", 1234, false, false, RelayType.GATEWAY_RELAY.name());
+		final RelayRequestDTO relay = new RelayRequestDTO("localhost", 1234, null, false, false, RelayType.GATEWAY_RELAY.name());
 		final SystemRequestDTO consumer = new SystemRequestDTO();
 		consumer.setSystemName("consumer");
 		consumer.setAddress("abc.de");

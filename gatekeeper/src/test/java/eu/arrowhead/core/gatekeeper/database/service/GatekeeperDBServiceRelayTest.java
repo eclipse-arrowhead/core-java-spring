@@ -18,12 +18,17 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -41,6 +46,7 @@ import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.RelayRepository;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
 @RunWith(SpringRunner.class)
@@ -156,7 +162,7 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRegisterBulkRelaysWithRelayWithNullAddress() {
-		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO(null, 10000, true, false, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO(null, 10000, null, true, false, "GENERAL_RELAY"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}
@@ -164,7 +170,7 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRegisterBulkRelaysWithRelayWithBlankAddress() {
-		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("", 10000, true, false, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("", 10000, null, true, false, "GENERAL_RELAY"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}
@@ -172,7 +178,7 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRegisterBulkRelaysWithRelayInvalidPortMin() {
-		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MIN - 1, true, false, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MIN - 1, null, true, false, "GENERAL_RELAY"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}
@@ -180,7 +186,7 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRegisterBulkRelaysWithRelayInvalidPortMax() {
-		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, true, false, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, null, true, false, "GENERAL_RELAY"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}
@@ -188,7 +194,7 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRegisterBulkRelaysWithRelayNullPort() {
-		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", null, true, false, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", null, null, true, false, "GENERAL_RELAY"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}
@@ -196,7 +202,7 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRegisterBulkRelaysWithInvalidType() {
-		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", 10000, true, false, "INVALID_RELAY_TYPE"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", 10000, null, true, false, "INVALID_RELAY_TYPE"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}
@@ -204,7 +210,7 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRegisterBulkRelaysWithExclusiveGatekeeperRelay() {
-		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", 10000, true, true, "GATEKEEPER_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", 10000, null, true, true, "GATEKEEPER_RELAY"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}
@@ -212,7 +218,7 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRegisterBulkRelaysWithExclusiveGeneralRelay() {
-		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", 10000, true, true, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", 10000, null, true, true, "GENERAL_RELAY"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}
@@ -220,8 +226,8 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRegisterBulkRelaysWithUniqueConstraintViolationInDTOList() {		
-		final List<RelayRequestDTO> dtoList =List.of(new RelayRequestDTO("1.1.1.1", 10000, false, false, "GENERAL_RELAY"),
-												     new RelayRequestDTO("1.1.1.1", 10000, true, false, "GATEKEEPER_RELAY"));
+		final List<RelayRequestDTO> dtoList =List.of(new RelayRequestDTO("1.1.1.1", 10000, null, false, false, "GENERAL_RELAY"),
+												     new RelayRequestDTO("1.1.1.1", 10000, null, true, false, "GATEKEEPER_RELAY"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}
@@ -231,9 +237,51 @@ public class GatekeeperDBServiceRelayTest {
 	public void testRegisterBulkRelaysWithUniqueConstraintViolationInRelayTable() {
 		when(relayRepository.existsByAddressAndPort(any(), anyInt())).thenReturn(true);
 		
-		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", 10000, true, false, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", 10000, null, true, false, "GENERAL_RELAY"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testRegisterBulkRelaysWithAuthenticationInfoUniqueConstraintViolationInRelayTable() {
+		when(relayRepository.existsByAddressAndPort(anyString(), anyInt())).thenReturn(false);
+		when(relayRepository.existsByAuthenticationInfo(anyString())).thenReturn(true);
+		
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", 10000, "test", true, false, "GENERAL_RELAY"));
+		
+		try {
+			gatekeeperDBService.registerBulkRelays(dtoList);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Relay with the following authentication info already exists: test", ex.getMessage());
+			
+			verify(relayRepository, times(1)).existsByAddressAndPort("1.1.1.1", 10000);
+			verify(relayRepository, times(1)).existsByAuthenticationInfo("test");
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testRegisterBulkRelaysWithAuthenticationInfoUniqueConstraintViolationInDTOList() {
+		when(relayRepository.existsByAddressAndPort(anyString(), anyInt())).thenReturn(false);
+		when(relayRepository.existsByAuthenticationInfo(anyString())).thenReturn(false);
+		
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", 10000, "test", true, false, "GENERAL_RELAY"),
+													  new RelayRequestDTO("1.1.1.1", 10001, "test", true, false, "GENERAL_RELAY"));
+		
+		try {
+			gatekeeperDBService.registerBulkRelays(dtoList);
+		} catch (final Exception ex) {
+			Assert.assertEquals("List of RelayRequestDTO contains the following authentication info multiple times: test", ex.getMessage());
+			
+			verify(relayRepository, times(1)).existsByAddressAndPort("1.1.1.1", 10000);
+			verify(relayRepository, times(1)).existsByAddressAndPort("1.1.1.1", 10001);
+			verify(relayRepository, times(2)).existsByAuthenticationInfo("test");
+			
+			throw ex;
+		}
 	}
 	
 	//=================================================================================================
@@ -242,7 +290,7 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testUpdateRelayByIdWithInvalidId() {
-		gatekeeperDBService.updateRelayById(-1, "1.1.1.1", 10000, true, false, RelayType.GATEKEEPER_RELAY);
+		gatekeeperDBService.updateRelayById(-1, "1.1.1.1", 10000, null, true, false, RelayType.GATEKEEPER_RELAY);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -250,7 +298,7 @@ public class GatekeeperDBServiceRelayTest {
 	public void testUpdateRelayByIdWithNotExistingRelay() {
 		when(relayRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 		
-		gatekeeperDBService.updateRelayById(1, "1.1.1.1", 10000, true, false, RelayType.GATEKEEPER_RELAY);
+		gatekeeperDBService.updateRelayById(1, "1.1.1.1", 10000, null, true, false, RelayType.GATEKEEPER_RELAY);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -261,40 +309,40 @@ public class GatekeeperDBServiceRelayTest {
 		
 		when(relayRepository.findById(anyLong())).thenReturn(Optional.of(relay));
 		
-		gatekeeperDBService.updateRelayById(1, null, 10000, true, false, RelayType.GATEKEEPER_RELAY);
+		gatekeeperDBService.updateRelayById(1, null, 10000, null, true, false, RelayType.GATEKEEPER_RELAY);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testUpdateRelayByIdWithBlankAddress() {
-		final Relay relay = new Relay("0.0.0.0", 5000, true, false, RelayType.GATEKEEPER_RELAY);
+		final Relay relay = new Relay("0.0.0.0", 5000, null, true, false, RelayType.GATEKEEPER_RELAY);
 		relay.setId(1);
 		
 		when(relayRepository.findById(anyLong())).thenReturn(Optional.of(relay));
 		
-		gatekeeperDBService.updateRelayById(1, "", 10000, true, false, RelayType.GATEKEEPER_RELAY);
+		gatekeeperDBService.updateRelayById(1, "", 10000, null, true, false, RelayType.GATEKEEPER_RELAY);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testUpdateRelayByIdWithInvalidPortMin() {
-		final Relay relay = new Relay("0.0.0.0", 5000, true, false, RelayType.GATEKEEPER_RELAY);
+		final Relay relay = new Relay("0.0.0.0", 5000, null, true, false, RelayType.GATEKEEPER_RELAY);
 		relay.setId(1);
 		
 		when(relayRepository.findById(anyLong())).thenReturn(Optional.of(relay));
 		
-		gatekeeperDBService.updateRelayById(1, "1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MIN - 1, true, false, RelayType.GATEKEEPER_RELAY);
+		gatekeeperDBService.updateRelayById(1, "1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MIN - 1, null, true, false, RelayType.GATEKEEPER_RELAY);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testUpdateRelayByIdWithInvalidPortMax() {
-		final Relay relay = new Relay("0.0.0.0", 5000, true, false, RelayType.GATEKEEPER_RELAY);
+		final Relay relay = new Relay("0.0.0.0", 5000, null, true, false, RelayType.GATEKEEPER_RELAY);
 		relay.setId(1);
 		
 		when(relayRepository.findById(anyLong())).thenReturn(Optional.of(relay));
 		
-		gatekeeperDBService.updateRelayById(1, "1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, true, false, RelayType.GATEKEEPER_RELAY);
+		gatekeeperDBService.updateRelayById(1, "1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, null, true, false, RelayType.GATEKEEPER_RELAY);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -305,7 +353,7 @@ public class GatekeeperDBServiceRelayTest {
 		
 		when(relayRepository.findById(anyLong())).thenReturn(Optional.of(relay));
 		
-		gatekeeperDBService.updateRelayById(1, "1.1.1.1", 10000, true, true, RelayType.GATEKEEPER_RELAY);
+		gatekeeperDBService.updateRelayById(1, "1.1.1.1", 10000, null, true, true, RelayType.GATEKEEPER_RELAY);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -316,19 +364,19 @@ public class GatekeeperDBServiceRelayTest {
 		
 		when(relayRepository.findById(anyLong())).thenReturn(Optional.of(relay));
 		
-		gatekeeperDBService.updateRelayById(1, "1.1.1.1", 10000, true, true, RelayType.GENERAL_RELAY);
+		gatekeeperDBService.updateRelayById(1, "1.1.1.1", 10000, null, true, true, RelayType.GENERAL_RELAY);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testUpdateRelayByIdWithUniqueConstraintViolationInRelayTable() {
-		final Relay relay = new Relay("0.0.0.0", 5000, true, false, RelayType.GATEKEEPER_RELAY);
+		final Relay relay = new Relay("0.0.0.0", 5000, null, true, false, RelayType.GATEKEEPER_RELAY);
 		relay.setId(1);
 		
 		when(relayRepository.findById(anyLong())).thenReturn(Optional.of(relay));
 		when(relayRepository.existsByAddressAndPort(any(), anyInt())).thenReturn(true);
 		
-		gatekeeperDBService.updateRelayById(1, "1.1.1.1", 10000, true, false, RelayType.GATEKEEPER_RELAY);
+		gatekeeperDBService.updateRelayById(1, "1.1.1.1", 10000, null, true, false, RelayType.GATEKEEPER_RELAY);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -339,10 +387,11 @@ public class GatekeeperDBServiceRelayTest {
 		
 		when(relayRepository.findById(anyLong())).thenReturn(Optional.of(relay));
 		
-		gatekeeperDBService.updateRelayById(1, "1.1.1.1", 10000, true, false, RelayType.GATEWAY_RELAY);
+		gatekeeperDBService.updateRelayById(1, "1.1.1.1", 10000, null, true, false, RelayType.GATEWAY_RELAY);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testUpdateRelayByIdWithNullRelayType() {
 		final Relay relay = new Relay("0.0.0.0", 5000, true, false, RelayType.GATEKEEPER_RELAY);
 		relay.setId(1);
@@ -350,8 +399,73 @@ public class GatekeeperDBServiceRelayTest {
 		when(relayRepository.findById(anyLong())).thenReturn(Optional.of(relay));
 		when(relayRepository.saveAndFlush(any())).thenReturn(null);
 		
-		final Relay updateRelay = gatekeeperDBService.updateRelayById(1, "1.1.1.1", 10000, true, false, null);
+		final Relay updateRelay = gatekeeperDBService.updateRelayById(1, "1.1.1.1", 10000, null, true, false, null);
 		assertNull(updateRelay);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testUpdateRelayByIdAuthenticationInfoUniqueConstraintViolation() {
+		final Relay relay = new Relay("0.0.0.0", 5000, true, false, RelayType.GATEKEEPER_RELAY);
+		relay.setId(1);
+		
+		when(relayRepository.findById(1L)).thenReturn(Optional.of(relay));
+		when(relayRepository.existsByAuthenticationInfo("test")).thenReturn(true);
+		
+		try {
+			gatekeeperDBService.updateRelayById(1, "0.0.0.0", 5000, "test", true, false, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Relay with the following authentication info already exists: test", ex.getMessage());
+			
+			verify(relayRepository, times(1)).findById(1L);
+			verify(relayRepository, times(1)).existsByAuthenticationInfo("test");
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testUpdateRelayByIdAuthenticationInfoChangedToNull() {
+		final Relay relay = new Relay("0.0.0.0", 5000, true, false, RelayType.GATEKEEPER_RELAY);
+		relay.setId(1);
+		
+		when(relayRepository.findById(1L)).thenReturn(Optional.of(relay));
+		when(relayRepository.existsByAddressAndPort("0.0.0.0", 5001)).thenReturn(true);
+		
+		try {
+			gatekeeperDBService.updateRelayById(1, "0.0.0.0", 5001, null, true, false, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Relay with the following address and port already exists: 0.0.0.0, 5001", ex.getMessage());
+			
+			verify(relayRepository, times(1)).findById(1L);
+			verify(relayRepository, never()).existsByAuthenticationInfo(anyString());
+			verify(relayRepository, times(1)).existsByAddressAndPort("0.0.0.0", 5001);
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testUpdateRelayByIdAuthenticationInfoNotChanged() {
+		final Relay relay = new Relay("0.0.0.0", 5000, "test", true, false, RelayType.GATEKEEPER_RELAY);
+		relay.setId(1);
+		
+		when(relayRepository.findById(1L)).thenReturn(Optional.of(relay));
+		when(relayRepository.existsByAddressAndPort("0.0.0.0", 5001)).thenReturn(true);
+		
+		try {
+			gatekeeperDBService.updateRelayById(1, "0.0.0.0", 5001, "test", true, false, null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Relay with the following address and port already exists: 0.0.0.0, 5001", ex.getMessage());
+			
+			verify(relayRepository, times(1)).findById(1L);
+			verify(relayRepository, never()).existsByAuthenticationInfo(anyString());
+			verify(relayRepository, times(1)).existsByAddressAndPort("0.0.0.0", 5001);
+			
+			throw ex;
+		}
 	}
 	
 	//=================================================================================================
@@ -379,5 +493,78 @@ public class GatekeeperDBServiceRelayTest {
 		when(relayRepository.getByIdWithCloudGatekeepers(anyLong())).thenReturn(Optional.of(relay));
 		
 		gatekeeperDBService.removeRelayById(1);
+	}
+	
+	//=================================================================================================
+	// Tests of getRelayByAuthenticationInfo
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetRelayByAuthenticationInfoNullInput() {
+		try {
+			gatekeeperDBService.getRelayByAuthenticationInfo(null);
+		} catch (final Exception ex) {
+			Assert.assertEquals("Authentication info is empty", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetRelayByAuthenticationInfoEmptyInput() {
+		try {
+			gatekeeperDBService.getRelayByAuthenticationInfo("");
+		} catch (final Exception ex) {
+			Assert.assertEquals("Authentication info is empty", ex.getMessage());
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetRelayByAuthenticationInfoRelayNotExists() {
+		when(relayRepository.findByAuthenticationInfo(anyString())).thenReturn(Optional.empty());
+		
+		try {
+			gatekeeperDBService.getRelayByAuthenticationInfo("test");
+		} catch (final Exception ex) {
+			Assert.assertEquals("Relay with the following authentication info not exists: test", ex.getMessage());
+			
+			verify(relayRepository, times(1)).findByAuthenticationInfo("test");
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetRelayByAuthenticationInfoDBProblem() {
+		when(relayRepository.findByAuthenticationInfo(anyString())).thenThrow(RuntimeException.class);
+		
+		try {
+			gatekeeperDBService.getRelayByAuthenticationInfo("test");
+		} catch (final Exception ex) {
+			Assert.assertEquals("Database operation exception", ex.getMessage());
+			
+			verify(relayRepository, times(1)).findByAuthenticationInfo("test");
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetRelayByAuthenticationInfoOk() {
+		final Relay relay = new Relay("localhost", 1234, "test", false, false, RelayType.GENERAL_RELAY);
+		relay.setId(12);
+		when(relayRepository.findByAuthenticationInfo(anyString())).thenReturn(Optional.of(relay));
+		
+		final Relay result = gatekeeperDBService.getRelayByAuthenticationInfo("test");
+		
+		Assert.assertEquals(result, relay);
+			
+		verify(relayRepository, times(1)).findByAuthenticationInfo("test");
 	}
 }

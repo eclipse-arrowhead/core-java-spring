@@ -9,6 +9,7 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Primary;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.database.service.CommonDBService;
 //import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.core.configuration.database.service.ConfigurationDBService;
 
@@ -31,4 +32,10 @@ public class ConfigurationTestContext {
         return Mockito.mock(ConfigurationDBService.class);
     }
 
+	//-------------------------------------------------------------------------------------------------
+	@Bean
+	@Primary // This bean is primary only in test context
+	public CommonDBService mockCommonDBService() {
+		return Mockito.mock(CommonDBService.class);
+	}
 }

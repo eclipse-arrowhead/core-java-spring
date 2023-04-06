@@ -210,7 +210,25 @@ public class ConsumerSideServerSocketThreadTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testInitSenderNull() {
-		testingObject.init(null);
+		testingObject.init(null, getTestMessageProducer(), getTestMessageConsumer(), getTestMessageConsumer());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitSenderControlNull() {
+		testingObject.init(getTestMessageProducer(), null, getTestMessageConsumer(), getTestMessageConsumer());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitConsumerNull() {
+		testingObject.init(getTestMessageProducer(), getTestMessageProducer(), null, getTestMessageConsumer());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitConsumerControlNull() {
+		testingObject.init(getTestMessageProducer(), getTestMessageProducer(), getTestMessageConsumer(), null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -219,7 +237,7 @@ public class ConsumerSideServerSocketThreadTest {
 		Assert.assertFalse(testingObject.isInitialized());
 		
 		ReflectionTestUtils.setField(testingObject, "sslProperties", null);
-		testingObject.init(getTestMessageProducer());
+		testingObject.init(getTestMessageProducer(), getTestMessageProducer(), getTestMessageConsumer(), getTestMessageConsumer());
 		
 		Assert.assertFalse(testingObject.isInitialized());
 	}
@@ -229,8 +247,8 @@ public class ConsumerSideServerSocketThreadTest {
 	public void testInitOk() {
 		Assert.assertTrue(!testingObject.isInitialized());
 		
-		ReflectionTestUtils.setField(testingObject, "port", 22004);
-		testingObject.init(getTestMessageProducer());
+		ReflectionTestUtils.setField(testingObject, "port", 22010);
+		testingObject.init(getTestMessageProducer(), getTestMessageProducer(), getTestMessageConsumer(), getTestMessageConsumer());
 		
 		Assert.assertTrue(testingObject.isInitialized());
 	}
@@ -298,22 +316,30 @@ public class ConsumerSideServerSocketThreadTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testRunWhenInternalExceptionThrown() throws IOException {
+	public void testRunWhenInternalExceptionThrown() throws IOException, JMSException {
 		when(appContext.getBean(SSLProperties.class)).thenReturn(getTestSSLPropertiesForThread());
 
 		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq5Jq4tOeFoLqxOqtYcujbCNZina3iuV9+/o8D1R9D0HvgnmlgPlqWwjDSxV7m7SGJpuc/rRXJ85OzqV3rwRHO8A8YWXiabj8EdgEIyqg4SOgTN7oZ7MQUisTpwtWn9K14se4dHt/YE9mUW4en19p/yPUDwdw3ECMJHamy/O+Mh6rbw6AFhYvz6F5rXYB8svkenOuG8TSBFlRkcjdfqQqtl4xlHgmlDNWpHsQ3eFAO72mKQjm2ZhWI1H9CLrJf1NQs2GnKXgHBOM5ET61fEHWN8axGGoSKfvTed5vhhX7l5uwxM+AKQipLNNKjEaQYnyX3TL9zL8I7y+QkhzDa7/5kQIDAQAB";
-		final ConsumerSideServerSocketThread thread = new ConsumerSideServerSocketThread(appContext, 22005, relayClient, getTestSession(), publicKey, "queueId", 60000, "consumer", "test-service");
+		final String queueId = "queueId";
+		final ConsumerSideServerSocketThread thread = new ConsumerSideServerSocketThread(appContext, 22005, relayClient, getTestSession(), publicKey, queueId, 60000, "consumer", "test-service");
 
-		thread.init(getTestMessageProducer());
-		
+		final ConcurrentHashMap<String,ConsumerSideServerSocketThread> activeConsumerSideSocketThreads = new ConcurrentHashMap<>();
+		activeConsumerSideSocketThreads.put(queueId, thread);
+		ReflectionTestUtils.setField(thread, "activeConsumerSideSocketThreads", activeConsumerSideSocketThreads);
+		ReflectionTestUtils.setField(thread, "sender", getTestMessageProducer());
+		ReflectionTestUtils.setField(thread, "senderControl", getTestMessageProducer());
 		final SSLServerSocket sslServerSocket = Mockito.mock(SSLServerSocket.class);
-		when(sslServerSocket.accept()).thenThrow(IOException.class);
 		ReflectionTestUtils.setField(thread, "sslServerSocket", sslServerSocket);
+		ReflectionTestUtils.setField(thread, "initialized", true);
+		when(sslServerSocket.accept()).thenThrow(IOException.class);
+		when(relayClient.destroyQueues(any(Session.class), any(MessageProducer.class), any(MessageProducer.class))).thenReturn(true);
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(true);
 		
 		thread.run();
 
 		final boolean interrupted = (boolean) ReflectionTestUtils.getField(thread, "interrupted");
 		Assert.assertTrue(interrupted);
+		Assert.assertFalse(activeConsumerSideSocketThreads.contains(queueId));
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -356,7 +382,14 @@ public class ConsumerSideServerSocketThreadTest {
 			}
 		};
 
-		testingObject.init(getTestMessageProducer());
+		final ConcurrentHashMap<String,ConsumerSideServerSocketThread> activeConsumerSideSocketThreads = new ConcurrentHashMap<>();
+		final String queueId = (String) ReflectionTestUtils.getField(testingObject, "queueId");
+		activeConsumerSideSocketThreads.put(queueId, testingObject);
+		ReflectionTestUtils.setField(testingObject, "activeConsumerSideSocketThreads", activeConsumerSideSocketThreads);
+		when(relayClient.destroyQueues(any(Session.class), any(MessageProducer.class), any(MessageProducer.class))).thenReturn(true);
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(true);
+		
+		testingObject.init(getTestMessageProducer(), getTestMessageProducer(), getTestMessageConsumer(), getTestMessageConsumer());
 		consumerSide.start();
 		testingObject.run();
 	
@@ -364,6 +397,7 @@ public class ConsumerSideServerSocketThreadTest {
 		
 		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(interrupted);
+		Assert.assertFalse(activeConsumerSideSocketThreads.contains(queueId));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -404,7 +438,14 @@ public class ConsumerSideServerSocketThreadTest {
 			}
 		};
 
-		testingObject.init(getTestMessageProducer());
+		final ConcurrentHashMap<String,ConsumerSideServerSocketThread> activeConsumerSideSocketThreads = new ConcurrentHashMap<>();
+		final String queueId = (String) ReflectionTestUtils.getField(testingObject, "queueId");
+		activeConsumerSideSocketThreads.put(queueId, testingObject);
+		ReflectionTestUtils.setField(testingObject, "activeConsumerSideSocketThreads", activeConsumerSideSocketThreads);
+		when(relayClient.destroyQueues(any(Session.class), any(MessageProducer.class), any(MessageProducer.class))).thenReturn(true);
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(true);
+		
+		testingObject.init(getTestMessageProducer(), getTestMessageProducer(), getTestMessageConsumer(), getTestMessageConsumer());
 		consumerSide.start();
 		testingObject.run();
 	
@@ -412,6 +453,7 @@ public class ConsumerSideServerSocketThreadTest {
 		
 		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(interrupted);
+		Assert.assertFalse(activeConsumerSideSocketThreads.contains(queueId));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -454,7 +496,14 @@ public class ConsumerSideServerSocketThreadTest {
 			}
 		};
 
-		testingObject.init(getTestMessageProducer());
+		final ConcurrentHashMap<String,ConsumerSideServerSocketThread> activeConsumerSideSocketThreads = new ConcurrentHashMap<>();
+		final String queueId = (String) ReflectionTestUtils.getField(testingObject, "queueId");
+		activeConsumerSideSocketThreads.put(queueId, testingObject);
+		ReflectionTestUtils.setField(testingObject, "activeConsumerSideSocketThreads", activeConsumerSideSocketThreads);
+		when(relayClient.destroyQueues(any(Session.class), any(MessageProducer.class), any(MessageProducer.class))).thenReturn(true);
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(true);
+		
+		testingObject.init(getTestMessageProducer(), getTestMessageProducer(), getTestMessageConsumer(), getTestMessageConsumer());
 		consumerSide.start();
 		testingObject.run();
 	
@@ -462,6 +511,7 @@ public class ConsumerSideServerSocketThreadTest {
 		
 		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(interrupted);
+		Assert.assertFalse(activeConsumerSideSocketThreads.contains(queueId));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -509,7 +559,14 @@ public class ConsumerSideServerSocketThreadTest {
 			}
 		};
 
-		testingObject.init(getTestMessageProducer());
+		final ConcurrentHashMap<String,ConsumerSideServerSocketThread> activeConsumerSideSocketThreads = new ConcurrentHashMap<>();
+		final String queueId = (String) ReflectionTestUtils.getField(testingObject, "queueId");
+		activeConsumerSideSocketThreads.put(queueId, testingObject);
+		ReflectionTestUtils.setField(testingObject, "activeConsumerSideSocketThreads", activeConsumerSideSocketThreads);
+		when(relayClient.destroyQueues(any(Session.class), any(MessageProducer.class), any(MessageProducer.class))).thenReturn(true);
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(true);
+		
+		testingObject.init(getTestMessageProducer(), getTestMessageProducer(), getTestMessageConsumer(), getTestMessageConsumer());
 		consumerSide.start();
 		testingObject.run();
 	
@@ -517,6 +574,7 @@ public class ConsumerSideServerSocketThreadTest {
 		
 		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(interrupted);
+		Assert.assertFalse(activeConsumerSideSocketThreads.contains(queueId));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -564,7 +622,15 @@ public class ConsumerSideServerSocketThreadTest {
 			}
 		};
 
-		testingObject.init(getTestMessageProducer());
+
+		final ConcurrentHashMap<String,ConsumerSideServerSocketThread> activeConsumerSideSocketThreads = new ConcurrentHashMap<>();
+		final String queueId = (String) ReflectionTestUtils.getField(testingObject, "queueId");
+		activeConsumerSideSocketThreads.put(queueId, testingObject);
+		ReflectionTestUtils.setField(testingObject, "activeConsumerSideSocketThreads", activeConsumerSideSocketThreads);
+		when(relayClient.destroyQueues(any(Session.class), any(MessageProducer.class), any(MessageProducer.class))).thenReturn(true);
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(true);
+		
+		testingObject.init(getTestMessageProducer(), getTestMessageProducer(), getTestMessageConsumer(), getTestMessageConsumer());
 		consumerSide.start();
 		testingObject.run();
 	
@@ -572,6 +638,7 @@ public class ConsumerSideServerSocketThreadTest {
 		
 		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(interrupted);
+		Assert.assertFalse(activeConsumerSideSocketThreads.contains(queueId));
 	}
 	
 	//=================================================================================================
@@ -626,20 +693,20 @@ public class ConsumerSideServerSocketThreadTest {
 		return new MessageProducer() {
 			
 			//-------------------------------------------------------------------------------------------------
-			public void setTimeToLive(long timeToLive) throws JMSException {}
-			public void setPriority(int defaultPriority) throws JMSException {}
-			public void setDisableMessageTimestamp(boolean value) throws JMSException {}
-			public void setDisableMessageID(boolean value) throws JMSException {}
-			public void setDeliveryMode(int deliveryMode) throws JMSException {	}
-			public void setDeliveryDelay(long deliveryDelay) throws JMSException {}
-			public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
-			public void send(Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
-			public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
-			public void send(Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
-			public void send(Destination destination, Message message, CompletionListener completionListener) throws JMSException {}
-			public void send(Message message, CompletionListener completionListener) throws JMSException {}
-			public void send(Destination destination, Message message) throws JMSException {}
-			public void send(Message message) throws JMSException {}
+			public void setTimeToLive(final long timeToLive) throws JMSException {}
+			public void setPriority(final int defaultPriority) throws JMSException {}
+			public void setDisableMessageTimestamp(final boolean value) throws JMSException {}
+			public void setDisableMessageID(final boolean value) throws JMSException {}
+			public void setDeliveryMode(final int deliveryMode) throws JMSException {	}
+			public void setDeliveryDelay(final long deliveryDelay) throws JMSException {}
+			public void send(final Destination destination, final Message message, final int deliveryMode, final int priority, final long timeToLive, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Message message, final int deliveryMode, final int priority, final long timeToLive, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Destination destination, final Message message, final int deliveryMode, final int priority, final long timeToLive) throws JMSException {}
+			public void send(final Message message, final int deliveryMode, final int priority, final long timeToLive) throws JMSException {}
+			public void send(final Destination destination, final Message message, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Message message, final CompletionListener completionListener) throws JMSException {}
+			public void send(final Destination destination, final Message message) throws JMSException {}
+			public void send(final Message message) throws JMSException {}
 			public long getTimeToLive() throws JMSException { return 0; }
 			public int getPriority() throws JMSException { return 0; }
 			public boolean getDisableMessageTimestamp() throws JMSException { return false;	}
@@ -647,6 +714,19 @@ public class ConsumerSideServerSocketThreadTest {
 			public Destination getDestination() throws JMSException { return null; }
 			public int getDeliveryMode() throws JMSException { return 0; }
 			public long getDeliveryDelay() throws JMSException { return 0; }
+			public void close() throws JMSException {}
+		};
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MessageConsumer getTestMessageConsumer() {
+		return new MessageConsumer() {
+			public void setMessageListener(final MessageListener listener) throws JMSException {}
+			public Message receiveNoWait() throws JMSException { return null; }
+			public Message receive(final long timeout) throws JMSException { return null; }
+			public Message receive() throws JMSException { return null; }
+			public String getMessageSelector() throws JMSException { return null; }
+			public MessageListener getMessageListener() throws JMSException { return null; }
 			public void close() throws JMSException {}
 		};
 	}

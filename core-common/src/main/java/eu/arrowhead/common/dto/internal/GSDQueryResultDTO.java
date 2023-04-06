@@ -17,6 +17,9 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class GSDQueryResultDTO implements Serializable {
 
 	//=================================================================================================
@@ -45,5 +48,15 @@ public class GSDQueryResultDTO implements Serializable {
 	
 	//-------------------------------------------------------------------------------------------------	
 	public void setResults(final List<GSDPollResponseDTO> results) { this.results = results; }
-	public void setUnsuccessfulRequests(final int unsuccessfulRequests) { this.unsuccessfulRequests = unsuccessfulRequests; }	
+	public void setUnsuccessfulRequests(final int unsuccessfulRequests) { this.unsuccessfulRequests = unsuccessfulRequests; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
+	}
 }

@@ -18,6 +18,9 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class CloudRequestDTO implements Serializable {
 
 	//=================================================================================================
@@ -78,5 +81,15 @@ public class CloudRequestDTO implements Serializable {
 		final CloudRequestDTO other = (CloudRequestDTO) obj;
 		
 		return Objects.equals(name, other.name) && Objects.equals(operator, other.operator);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch (final JsonProcessingException ex) {
+			return "toString failure";
+		}
 	}
 }
