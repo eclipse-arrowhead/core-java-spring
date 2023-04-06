@@ -25,18 +25,18 @@ The PDE consumes the following services:
   
 [Authorization]:README.md#authorization
 [AuthorizationControl]:README.md#authorization
-[Inventory]:documentation/plant-description-engine/inventory-sd.md
-[Inventory JSON]:documentation/plant-description-engine/inventory-idd-http-json.md
-[Monitorable]:documentation/plant-description-engine/monitorable-sd.md
-[Monitorable JSON]:documentation/plant-description-engine/monitorable-idd-http-json.md
+[Inventory]:/documentation/plant-description-engine/inventory-sd.md
+[Inventory JSON]:/documentation/plant-description-engine/inventory-idd-http-json.md
+[Monitorable]:/documentation/plant-description-engine/monitorable-sd.md
+[Monitorable JSON]:/documentation/plant-description-engine/monitorable-idd-http-json.md
 [Orchestrator]:README.md#orchestrator
 [Orchestration]:README.md#orchestrator
 [Orchestration Store Management]:README.md#orchestrator
-[Plant Description Monitor]:documentation/plant-description-engine/plant-description-monitor-sd.md
-[Plant Description Monitor JSON]:documentation/plant-description-engine/plant-description-monitor-idd-http-json.md
-[Plant Description Management]:documentation/plant-description-engine/plant-description-management-sd.md
-[Plant Description Management JSON]:documentation/plant-description-engine/plant-description-management-idd-http-json.md
-[Plant Description Engine HTTP(S)/JSON - System Description (SysD)]:documentation/plant-description-engine/plant-description-engine-sysd.md
-[Plant Description Engine - System of systems Description (SosD)]:documentation/plant-description-engine/plant-description-engine-sosd.md
+[Plant Description Monitor]:/documentation/plant-description-engine/plant-description-monitor-sd.md
+[Plant Description Monitor JSON]:/documentation/plant-description-engine/plant-description-monitor-idd-http-json.md
+[Plant Description Management]:/documentation/plant-description-engine/plant-description-management-sd.md
+[Plant Description Management JSON]:/documentation/plant-description-engine/plant-description-management-idd-http-json.md
+[Plant Description Engine HTTP(S)/JSON - System Description (SysD)]:/documentation/plant-description-engine/plant-description-engine-sysd.md
+[Plant Description Engine - System of systems Description (SosD)]:/documentation/plant-description-engine/plant-description-engine-sosd.md
 [Service Discovery]:README.md#serviceregistry_usecases
 [Service Registry]:README.md#serviceregistry
