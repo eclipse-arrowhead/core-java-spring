@@ -14,7 +14,7 @@
 
     <properties>
         <mina.version>2.1.5</mina.version>
-        <sshd.version>2.7.0</sshd.version>
+        <sshd.version>2.4.0</sshd.version>
         <eddsa.version>0.3.0</eddsa.version>
     </properties>
 
