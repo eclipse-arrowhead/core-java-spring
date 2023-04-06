@@ -11,7 +11,7 @@ This supporting core system has the purpose of establishing a secured datapath -
 
 These Services are part of the Inter-Cloud Negotiation (ICN) process initiated by the requester cloud's Gatekeeper. During the ICN process, when a Gateway is required by one of the cloud, then the Gatekeepers in both cloud establish a new datapath to their application systems and ensure the data exchange via a Relay system.
 
-![Alt text](documentation/images/gateway_overview.png)
+![Alt text](/documentation/images/gateway_overview.png)
 
 > Please follow this guide to setup the Arrowhead Gatekeeper and Gateway core systems: [Gatekeeper & Gateway Setup Guide with ActiveMQ Relay](documentation/gatekeeper/GatekeeperSetup.md)
 
