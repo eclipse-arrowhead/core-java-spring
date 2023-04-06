@@ -60,11 +60,11 @@
 		<mvn.jar.version>3.1.2</mvn.jar.version>
 		<mvn.resources.version>3.1.0</mvn.resources.version>
 		<mariadb.jdbc.driver>2.3.0</mariadb.jdbc.driver>
-		<mysql.jdbc.driver>8.0.16</mysql.jdbc.driver>
+		<mysql.jdbc.driver>8.0.28</mysql.jdbc.driver>
 		<paho.version>1.2.2</paho.version>
 		<swagger.version>2.9.2</swagger.version>
 		<disruptor.version>3.3.6</disruptor.version>
-		<http.client.version>4.5.8</http.client.version>
+		<http.client.version>4.5.13</http.client.version>
   		<jose4j.version>0.6.5</jose4j.version>
   		<apache.commons.lang3.version>3.9</apache.commons.lang3.version>
   		<jms.api.version>2.0.1</jms.api.version>

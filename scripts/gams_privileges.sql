@@ -3,7 +3,6 @@ USE `arrowhead`;
 REVOKE ALL, GRANT OPTION FROM 'gams'@'localhost';
 
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'gams'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'gams_knowledge'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`gams_action` TO 'gams'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`gams_action_plan` TO 'gams'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`gams_processable_action` TO 'gams'@'localhost';
@@ -37,7 +36,6 @@ REVOKE ALL, GRANT OPTION FROM 'gams'@'%';
 
 
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'gams'@'%';
-GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'gams_knowledge'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`gams_action` TO 'gams'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`gams_action_plan` TO 'gams'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`gams_processable_action` TO 'gams'@'%';
