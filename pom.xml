@@ -65,7 +65,7 @@
 		<swagger.version>2.9.2</swagger.version>
 		<disruptor.version>3.3.6</disruptor.version>
 		<http.client.version>4.5.8</http.client.version>
-  		<jose4j.version>0.6.5</jose4j.version>
+  		<jose4j.version>0.9.3</jose4j.version>
   		<apache.commons.lang3.version>3.9</apache.commons.lang3.version>
   		<jms.api.version>2.0.1</jms.api.version>
   		<activemq.client.version>5.15.9</activemq.client.version>
