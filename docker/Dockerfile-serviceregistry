@@ -1,0 +1,21 @@
+FROM openjdk:11.0.12-jdk
+
+RUN apt-get update && \
+    apt-get install -y maven
+	
+WORKDIR /opt/arrowhead-temp
+
+COPY ./ ./
+
+RUN mvn -pl serviceregistry -am -DskipTests clean install
+
+RUN cd serviceregistry/target && \
+    mkdir /opt/arrowhead-serviceregistry && \   
+	find ./ -name "*.jar" -print0 | xargs -0 cp -t "/opt/arrowhead-serviceregistry/"
+
+WORKDIR /opt/arrowhead-serviceregistry
+
+RUN rm -rf /opt/arrowhead-temp
+RUN rm -rf /home/root/.m2
+
+CMD find /opt/arrowhead-serviceregistry/ -name "*.jar" -exec java -jar {} \;

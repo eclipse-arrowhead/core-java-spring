@@ -1,0 +1,21 @@
+FROM openjdk:11.0.12-jdk
+
+RUN apt-get update && \
+    apt-get install -y maven
+	
+WORKDIR /opt/arrowhead-temp
+
+COPY ./ ./
+
+RUN mvn -pl orchestrator -am -DskipTests clean install
+
+RUN cd orchestrator/target && \
+    mkdir /opt/arrowhead-orchestrator && \   
+	find ./ -name "*.jar" -print0 | xargs -0 cp -t "/opt/arrowhead-orchestrator/"
+
+WORKDIR /opt/arrowhead-orchestrator
+
+RUN rm -rf /opt/arrowhead-temp
+RUN rm -rf /home/root/.m2
+
+CMD find /opt/arrowhead-orchestrator/ -name "*.jar" -exec java -jar {} \;
