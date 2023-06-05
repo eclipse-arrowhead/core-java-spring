@@ -1,0 +1,183 @@
+\documentclass[a4paper]{arrowhead}
+
+\usepackage[yyyymmdd]{datetime}
+\usepackage{etoolbox}
+\usepackage[utf8]{inputenc}
+\usepackage{multirow}
+
+\renewcommand{\dateseparator}{-}
+
+\setlength{\parskip}{1em}
+
+\newcommand{\fparam}[1]{\textit{\textcolor{ArrowheadBlue}{#1}}}
+
+%% Special references
+\newcommand{\fref}[1]{{\textcolor{ArrowheadBlue}{\hyperref[sec:functions:#1]{#1}}}}
+\newcommand{\mref}[1]{{\textcolor{ArrowheadPurple}{\hyperref[sec:model:#1]{#1}}}}
+\newcommand{\pdef}[1]{{\textcolor{ArrowheadGrey}{#1 \label{sec:model:primitives:#1} \label{sec:model:primitives:#1s}}}}
+\newcommand{\pref}[1]{{\textcolor{ArrowheadGrey}{\hyperref[sec:model:primitives:#1]{#1}}}}
+
+\newrobustcmd\fsubsection[5]{
+  \addtocounter{subsection}{1}
+  \addcontentsline{toc}{subsection}{\protect\numberline{\thesubsection}operation \textcolor{ArrowheadBlue}{#1}}
+  \renewcommand*{\do}[1]{\rref{##1},\ }
+  \subsection*{
+    \thesubsection\quad
+    #2 \textcolor{ArrowheadPurple}{#3} \\
+    \small
+    \hspace*{0.075\textwidth}\begin{minipage}{0.1\textwidth}
+      \vspace*{1mm}
+      Operation: \\
+      \notblank{#4}{Input: \\}{}
+      \notblank{#5}{Output: \\}{}
+    \end{minipage}
+    \begin{minipage}{0.825\textwidth}
+      \vspace*{1mm}
+      \textcolor{ArrowheadBlue}{#1} \\
+      \notblank{#4}{\mref{#4} \\}{}
+      \notblank{#5}{\mref{#5} \\}{}
+    \end{minipage}
+  }
+  \label{sec:functions:#1}
+}
+\newrobustcmd\msubsection[2]{
+  \addtocounter{subsection}{1}
+  \addcontentsline{toc}{subsection}{\protect\numberline{\thesubsection}#1 \textcolor{ArrowheadPurple}{#2}}
+  \subsection*{\thesubsection\quad#1 \textcolor{ArrowheadPurple}{#2}}
+  \label{sec:model:#2} \label{sec:model:#2s}
+}
+\newrobustcmd\msubsubsection[3]{
+  \addtocounter{subsubsection}{1}
+  \addcontentsline{toc}{subsubsection}{\protect\numberline{\thesubsubsection}#1 \textcolor{ArrowheadPurple}{#2}}
+  \subsubsection*{\thesubsubsection\quad#1 \textcolor{ArrowheadPurple}{#2}}
+  \label{sec:model:#2} \label{sec:model:#2s}
+}
+%%
+
+\begin{document}
+
+%% Arrowhead Document Properties
+\ArrowheadTitle{echo HTTP/TLS/TEXT} %e.g. ServiceDiscovery HTTP/TLS/JSON
+\ArrowheadServiceID{echo} % e.g. register
+\ArrowheadType{Interface Design Description}
+\ArrowheadTypeShort{IDD}
+\ArrowheadVersion{4.6.0}
+\ArrowheadDate{\today}
+\ArrowheadAuthor{Tamás Bordi} % e.g Szvetlin Tanyi}
+\ArrowheadStatus{RELEASE}
+\ArrowheadContact{tbordi@aitia.ai} % jerker.delsing@arrowhead.eu
+\ArrowheadFooter{\href{www.arrowhead.eu}{www.arrowhead.eu}}
+\ArrowheadSetup
+%%
+
+%% Front Page
+\begin{center}
+  \vspace*{1cm}
+  \huge{\arrowtitle}
+
+  \vspace*{0.2cm}
+  \LARGE{\arrowtype}
+  \vspace*{1cm}
+\end{center}
+
+%  \Large{Service ID: \textit{"\arrowid"}}
+  \vspace*{\fill}
+
+  % Front Page Image
+  %\includegraphics{figures/TODO}
+
+  \vspace*{1cm}
+  \vspace*{\fill}
+
+  % Front Page Abstract
+  \begin{abstract}
+    This document describes a HTTP protocol with TLS payload
+    security and TEXT payload encoding variant of the \textbf{echo} service.
+  \end{abstract}
+  \vspace*{1cm}
+
+\newpage
+
+%% Table of Contents
+\tableofcontents
+\newpage
+%%
+
+\section{Overview}
+\label{sec:overview}
+
+This document describes the \textbf{echo} service interface, which enables an ”I’m alive” kind monitoring of the system. It's implemented using protocol, encoding as stated in the following table:
+
+\begin{table}[ht!]
+  \centering
+  \begin{tabular}{|l|l|l|l|}
+    \rowcolor{gray!33} Profile type & Type & Version \\ \hline
+    Transfer protocol & HTTP & 1.1 \\ \hline
+    Data encryption & TLS & 1.3 \\ \hline
+    Encoding & TEXT & - \\ \hline
+    Compression & N/A & - \\ \hline
+  \end{tabular}
+  \caption{Communication and semantics details used for the \textbf{echo}
+    service interface}
+  \label{tab:comunication_semantics_profile}
+\end{table}
+
+This document provides the Interface Design Description IDD to the \textit{echo -- Service Description} document.
+For further details about how this service is meant to be used, please consult that document.
+
+The rest of this document describes how to realize the \textbf{echo} service HTTP/TLS/TEXT interface in details.
+
+\newpage
+
+\section{Interface Description}
+\label{sec:functions}
+
+The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are \texttt{401 Unauthorized} if improper client side certificate is provided and \texttt{500 Internal
+  Server Error} if the system is unavailable.
+
+\begin{lstlisting}[language=http,label={lst:echo},caption={An \fref{echo} invocation.}]
+GET /orchestrator/echo HTTP/1.1
+\end{lstlisting}
+
+\begin{lstlisting}[language=http,label={lst:echo_response},caption={An \fref{echo} response.}]
+Got it!
+\end{lstlisting}
+
+\newpage
+
+\section{Data Models}
+\label{sec:model}
+
+Here, all data objects that can be part of the service calls associated with this service are listed in alphabetic order.
+
+\msubsection{text}{EchoResponse}
+
+Simple text message with the value of "Got it!".
+
+\newpage
+
+\bibliographystyle{IEEEtran}
+\bibliography{bibliography}
+
+\newpage
+
+\section{Revision History}
+\subsection{Amendments}
+
+\noindent\begin{tabularx}{\textwidth}{| p{1cm} | p{3cm} | p{2cm} | X | p{4cm} |} \hline
+\rowcolor{gray!33} No. & Date & Version & Subject of Amendments & Author \\ \hline
+
+1 & YYYY-MM-DD & \arrowversion & & Xxx Yyy \\ \hline
+
+\end{tabularx}
+
+\subsection{Quality Assurance}
+
+\noindent\begin{tabularx}{\textwidth}{| p{1cm} | p{3cm} | p{2cm} | X |} \hline
+\rowcolor{gray!33} No. & Date & Version & Approved by \\ \hline
+
+1 & YYYY-MM-DD & \arrowversion & Xxx Yyy \\ \hline
+
+\end{tabularx}
+
+\end{document}

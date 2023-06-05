@@ -18,7 +18,7 @@
 	<description>An Arrowhead configuration manager system based on Eclipse HawkBit</description>
 
 	<properties>
-		<base.version>4.6.0</base.version>
+		<base.version>4.6.1</base.version>
 		<revision>${base.version}</revision>
 		<spring.boot.version>2.4.0</spring.boot.version>
 		<log4j2.version>2.17.1</log4j2.version>
@@ -32,7 +32,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.16</version>
+			<version>1.18.24</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -44,6 +44,10 @@
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.yaml</groupId>
+					<artifactId>snakeyaml</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -98,6 +102,7 @@
 			<artifactId>jose4j</artifactId>
 			<version>0.9.3</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>
@@ -152,6 +157,12 @@
 			<artifactId>mockserver-netty</artifactId>
 			<version>5.11.1</version>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.yaml</groupId>
+					<artifactId>snakeyaml</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.mock-server</groupId>
