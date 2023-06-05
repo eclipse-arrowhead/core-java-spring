@@ -1,0 +1,16 @@
+FROM openjdk:11.0.12-jdk
+
+ENV AH_VERSION=4.6.1
+
+RUN apt-get update && apt-get install -y maven
+
+WORKDIR /opt/arrowhead
+COPY ./docker/run.sh ./
+RUN chmod +x run.sh
+
+WORKDIR /opt/arrowhead-temp
+COPY ./ ./
+RUN mvn package -DskipTests
+RUN rm -rf /root/.m2
+
+CMD ["/opt/arrowhead/run.sh"]
