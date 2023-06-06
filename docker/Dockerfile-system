@@ -4,13 +4,13 @@ ENV AH_VERSION=4.6.1
 
 RUN apt-get update && apt-get install -y maven
 
-WORKDIR /opt/arrowhead
-COPY ./docker/run.sh ./
-RUN chmod +x run.sh
-
 WORKDIR /opt/arrowhead-temp
 COPY ./ ./
 RUN mvn package -DskipTests
 RUN rm -rf /root/.m2
+
+WORKDIR /opt/arrowhead
+COPY ./docker/run.sh ./
+RUN chmod +x run.sh
 
 CMD ["/opt/arrowhead/run.sh"]

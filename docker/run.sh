@@ -2,7 +2,7 @@
 
 cd /opt/arrowhead
 if [ -z "$SYSTEM_NAME" ]; then
-    echo "The environment variable is not set."
+    echo "Arrowhead Core System name is not set."
 else
     echo "Arrowhead Core System: $SYSTEM_NAME"
 	if [ -f "/opt/arrowhead/application.jar" ]; then
