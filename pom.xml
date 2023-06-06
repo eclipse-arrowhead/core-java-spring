@@ -48,6 +48,29 @@
 	    <module>deb-installer</module>
 	    <module>docker-all</module>
   	</modules>
+	
+	<profiles>
+		<profile>
+			<id>license-check</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.eclipse.dash</groupId>
+						<artifactId>license-tool-plugin</artifactId>
+						<version>0.0.1-SNAPSHOT</version>
+						<executions>
+							<execution>
+								<id>license-check</id>
+								<goals>
+									<goal>license-check</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
   	
 	<properties>
 		<base.version>4.6.1</base.version>
@@ -318,20 +341,6 @@
 		          	<abbrevLength>7</abbrevLength>
 		       	</configuration>
 	      	</plugin>
-	      	
-	      	<plugin>
-				<groupId>org.eclipse.dash</groupId>
-				<artifactId>license-tool-plugin</artifactId>
-				<version>0.0.1-SNAPSHOT</version>
-				<executions>
-					<execution>
-						<id>license-check</id>
-						<goals>
-							<goal>license-check</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 </project>
