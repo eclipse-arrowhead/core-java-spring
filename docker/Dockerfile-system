@@ -7,10 +7,12 @@ RUN apt-get update && apt-get install -y maven
 WORKDIR /opt/arrowhead-temp
 COPY ./ ./
 RUN mvn package -DskipTests
-RUN rm -rf /root/.m2
-
+RUN rm -rf /root/.m2 && \
+	rm -rf /opt/arrowhead-temp/docker-all && \
+	rm -rf /opt/arrowhead-temp/target
+	
 WORKDIR /opt/arrowhead
-COPY ./docker/run.sh ./
+COPY ./docker/run.sh ./run.sh
 RUN chmod +x run.sh
 
 CMD ["/opt/arrowhead/run.sh"]
