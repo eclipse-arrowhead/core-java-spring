@@ -8,7 +8,7 @@ else
 	if [ -f "/opt/arrowhead/application.jar" ]; then
 		echo "Container has been already initialized."
 	else
-		mv /opt/arrowhead-temp/$SYSTEM_NAME/target/arrowhead-$SYSTEM_NAME-$AH_VERSION.jar /opt/arrowhead/application.jar
+		mv /opt/arrowhead-temp/arrowhead-$SYSTEM_NAME-$AH_VERSION.jar /opt/arrowhead/application.jar
 		rm -rf /opt/arrowhead-temp
 		echo "Container has been initialized."
 	fi

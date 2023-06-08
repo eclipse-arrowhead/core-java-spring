@@ -1,18 +1,22 @@
-FROM openjdk:11.0.12-jdk
+FROM eclipse-temurin:11.0.19_7-jdk as build
+
+RUN mkdir /opt/arrowhead /opt/arrowhead-temp /opt/arrowhead-build && \
+	apt-get update && apt-get install -y maven dos2unix
+
+COPY ./ /opt/arrowhead-build
+
+RUN cd /opt/arrowhead-build && \
+    mvn package -DskipTests && \
+	find /opt/arrowhead-build -type f -name "*.jar" -exec cp {} /opt/arrowhead-temp \; && \
+	mv /opt/arrowhead-build/docker/run.sh /opt/arrowhead/ && \
+	chmod +x /opt/arrowhead/run.sh && \
+	dos2unix /opt/arrowhead/run.sh
+
+FROM eclipse-temurin:11.0.19_7-jre 
 
 ENV AH_VERSION=4.6.1
 
-RUN apt-get update && apt-get install -y maven
-
-WORKDIR /opt/arrowhead-temp
-COPY ./ ./
-RUN mvn package -DskipTests
-RUN rm -rf /root/.m2 && \
-	rm -rf /opt/arrowhead-temp/docker-all && \
-	rm -rf /opt/arrowhead-temp/target
-	
-WORKDIR /opt/arrowhead
-COPY ./docker/run.sh ./run.sh
-RUN chmod +x run.sh
+COPY --from=build /opt/arrowhead /opt/arrowhead
+COPY --from=build /opt/arrowhead-temp /opt/arrowhead-temp
 
 CMD ["/opt/arrowhead/run.sh"]
