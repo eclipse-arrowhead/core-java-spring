@@ -48,9 +48,41 @@
 	    <module>deb-installer</module>
 	    <module>docker-all</module>
   	</modules>
+	
+	<profiles>
+		<profile>
+			<id>license-check</id>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>dash-licenses-snapshots</id>
+					<url>https://repo.eclipse.org/content/repositories/dash-licenses-snapshots/</url>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+				</pluginRepository>
+			</pluginRepositories>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.eclipse.dash</groupId>
+						<artifactId>license-tool-plugin</artifactId>
+						<version>0.0.1-SNAPSHOT</version>
+						<executions>
+							<execution>
+								<id>license-check</id>
+								<goals>
+									<goal>license-check</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
   	
 	<properties>
-		<base.version>4.6.0</base.version>
+		<base.version>4.6.1</base.version>
 		<revision>${base.version}</revision>
 		<java.version>11</java.version>
 		<mvn.clean.version>3.1.0</mvn.clean.version>
@@ -60,19 +92,19 @@
 		<mvn.jar.version>3.1.2</mvn.jar.version>
 		<mvn.resources.version>3.1.0</mvn.resources.version>
 		<mariadb.jdbc.driver>2.3.0</mariadb.jdbc.driver>
-		<mysql.jdbc.driver>8.0.16</mysql.jdbc.driver>
+		<mysql.jdbc.driver>8.0.28</mysql.jdbc.driver>
 		<paho.version>1.2.2</paho.version>
 		<swagger.version>2.9.2</swagger.version>
 		<disruptor.version>3.3.6</disruptor.version>
-		<http.client.version>4.5.8</http.client.version>
-  		<jose4j.version>0.6.5</jose4j.version>
+  	<jose4j.version>0.9.3</jose4j.version>
+		<http.client.version>4.5.13</http.client.version>
   		<apache.commons.lang3.version>3.9</apache.commons.lang3.version>
   		<jms.api.version>2.0.1</jms.api.version>
   		<activemq.client.version>5.15.9</activemq.client.version>
 		<bouncy.castle.version>1.69</bouncy.castle.version>
   		<jna.version>5.5.0</jna.version>
 		<spring.jms.version>5.1.7.RELEASE</spring.jms.version>
-		<google.gson.version>2.8.6</google.gson.version>
+		<google.gson.version>2.8.9</google.gson.version>
 		<log4j2.version>2.17.1</log4j2.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -84,16 +116,6 @@
 			<url>https://repo.spring.io/plugins-release/</url>
         </repository>
 	</repositories>
-	
-	<pluginRepositories>
-		<pluginRepository>
-			<id>dash-licenses-snapshots</id>
-			<url>https://repo.eclipse.org/content/repositories/dash-licenses-snapshots/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</pluginRepository>
-	</pluginRepositories>
 
 	<dependencies>
 		<dependency>
@@ -232,7 +254,7 @@
 		<dependency>
 			<groupId>commons-net</groupId>
 			<artifactId>commons-net</artifactId>
-			<version>3.8.0</version>
+			<version>3.9.0</version>
 		</dependency>
 
 		<dependency>
@@ -318,20 +340,6 @@
 		          	<abbrevLength>7</abbrevLength>
 		       	</configuration>
 	      	</plugin>
-	      	
-	      	<plugin>
-				<groupId>org.eclipse.dash</groupId>
-				<artifactId>license-tool-plugin</artifactId>
-				<version>0.0.1-SNAPSHOT</version>
-				<executions>
-					<execution>
-						<id>license-check</id>
-						<goals>
-							<goal>license-check</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 </project>

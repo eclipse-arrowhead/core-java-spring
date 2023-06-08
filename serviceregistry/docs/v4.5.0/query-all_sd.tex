@@ -1,0 +1,281 @@
+\documentclass[a4paper]{arrowhead}
+
+\usepackage[yyyymmdd]{datetime}
+\usepackage{etoolbox}
+\usepackage[utf8]{inputenc}
+\usepackage{multirow}
+
+\renewcommand{\dateseparator}{-}
+
+\setlength{\parskip}{1em}
+
+%% Special references
+\newcommand{\fref}[1]{{\textcolor{ArrowheadBlue}{\hyperref[sec:functions:#1]{#1}}}}
+\newcommand{\mref}[1]{{\textcolor{ArrowheadPurple}{\hyperref[sec:model:#1]{#1}}}}
+\newcommand{\pdef}[1]{{\textcolor{ArrowheadGrey}{#1\label{sec:model:primitives:#1}\label{sec:model:primitives:#1s}\label{sec:model:primitives:#1es}}}}
+\newcommand{\pref}[1]{{\textcolor{ArrowheadGrey}{\hyperref[sec:model:primitives:#1]{#1}}}}
+
+\newrobustcmd\fsubsection[3]{
+  \addtocounter{subsection}{1}
+  \addcontentsline{toc}{subsection}{\protect\numberline{\thesubsection}interface \textcolor{ArrowheadBlue}{#1}}
+  \renewcommand*{\do}[1]{\rref{##1},\ }
+  \subsection*{
+    \thesubsection\quad
+    interface
+    \textcolor{ArrowheadBlue}{#1}
+    (\notblank{#2}{\mref{#2}}{})
+    \notblank{#3}{: \mref{#3}}{}
+  }
+  \label{sec:functions:#1}
+}
+\newrobustcmd\msubsection[2]{
+  \addtocounter{subsection}{1}
+  \addcontentsline{toc}{subsection}{\protect\numberline{\thesubsection}#1 \textcolor{ArrowheadPurple}{#2}}
+  \subsection*{\thesubsection\quad#1 \textcolor{ArrowheadPurple}{#2}}
+  \label{sec:model:#2} \label{sec:model:#2s} \label{sec:model:#2es}
+}
+\newrobustcmd\msubsubsection[3]{
+  \addtocounter{subsubsection}{1}
+  \addcontentsline{toc}{subsubsection}{\protect\numberline{\thesubsubsection}#1 \textcolor{ArrowheadPurple}{#2}}
+  \subsubsection*{\thesubsubsection\quad#1 \textcolor{ArrowheadPurple}{#2}}
+  \label{sec:model:#2} \label{sec:model:#2s}
+}
+%%
+
+\begin{document}
+
+%% Arrowhead Document Properties
+\ArrowheadTitle{query-all} % XXX = ServiceName 
+\ArrowheadServiceID{query-all} % ID name of service
+\ArrowheadType{Service Description}
+\ArrowheadTypeShort{SD}
+\ArrowheadVersion{4.5.0} % Arrowhead version X.Y.Z, e..g. 4.4.1
+\ArrowheadDate{\today}
+\ArrowheadAuthor{Tamás Bordi} % Corresponding author e.g. Jerker Delsing
+\ArrowheadStatus{RELEASE} % e..g. RELEASE, RELEASE CONDIDATE, PROTOTYPE
+\ArrowheadContact{tbordi@aitia.ai} % Email of corresponding author
+\ArrowheadFooter{\href{www.arrowhead.eu}{www.arrowhead.eu}}
+\ArrowheadSetup
+%%
+
+%% Front Page
+\begin{center}
+  \vspace*{1cm}
+  \huge{\arrowtitle}
+
+  \vspace*{0.2cm}
+  \LARGE{\arrowtype}
+  \vspace*{1cm}
+
+  %\Large{Service ID: \textit{"\arrowid"}}
+  \vspace*{\fill}
+
+  % Front Page Image
+  %\includegraphics{figures/TODO}
+
+  \vspace*{1cm}
+  \vspace*{\fill}
+
+  % Front Page Abstract
+  \begin{abstract}
+    This document provides service description for the \textbf{query-all} service. 
+  \end{abstract}
+
+  \vspace*{1cm}
+
+%   \scriptsize
+%   \begin{tabularx}{\textwidth}{l X}
+%     \raisebox{-0.5\height}{\includegraphics[width=2cm]{figures/artemis_logo}} & {ARTEMIS Innovation Pilot Project: Arrowhead\newline
+%     THEME [SP1-JTI-ARTEMIS-2012-AIPP4 SP1-JTI-ARTEMIS-2012-AIPP6]\newline
+%     [Production and Energy System Automation Intelligent-Built environment and urban infrastructure for sustainable and friendly cities]}
+%   \end{tabularx}
+%   \vspace*{-0.2cm}
+ \end{center}
+
+\newpage
+%%
+
+%% Table of Contents
+\tableofcontents
+\newpage
+%%
+
+\section{Overview}
+\label{sec:overview}
+This document describes the \textbf{query-all} service, which enables dedicated core systems to get data about all service registry instance by one request, therefore it is an integral part of the implementation of service discovery requirements in Service Registry Mandatory Core System. Examples of this interaction is a core system that needs the available information about every service instance from Service Registry.
+
+The rest of this document is organized as follows.
+In Section \ref{sec:functions}, we describe the abstract message functions provided by the service.
+In Section \ref{sec:model}, we end the document by presenting the data types used by the mentioned functions.
+
+\newpage
+
+\subsection{How This Service Is Meant to Be Used}
+The given core system can consume this without any input data.
+
+\subsection{Important Delimitations}
+\label{sec:delimitations}
+
+No delimitations.
+
+\subsection{Access policy}
+\label{sec:accesspolicy}
+
+Available only for the following core systems: \textit{Gatekeeper, QoS-Monitor}
+
+\newpage
+
+\section{Service Interface}
+\label{sec:functions}
+
+This section describes the interfaces to the service. The \textbf{query-all} service is used to get every service instance data.In the following, each subsection names an interface, an input type and an output type, in that order.
+The input type is named inside parentheses, while the output type is preceded by a colon.
+Input and output types are only denoted when accepted or returned, respectively, by the interface in question. All abstract data types named in this section are defined in Section 3.
+
+The following interfaces are available.
+
+\fsubsection{HTTP/TLS/JSON}{}{ServiceRegistryList}
+
+\begin{table}[ht!]
+  \centering
+  \begin{tabular}{|l|l|l|l|}
+    \rowcolor{gray!33} Profile ype & Type & Version \\ \hline
+    Transfer protocol & HTTP & 1.1 \\ \hline
+    Data encryption & TLS & 1.3 \\ \hline
+    Encoding & JSON & RFC 8259 \cite{rfc8259} \\ \hline
+    Compression & N/A & - \\ \hline
+  \end{tabular}
+  \caption{HTTP/TLS/JSON communication details.}
+  \label{tab:comunication_semantics_profile}
+\end{table}
+
+\clearpage
+
+\section{Information Model}
+\label{sec:model}
+
+Here, all data objects that can be part of the \textbf{query-all} service
+provides to the hosting System are listed in alphabetic order.
+Note that each subsection, which describes one type of object, begins with the \textit{struct} keyword, which is used to denote a collection of named fields, each with its own data type.
+As a complement to the explicitly defined types in this section, there is also a list of implicit primitive types in Section \ref{sec:model:primitives}, which are used to represent things like hashes and identifiers.
+
+\msubsection{struct}{ServiceRegistryList}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
+\rowcolor{gray!33} Field & Type      & Description \\ \hline
+data & \pref{Array}$<$\pref{Object}$>$     & List of service instances \\ \hline
+count & \pref{Number} & Size of the result list. \\ \hline
+\end{tabularx}
+\end{table}
+
+\msubsubsection{struct}{data}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
+\rowcolor{gray!33} Field & Type      & Description \\ \hline
+createdAt & \pref{DateTime} & Service instance record was created at this UTC timestamp. \\ \hline
+endOfValidity & \pref{DateTime} & Service is available until this UTC timestamp. \\ \hline
+id & \pref{Number} & Identifier of the service instance \\ \hline
+interfaces & \pref{Array}$<$\pref{Object}$>$     & List of interfaces the service supports. \\ \hline
+provider & \pref{Object} & Descriptor of the provider system record. \\ \hline
+secure &\pref{SecureType}  & Type of security the service uses. \\ \hline
+serviceDefinitionResponse & \pref{Object} & Descriptor of the serviceDefinition record. \\ \hline
+serviceUri &\pref{URI}         & URI of the service. \\ \hline
+metadata & \pref{Metadata}     & Service metadata \\ \hline
+updatedAt & \pref{DateTime} & Service instance record was modified at this UTC timestamp. \\ \hline
+version &\pref{Version}     & Version of the service. \\ \hline
+\end{tabularx}
+\end{table}
+
+\msubsubsection{struct}{interfaces}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
+\rowcolor{gray!33} Field & Type      & Description \\ \hline
+createdAt & \pref{DateTime} & Interface instance record was created at this UTC timestamp. \\ \hline
+id & \pref{Number} & Identifier of the interface instance \\ \hline
+interfaceName &\pref{Interface}  & Specified name of the interface. \\ \hline
+updatedAt & \pref{DateTime} & Interface instance record was modified at this UTC timestamp. \\ \hline
+\end{tabularx}
+\end{table}
+
+\clearpage
+
+\msubsubsection{struct}{provider}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
+\rowcolor{gray!33} Field & Type      & Description \\ \hline
+address & \pref{String} & Network address. \\ \hline
+authenticationInfo & \pref{String}     & Public key of the client certificate. \\ \hline
+createdAt & \pref{DateTime} & System instance record was created at this UTC timestamp. \\ \hline
+id & \pref{Number} & Identifier of the system instance \\ \hline
+metadata & \pref{Metadata}     & Metadata \\ \hline
+port & \pref{PortNumber} & Port of the system. \\ \hline
+systemName &\pref{Name}  & Name of the system. \\ \hline
+updatedAt & \pref{DateTime} & System instance record was modified at this UTC timestamp. \\ \hline
+\end{tabularx}
+\end{table}
+
+\msubsubsection{struct}{serviceDefinition}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
+\rowcolor{gray!33} Field & Type      & Description \\ \hline
+createdAt & \pref{DateTime} & Service definition instance record was created at this UTC timestamp. \\ \hline
+id & \pref{Number} & Identifier of the service definition instance \\ \hline
+serviceDefinition &\pref{Name}  & Name of the service definition. \\ \hline
+updatedAt & \pref{DateTime} & Service definition instance record was modified at this UTC timestamp. \\ \hline
+\end{tabularx}
+\end{table}
+
+\subsection{Primitives}
+\label{sec:model:primitives}
+
+Types and structures mentioned throughout this document that are assumed to be available to implementations of this service.
+The concrete interpretations of each of these types and structures must be provided by any IDD document claiming to implement this service.
+
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{3cm} | X |} \hline
+\rowcolor{gray!33} Type & Description \\ \hline
+\pdef{Address}          & A string representation of the address \\ \hline
+\pdef{Boolean}          & One out of \texttt{true} or \texttt{false}. \\ \hline
+\pdef{DateTime}         & Pinpoints a specific moment in time. \\ \hline
+\pdef{Object}           & Set of primitives and possible further objects. \\ \hline
+\pdef{Interface}        & Any suitable type chosen by the implementor of service \\ \hline
+\pdef{List}$<$A$>$      & An \textit{array} of a known number of items, each having type A. \\ \hline
+\pdef{Name}             & A string identifier that is intended to be both human and machine-readable. \\ \hline
+\pdef{Number}           & Decimal number \\ \hline
+\pdef{SecureType}       & Any suitable type chosen by the implementor of service \\ \hline
+\pdef{Version}          & Specifies a service version. \\ \hline
+\end{tabularx}
+\end{table}
+
+\newpage
+
+\bibliographystyle{IEEEtran}
+\bibliography{bibliography}
+
+\newpage
+
+\section{Revision History}
+\subsection{Amendments}
+
+\noindent\begin{tabularx}{\textwidth}{| p{1cm} | p{3cm} | p{2cm} | X | p{4cm} |} \hline
+\rowcolor{gray!33} No. & Date & Version & Subject of Amendments & Author \\ \hline
+
+1 & YYYY-MM-DD & \arrowversion & & Xxx Yyy \\ \hline
+\end{tabularx}
+
+\subsection{Quality Assurance}
+
+\noindent\begin{tabularx}{\textwidth}{| p{1cm} | p{3cm} | p{2cm} | X |} \hline
+\rowcolor{gray!33} No. & Date & Version & Approved by \\ \hline
+
+1 & YYYY-MM-DD & \arrowversion  &  \\ \hline
+
+\end{tabularx}
+
+\end{document}

@@ -1,0 +1,504 @@
+\documentclass[a4paper]{arrowhead}
+
+\usepackage[yyyymmdd]{datetime}
+\usepackage{etoolbox}
+\usepackage[utf8]{inputenc}
+\usepackage{multirow}
+
+\renewcommand{\dateseparator}{-}
+
+\setlength{\parskip}{1em}
+
+\newcommand{\fparam}[1]{\textit{\textcolor{ArrowheadBlue}{#1}}}
+
+%% Special references
+\newcommand{\fref}[1]{{\textcolor{ArrowheadBlue}{\hyperref[sec:functions:#1]{#1}}}}
+\newcommand{\mref}[1]{{\textcolor{ArrowheadPurple}{\hyperref[sec:model:#1]{#1}}}}
+\newcommand{\pdef}[1]{{\textcolor{ArrowheadGrey}{#1 \label{sec:model:primitives:#1} \label{sec:model:primitives:#1s}}}}
+\newcommand{\pref}[1]{{\textcolor{ArrowheadGrey}{\hyperref[sec:model:primitives:#1]{#1}}}}
+
+\newrobustcmd\fsubsection[5]{
+  \addtocounter{subsection}{1}
+  \addcontentsline{toc}{subsection}{\protect\numberline{\thesubsection}operation \textcolor{ArrowheadBlue}{#1}}
+  \renewcommand*{\do}[1]{\rref{##1},\ }
+  \subsection*{
+    \thesubsection\quad
+    #2 \textcolor{ArrowheadPurple}{#3} \\
+    \small
+    \hspace*{0.075\textwidth}\begin{minipage}{0.1\textwidth}
+      \vspace*{1mm}
+      Operation: \\
+      \notblank{#4}{Input: \\}{}
+      \notblank{#5}{Output: \\}{}
+    \end{minipage}
+    \begin{minipage}{0.825\textwidth}
+      \vspace*{1mm}
+      \textcolor{ArrowheadBlue}{#1} \\
+      \notblank{#4}{\mref{#4} \\}{}
+      \notblank{#5}{\mref{#5} \\}{}
+    \end{minipage}
+  }
+  \label{sec:functions:#1}
+}
+\newrobustcmd\msubsection[2]{
+  \addtocounter{subsection}{1}
+  \addcontentsline{toc}{subsection}{\protect\numberline{\thesubsection}#1 \textcolor{ArrowheadPurple}{#2}}
+  \subsection*{\thesubsection\quad#1 \textcolor{ArrowheadPurple}{#2}}
+  \label{sec:model:#2} \label{sec:model:#2s}
+}
+\newrobustcmd\msubsubsection[3]{
+  \addtocounter{subsubsection}{1}
+  \addcontentsline{toc}{subsubsection}{\protect\numberline{\thesubsubsection}#1 \textcolor{ArrowheadPurple}{#2}}
+  \subsubsection*{\thesubsubsection\quad#1 \textcolor{ArrowheadPurple}{#2}}
+  \label{sec:model:#2} \label{sec:model:#2s}
+}
+%%
+
+\begin{document}
+
+%% Arrowhead Document Properties
+\ArrowheadTitle{orchestration-service-by-proxy HTTP/TLS/JSON} %e.g. ServiceDiscovery HTTP/TLS/JSON
+\ArrowheadServiceID{orchestration-service-by-proxy} % e.g. register
+\ArrowheadType{Interface Design Description}
+\ArrowheadTypeShort{IDD}
+\ArrowheadVersion{4.6.0}
+\ArrowheadDate{\today}
+\ArrowheadAuthor{Rajmund Bocsi} % e.g Szvetlin Tanyi}
+\ArrowheadStatus{RELEASE}
+\ArrowheadContact{rbocsi@aitia.ai} % jerker.delsing@arrowhead.eu
+\ArrowheadFooter{\href{www.arrowhead.eu}{www.arrowhead.eu}}
+\ArrowheadSetup
+%%
+
+%% Front Page
+\begin{center}
+  \vspace*{1cm}
+  \huge{\arrowtitle}
+
+  \vspace*{0.2cm}
+  \LARGE{\arrowtype}
+  \vspace*{1cm}
+\end{center}
+
+%  \Large{Service ID: \textit{"\arrowid"}}
+  \vspace*{\fill}
+
+  % Front Page Image
+  %\includegraphics{figures/TODO}
+
+  \vspace*{1cm}
+  \vspace*{\fill}
+
+  % Front Page Abstract
+  \begin{abstract}
+    This document describes a HTTP protocol with TLS payload
+    security and JSON payload encoding variant of the \textbf{orchestration-service-by-proxy} service.
+  \end{abstract}
+  \vspace*{1cm}
+
+\newpage
+
+%% Table of Contents
+\tableofcontents
+\newpage
+%%
+
+\section{Overview}
+\label{sec:overview}
+
+This document describes the \textbf{orchestration-service-by-proxy} service interface, that provides runtime (late) binding between application systems. It's implemented using protocol, encoding as stated in the following table:
+
+\begin{table}[ht!]
+  \centering
+  \begin{tabular}{|l|l|l|l|}
+    \rowcolor{gray!33} Profile type & Type & Version \\ \hline
+    Transfer protocol & HTTP & 1.1 \\ \hline
+    Data encryption & TLS & 1.3 \\ \hline
+    Encoding & JSON & RFC 8259 \cite{rfc8259} \\ \hline
+    Compression & N/A & - \\ \hline
+  \end{tabular}
+  \caption{Communication and semantics details used for the \textbf{orchestration-service-by-proxy}
+    service interface}
+  \label{tab:comunication_semantics_profile}
+\end{table}
+
+This document provides the Interface Design Description IDD to the \textit{orchestration-service-by-proxy -- Service Description} document.
+For further details about how this service is meant to be used, please consult that document.
+
+The rest of this document describes how to realize the \textbf{orchestration-service-by-proxy} service HTTP/ TLS/JSON interface in details.
+
+\newpage
+
+\section{Interface Description}
+\label{sec:functions}
+
+The service responses with the status code \texttt{200 Ok} if called successfully. The error codes are, \texttt{400 Bad Request} if request is malformed, \texttt{401 Unauthorized} if improper client side certificate is provided, \texttt{500 Internal Server Error} if Orchestrator is unavailable.
+
+\begin{lstlisting}[language=http,label={lst:orchestration-by-proxy},caption={An \fref{orchestration-service-by-proxy} invocation.}]
+POST /orchestrator/orchestration-by-proxy HTTP/1.1
+
+{
+  "requesterSystem": {
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string"
+  },
+  "requestedService": {
+    "serviceDefinitionRequirement": "string",
+    "interfaceRequirements": [
+      "string"
+    ],
+    "securityRequirements": [
+      "CERTIFICATE", "TOKEN"
+    ],
+    "metadataRequirements": {
+      "additionalProp1": "string",
+      "additionalProp2": "string",
+      "additionalProp3": "string"
+    },
+    "versionRequirement": 0,
+    "maxVersionRequirement": 0,
+    "minVersionRequirement": 0
+  },
+  "preferredProviders": [
+    {
+      "providerCloud": {
+        "operator": "string",
+        "name": "string"
+      },
+      "providerSystem": {
+        "systemName": "string",
+        "address": "string",
+        "port": 0
+      }
+    }
+  ],
+  "orchestrationFlags": {
+    "overrideStore": true,
+    "matchmaking": true,
+    "enableQoS": true
+  },
+  "qosRequirements": {
+    "qosMaxRespTimeThreshold": "1000"
+  }
+}
+\end{lstlisting}
+
+\clearpage
+
+\begin{lstlisting}[language=http,label={lst:orchestration-by-proxy_response},caption={An \fref{orchestration-service-by-proxy} response.}]
+{
+  "response": [
+    {
+      "provider": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "metadata": {
+          "additionalProp1": "string",
+          "additionalProp2": "string",
+          "additionalProp3": "string"
+        },  
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "service": {
+        "id": 0,
+        "serviceDefinition": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "serviceUri": "string",
+      "secure": "TOKEN",
+      "metadata": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },  
+      "interfaces": [
+        {
+          "id": 0,
+          "createdAt": "string",
+          "interfaceName": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "version": 0,
+      "authorizationTokens": {
+        "interfaceName1": "token1",
+        "interfaceName2": "token2"
+      },
+      "warnings": [
+        "FROM_OTHER_CLOUD", "TTL_UNKNOWN"
+      ]
+    }
+  ]
+}
+\end{lstlisting}
+
+\newpage
+
+\section{Data Models}
+\label{sec:model}
+
+Here, all data objects that can be part of the service calls associated with this service are listed in alphabetic order.
+Note that each subsection, which describes one type of object, begins with the \textit{struct} keyword, which is meant to denote a JSON \pref{Object} that must contain certain fields, or names, with values conforming to explicitly named types.
+As a complement to the primary types defined in this section, there is also a list of secondary types in Section \ref{sec:model:primitives}, which are used to represent things like hashes, identifiers and texts.
+
+\msubsection{struct}{OrchestrationForm}
+\label{sec:model:OrchestrationForm}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{4cm} | p{4cm} | p{2cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
+commands &\hyperref[sec:model:Metadata]{Metadata} & no & Additional commands to the Orchestrator, the only available command now is \texttt{qosExclusivity} (see in the Service
+Description document). \\ \hline
+orchestrationFlags &\hyperref[sec:model:OrchestrationFlags]{OrchestrationFlags} & no & A map of flags that changes the behaviour of the service. See details in the Service Description document. \\ \hline
+preferredProviders &\pref{List}$<$\hyperref[sec:model:PreferredProvider]{PreferredProvider}$>$ & no & A list of providers that takes precedence in matchmaking if they are available; if \texttt{onlyPreferred} flag is set, then the result can only be a subset of this list. \\ \hline
+qosRequirements &\hyperref[sec:model:Metadata]{Metadata} & no & Quality-of-Service requirement map. See details in the Service Description document. \\ \hline
+requestedService &\hyperref[sec:model:SQF]{ServiceQueryForm} & no (yes) & Information about the requested service; mandatory in case of dynamic or flexible store orchestration. \\ \hline
+requesterCloud &\hyperref[sec:model:Cloud]{Cloud} & no & Information about the cloud from which the request comes. Only specified when the request comes from an other cloud. \\ \hline
+requesterSystem &\hyperref[sec:model:System]{System} & yes & Information about the executor system that will consume the service. \\ \hline
+\end{tabularx}
+\end{table}
+
+\msubsection{struct}{Metadata}
+\label{sec:model:Metadata}
+
+An \pref{Object} which maps \pref{String} key-value pairs.
+
+\msubsection{struct}{OrchestrationFlags}
+\label{sec:model:OrchestrationFlags}
+
+An \pref{Object} which maps \pref{String} keys to \pref{Boolean} values. 
+
+\clearpage
+
+\msubsection{struct}{PreferredProvider}
+\label{sec:model:PreferredProvider}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{4cm} | p{4cm} | p{2cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
+
+providerCloud &\hyperref[sec:model:Cloud]{Cloud} & no & Information about the cloud of the preferred system. Need only specified when the system is in an other cloud. \\ \hline
+providerSystem &\hyperref[sec:model:System]{System} & yes & Information about the preferred system.  \\ \hline
+\end{tabularx}
+\end{table}
+
+\msubsection{struct}{Cloud}
+\label{sec:model:Cloud}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{4cm} | p{4cm} | p{2cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
+
+name &\pref{Name} & yes & Name of the cloud. \\ \hline
+operator &\pref{Name} & yes & Operator of the cloud. \\ \hline
+\end{tabularx}
+\end{table}
+
+\msubsection{struct}{System}
+\label{sec:model:System}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{4cm} | p{4cm} | p{2cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
+
+address &\pref{Address} & yes & Network address of the system. \\ \hline
+authenticationInfo &\pref{String} & no & X.509 public key of the system. \\ \hline
+metadata &\hyperref[sec:model:Metadata]{Metadata} & no & Additional information about the system. \\ \hline
+port &\pref{PortNumber} & yes & Port of the system. \\ \hline
+systemName &\pref{Name} & yes & Name of the system. \\ \hline
+\end{tabularx}
+\end{table}
+
+\clearpage
+
+\msubsection{struct}{ServiceQueryForm}
+\label{sec:model:SQF}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{5cm} | p{3cm} | p{2cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Mandatory & Description \\ \hline
+interfaceRequirements &\pref{List}$<$\pref{Interface}$>$ & no & Names of the required interfaces. If specified at least one of the interfaces must match for having result(s). \\ \hline
+maxVersionRequirement &\pref{Number} & no & Required maximum version of the service. If specified version must be equal or lower for having result(s). Ignored if \texttt{versionRequirement} is specified. \\ \hline
+metadataRequirements &\hyperref[sec:model:Metadata]{Metadata} & no & Service metadata requirements. If spe\-cified the whole content of the map must match for having result(s). Only applied if the \texttt{metadataSearch} flag is set to true. \\ \hline
+minVersionRequirement &\pref{Number} & no & Required minimum version of the service. If specified version must be equal or higher for having result(s). Ignored if \texttt{versionRequirement} is specified. \\ \hline
+pingProviders &\pref{Boolean} & no & Whether or not the provider should be pinged. If true only the responding providers will comply. The orchestration flag \texttt{pingProviders} overrides this value. \\ \hline
+securityRequirements &\pref{List}$<$\pref{SecureType}$>$ & no & Types of the required security levels. If specified at least one of the types must match for having result(s). \\ \hline
+serviceDefinitionRequirement &\pref{Name} & yes & Identifier of the service. \\ \hline
+versionRequirement &\pref{Number} & no & Required version of the service. If spe\-cified version must match for having result(s). \\ \hline
+\end{tabularx}
+\end{table}
+
+\msubsection{struct}{OrchestrationResultList}
+\label{sec:model:OrchestrationResultList}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{3cm} | p{6cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Description \\ \hline
+response & \pref{List}$<$\hyperref[sec:model:OrchestrationResult]{OrchestrationResult}$>$ & List of orchestration results. \\ \hline
+\end{tabularx}
+\end{table}
+
+\clearpage
+
+\msubsection{struct}{OrchestrationResult}
+\label{sec:model:OrchestrationResult}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{4cm} | p{4.6cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Description \\ \hline
+authorizationTokens & \hyperref[sec:model:Metadata]{Metadata} & Tokens to use the service instance (one for every supported interface). Only filled if the security type is \texttt{TOKEN}. \\ \hline
+interfaces & \pref{List}$<$\hyperref[sec:model:ServiceInterfaceRecord]{ServiceInterfaceRecord}$>$ & List of interfaces the service instance supports. \\ \hline
+metadata & \hyperref[sec:model:Metadata]{Metadata} & Service instance metadata. \\ \hline
+provider & \hyperref[sec:model:SystemRecord]{SystemRecord} & Descriptor of the provider system record. \\ \hline
+secure & \pref{SecureType} & Type of security the service instance uses. \\ \hline
+service & \hyperref[sec:model:ServiceDefinitionRecord]{ServiceDefinitionRecord} & Descriptor of the service definition record. \\ \hline
+serviceUri & \pref{String} & Path of the service on the provider. \\ \hline
+version & \pref{Version} & Version of the service instance. \\ \hline
+warnings & \pref{List}$<$\pref{OrchestratorWarning}$>$ & List of warnings about the provider and/or its service instance. \\ \hline
+
+\end{tabularx}
+\end{table}
+
+\msubsection{struct}{ServiceInterfaceRecord}
+\label{sec:model:ServiceInterfaceRecord}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Description \\ \hline
+createdAt & \pref{DateTime} & Interface instance record was created at this UTC time\-stamp. \\ \hline
+id & \pref{Number} & Identifier of the interface instance. \\ \hline
+interfaceName &\pref{Interface} & Specified name of the interface. \\ \hline
+updatedAt & \pref{DateTime} & Interface instance record was modified at this UTC time\-stamp. \\ \hline
+\end{tabularx}
+\end{table}
+
+\msubsection{struct}{SystemRecord}
+\label{sec:model:SystemRecord}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Description \\ \hline
+
+address &\pref{Address} & Network address of the system. \\ \hline
+authenticationInfo &\pref{String} & X.509 public key of the system. \\ \hline
+createdAt & \pref{DateTime} & System instance record was created at this UTC time\-stamp. \\ \hline
+id & \pref{Number} & Identifier of the system instance. \\ \hline
+metadata &\hyperref[sec:model:Metadata]{Metadata} & Additional information about the system. \\ \hline
+port &\pref{PortNumber} & Port of the system. \\ \hline
+systemName &\pref{Name} & Name of the system. \\ \hline
+updatedAt & \pref{DateTime} & System instance record was modified at this UTC time\-stamp. \\ \hline
+\end{tabularx}
+\end{table}
+
+\clearpage
+
+\msubsection{struct}{ServiceDefinitionRecord}
+\label{sec:model:ServiceDefinitionRecord}
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{4.25cm} | p{3.5cm} | X |} \hline
+\rowcolor{gray!33} Field & Type & Description \\ \hline
+createdAt & \pref{DateTime} & Service definition instance record was created at this UTC time\-stamp. \\ \hline
+id & \pref{Number} & Identifier of the service definition instance. \\ \hline
+serviceDefinition &\pref{Name}  & Name of the service definition. \\ \hline
+updatedAt & \pref{DateTime} & Service definition instance record was modified at this UTC time\-stamp. \\ \hline
+\end{tabularx}
+\end{table} 
+
+\subsection{Primitives}
+\label{sec:model:primitives}
+
+As all messages are encoded using the JSON format \cite{bray2014json}, the following primitive constructs, part of that standard, become available.
+Note that the official standard is defined in terms of parsing rules, while this list only concerns syntactic information.
+Furthermore, the \pref{Object} and \pref{Array} types are given optional generic type parameters, which are used in this document to signify when pair values or elements are expected to conform to certain types. 
+
+\begin{table}[ht!]
+\begin{tabularx}{\textwidth}{| p{3cm} | X |} \hline
+\rowcolor{gray!33} JSON Type & Description \\ \hline
+\pdef{Value}                 & Any out of \pref{Object}, \pref{Array}, \pref{String}, \pref{Number}, \pref{Boolean} or \pref{Null}. \\ \hline
+\pdef{Object}$<$A$>$         & An unordered collection of $[$\pref{String}: \pref{Value}$]$ pairs, where each \pref{Value} conforms to type A. \\ \hline
+\pdef{Array}$<$A$>$          & An ordered collection of \pref{Value} elements, where each element conforms to type A. \\ \hline
+\pdef{String}                & An arbitrary UTF-8 string. \\ \hline
+\pdef{Number}                & Any IEEE 754 binary64 floating point number \cite{cowlishaw2019floating}, except for \textit{+Inf}, \textit{-Inf} and \textit{NaN}. \\ \hline
+\pdef{Boolean}               & One out of \texttt{true} or \texttt{false}. \\ \hline
+\pdef{Null}                  & Must be \texttt{null}. \\ \hline
+\end{tabularx}
+\end{table}
+
+With these primitives now available, we proceed to define all the types specified in the \textbf{orchestration-service-by-proxy} SD document without a direct equivalent among the JSON types.
+Concretely, we define the \textbf{orchestration-service-by-proxy} SD primitives either as \textit{aliases} or \textit{structs}.
+An \textit{alias} is a renaming of an existing type, but with some further details about how it is intended to be used.
+Structs are described in the beginning of the parent section.
+The types are listed by name in alphabetical order.
+
+\subsubsection{alias \pdef{Address} = \pref{String}}
+
+A string representation of a network address. An address can be a version 4 IP address (RFC 791), a version 6 IP address (RFC 2460) or a DNS name (RFC 1034).
+
+\subsubsection{alias \pdef{DateTime} = \pref{String}}
+
+Pinpoints a moment in time in the format of ISO8601 standard "yyyy-mm-ddThh:mm:ss", where "yyy" denotes year (4 digits), "mm" denotes month starting from 01, "dd" denotes day starting from 01, "T" is the separator between date and time part, "hh" denotes hour in the 24-hour format (00-23), "MM" denotes minute (00-59), "SS" denotes second (00-59). " " is used as separator between the date and the time.
+An example of a valid date/time string is "2020-12-05T12:00:00"
+
+\subsubsection{alias \pdef{Interface} = \pref{String}}
+
+A \pref{String} that describes an interface in \textit{Protocol-SecurityType-MimeType} format. \textit{SecurityType} can be SECURE or INSECURE. \textit{Protocol} and \textit{MimeType} can be anything. An example of a valid interface is: "HTTP-SECURE-JSON" or "HTTP-INSECURE-SENML".
+
+\subsubsection{alias \pdef{List}$<$A$>$ = \pref{Array}$<$A$>$}
+There is no difference.
+
+\subsubsection{alias \pdef{Name} = \pref{String}}
+
+A \pref{String} identifier that is intended to be both human and machine-readable.
+
+\subsubsection{alias \pdef{PortNumber} = \pref{Number}}
+
+Decimal \pref{Number} in the range of 0-65535.
+
+\subsubsection{alias \pdef{OrchestratorWarning} = \pref{String}}
+
+A String that represents a potentially interesting information about a provider and/or its service instance. Possible values are \textit{FROM\_OTHER\_CLOUD} (if the provider is in an other cloud), \textit{TTL\_EXPIRED} (the provider is no longer accessible), \textit{TTL\_EXPIRING} (the provider will be inaccessible in a matter of minutes), \textit{TTL\_UNKNOWN} (the provider does not specified expiration time), \textit{VIA\_GATEWAY} (the provider is in an other cloud and only accessible via a tunnel provided by the Gateway Core System)
+
+\subsubsection{alias \pdef{SecureType} = \pref{String}}
+
+A \pref{String} that describes an the security type. Possible values are \textit{NOT\_SECURE} or \textit{CERTIFICATE} or \textit{TOKEN}.
+
+\subsubsection{alias \pdef{Version} = \pref{Number}}
+
+A \pref{Number} that represents the version of the service. And example of a valid version is: 1.
+\color{black}
+
+\newpage
+
+\bibliographystyle{IEEEtran}
+\bibliography{bibliography}
+
+\newpage
+
+\section{Revision History}
+\subsection{Amendments}
+
+\noindent\begin{tabularx}{\textwidth}{| p{1cm} | p{3cm} | p{2cm} | X | p{4cm} |} \hline
+\rowcolor{gray!33} No. & Date & Version & Subject of Amendments & Author \\ \hline
+
+1 & YYYY-MM-DD & \arrowversion & & Xxx Yyy \\ \hline
+
+\end{tabularx}
+
+\subsection{Quality Assurance}
+
+\noindent\begin{tabularx}{\textwidth}{| p{1cm} | p{3cm} | p{2cm} | X |} \hline
+\rowcolor{gray!33} No. & Date & Version & Approved by \\ \hline
+
+1 & YYYY-MM-DD & \arrowversion & Xxx Yyy \\ \hline
+
+\end{tabularx}
+
+\end{document}
