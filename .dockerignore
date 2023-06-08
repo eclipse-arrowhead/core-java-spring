@@ -1,0 +1,14 @@
+.git
+certificates
+documentation
+*/docs
+*/doc
+*/target
+
+*.md
+*.pdf
+*.tex
+*.svg
+*.png
+*.uxf
+*.drawio

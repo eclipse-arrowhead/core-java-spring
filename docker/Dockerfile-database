@@ -1,0 +1,23 @@
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+WORKDIR ./opt/arrwhead-scripts
+
+COPY ./scripts ./
+
+RUN apt update
+RUN apt install -y mysql-server 
+RUN service mysql stop && \
+    usermod -d /var/lib/mysql/ mysql && \
+    service mysql start && \
+    service mysql status && \
+    echo Creating arrowhead database... && \
+    mysql <create_empty_arrowhead_db.sql && \
+    echo ...done && \
+    service mysql stop
+RUN sed -i '$a\[mysqld]' /etc/mysql/my.cnf && \
+    sed -i '$a\bind_address = 0.0.0.0' /etc/mysql/my.cnf
+
+CMD ["mysqld"]
+
