@@ -113,6 +113,7 @@ public class AuthorizationDriver {
 	private void initializeSystemRequestDTO() {
 		logger.debug("initializeSystemRequestDTO started...");
 		
+		systemRequestDTO = new SystemRequestDTO();
 		systemRequestDTO.setAddress(address);
 		systemRequestDTO.setPort(port);
 		systemRequestDTO.setSystemName(systemName);
