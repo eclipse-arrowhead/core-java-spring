@@ -102,4 +102,6 @@ public class SensorDto implements Serializable {
                 .add("timeUnit=" + timeUnit)
                 .toString();
     }
+    
+    private static final long serialVersionUID = 1L;    
 }

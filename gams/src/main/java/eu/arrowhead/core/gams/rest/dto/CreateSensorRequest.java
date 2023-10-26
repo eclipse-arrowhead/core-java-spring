@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "request")
 public class CreateSensorRequest implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(required = true, value = "Name of the sensor", dataType = "string", example = "MyTemperatureSensor")
     private String name;
