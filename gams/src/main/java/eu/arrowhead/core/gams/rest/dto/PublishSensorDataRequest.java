@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 public class PublishSensorDataRequest implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private String timestamp;
     private Object data;

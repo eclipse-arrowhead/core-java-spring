@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "request")
 public class CreateInstanceRequest implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(required = true, value = "The name of the new instance", dataType = "string")
     private String name;
