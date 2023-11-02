@@ -85,7 +85,7 @@ public class StepGraph {
 		
 		for (final Node node : this.steps) {
 			final Node otherNode = findNode(node.getName(), other.steps);
-			if (!node.getNextNodes().equals(otherNode.getNextNodes()) || !node.getPrevNodes().equals(otherNode.getPrevNodes())) {
+			if (otherNode != null && (!node.getNextNodes().equals(otherNode.getNextNodes()) || !node.getPrevNodes().equals(otherNode.getPrevNodes()))) {
 				return false;
 			}
 			

@@ -29,15 +29,19 @@ public class ActionCircleDetector {
 		
 		final Set<String> checkedActions = new HashSet<>();
 		ChoreographerActionRequestDTO action = findAction(plan.getActions(), plan.getFirstActionName());
-		checkedActions.add(action.getName());
+
+		if (action != null){
+			checkedActions.add(action.getName());
 		
-		while (!Utilities.isEmpty(action.getNextActionName())) {
-			if (checkedActions.contains(action.getNextActionName())) {
-				return true;
+			while (!Utilities.isEmpty(action.getNextActionName())) {
+				if (checkedActions.contains(action.getNextActionName())) {
+					return true;
+				}
+				checkedActions.add(action.getNextActionName());
+				action = findAction(plan.getActions(), action.getNextActionName());
 			}
-			checkedActions.add(action.getNextActionName());
-			action = findAction(plan.getActions(), action.getNextActionName());
 		}
+		
 		
 		return false;
 	}
