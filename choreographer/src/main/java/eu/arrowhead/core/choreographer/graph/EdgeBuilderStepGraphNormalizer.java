@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
+import eu.arrowhead.core.choreographer.graph.Node;
 
 public class EdgeBuilderStepGraphNormalizer implements StepGraphNormalizer {
 	
@@ -52,7 +53,7 @@ public class EdgeBuilderStepGraphNormalizer implements StepGraphNormalizer {
 	private StepGraph shallowCopyStepGraph(final StepGraph graph) {
 		final StepGraph result = new StepGraph();
 		for (final Node node : graph.getSteps()) {
-			result.getSteps().add(new Node(node.getName()));
+			result.getSteps().add(new Node(node.getName(), node.getIsStartConditionAND()));
 		}
 		
 		return result;
@@ -140,6 +141,12 @@ public class EdgeBuilderStepGraphNormalizer implements StepGraphNormalizer {
 	//-------------------------------------------------------------------------------------------------
 	private boolean isRedundantRouteImpl(final List<String> candidateRoute, final List<String> verifiedRoute) {
 		int lastIndex = -1;
+		
+//		final Node lastNode = candidateRoute.get(0);
+//		if(lastNode.getIsStartConditionAND()) {
+//			return false;
+//		}
+		
 		for (int i = 0; i < candidateRoute.size(); ++i) {
 			final String node = candidateRoute.get(i);
 			int index = verifiedRoute.indexOf(node);

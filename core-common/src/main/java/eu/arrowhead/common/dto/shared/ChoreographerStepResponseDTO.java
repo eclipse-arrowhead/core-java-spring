@@ -22,75 +22,195 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStartCondition;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ChoreographerStepResponseDTO implements Serializable {
 
-	//=================================================================================================
+	// =================================================================================================
 	// members
-	
+
 	private static final long serialVersionUID = 1643826656433118530L;
-	
+
 	private long id;
-    private String name;
-    private String serviceDefinition;
-    private Integer minVersion;
-    private Integer maxVersion;
-    private Map<String,String> staticParameters;
-    private int quantity;
-    private ChoreographerServiceQueryFormDTO srTemplate;
-    private List<String> nextStepNames;
-    private String createdAt;
-    private String updatedAt;
+	private String name;
+	private String serviceDefinition;
+	private Integer minVersion;
+	private Integer maxVersion;
+	private Map<String, String> staticParameters;
+	private int quantity;
+	private ChoreographerServiceQueryFormDTO srTemplate;
+	private List<String> nextStepNames;
+	private String createdAt;
+	private String updatedAt;
+	private ChoreographerSessionStepStartCondition startCondition;
+	private String path;
+	private String threshold;
 
-    //=================================================================================================
-    // methods
-	
-    //-------------------------------------------------------------------------------------------------
-	public ChoreographerStepResponseDTO() {}
+	// =================================================================================================
+	// methods
 
-    //-------------------------------------------------------------------------------------------------
-    public ChoreographerStepResponseDTO(final long id, final String name, final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final Map<String, String> staticParameters, final int quantity,
-    									final ChoreographerServiceQueryFormDTO srTemplate, final List<String> nextStepNames, final String createdAt, final String updatedAt) {
-        this.id = id;
-        this.name = name;
-        this.serviceDefinition = serviceDefinition;
-        this.minVersion = minVersion;
-        this.maxVersion = maxVersion;
-        this.staticParameters = staticParameters;
-        this.quantity = quantity;
-        this.srTemplate = srTemplate;
-        this.nextStepNames = nextStepNames;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
+	// -------------------------------------------------------------------------------------------------
+	public ChoreographerStepResponseDTO() {
+	}
 
-    //-------------------------------------------------------------------------------------------------
-	public long getId() { return id; }
-	public String getName() { return name; }
-	public String getServiceDefinition() { return serviceDefinition; }
-	public Integer getMinVersion() { return minVersion; }
-	public Integer getMaxVersion() { return maxVersion; }
-	public Map<String,String> getStaticParameters() { return staticParameters; }
-    public int getQuantity() { return quantity; }
-    public ChoreographerServiceQueryFormDTO getSrTemplate() { return srTemplate; }
-    public List<String> getNextStepNames() { return nextStepNames; }
-    public String getCreatedAt() { return createdAt; }
-	public String getUpdatedAt() { return updatedAt; }
+	// -------------------------------------------------------------------------------------------------
+	public ChoreographerStepResponseDTO(final long id, final String name, final String serviceDefinition,
+			final Integer minVersion, final Integer maxVersion, final Map<String, String> staticParameters,
+			final int quantity, final ChoreographerServiceQueryFormDTO srTemplate, final List<String> nextStepNames,
+			final String createdAt, final String updatedAt) {
+		this.id = id;
+		this.name = name;
+		this.serviceDefinition = serviceDefinition;
+		this.minVersion = minVersion;
+		this.maxVersion = maxVersion;
+		this.staticParameters = staticParameters;
+		this.quantity = quantity;
+		this.srTemplate = srTemplate;
+		this.nextStepNames = nextStepNames;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
+		this.startCondition = ChoreographerSessionStepStartCondition.AND;
+		this.path = null;
+		this.threshold = null;
+	}
 
-	//-------------------------------------------------------------------------------------------------
-	public void setId(final long id) { this.id = id; }
-    public void setName(final String name) { this.name = name; }
-    public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
-    public void setMinVersion(final Integer minVersion) { this.minVersion = minVersion; }
-    public void setMaxVersion(final Integer maxVersion) { this.maxVersion = maxVersion; }
-    public void setSrTemplate(final ChoreographerServiceQueryFormDTO srTemplate) { this.srTemplate = srTemplate; }
-    public void setNextStepNames(final List<String> nextStepNames) { this.nextStepNames = nextStepNames; }
-    public void setStaticParameters(final Map<String,String> staticParameters) { this.staticParameters = staticParameters; }
-    public void setQuantity(final int quantity) { this.quantity = quantity; }
-    public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
-    public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
-    
-	//-------------------------------------------------------------------------------------------------
+	public ChoreographerStepResponseDTO(final long id, final String name, final String serviceDefinition,
+			final Integer minVersion, final Integer maxVersion, final Map<String, String> staticParameters,
+			final int quantity, final ChoreographerServiceQueryFormDTO srTemplate, final List<String> nextStepNames,
+			final String createdAt, final String updatedAt, final ChoreographerSessionStepStartCondition startCondition,
+			final String path, final String threshold) {
+		this.id = id;
+		this.name = name;
+		this.serviceDefinition = serviceDefinition;
+		this.minVersion = minVersion;
+		this.maxVersion = maxVersion;
+		this.staticParameters = staticParameters;
+		this.quantity = quantity;
+		this.srTemplate = srTemplate;
+		this.nextStepNames = nextStepNames;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
+		this.startCondition = startCondition;
+		this.path = path;
+		this.threshold = threshold;
+	}
+
+	// -------------------------------------------------------------------------------------------------
+	public long getId() {
+		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getServiceDefinition() {
+		return serviceDefinition;
+	}
+
+	public Integer getMinVersion() {
+		return minVersion;
+	}
+
+	public Integer getMaxVersion() {
+		return maxVersion;
+	}
+
+	public Map<String, String> getStaticParameters() {
+		return staticParameters;
+	}
+
+	public int getQuantity() {
+		return quantity;
+	}
+
+	public ChoreographerServiceQueryFormDTO getSrTemplate() {
+		return srTemplate;
+	}
+
+	public List<String> getNextStepNames() {
+		return nextStepNames;
+	}
+
+	public String getCreatedAt() {
+		return createdAt;
+	}
+
+	public String getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public ChoreographerSessionStepStartCondition getStartCondition() {
+		return this.startCondition;
+	}
+
+	public String getThreshold() {
+		return this.threshold;
+	}
+
+	public String getPath() {
+		return this.path;
+	}
+
+	// -------------------------------------------------------------------------------------------------
+	public void setId(final long id) {
+		this.id = id;
+	}
+
+	public void setName(final String name) {
+		this.name = name;
+	}
+
+	public void setServiceDefinition(final String serviceDefinition) {
+		this.serviceDefinition = serviceDefinition;
+	}
+
+	public void setMinVersion(final Integer minVersion) {
+		this.minVersion = minVersion;
+	}
+
+	public void setMaxVersion(final Integer maxVersion) {
+		this.maxVersion = maxVersion;
+	}
+
+	public void setSrTemplate(final ChoreographerServiceQueryFormDTO srTemplate) {
+		this.srTemplate = srTemplate;
+	}
+
+	public void setNextStepNames(final List<String> nextStepNames) {
+		this.nextStepNames = nextStepNames;
+	}
+
+	public void setStaticParameters(final Map<String, String> staticParameters) {
+		this.staticParameters = staticParameters;
+	}
+
+	public void setQuantity(final int quantity) {
+		this.quantity = quantity;
+	}
+
+	public void setCreatedAt(final String createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public void setUpdatedAt(final String updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	public void setStartCondition(final ChoreographerSessionStepStartCondition startCondition) {
+		this.startCondition = startCondition;
+	}
+
+	public void setThreshold(final String threshold) {
+		this.threshold = threshold;
+	}
+
+	public void setPath(final String path) {
+		this.path = path;
+	}
+
+	// -------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
 		try {
