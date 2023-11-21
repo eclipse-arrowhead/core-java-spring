@@ -10,7 +10,7 @@ public class Node {
 	// members
 
 	protected final String name;
-	protected final Boolean isStartConditionAND;
+	protected final ChoreographerSessionStepStartCondition startCondition;
 	protected final Set<Node> nextNodes = new HashSet<>();
 	protected final Set<Node> prevNodes = new HashSet<>();
 
@@ -20,34 +20,14 @@ public class Node {
 	// -------------------------------------------------------------------------------------------------
 	public Node(final String name) {
 		this.name = name;
-		this.isStartConditionAND = true;
+		this.startCondition = ChoreographerSessionStepStartCondition.AND;
 	}
 
 	// -------------------------------------------------------------------------------------------------
 	public Node(final String name, final ChoreographerSessionStepStartCondition condition) {
 		this.name = name;
-		switch (condition) {
-		case TRUE: {
-			this.isStartConditionAND = false;
-			break;
-		}
-		case FALSE: {
-			this.isStartConditionAND = false;
-			break;
-		}
-		case OR: {
-			this.isStartConditionAND = false;
-			break;
-		}
-		default:
-			this.isStartConditionAND = true;
-		}
-	}
+		this.startCondition = condition;
 
-	// -------------------------------------------------------------------------------------------------
-	public Node(final String name, final Boolean condition) {
-		this.name = name;
-		this.isStartConditionAND = condition;
 	}
 
 	// -------------------------------------------------------------------------------------------------
@@ -55,8 +35,24 @@ public class Node {
 		return name;
 	}
 
+	public ChoreographerSessionStepStartCondition getStartCondition() {
+		return startCondition;
+	}
+	
 	public Boolean getIsStartConditionAND() {
-		return isStartConditionAND;
+		switch (startCondition) {
+		case TRUE: {
+			return false;
+		}
+		case FALSE: {
+			return false;
+		}
+		case OR: {
+			return false;
+		}
+		default:
+			return true;
+		}
 	}
 
 	public Set<Node> getNextNodes() {

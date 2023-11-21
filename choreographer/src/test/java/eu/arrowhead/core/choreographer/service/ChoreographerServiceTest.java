@@ -1677,9 +1677,12 @@ public class ChoreographerServiceTest {
 		final ChoreographerAction action = new ChoreographerAction();
 		action.setId(11);
 		final ChoreographerStep nextStep = new ChoreographerStep();
+		nextStep.setStartCondition("AND");
 		final ChoreographerStep otherPrevStep = new ChoreographerStep();
+		otherPrevStep.setStartCondition("AND");
 		final ChoreographerStep step = new ChoreographerStep();
 		step.setAction(action);
+		step.setStartCondition("AND");
 		step.setNextStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep)));
 		
 		nextStep.setPreviousStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep),
@@ -1721,11 +1724,14 @@ public class ChoreographerServiceTest {
 		action.setName("action");
 		action.setPlan(plan);
 		final ChoreographerStep nextStep = new ChoreographerStep();
+		nextStep.setStartCondition("AND");
 		nextStep.setName("nextStep");
 		nextStep.setAction(action);
 		final ChoreographerStep otherPrevStep = new ChoreographerStep();
+		otherPrevStep.setStartCondition("AND");
 		final ChoreographerStep step = new ChoreographerStep();
 		step.setAction(action);
+		step.setStartCondition("AND");
 		step.setNextStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep)));
 		
 		nextStep.setPreviousStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep),
