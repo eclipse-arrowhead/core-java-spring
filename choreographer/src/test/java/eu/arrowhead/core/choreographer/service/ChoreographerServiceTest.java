@@ -46,6 +46,7 @@ import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.database.entity.ChoreographerSessionStep;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.database.entity.ChoreographerStepNextStepConnection;
+import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStartCondition;
 import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStatus;
 import eu.arrowhead.common.dto.internal.ChoreographerStartSessionDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerAbortStepRequestDTO;
@@ -1677,12 +1678,12 @@ public class ChoreographerServiceTest {
 		final ChoreographerAction action = new ChoreographerAction();
 		action.setId(11);
 		final ChoreographerStep nextStep = new ChoreographerStep();
-		nextStep.setStartCondition("AND");
+		nextStep.setStartCondition(ChoreographerSessionStepStartCondition.AND);
 		final ChoreographerStep otherPrevStep = new ChoreographerStep();
-		otherPrevStep.setStartCondition("AND");
+		otherPrevStep.setStartCondition(ChoreographerSessionStepStartCondition.AND);
 		final ChoreographerStep step = new ChoreographerStep();
 		step.setAction(action);
-		step.setStartCondition("AND");
+		step.setStartCondition(ChoreographerSessionStepStartCondition.AND);
 		step.setNextStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep)));
 		
 		nextStep.setPreviousStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep),
@@ -1724,14 +1725,14 @@ public class ChoreographerServiceTest {
 		action.setName("action");
 		action.setPlan(plan);
 		final ChoreographerStep nextStep = new ChoreographerStep();
-		nextStep.setStartCondition("AND");
+		nextStep.setStartCondition(ChoreographerSessionStepStartCondition.AND);
 		nextStep.setName("nextStep");
 		nextStep.setAction(action);
 		final ChoreographerStep otherPrevStep = new ChoreographerStep();
-		otherPrevStep.setStartCondition("AND");
+		otherPrevStep.setStartCondition(ChoreographerSessionStepStartCondition.AND);
 		final ChoreographerStep step = new ChoreographerStep();
 		step.setAction(action);
-		step.setStartCondition("AND");
+		step.setStartCondition(ChoreographerSessionStepStartCondition.AND);
 		step.setNextStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep)));
 		
 		nextStep.setPreviousStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep),

@@ -32,6 +32,8 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -83,13 +85,14 @@ public class ChoreographerStep {
     @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private ZonedDateTime updatedAt;
 
-    @Column(columnDefinition = "TEXT")
-    private String startCondition;
+    @Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
+    @Enumerated(EnumType.STRING)
+    private ChoreographerSessionStepStartCondition startCondition;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String threshold;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String path;
     
     @OneToMany (mappedBy = "from", fetch = FetchType.EAGER, orphanRemoval = true)
@@ -116,7 +119,7 @@ public class ChoreographerStep {
         this.srTemplate = srTemplate;
         this.staticParameters = staticParameters;
         this.quantity = quantity;
-        this.startCondition = "AND";
+        this.startCondition = ChoreographerSessionStepStartCondition.AND;
         this.threshold = null;
         this.path = null;
     }
@@ -131,12 +134,13 @@ public class ChoreographerStep {
         this.srTemplate = srTemplate;
         this.staticParameters = staticParameters;
         this.quantity = quantity;
-        switch(startCondition) {
-			case TRUE: this.startCondition = "TRUE"; break;
-			case FALSE: this.startCondition = "FALSE"; break;
-			case OR: this.startCondition = "OR"; break;
-        	default: this.startCondition = "AND";
-        }
+        this.startCondition = startCondition;
+//        switch(startCondition) {
+//			case TRUE: this.startCondition = "TRUE"; break;
+//			case FALSE: this.startCondition = "FALSE"; break;
+//			case OR: this.startCondition = "OR"; break;
+//        	default: this.startCondition = "AND";
+//        }
         this.threshold = threshold;
         this.path = path;
     }
@@ -157,12 +161,13 @@ public class ChoreographerStep {
     public Set<ChoreographerStepNextStepConnection> getNextStepConnections() { return nextStepConnections; }
     public Set<ChoreographerStepNextStepConnection> getPreviousStepConnections() { return previousStepConnections; }
     public ChoreographerSessionStepStartCondition getStartCondition() {
-        switch(startCondition) {
-			case "TRUE": return ChoreographerSessionStepStartCondition.TRUE;
-			case  "FALSE": return ChoreographerSessionStepStartCondition.FALSE;
-			case  "OR": return ChoreographerSessionStepStartCondition.OR;
-        	default: return ChoreographerSessionStepStartCondition.AND;
-    	}
+    	return startCondition;
+//        switch(startCondition) {
+//			case "TRUE": return ChoreographerSessionStepStartCondition.TRUE;
+//			case  "FALSE": return ChoreographerSessionStepStartCondition.FALSE;
+//			case  "OR": return ChoreographerSessionStepStartCondition.OR;
+//        	default: return ChoreographerSessionStepStartCondition.AND;
+//    	}
     }
     public String getThreshold() {return this.threshold;}
     public String getPath() {return this.path;}
@@ -192,7 +197,7 @@ public class ChoreographerStep {
     public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
     public void setNextStepConnections(final Set<ChoreographerStepNextStepConnection> nextStepConnections) { this.nextStepConnections = nextStepConnections; }
     public void setPreviousStepConnections(final Set<ChoreographerStepNextStepConnection> previousStepConnections) { this.previousStepConnections = previousStepConnections; }
-    public void setStartCondition(final String startCondition) {this.startCondition = startCondition;}
+    public void setStartCondition(final ChoreographerSessionStepStartCondition startCondition) {this.startCondition = startCondition;}
     public void setThreshold(final String threshold) { this.threshold = threshold;}
     public void setPath(final String path) { this.path = path;}
 

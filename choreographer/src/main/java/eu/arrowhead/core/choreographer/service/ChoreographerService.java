@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
@@ -514,6 +515,9 @@ public class ChoreographerService {
 		} else {
 			final List<ChoreographerStep> executableSteps = new ArrayList<>();
 			boolean executable = true;
+			
+			AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+			context.scan("eu.arrowhead.core.choreographer.servic");
 
 			for (final ChoreographerStep nextStep : nextSteps) {
 				// next step is only executable if all of its previous steps are done
@@ -539,7 +543,7 @@ public class ChoreographerService {
 
 				} else if (ChoreographerSessionStepStartCondition.TRUE == nextStep.getStartCondition()) {
 					executable = false;
-					StepResponseEvaluation evaluator = new StepResponseEvaluation();
+					StepResponseEvaluation evaluator = context.getBean(StepResponseEvaluation.class);
 
 					for (final ChoreographerSessionStep sessionStep : previousSessionSteps) {
 						if (ChoreographerSessionStepStatus.DONE == sessionStep.getStatus()
@@ -552,7 +556,7 @@ public class ChoreographerService {
 
 				} else if (ChoreographerSessionStepStartCondition.FALSE == nextStep.getStartCondition()) {
 					executable = false;
-					StepResponseEvaluation evaluator = new StepResponseEvaluation();
+					StepResponseEvaluation evaluator = context.getBean(StepResponseEvaluation.class);
 
 					for (final ChoreographerSessionStep sessionStep : previousSessionSteps) {
 						if (ChoreographerSessionStepStatus.DONE == sessionStep.getStatus()
