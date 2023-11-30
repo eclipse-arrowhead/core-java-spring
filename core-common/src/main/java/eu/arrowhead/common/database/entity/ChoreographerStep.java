@@ -61,6 +61,8 @@ public class ChoreographerStep {
     
     private boolean firstStep = false;
     
+    private boolean isWaiting = true;
+    
     @Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
     private String serviceDefinition;
 
@@ -135,12 +137,6 @@ public class ChoreographerStep {
         this.staticParameters = staticParameters;
         this.quantity = quantity;
         this.startCondition = startCondition;
-//        switch(startCondition) {
-//			case TRUE: this.startCondition = "TRUE"; break;
-//			case FALSE: this.startCondition = "FALSE"; break;
-//			case OR: this.startCondition = "OR"; break;
-//        	default: this.startCondition = "AND";
-//        }
         this.threshold = threshold;
         this.path = path;
     }
@@ -162,15 +158,10 @@ public class ChoreographerStep {
     public Set<ChoreographerStepNextStepConnection> getPreviousStepConnections() { return previousStepConnections; }
     public ChoreographerSessionStepStartCondition getStartCondition() {
     	return startCondition;
-//        switch(startCondition) {
-//			case "TRUE": return ChoreographerSessionStepStartCondition.TRUE;
-//			case  "FALSE": return ChoreographerSessionStepStartCondition.FALSE;
-//			case  "OR": return ChoreographerSessionStepStartCondition.OR;
-//        	default: return ChoreographerSessionStepStartCondition.AND;
-//    	}
     }
     public String getThreshold() {return this.threshold;}
     public String getPath() {return this.path;}
+    public boolean getIsWaiting() { return this.isWaiting;}
     
     //-------------------------------------------------------------------------------------------------
 	public Set<ChoreographerStep> getNextSteps() {
@@ -200,6 +191,7 @@ public class ChoreographerStep {
     public void setStartCondition(final ChoreographerSessionStepStartCondition startCondition) {this.startCondition = startCondition;}
     public void setThreshold(final String threshold) { this.threshold = threshold;}
     public void setPath(final String path) { this.path = path;}
+    public void setIsWaiting(boolean state) {this.isWaiting = state;}
 
 	//-------------------------------------------------------------------------------------------------
 	@PrePersist

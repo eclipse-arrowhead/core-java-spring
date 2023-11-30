@@ -264,6 +264,7 @@ public class ChoreographerService {
 			logger.debug("Have no session cache, probably it was aborted!");
 			return;
 		}
+		
 
 		final String fullStepName = createFullyQualifiedStepName(step);
 		final ChoreographerSessionStep sessionStep = sessionDBService.changeSessionStepStatus(sessionId, step,
@@ -280,6 +281,7 @@ public class ChoreographerService {
 				throw new ChoreographerSessionException(sessionId, sessionStep.getId(),
 						"Can't find properly working executor for step: " + createFullyQualifiedStepName(step));
 			} else {
+				step.setIsWaiting(false);
 				cache.put(step.getServiceDefinition(), step.getMinVersion(), step.getMaxVersion(), executorData);
 			}
 		}
@@ -310,8 +312,10 @@ public class ChoreographerService {
 						"No providers found for step: " + fullStepName);
 			}
 		} catch (final ChoreographerSessionException ex) {
+			step.setIsWaiting(true);
 			throw ex;
 		} catch (final Exception ex) { // problem during orchestration
+			step.setIsWaiting(true);
 			closeGatewayTunnelsIfNecessary(executorPreconditions);
 
 			throw new ChoreographerSessionException(sessionId, sessionStep.getId(),
@@ -329,6 +333,7 @@ public class ChoreographerService {
 		try {
 			driver.startExecutor(executor.getAddress(), executor.getPort(), executor.getBaseUri(), payload);
 		} catch (final Exception ex) {
+			step.setIsWaiting(true);
 			logger.warn("Unable to start executor - " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 			logger.debug(ex);
 
@@ -515,10 +520,12 @@ public class ChoreographerService {
 		} else {
 			final List<ChoreographerStep> executableSteps = new ArrayList<>();
 			boolean executable = true;
-			
+
 			AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 			context.scan("eu.arrowhead.core.choreographer.servic");
 
+			StepResponseEvaluation evaluator =  new StepResponseEvaluation(); 	//context.getBean(StepResponseEvaluation.class);
+																				// new StepResponseEvaluation();
 			for (final ChoreographerStep nextStep : nextSteps) {
 				// next step is only executable if all of its previous steps are done
 				final List<ChoreographerSessionStep> previousSessionSteps = sessionDBService
@@ -532,40 +539,19 @@ public class ChoreographerService {
 						}
 					}
 
-				} else if (ChoreographerSessionStepStartCondition.OR == nextStep.getStartCondition()) {
-					executable = false;
-					for (final ChoreographerSessionStep sessionStep : previousSessionSteps) {
-						if (ChoreographerSessionStepStatus.DONE == sessionStep.getStatus()) {
-							executable = true;
-							break;
-						}
-					}
+				} else if (nextStep.getIsWaiting() && ChoreographerSessionStepStartCondition.OR == nextStep.getStartCondition()) {
+					executable = true;
 
-				} else if (ChoreographerSessionStepStartCondition.TRUE == nextStep.getStartCondition()) {
-					executable = false;
-					StepResponseEvaluation evaluator = context.getBean(StepResponseEvaluation.class);
+				} else if (nextStep.getIsWaiting() && ChoreographerSessionStepStartCondition.TRUE == nextStep.getStartCondition()
+						&& payload.getMessage() != null && evaluator.stepOutputValue(payload.getMessage(),
+								nextStep.getPath(), nextStep.getThreshold())) {
+					executable = true;
 
-					for (final ChoreographerSessionStep sessionStep : previousSessionSteps) {
-						if (ChoreographerSessionStepStatus.DONE == sessionStep.getStatus()
-								&& evaluator.stepOutputValue(payload.getMessage(), sessionStep.getStep().getPath(),
-										sessionStep.getStep().getThreshold())) {
-							executable = true;
-							break;
-						}
-					}
+				} else if (nextStep.getIsWaiting() && ChoreographerSessionStepStartCondition.FALSE == nextStep.getStartCondition()
+						&& payload.getMessage() != null && !(evaluator.stepOutputValue(payload.getMessage(),
+								nextStep.getPath(), nextStep.getThreshold()))) {
+					executable = true;
 
-				} else if (ChoreographerSessionStepStartCondition.FALSE == nextStep.getStartCondition()) {
-					executable = false;
-					StepResponseEvaluation evaluator = context.getBean(StepResponseEvaluation.class);
-
-					for (final ChoreographerSessionStep sessionStep : previousSessionSteps) {
-						if (ChoreographerSessionStepStatus.DONE == sessionStep.getStatus()
-								&& !(evaluator.stepOutputValue(payload.getMessage(), sessionStep.getStep().getPath(),
-										sessionStep.getStep().getThreshold()))) {
-							executable = true;
-							break;
-						}
-					}
 				}
 
 				if (executable) {
@@ -586,6 +572,8 @@ public class ChoreographerService {
 					}
 				});
 			}
+			
+			context.close();
 		}
 
 	}

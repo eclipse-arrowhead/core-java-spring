@@ -370,12 +370,12 @@ public class ChoreographerPlanValidator {
 		if(elements.length != 2)
 			throw new IllegalArgumentException("The threshold valuable must have two component, seperated by a \":\" character.");
 		String type = elements[0].toLowerCase();
-		if( type.equals("long")) {
+		if( type.equals("double")) {
 			try{
-				value = ((Long) Long.parseLong(elements[1])).toString();
+				value = ((Double) Double.parseDouble(elements[1])).toString();
 			}
 			catch ( NumberFormatException e){
-				throw  new IllegalArgumentException("The long value must be a long number.");
+				throw  new IllegalArgumentException("The double value must be a double number.");
 			}
 		} else if( type.equals("int")) {
 			try{
@@ -391,7 +391,7 @@ public class ChoreographerPlanValidator {
 		} else if( type.equals("string")) {
 			value = elements[1].toLowerCase();
 		} else {
-			throw new IllegalArgumentException("Invalid threshold type. The threshold type can only be long, integer, boolean or string.");
+			throw new IllegalArgumentException("Invalid threshold type. The threshold type can only be double, integer, boolean or string.");
 		} 
 
 		return type + ":" + value;

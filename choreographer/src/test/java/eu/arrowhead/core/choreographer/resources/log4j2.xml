@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+    <Properties>
+        <Property name="LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex
+        </Property>
+		<Property name="SYSTEM_NAME">CHOREOGRAPHER</Property>
+		<Property name="JDBC_LEVEL">OFF</Property>
+		<Property name="CONSOLE_FILE_LEVEL">OFF</Property>
+		<Property name="LOG_DIR">.</Property>
+    </Properties>
+    <Appenders>
+        <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+ 			<ThresholdFilter level="${CONSOLE_FILE_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+        </Console>
+		<RollingFile name="FileAppender" fileName="${LOG_DIR}/choreographer.log" filePattern="${LOG_DIR}/choreographer-%d{yyyy-MM-dd}-%i.log">
+	    	<PatternLayout>
+	        	<Pattern>${LOG_PATTERN}</Pattern>
+	    	</PatternLayout>
+	    	<Policies>
+	        	<SizeBasedTriggeringPolicy size="100MB" />
+	    	</Policies>
+	    	<DefaultRolloverStrategy max="10" />
+ 			<ThresholdFilter level="${CONSOLE_FILE_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+		</RollingFile>
+		<JDBC name="MySQLDatabase" tableName="logs">
+         	<ConnectionFactory class="eu.arrowhead.common.log4j2.JDBCConnectionFactoryForLog4J2" method="getConnection" />
+         	<Column name="log_id" pattern="%u" />
+         	<Column name="entry_date" isEventTimestamp="true" />
+         	<Column name="logger" pattern="%logger" />
+         	<Column name="system_name" literal="'${SYSTEM_NAME}'" />
+         	<Column name="log_level" pattern="%level" />
+         	<Column name="message" pattern="%m" />
+         	<Column name="exception" pattern="%throwable" />
+			<ThresholdFilter level="${JDBC_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+      	</JDBC>
+    </Appenders>
+    <Loggers>
+		<Root level="OFF">
+            <AppenderRef ref="ConsoleAppender" /> <!-- comment out this one in production environment -->
+            <AppenderRef ref="FileAppender" />
+        </Root>
+ 		<AsyncLogger name="eu.arrowhead" level="OFF" additivity="true">
+            <AppenderRef ref="MySQLDatabase"  />			
+    	</AsyncLogger>
+		<Logger name="eu.arrowhead.core" level="OFF" additivity="true"></Logger>		
+		<Logger name="eu.arrowhead.common" level="OFF" additivity="true"></Logger>
+ 		<AsyncLogger name="org" level="OFF" additivity="true">
+            <AppenderRef ref="MySQLDatabase"  />			
+    	</AsyncLogger>
+ 		<AsyncLogger name="com" level="OFF" additivity="true">
+            <AppenderRef ref="MySQLDatabase"  />			
+    	</AsyncLogger>	
+    </Loggers>
+</Configuration>
