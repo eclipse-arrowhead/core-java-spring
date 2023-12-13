@@ -934,7 +934,7 @@ public class OrchestratorStoreDBService {
 		SystemResponseDTO providerSystem = new SystemResponseDTO();
 		if (systemOptional.isEmpty()) {
 			providerSystem.setId(orchestratorStore.getProviderSystemId());
-			providerSystem.setSystemName("unknown");
+			providerSystem.setSystemName("unknown-" + orchestratorStore.getProviderSystemId());
 			providerSystem.setAddress("unknown");
 		} else {
 			providerSystem = DTOConverter.convertSystemToSystemResponseDTO(systemOptional.get());		
