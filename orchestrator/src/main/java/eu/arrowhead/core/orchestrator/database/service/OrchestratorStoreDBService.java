@@ -930,12 +930,16 @@ public class OrchestratorStoreDBService {
 	@SuppressWarnings("squid:S3655")
 	private OrchestratorStoreResponseDTO getLocalResponseDTO(final OrchestratorStore orchestratorStore) {
 		final Optional<System> systemOptional = systemRepository.findById(orchestratorStore.getProviderSystemId());
-		if (systemOptional.isEmpty()) {
-			throw new InvalidParameterException("SystemOptional by id: " + orchestratorStore.getProviderSystemId() + NOT_IN_DB_ERROR_MESSAGE);
-		}
-		final System system = systemOptional.get();
 		
-		final SystemResponseDTO providerSystem = DTOConverter.convertSystemToSystemResponseDTO(system);		
+		SystemResponseDTO providerSystem = new SystemResponseDTO();
+		if (systemOptional.isEmpty()) {
+			providerSystem.setId(orchestratorStore.getProviderSystemId());
+			providerSystem.setSystemName("unknown");
+			providerSystem.setAddress("unknown");
+		} else {
+			providerSystem = DTOConverter.convertSystemToSystemResponseDTO(systemOptional.get());		
+		}
+		
 		
 		return DTOConverter.convertOrchestratorStoreToOrchestratorStoreResponseDTO(orchestratorStore, providerSystem, null);
 	}
