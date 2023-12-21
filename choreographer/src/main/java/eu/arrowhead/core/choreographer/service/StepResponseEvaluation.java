@@ -20,20 +20,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.lang.String;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Service
+@Component
 class StepResponseEvaluation {
 	
 	private final Logger logger = LogManager.getLogger(StepResponseEvaluation.class);
 	
+	private ObjectMapper objectMapper = new ObjectMapper();
+	
 	public Boolean stepOutputValue(String message, String path, String threshold) {
-		// if sth used is null throw exception
-		if (path == null || message == null || threshold == null) {
-			throw new NullPointerException("The arguments cannot be null");
-		}
 
 		// extract value from message given in path
 		String value = getJsonValue(path, message);
@@ -64,8 +63,7 @@ class StepResponseEvaluation {
 	}
 
 	public String getJsonValue(String path, String message) {
-		ObjectMapper objectMapper = new ObjectMapper();
-
+		
 		String keys[] = path.split("/");
 
 		String value = null;

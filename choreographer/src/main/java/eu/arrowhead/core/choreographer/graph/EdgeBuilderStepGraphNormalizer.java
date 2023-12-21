@@ -8,9 +8,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
-
 import eu.arrowhead.core.choreographer.graph.Node;
-import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStartCondition;
 
 public class EdgeBuilderStepGraphNormalizer implements StepGraphNormalizer {
 	
@@ -34,7 +32,7 @@ public class EdgeBuilderStepGraphNormalizer implements StepGraphNormalizer {
 		final StepGraph resultGraph = shallowCopyStepGraph(graph);
 
 		for (final Node node : graph.getSteps()) {
-			List<List<String>> routes = generateRoutes(node);
+			List<List<Node>> routes = generateRoutes(node);
 			logger.debug("Calculated routes for {}: {}", node.getName(), routes);
 			if (routes.size() > 1) {
 				sortRoutesByLengthDescending(routes);
@@ -62,15 +60,15 @@ public class EdgeBuilderStepGraphNormalizer implements StepGraphNormalizer {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<List<String>> generateRoutes(final Node node) {
+	private List<List<Node>> generateRoutes(final Node node) {
 		if (node.getPrevNodes().isEmpty()) {
-			return List.of(List.of(node.getName()));
+			return List.of(List.of(new Node(node.getName(), node.getStartCondition())));
 		}
 		
-		final List<List<String>> result = new ArrayList<>();
+		final List<List<Node>> result = new ArrayList<>();
 		for (final Node prevNode : node.getPrevNodes()) {
-			final List<String> route = new ArrayList<>();
-			route.add(node.getName());
+			final List<Node> route = new ArrayList<>();
+			route.add(new Node(node.getName(), node.getStartCondition()));
 			generateARoute(prevNode, route, result);
 		}
 		
@@ -78,36 +76,36 @@ public class EdgeBuilderStepGraphNormalizer implements StepGraphNormalizer {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void generateARoute(final Node node, final List<String> routePrefix, final List<List<String>> routes) {
-		routePrefix.add(node.getName());
+	private void generateARoute(final Node node, final List<Node> routePrefix, final List<List<Node>> routes) {
+		routePrefix.add(new Node(node.getName(), node.getStartCondition()));
 		
 		if (node.getPrevNodes().isEmpty()) {
 			routes.add(routePrefix);
 		}
 		
 		for (final Node prevNode : node.getPrevNodes()) {
-			final List<String> routePrefixCopy = copyRoute(routePrefix);
+			final List<Node> routePrefixCopy = copyRoute(routePrefix);
 			generateARoute(prevNode, routePrefixCopy, routes);
 		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<String> copyRoute(final List<String> route) {
-		final List<String> result = new ArrayList<>(route.size());
-		for (final String nodeName : route) {
-			result.add(nodeName);
+	private List<Node> copyRoute(final List<Node> route) {
+		final List<Node> result = new ArrayList<>(route.size());
+		for (final Node node : route) {
+			result.add(node);
 		}
 		
 		return result;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void sortRoutesByLengthDescending(final List<List<String>> routes) {
-		Collections.sort(routes, new Comparator<List<String>>() {
+	private void sortRoutesByLengthDescending(final List<List<Node>> routes) {
+		Collections.sort(routes, new Comparator<List<Node>>() {
 
 			//-------------------------------------------------------------------------------------------------
 			@Override
-			public int compare(final List<String> route1, final List<String> route2) {
+			public int compare(final List<Node> route1, final List<Node> route2) {
 				// we need descending order
 				return Integer.compare(route2.size(), route1.size());
 			}
@@ -116,14 +114,25 @@ public class EdgeBuilderStepGraphNormalizer implements StepGraphNormalizer {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<List<String>> removeRedundantRoutes(final List<List<String>> routes) {
-		final List<List<String>> result = new ArrayList<>();
+	private List<List<Node>> removeRedundantRoutes(final List<List<Node>> routes) {
+		final List<List<Node>> result = new ArrayList<>();
 		result.add(routes.get(0)); // we always keep the first one (longest one)
 		
 		for (int i = 1; i < routes.size(); ++i) {
-			final List<String> candidateRoute = routes.get(i);
+			final List<Node> candidateRoute = routes.get(i);
 			if (!isRedundantRoute(candidateRoute, result)) {
 				result.add(candidateRoute);
+			}
+			else {/*add edges that ends in node where startCondition is NOT AND */
+		for (int j = 0; j < candidateRoute.size(); ++j) {
+			final Node node = candidateRoute.get(j);
+			if(node.getIsStartConditionAND() && j < candidateRoute.size() - 1) {
+				List<Node> mustKeepEdge = new ArrayList<>();
+				mustKeepEdge.add(node);
+				mustKeepEdge.add(candidateRoute.get(j+1));
+				result.add(mustKeepEdge);
+			}
+		}
 			}
 		}
 		
@@ -131,8 +140,8 @@ public class EdgeBuilderStepGraphNormalizer implements StepGraphNormalizer {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private boolean isRedundantRoute(final List<String> candidateRoute, final List<List<String>> verifiedRoutes) {
-		for (final List<String> route : verifiedRoutes) {
+	private boolean isRedundantRoute(final List<Node> candidateRoute, final List<List<Node>> verifiedRoutes) {
+		for (final List<Node> route : verifiedRoutes) {
 			if (isRedundantRouteImpl(candidateRoute, route)) {
 				return true;
 			}
@@ -141,16 +150,11 @@ public class EdgeBuilderStepGraphNormalizer implements StepGraphNormalizer {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private boolean isRedundantRouteImpl(final List<String> candidateRoute, final List<String> verifiedRoute) {
+	private boolean isRedundantRouteImpl(final List<Node> candidateRoute, final List<Node> verifiedRoute) {
 		int lastIndex = -1;
 		
-//		final Node lastNode = candidateRoute.get(0);
-//		if(lastNode.getIsStartConditionAND()) {
-//			return false;
-//		}
-		
 		for (int i = 0; i < candidateRoute.size(); ++i) {
-			final String node = candidateRoute.get(i);
+			final Node node = candidateRoute.get(i);
 			int index = verifiedRoute.indexOf(node);
 			if (index <= lastIndex) {
 				return false;
@@ -162,8 +166,8 @@ public class EdgeBuilderStepGraphNormalizer implements StepGraphNormalizer {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void addEdgesFromRoutes(final StepGraph graph, final List<List<String>> routes) {
-		for (final List<String> route : routes) {
+	private void addEdgesFromRoutes(final StepGraph graph, final List<List<Node>> routes) {
+		for (final List<Node> route : routes) {
 			if (route.size() > 1) {
 				final Node toNode = findNode(graph, route.get(0));
 				final Node fromNode = findNode(graph, route.get(1));
@@ -174,9 +178,9 @@ public class EdgeBuilderStepGraphNormalizer implements StepGraphNormalizer {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private Node findNode(final StepGraph graph, final String name) {
+	private Node findNode(final StepGraph graph, final Node pnode) {
 		for (final Node node : graph.getSteps()) {
-			if (name.equals(node.getName())) {
+			if (pnode.getName().equals(node.getName())) {
 				return node;
 			}
 		}

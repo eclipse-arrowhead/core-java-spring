@@ -89,6 +89,8 @@ public class ChoreographerService {
 
 	@Autowired
 	private ExecutorSelector executorSelector;
+	
+	private StepResponseEvaluation evaluator = new StepResponseEvaluation();
 
 	private final Logger logger = LogManager.getLogger(ChoreographerService.class);
 
@@ -521,17 +523,13 @@ public class ChoreographerService {
 			final List<ChoreographerStep> executableSteps = new ArrayList<>();
 			boolean executable = true;
 
-			AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-			context.scan("eu.arrowhead.core.choreographer.servic");
-
-			StepResponseEvaluation evaluator =  new StepResponseEvaluation(); 	//context.getBean(StepResponseEvaluation.class);
-																				// new StepResponseEvaluation();
 			for (final ChoreographerStep nextStep : nextSteps) {
-				// next step is only executable if all of its previous steps are done
+				
 				final List<ChoreographerSessionStep> previousSessionSteps = sessionDBService
 						.getSessionStepBySessionIdAndSteps(sessionId, nextStep.getPreviousSteps());
 
 				if (ChoreographerSessionStepStartCondition.AND == nextStep.getStartCondition()) {
+					// next step is only executable if all of its previous steps are done
 					for (final ChoreographerSessionStep sessionStep : previousSessionSteps) {
 						if (ChoreographerSessionStepStatus.DONE != sessionStep.getStatus()) {
 							executable = false;
@@ -551,7 +549,6 @@ public class ChoreographerService {
 						&& payload.getMessage() != null && !(evaluator.stepOutputValue(payload.getMessage(),
 								nextStep.getPath(), nextStep.getThreshold()))) {
 					executable = true;
-
 				}
 
 				if (executable) {
@@ -573,7 +570,6 @@ public class ChoreographerService {
 				});
 			}
 			
-			context.close();
 		}
 
 	}

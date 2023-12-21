@@ -2,7 +2,7 @@ package eu.arrowhead.core.choreographer.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
-//import com.fasterxml.jackson.databind.JsonNode;
+
 import java.lang.String;
 import java.lang.Double;
 import java.lang.NullPointerException;
@@ -16,12 +16,23 @@ import org.junit.Test;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import eu.arrowhead.core.choreographer.ChoreographerMain;
 
 @RunWith(SpringRunner.class)
 public class StepResponseEvaluationTest {
 
 	private String message;
 
+	private StepResponseEvaluation evaluator = new StepResponseEvaluation();
+	
+	private ObjectMapper objectMapper = new ObjectMapper();
+	
 	public class Coordinates {
 		private Double x;
 		private Double y;
@@ -99,7 +110,7 @@ public class StepResponseEvaluationTest {
 	@Before
 	public void setMessage() throws JsonProcessingException {
 
-			ObjectMapper objectMapper = new ObjectMapper();
+			
 			List<Car> list = new ArrayList();
 			list.add(new Car("yellow", "Renault"));
 			list.add(new Car("blue", "Suzuki"));
@@ -109,11 +120,6 @@ public class StepResponseEvaluationTest {
 			double z = 66.6;
 			TestMessage object = new TestMessage(1234, true, x, y, z, list);
 			message = objectMapper.writeValueAsString(object);
-
-//			ObjectMapper objectMapper = new ObjectMapper();
-//			Car car = new Car("yellow", "renault");
-//			Coordinates place = new Coordinates(x,y,z);
-//			message = objectMapper.writeValueAsString(place);
 
 	}
 
@@ -129,7 +135,7 @@ public class StepResponseEvaluationTest {
 
 	@Test
 	public void getJsonValueTest() {
-		StepResponseEvaluation evaluator = new StepResponseEvaluation();
+//		StepResponseEvaluation evaluator = new StepResponseEvaluation();
 		String path = "value/id";
 		String result = evaluator.getJsonValue(path, message);
 		Assert.assertEquals("1234", result);
@@ -173,27 +179,33 @@ public class StepResponseEvaluationTest {
 		path = "map/cars/array/2/value/type";
 		result = evaluator.getJsonValue(path, message);
 		Assert.assertEquals("Opel", result);
-		{
-		}
+
 	}
 
 	@Test(expected = IndexOutOfBoundsException.class)
 	public void getJsonValueInvalidIndexTest() {
-		StepResponseEvaluation evaluator = new StepResponseEvaluation();
+//		StepResponseEvaluation evaluator = new StepResponseEvaluation();
 		String path = "map/cars/array/3/value/type";
 		evaluator.getJsonValue(path, message);
 	}
 
 	@Test(expected = NullPointerException.class)
 	public void getJsonValueInvalidAttributeTest() {
-		StepResponseEvaluation evaluator = new StepResponseEvaluation();
+//		StepResponseEvaluation evaluator = new StepResponseEvaluation();
 		String path = "map/cars/value/type";
+		evaluator.getJsonValue(path, message);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void checkPathKeywordsTest() {
+//		StepResponseEvaluation evaluator = new StepResponseEvaluation();
+		String path = "map/cars/key/type";
 		evaluator.getJsonValue(path, message);
 	}
 
 	@Test
 	public void stepOutputValueTest() {
-		StepResponseEvaluation evaluator = new StepResponseEvaluation();
+//		StepResponseEvaluation evaluator = new StepResponseEvaluation();
 
 		String path = "value/isAccessable";
 		String threshold = "boolean:true";
@@ -240,7 +252,7 @@ public class StepResponseEvaluationTest {
 
 	@Test(expected = NumberFormatException.class)
 	public void stepOutputValueIntegerParseExceptionTest() {
-		StepResponseEvaluation evaluator = new StepResponseEvaluation();
+//		StepResponseEvaluation evaluator = new StepResponseEvaluation();
 		String path = "value/id";
 		String threshold = "integer:4.5";
 		evaluator.stepOutputValue(message, path, threshold);
@@ -248,7 +260,7 @@ public class StepResponseEvaluationTest {
 
 	@Test(expected = NumberFormatException.class)
 	public void stepOutputValueDoubleParseExceptionTest() {
-		StepResponseEvaluation evaluator = new StepResponseEvaluation();
+//		StepResponseEvaluation evaluator = new StepResponseEvaluation();
 		String path = "map/place/value/x";
 		String threshold = "double:true";
 		evaluator.stepOutputValue(message, path, threshold);
@@ -256,7 +268,7 @@ public class StepResponseEvaluationTest {
 
 	@Test
 	public void illegalArgumentExceptionTest() {
-		StepResponseEvaluation evaluator = new StepResponseEvaluation();
+//		StepResponseEvaluation evaluator = new StepResponseEvaluation();
 		try {
 			String path = "map/place/value/x";
 			String threshold = "double 4.2";
@@ -296,14 +308,14 @@ public class StepResponseEvaluationTest {
 
 	@Test(expected = NullPointerException.class)
 	public void thresholdIsNullTest() {
-		StepResponseEvaluation evaluator = new StepResponseEvaluation();
+//		StepResponseEvaluation evaluator = new StepResponseEvaluation();
 		String path = "map/cars/value/type";
 		evaluator.stepOutputValue(message, path, null);
 	}
 	
 	@Test(expected = NullPointerException.class)
 	public void messageIsNullTest() {
-		StepResponseEvaluation evaluator = new StepResponseEvaluation();
+//		StepResponseEvaluation evaluator = new StepResponseEvaluation();
 		String path = "value/isAccessable";
 		String threshold = "boolean:true";
 		evaluator.stepOutputValue(null, path, threshold);
@@ -311,7 +323,7 @@ public class StepResponseEvaluationTest {
 	
 	@Test(expected = NullPointerException.class)
 	public void pathIsNullTest() {
-		StepResponseEvaluation evaluator = new StepResponseEvaluation();
+//		StepResponseEvaluation evaluator = new StepResponseEvaluation();
 		String threshold = "boolean:true";
 		evaluator.stepOutputValue(message, null, threshold);
 	}

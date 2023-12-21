@@ -92,6 +92,15 @@ public class ChoreographerServiceTest {
     
 	@Mock
     private ExecutorSelector executorSelector;
+	
+	private static String message = 
+			"{\"id\":1234,\"isAccessable\":true,"
+			+ "\"place\":{\"x\":3.14,\"y\":42.1,\"z\":66.6},"
+			+ "\"cars\":["
+			+ "{\"color\":\"yellow\",\"type\":\"Renault\"},"
+			+ "{\"color\":\"blue\",\"type\":\"Suzuki\"},"
+			+ "{\"color\":\"silver\",\"type\":\"Opel\"}]}"
+;
 
 	//=================================================================================================
 	// methods
@@ -1711,44 +1720,40 @@ public class ChoreographerServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	
 	@Test
-	public void testReceiveSessionStepDoneCannotStartNextStepCaseTrue() {  
+	public void testReceiveSessionStepDoneCannotStartNextStepCaseTrue() {
+		
 		final ChoreographerExecutedStepResultDTO payload = new ChoreographerExecutedStepResultDTO();
 		payload.setSessionId(1L);
 		payload.setSessionStepId(1L);
 		payload.setStatus(ChoreographerExecutedStepStatus.SUCCESS);
-		payload.setMessage(
-				"{\"id\":1234,\"isAccessable\":true,\"place\":{\"x\":3.14,\"y\":42.1,\"z\":66.6},\"cars\":[{\"color\":\"yellow\",\"type\":\"Renault\"},{\"color\":\"blue\",\"type\":\"Suzuki\"},{\"color\":\"silver\",\"type\":\"Opel\"}]}"
-			);
+		payload.setMessage(message);
 		
 		final ChoreographerSession session = new ChoreographerSession();
 		session.setId(1);
+		
 		final ChoreographerAction action = new ChoreographerAction();
 		action.setId(11);
+		
 		final ChoreographerStep nextStep = new ChoreographerStep();
 		nextStep.setStartCondition(ChoreographerSessionStepStartCondition.TRUE);
 		nextStep.setPath("map/place/value/x");
 		nextStep.setThreshold("double:6.6");
-		final ChoreographerStep otherPrevStep = new ChoreographerStep();
-		otherPrevStep.setStartCondition(ChoreographerSessionStepStartCondition.AND);
+		
 		final ChoreographerStep step = new ChoreographerStep();
 		step.setAction(action);
 		step.setStartCondition(ChoreographerSessionStepStartCondition.AND);
 		step.setNextStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep)));
 		
-		nextStep.setPreviousStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep),
-												   new ChoreographerStepNextStepConnection(otherPrevStep, nextStep)));
+		nextStep.setPreviousStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep))); 
+		
 		final ChoreographerSessionStep sessionStep = new ChoreographerSessionStep();
 		sessionStep.setId(1);
 		sessionStep.setStep(step);
 		sessionStep.setSession(session);
 		sessionStep.setStatus(ChoreographerSessionStepStatus.DONE);
 		
-		final ChoreographerSessionStep otherPrevSessionStep = new ChoreographerSessionStep();
-		otherPrevSessionStep.setStatus(ChoreographerSessionStepStatus.RUNNING);
-		
 		when(sessionDBService.changeSessionStepStatus(1, ChoreographerSessionStepStatus.DONE, "Step finished successfully.")).thenReturn(sessionStep);
-		when(sessionDBService.getSessionStepBySessionIdAndSteps(eq(1L), anySet())).thenReturn(List.of(sessionStep, otherPrevSessionStep));
-		
+	
 		testObject.receiveSessionStepDoneMessage(payload);
 
 		verify(sessionDBService, times(1)).changeSessionStepStatus(1, ChoreographerSessionStepStatus.DONE, "Step finished successfully.");
@@ -1759,43 +1764,39 @@ public class ChoreographerServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	
 	@Test
-	public void testReceiveSessionStepDoneCannotStartNextStepCaseFalse() {  
+	public void testReceiveSessionStepDoneCannotStartNextStepCaseFalse() {
+		
 		final ChoreographerExecutedStepResultDTO payload = new ChoreographerExecutedStepResultDTO();
 		payload.setSessionId(1L);
 		payload.setSessionStepId(1L);
 		payload.setStatus(ChoreographerExecutedStepStatus.SUCCESS);
-		payload.setMessage(
-				"{\"id\":1234,\"isAccessable\":true,\"place\":{\"x\":3.14,\"y\":42.1,\"z\":66.6},\"cars\":[{\"color\":\"yellow\",\"type\":\"Renault\"},{\"color\":\"blue\",\"type\":\"Suzuki\"},{\"color\":\"silver\",\"type\":\"Opel\"}]}"
-			);
+		payload.setMessage(message);
 		
 		final ChoreographerSession session = new ChoreographerSession();
 		session.setId(1);
+		
 		final ChoreographerAction action = new ChoreographerAction();
 		action.setId(11);
+		
 		final ChoreographerStep nextStep = new ChoreographerStep();
 		nextStep.setStartCondition(ChoreographerSessionStepStartCondition.FALSE);
 		nextStep.setPath("value/isAccessable");
 		nextStep.setThreshold("boolean:true");
-		final ChoreographerStep otherPrevStep = new ChoreographerStep();
-		otherPrevStep.setStartCondition(ChoreographerSessionStepStartCondition.AND);
+
 		final ChoreographerStep step = new ChoreographerStep();
 		step.setAction(action);
 		step.setStartCondition(ChoreographerSessionStepStartCondition.AND);
 		step.setNextStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep)));
 		
-		nextStep.setPreviousStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep),
-												   new ChoreographerStepNextStepConnection(otherPrevStep, nextStep)));
+		nextStep.setPreviousStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep)));
 		final ChoreographerSessionStep sessionStep = new ChoreographerSessionStep();
+		
 		sessionStep.setId(1);
 		sessionStep.setStep(step);
 		sessionStep.setSession(session);
 		sessionStep.setStatus(ChoreographerSessionStepStatus.DONE);
 		
-		final ChoreographerSessionStep otherPrevSessionStep = new ChoreographerSessionStep();
-		otherPrevSessionStep.setStatus(ChoreographerSessionStepStatus.RUNNING);
-		
 		when(sessionDBService.changeSessionStepStatus(1, ChoreographerSessionStepStatus.DONE, "Step finished successfully.")).thenReturn(sessionStep);
-		when(sessionDBService.getSessionStepBySessionIdAndSteps(eq(1L), anySet())).thenReturn(List.of(sessionStep, otherPrevSessionStep));
 		
 		testObject.receiveSessionStepDoneMessage(payload);
 
@@ -1806,7 +1807,7 @@ public class ChoreographerServiceTest {
 	}
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ChoreographerSessionException.class)
-	public void testReceiveSessionStepDoneStartNextStep() { // executeStep is already tested with receiveStartSessionMessage, so we just make sure it is called  
+	public void testReceiveSessionStepDoneCanStartNextStep() { // executeStep is already tested with receiveStartSessionMessage, so we just make sure it is called  
 		final ChoreographerExecutedStepResultDTO payload = new ChoreographerExecutedStepResultDTO();
 		payload.setSessionId(1L);
 		payload.setSessionStepId(1L);
@@ -1866,7 +1867,8 @@ public class ChoreographerServiceTest {
 	}
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ChoreographerSessionException.class)
-	public void testReceiveSessionStepDoneStartNextStepCaseOr() { // executeStep is already tested with receiveStartSessionMessage, so we just make sure it is called  
+	public void testReceiveSessionStepDoneCanStartNextStepCaseOr() { 
+		
 		final ChoreographerExecutedStepResultDTO payload = new ChoreographerExecutedStepResultDTO();
 		payload.setSessionId(1L);
 		payload.setSessionStepId(1L);
@@ -1874,18 +1876,23 @@ public class ChoreographerServiceTest {
 		
 		final ChoreographerPlan plan = new ChoreographerPlan();
 		plan.setName("plan");
+		
 		final ChoreographerSession session = new ChoreographerSession();
 		session.setId(1);
+		
 		final ChoreographerAction action = new ChoreographerAction();
 		action.setId(11);
 		action.setName("action");
 		action.setPlan(plan);
+		
 		final ChoreographerStep nextStep = new ChoreographerStep();
 		nextStep.setStartCondition(ChoreographerSessionStepStartCondition.OR);
 		nextStep.setName("nextStep");
 		nextStep.setAction(action);
+		
 		final ChoreographerStep otherPrevStep = new ChoreographerStep();
 		otherPrevStep.setStartCondition(ChoreographerSessionStepStartCondition.AND);
+		
 		final ChoreographerStep step = new ChoreographerStep();
 		step.setAction(action);
 		step.setStartCondition(ChoreographerSessionStepStartCondition.AND);
@@ -1893,6 +1900,7 @@ public class ChoreographerServiceTest {
 		
 		nextStep.setPreviousStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep),
 												   new ChoreographerStepNextStepConnection(otherPrevStep, nextStep)));
+		
 		final ChoreographerSessionStep sessionStep = new ChoreographerSessionStep();
 		sessionStep.setId(1);
 		sessionStep.setSession(session);
@@ -1908,6 +1916,7 @@ public class ChoreographerServiceTest {
 		when(sessionDataStorage.containsKey(eq(1L))).thenReturn(true);
 		when(sessionDBService.changeSessionStepStatus(eq(1L), any(ChoreographerStep.class), eq(ChoreographerSessionStepStatus.RUNNING), anyString())).thenThrow(new ArrowheadException("early end")); // to finish the test earlier
 		
+		//executeStep is already tested with receiveStartSessionMessage, so we just make sure it is called
 		try {
 			testObject.receiveSessionStepDoneMessage(payload);
 		} catch (final Exception ex) {
@@ -1928,53 +1937,51 @@ public class ChoreographerServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	
 	@Test(expected = ChoreographerSessionException.class)
-	public void testReceiveSessionStepDoneStartNextStepCaseTrue() { // executeStep is already tested with receiveStartSessionMessage, so we just make sure it is called  
+	public void testReceiveSessionStepDoneCanStartNextStepCaseTrue() {
+		
 		final ChoreographerExecutedStepResultDTO payload = new ChoreographerExecutedStepResultDTO();
 		payload.setSessionId(1L);
 		payload.setSessionStepId(1L);
 		payload.setStatus(ChoreographerExecutedStepStatus.SUCCESS);
-		payload.setMessage(
-				"{\"id\":1234,\"isAccessable\":true,\"place\":{\"x\":3.14,\"y\":42.1,\"z\":66.6},\"cars\":[{\"color\":\"yellow\",\"type\":\"Renault\"},{\"color\":\"blue\",\"type\":\"Suzuki\"},{\"color\":\"silver\",\"type\":\"Opel\"}]}"
-			);
+		payload.setMessage(message);
 		
 		final ChoreographerPlan plan = new ChoreographerPlan();
 		plan.setName("plan");
+		
 		final ChoreographerSession session = new ChoreographerSession();
 		session.setId(1);
+		
 		final ChoreographerAction action = new ChoreographerAction();
 		action.setId(11);
 		action.setName("action");
 		action.setPlan(plan);
+		
 		final ChoreographerStep nextStep = new ChoreographerStep();
 		nextStep.setStartCondition(ChoreographerSessionStepStartCondition.TRUE);
 		nextStep.setPath("map/place/value/x");
 		nextStep.setThreshold("double:0.6");
 		nextStep.setName("nextStep");
 		nextStep.setAction(action);
-		final ChoreographerStep otherPrevStep = new ChoreographerStep();
-		otherPrevStep.setStartCondition(ChoreographerSessionStepStartCondition.AND);
+		
 		final ChoreographerStep step = new ChoreographerStep();
 		step.setAction(action);
 		step.setStartCondition(ChoreographerSessionStepStartCondition.AND);
 		step.setNextStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep)));
 		
-		nextStep.setPreviousStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep),
-												   new ChoreographerStepNextStepConnection(otherPrevStep, nextStep)));
+		nextStep.setPreviousStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep)));
+		
 		final ChoreographerSessionStep sessionStep = new ChoreographerSessionStep();
 		sessionStep.setId(1);
 		sessionStep.setSession(session);
 		sessionStep.setStep(step);
 		sessionStep.setStatus(ChoreographerSessionStepStatus.DONE);
 		
-		final ChoreographerSessionStep otherPrevSessionStep = new ChoreographerSessionStep();
-		otherPrevSessionStep.setStatus(ChoreographerSessionStepStatus.RUNNING);
-		
 		when(sessionDBService.changeSessionStepStatus(1, ChoreographerSessionStepStatus.DONE, "Step finished successfully.")).thenReturn(sessionStep);
 		when(sessionDataStorage.get(1L)).thenReturn(new SessionExecutorCache(false, false));
-		when(sessionDBService.getSessionStepBySessionIdAndSteps(eq(1L), anySet())).thenReturn(List.of(sessionStep, otherPrevSessionStep));
 		when(sessionDataStorage.containsKey(eq(1L))).thenReturn(true);
 		when(sessionDBService.changeSessionStepStatus(eq(1L), any(ChoreographerStep.class), eq(ChoreographerSessionStepStatus.RUNNING), anyString())).thenThrow(new ArrowheadException("early end")); // to finish the test earlier
 		
+		//executeStep is already tested with receiveStartSessionMessage, so we just make sure it is called
 		try {
 			testObject.receiveSessionStepDoneMessage(payload);
 		} catch (final Exception ex) {
@@ -1996,53 +2003,52 @@ public class ChoreographerServiceTest {
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ChoreographerSessionException.class)
-	public void testReceiveSessionStepDoneStartNextStepCaseFalse() { // executeStep is already tested with receiveStartSessionMessage, so we just make sure it is called  
+	public void testReceiveSessionStepDoneCanStartNextStepCaseFalse() { 
+		
 		final ChoreographerExecutedStepResultDTO payload = new ChoreographerExecutedStepResultDTO();
 		payload.setSessionId(1L);
 		payload.setSessionStepId(1L);
 		payload.setStatus(ChoreographerExecutedStepStatus.SUCCESS);
-		payload.setMessage(
-				"{\"id\":1234,\"isAccessable\":true,\"place\":{\"x\":3.14,\"y\":42.1,\"z\":66.6},\"cars\":[{\"color\":\"yellow\",\"type\":\"Renault\"},{\"color\":\"blue\",\"type\":\"Suzuki\"},{\"color\":\"silver\",\"type\":\"Opel\"}]}"
-			);
+		payload.setMessage(message);
 		
 		final ChoreographerPlan plan = new ChoreographerPlan();
 		plan.setName("plan");
+		
 		final ChoreographerSession session = new ChoreographerSession();
 		session.setId(1);
+		
 		final ChoreographerAction action = new ChoreographerAction();
 		action.setId(11);
 		action.setName("action");
 		action.setPlan(plan);
+		
 		final ChoreographerStep nextStep = new ChoreographerStep();
 		nextStep.setStartCondition(ChoreographerSessionStepStartCondition.FALSE);
 		nextStep.setPath("map/cars/array/2/value/color");
 		nextStep.setThreshold("string:red");
 		nextStep.setName("nextStep");
 		nextStep.setAction(action);
-		final ChoreographerStep otherPrevStep = new ChoreographerStep();
-		otherPrevStep.setStartCondition(ChoreographerSessionStepStartCondition.AND);
+		
 		final ChoreographerStep step = new ChoreographerStep();
 		step.setAction(action);
 		step.setStartCondition(ChoreographerSessionStepStartCondition.AND);
+		
 		step.setNextStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep)));
 		
-		nextStep.setPreviousStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep),
-												   new ChoreographerStepNextStepConnection(otherPrevStep, nextStep)));
+		nextStep.setPreviousStepConnections(Set.of(new ChoreographerStepNextStepConnection(step, nextStep)));
+		
 		final ChoreographerSessionStep sessionStep = new ChoreographerSessionStep();
 		sessionStep.setId(1);
 		sessionStep.setSession(session);
 		sessionStep.setStep(step);
 		sessionStep.setStatus(ChoreographerSessionStepStatus.DONE);
-		
-		final ChoreographerSessionStep otherPrevSessionStep = new ChoreographerSessionStep();
-		otherPrevSessionStep.setStatus(ChoreographerSessionStepStatus.RUNNING);
-		
+
 		when(sessionDBService.changeSessionStepStatus(1, ChoreographerSessionStepStatus.DONE, "Step finished successfully.")).thenReturn(sessionStep);
 		when(sessionDataStorage.get(1L)).thenReturn(new SessionExecutorCache(false, false));
-		when(sessionDBService.getSessionStepBySessionIdAndSteps(eq(1L), anySet())).thenReturn(List.of(sessionStep, otherPrevSessionStep));
 		when(sessionDataStorage.containsKey(eq(1L))).thenReturn(true);
 		when(sessionDBService.changeSessionStepStatus(eq(1L), any(ChoreographerStep.class), eq(ChoreographerSessionStepStatus.RUNNING), anyString())).thenThrow(new ArrowheadException("early end")); // to finish the test earlier
 		
+		//executeStep is already tested with receiveStartSessionMessage, so we just make sure it is called
 		try {
 			testObject.receiveSessionStepDoneMessage(payload);
 		} catch (final Exception ex) {

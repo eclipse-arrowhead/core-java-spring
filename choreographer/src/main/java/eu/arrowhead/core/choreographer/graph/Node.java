@@ -38,7 +38,7 @@ public class Node {
 	public ChoreographerSessionStepStartCondition getStartCondition() {
 		return startCondition;
 	}
-	
+
 	public Boolean getIsStartConditionAND() {
 		switch (startCondition) {
 		case TRUE: {
@@ -66,7 +66,14 @@ public class Node {
 	// -------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "Node [name=" + name + "]";
+		String condition = null;
+		switch(startCondition) {
+			case OR: condition = "OR"; break;
+			case TRUE: condition = "TRUE"; break;
+			case FALSE: condition = "FALSE"; break;
+			default: condition = "AND"; break;
+			}
+		return "Node [name=" + name + ", startCondition = "+ condition +"]";
 	}
 
 	// -------------------------------------------------------------------------------------------------
