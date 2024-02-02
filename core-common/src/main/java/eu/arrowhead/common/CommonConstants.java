@@ -91,6 +91,8 @@ public class CommonConstants {
 
 	public static final String CORE_SERVICE_CONFIGURATION_CONF = "conf";
 	public static final String CORE_SERVICE_CONFIGURATION_RAWCONF = "confraw";
+	public static final String CORE_SERVICE_CONFIGURATION_CONF_BY_PROXY = "conf-by-proxy";
+	public static final String CORE_SERVICE_CONFIGURATION_SAVE_CONF_BY_PROXY = "save-conf-by-proxy";
 
 	public static final String CORE_SERVICE_CHOREOGRAPHER_PROCESS = "choreographer-service";
 	public static final String CORE_SERVICE_CHOREOGRAPHER_REGISTER_EXECUTOR = "executor-register";
@@ -280,6 +282,8 @@ public static final String CORE_SERVICE_QOSMONITOR_PUBLIC_KEY = "qos-monitor-pub
 	public static final String OP_CONFIGURATION_CONF = "/config";
 	public static final String OP_CONFIGURATION_RAWCONF = "/config/raw";
 	public static final String OP_CONFIGURATION_MGMT_MANAGE = "/mgmt/config";
+	public static final String OP_CONFIGURATION_CONF_BY_PROXY = "/proxy/config";
+	public static final String OP_CONFIGURATION_SAVE_CONF_BY_PROXY = "/proxy/save-config";
 
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
 	public static final String CHOREOGRAPHER_SESSION_MGMT_URI = CoreCommonConstants.MGMT_URI + "/session";
