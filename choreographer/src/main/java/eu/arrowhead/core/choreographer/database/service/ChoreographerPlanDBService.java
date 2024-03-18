@@ -142,6 +142,13 @@ public class ChoreographerPlanDBService {
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG, ex);
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Optional<ChoreographerPlan> getPlanByName(final String name) {
+		logger.debug("getPlanByName started...");
+		
+		return choreographerPlanRepository.findByName(name);
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	public ChoreographerPlanResponseDTO getPlanByIdResponse(final long id) {
