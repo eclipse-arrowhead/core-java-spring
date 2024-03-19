@@ -201,6 +201,29 @@ public class ConfigurationController {
 		
 		return ret;
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Interface to get an other application's configuration", response = ConfigurationResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = CoreCommonConstants.SWAGGER_HTTP_404_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path= CommonConstants.OP_CONFIGURATION_CONF_BY_PROXY + "/{systemName}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public ConfigurationResponseDTO confGetByProxy(@PathVariable(value="systemName", required = true) String systemName) {
+		if (Utilities.isEmpty(systemName)) {
+			throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_CONFIGURATION_CONF_BY_PROXY);
+		}
+		systemName = systemName.toLowerCase().trim();
+		
+		final ConfigurationResponseDTO ret = configurationDBService.getConfigForSystem(systemName);
+		if (ret == null) {
+			throw new DataNotFoundException(NOT_FOUND_ERROR_MESSAGE, HttpStatus.SC_NOT_FOUND, CommonConstants.OP_CONFIGURATION_CONF_BY_PROXY + "/" + systemName);
+		}
+		
+		return ret;
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Interface to list all configuration files", response = ConfigurationListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
@@ -235,6 +258,25 @@ public class ConfigurationController {
 
 		validateConfigRequestDTO(systemName.toLowerCase().trim(), config, origin);
 		final ConfigurationResponseDTO configResponse = configurationDBService.setConfigForSystem(systemName.toLowerCase().trim(), config);
+		
+		return configResponse;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Stores/updates an other application's configuration", response = ConfigurationResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = PUT_CONFIG_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_CONFIG_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PutMapping(path = CommonConstants.OP_CONFIGURATION_SAVE_CONF_BY_PROXY, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public ConfigurationResponseDTO storeConfigurationForSystemByProxy(@RequestBody final ConfigurationRequestDTO config) {
+		logger.debug("New storeConfigurationForSystemByProxy put request received.");
+		final String origin = CommonConstants.CONFIGURATION_URI + CommonConstants.OP_CONFIGURATION_SAVE_CONF_BY_PROXY;	
+		
+		validateConfigRequestDTO(config.getSystemName(), config, origin);
+		final ConfigurationResponseDTO configResponse = configurationDBService.setConfigForSystem(config.getSystemName(), config);
 		
 		return configResponse;
 	}

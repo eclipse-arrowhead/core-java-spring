@@ -91,10 +91,14 @@ public enum CoreSystem {
 	
 	CHOREOGRAPHER(Defaults.DEFAULT_CHOREOGRAPHER_PORT, List.of(CoreSystemService.CHOREOGRAPHER_SERVICE,
 			                                                   CoreSystemService.CHOREOGRAPHER_REGISTER_EXECUTOR_SERVICE,
-			                                                   CoreSystemService.CHOREOGRAPHER_UNREGISTER_EXECUTOR_SERVICE)),
+			                                                   CoreSystemService.CHOREOGRAPHER_UNREGISTER_EXECUTOR_SERVICE,
+			                                                   CoreSystemService.CHOREOGRAPHER_START_SESSION_SERVICE,
+			                                                   CoreSystemService.CHOREOGRAPHER_ABORT_SESSION_SERVICE)),
 
     CONFIGURATION(Defaults.DEFAULT_CONFIGURATION_PORT, List.of(CoreSystemService.CONFIGURATION_SERVICE,
-                                                               CoreSystemService.CONFIGURATION_RAW_SERVICE)),
+                                                               CoreSystemService.CONFIGURATION_RAW_SERVICE,
+                                                               CoreSystemService.CONFIGURATION_BY_PROXY_SERVICE,
+                                                               CoreSystemService.CONFIGURATION_SAVE_BY_PROXY_SERVICE)),
 
 	QOSMONITOR(Defaults.DEFAULT_QOSMONITOR_PORT, List.of(CoreSystemService.QOSMONITOR_INTRA_PING_MEASUREMENT_SERVICE,
 														   CoreSystemService.QOSMONITOR_INTRA_PING_MEDIAN_MEASUREMENT_SERVICE,

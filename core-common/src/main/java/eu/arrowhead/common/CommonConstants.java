@@ -91,10 +91,14 @@ public class CommonConstants {
 
 	public static final String CORE_SERVICE_CONFIGURATION_CONF = "conf";
 	public static final String CORE_SERVICE_CONFIGURATION_RAWCONF = "confraw";
+	public static final String CORE_SERVICE_CONFIGURATION_CONF_BY_PROXY = "conf-by-proxy";
+	public static final String CORE_SERVICE_CONFIGURATION_SAVE_CONF_BY_PROXY = "save-conf-by-proxy";
 
 	public static final String CORE_SERVICE_CHOREOGRAPHER_PROCESS = "choreographer-service";
 	public static final String CORE_SERVICE_CHOREOGRAPHER_REGISTER_EXECUTOR = "executor-register";
 	public static final String CORE_SERVICE_CHOREOGRAPHER_UNREGISTER_EXECUTOR = "executor-unregister";
+	public static final String CORE_SERVICE_CHOREOGRAPHER_START_SESSION = "choreographer-start-session";
+	public static final String CORE_SERVICE_CHOREOGRAPHER_ABORT_SESSION = "choreographer-abort-session";
 
 	public static final String CORE_SERVICE_CERTIFICATEAUTHORITY_SIGN = "ca-sign";
 	public static final String CORE_SERVICE_CERTIFICATEAUTHORITY_LIST_CERTIFICATES = "ca-list-certificates";
@@ -109,7 +113,7 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_QOSMONITOR_INTRA_PING_MEDIAN_MEASUREMENT = "qos-monitor-intra-ping-median-measurement";
 	public static final String CORE_SERVICE_QOSMONITOR_INTER_DIRECT_PING_MEASUREMENT = "qos-monitor-inter-direct-ping-measurement";
 	public static final String CORE_SERVICE_QOSMONITOR_INTER_RELAY_ECHO_MEASUREMENT = "qos-monitor-inter-relay-echo-measurement";
-public static final String CORE_SERVICE_QOSMONITOR_PUBLIC_KEY = "qos-monitor-public-key";
+	public static final String CORE_SERVICE_QOSMONITOR_PUBLIC_KEY = "qos-monitor-public-key";
 	public static final String CORE_SERVICE_QOSMONITOR_JOIN_RELAY_TEST = "qos-monitor-join-relay-test";
 	public static final String CORE_SERVICE_QOSMONITOR_INIT_RELAY_TEST = "qos-monitor-init-relay-test";
 	public static final String CORE_SERVICE_SERVICEREGISTRY_REGISTER = "service-register";
@@ -280,6 +284,8 @@ public static final String CORE_SERVICE_QOSMONITOR_PUBLIC_KEY = "qos-monitor-pub
 	public static final String OP_CONFIGURATION_CONF = "/config";
 	public static final String OP_CONFIGURATION_RAWCONF = "/config/raw";
 	public static final String OP_CONFIGURATION_MGMT_MANAGE = "/mgmt/config";
+	public static final String OP_CONFIGURATION_CONF_BY_PROXY = "/proxy/config";
+	public static final String OP_CONFIGURATION_SAVE_CONF_BY_PROXY = "/proxy/save-config";
 
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
 	public static final String CHOREOGRAPHER_SESSION_MGMT_URI = CoreCommonConstants.MGMT_URI + "/session";
@@ -294,6 +300,8 @@ public static final String CORE_SERVICE_QOSMONITOR_PUBLIC_KEY = "qos-monitor-pub
 	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER = "/executor/unregister";
 	public static final String OP_CHOREOGRAPHER_NOTIFY_STEP_DONE = "/executor/notify-step-done";
 	public static final String OP_CHOREOGRAPHER_EXECUTOR_UNREGISTER_REQUEST_PARAM_NAME = "name";
+	public static final String OP_CHOREOGRAPHER_CLIENT_SERVICE_SESSION_START_URI = "/session/start";
+	public static final String OP_CHOREOGRAPHER_CLIENT_SERVICE_SESSION_ABORT_URI = "/session/abort/{id}";
 
 	public static final String GATEWAY_URI = "/gateway";
 	public static final String OP_GATEWAY_KEY_URI = "/publickey";

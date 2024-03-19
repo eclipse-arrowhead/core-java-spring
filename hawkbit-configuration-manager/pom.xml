@@ -18,7 +18,7 @@
 	<description>An Arrowhead configuration manager system based on Eclipse HawkBit</description>
 
 	<properties>
-		<base.version>4.6.1</base.version>
+		<base.version>4.6.2</base.version>
 		<revision>${base.version}</revision>
 		<spring.boot.version>2.4.0</spring.boot.version>
 		<log4j2.version>2.17.1</log4j2.version>
@@ -95,12 +95,12 @@
 		<dependency>
 			<groupId>com.rabbitmq</groupId>
 			<artifactId>amqp-client</artifactId>
-			<version>5.9.0</version>
+			<version>5.18.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.bitbucket.b_c</groupId>
 			<artifactId>jose4j</artifactId>
-			<version>0.9.3</version>
+			<version>0.9.4</version>
 		</dependency>
 
 		<dependency>

@@ -82,7 +82,7 @@
 	</profiles>
   	
 	<properties>
-		<base.version>4.6.1</base.version>
+		<base.version>4.6.2</base.version>
 		<revision>${base.version}</revision>
 		<java.version>11</java.version>
 		<mvn.clean.version>3.1.0</mvn.clean.version>
@@ -96,11 +96,11 @@
 		<paho.version>1.2.2</paho.version>
 		<swagger.version>2.9.2</swagger.version>
 		<disruptor.version>3.3.6</disruptor.version>
-  	<jose4j.version>0.9.3</jose4j.version>
+  	<jose4j.version>0.9.4</jose4j.version>
 		<http.client.version>4.5.13</http.client.version>
   		<apache.commons.lang3.version>3.9</apache.commons.lang3.version>
   		<jms.api.version>2.0.1</jms.api.version>
-  		<activemq.client.version>5.15.9</activemq.client.version>
+  		<activemq.client.version>5.15.16</activemq.client.version>
 		<bouncy.castle.version>1.69</bouncy.castle.version>
   		<jna.version>5.5.0</jna.version>
 		<spring.jms.version>5.1.7.RELEASE</spring.jms.version>

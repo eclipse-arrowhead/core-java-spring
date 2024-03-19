@@ -19,6 +19,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
@@ -49,6 +50,7 @@ import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;
+import eu.arrowhead.common.database.entity.ChoreographerPlan;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.database.entity.Logs;
 import eu.arrowhead.common.database.service.CommonDBService;
@@ -58,6 +60,7 @@ import eu.arrowhead.common.dto.shared.ChoreographerCheckPlanResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanListResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerRunPlanRequestByClientDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerRunPlanRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerRunPlanResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerSessionStatus;
@@ -111,7 +114,8 @@ public class ChoreographerPlanController {
     private static final String DELETE_PLAN_HTTP_400_MESSAGE = "Could not remove Plan.";
 
     private static final String START_SESSION_HTTP_200_MESSAGE = "Initiated plan execution with given id(s).";
-    private static final String START_PLAN_HTTP_400_MESSAGE = "Could not start plan with given id(s).";
+    private static final String START_SESSION_BY_CLIENT_HTTP_200_MESSAGE = "Initiated plan execution with given id(s) or name(s).";
+    private static final String START_PLAN_HTTP_400_MESSAGE = "Could not start plan.";
     
     private static final String ABORT_SESSION_HTTP_200_MESSAGE = "Initiated session abortion with given id.";
     private static final String ABORT_SESSION_HTTP_400_MESSAGE = "Could not abort session with given id.";
@@ -367,6 +371,69 @@ public class ChoreographerPlanController {
 
         return new ChoreographerCheckPlanResponseDTO(id, result.getErrorMessages(), result.getNeedInterCloud());
     }
+	
+	//-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Initiate the start of one or more plans.", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = START_SESSION_BY_CLIENT_HTTP_200_MESSAGE, responseContainer = "List", response = ChoreographerRunPlanResponseDTO.class),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = START_PLAN_HTTP_400_MESSAGE, response= ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE, response= ErrorMessageDTO.class),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE, response= ErrorMessageDTO.class)
+    })
+    @PostMapping(path = CommonConstants.OP_CHOREOGRAPHER_CLIENT_SERVICE_SESSION_START_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody public List<ChoreographerRunPlanResponseDTO> startPlansByClient(@RequestBody final List<ChoreographerRunPlanRequestByClientDTO> requests) { 
+    	logger.debug("startPlans started...");
+    	
+    	if (requests == null || requests.isEmpty()) {
+    		throw new BadPayloadException("No plan specified to start.", HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + CommonConstants.OP_CHOREOGRAPHER_CLIENT_SERVICE_SESSION_START_URI);
+    	}
+    	
+    	final List<ChoreographerRunPlanResponseDTO> results = new ArrayList<>(requests.size());
+        for (final ChoreographerRunPlanRequestByClientDTO request : requests) {
+        	request.setAllowInterCloud(gatekeeperIsPresent && request.isAllowInterCloud()); // change inter-cloud flag based on gatekeeper presence in the cloud
+        	if (request.getPlanId() == null) {
+        		request.setPlanId(findPlan(request.getName())); // try to find plan id by name
+        	}
+        	
+        	final ChoreographerRunPlanResponseDTO response = planChecker.checkPlanForExecution(request);
+           
+        	if (!Utilities.isEmpty(response.getErrorMessages())) {
+        		results.add(response);
+        	} else {
+        		final ChoreographerSession session = sessionDBService.initiateSession(request.getPlanId(), request.getQuantity(), createNotifyUri(request));
+        		results.add(new ChoreographerRunPlanResponseDTO(request.getPlanId(), session.getId(), session.getQuantityGoal(), response.getNeedInterCloud()));
+			   
+        		logger.debug("Sending a message to {}.", ChoreographerService.START_SESSION_DESTINATION);
+        		jms.convertAndSend(ChoreographerService.START_SESSION_DESTINATION, new ChoreographerStartSessionDTO(session.getId(), request.getPlanId(), request.isAllowInterCloud(), request.getChooseOptimalExecutor()));
+        	}
+        }
+           
+        return results;
+    }
+	
+	//-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Initiate the abortion of the specified session.", response = Void.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+    @ApiResponses (value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = ABORT_SESSION_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = ABORT_SESSION_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @DeleteMapping(path = CommonConstants.OP_CHOREOGRAPHER_CLIENT_SERVICE_SESSION_ABORT_URI)
+    public void abortSessionByClient(@PathVariable final Long id) {
+    	logger.debug("New abort session request received with id: {}.", id);
+    	
+    	if (id < 1) {
+            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + CommonConstants.OP_CHOREOGRAPHER_CLIENT_SERVICE_SESSION_ABORT_URI);
+        }
+    	
+    	final ChoreographerSession session = sessionDBService.getSessionById(id);
+    	if (session.getStatus() == ChoreographerSessionStatus.DONE) {
+			throw new BadPayloadException("Session with id " + id + " couldn't be aborted due to its DONE status");
+		}
+    	
+    	choreographerService.abortSession(id, null, MANUAL_ABORT_MESSAGE);
+    }
 
     //=================================================================================================
 	// assistant methods
@@ -375,5 +442,16 @@ public class ChoreographerPlanController {
 	private String createNotifyUri(final ChoreographerRunPlanRequestDTO request) {
 		return Utilities.isEmpty(request.getNotifyAddress()) ? null
 															 : request.getNotifyProtocol() + "://" + request.getNotifyAddress() + ":" + request.getNotifyPort() + "/" + request.getNotifyPath();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private Long findPlan(final String name) {
+		if (Utilities.isEmpty(name)) {
+			return null;
+		}
+		
+		final Optional<ChoreographerPlan> plan = planDBService.getPlanByName(name);
+		
+		return plan.isPresent() ? plan.get().getId() : null;
 	}
 }

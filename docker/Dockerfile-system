@@ -14,7 +14,7 @@ RUN cd /opt/arrowhead-build && \
 
 FROM eclipse-temurin:11.0.19_7-jre 
 
-ENV AH_VERSION=4.6.1
+ENV AH_VERSION=4.6.2
 
 COPY --from=build /opt/arrowhead /opt/arrowhead
 COPY --from=build /opt/arrowhead-temp /opt/arrowhead-temp

@@ -13,7 +13,7 @@
   	
   	<properties>
   		<jms.api.version>2.0.1</jms.api.version>
-  		<activemq.client.version>5.15.9</activemq.client.version>
+  		<activemq.client.version>5.15.16</activemq.client.version>
   	</properties>
 	
 	<dependencies>

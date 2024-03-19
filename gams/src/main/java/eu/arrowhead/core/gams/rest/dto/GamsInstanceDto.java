@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 public class GamsInstanceDto implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private final String name;
     private final String uid;
