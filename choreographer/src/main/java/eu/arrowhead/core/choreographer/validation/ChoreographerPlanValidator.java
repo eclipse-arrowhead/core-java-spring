@@ -33,6 +33,7 @@ import eu.arrowhead.common.dto.shared.ChoreographerStepRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.choreographer.graph.StepGraph;
 import eu.arrowhead.core.choreographer.graph.StepGraphUtils;
+import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStartCondition;
 
 @Service
 public class ChoreographerPlanValidator {
@@ -275,6 +276,9 @@ public class ChoreographerPlanValidator {
 		result.setStaticParameters(step.getStaticParameters());
 		result.setQuantity(step.getQuantity() != null ? step.getQuantity() : 1);
 		result.setServiceRequirement(handleServiceRequirement(step.getServiceRequirement(), origin));
+		result.setStartCondition(handleStartCondition(step.getStartCondition()));
+		result.setThreshold(handleThreshold(step.getThreshold()));
+		result.setPath(handlePath(step.getPath()));
 		
 		if (step.getNextStepNames() != null) {
 			final List<String> resultNextStepNames = new ArrayList<String>(step.getNextStepNames().size());
@@ -354,7 +358,73 @@ public class ChoreographerPlanValidator {
 		
 		return result;
 	}
+	//-------------------------------------------------------------------------------------------------
+	private String handleThreshold(final String threshold) {
+		logger.debug("handleThreshold started...");
+		if(threshold == null)
+			return null;
+			
+		String elements[] = threshold.split(":");
+		String value;
 
+		if(elements.length != 2)
+			throw new IllegalArgumentException("The threshold valuable must have two component, seperated by a \":\" character.");
+		String type = elements[0].toLowerCase();
+		if( type.equals("double")) {
+			try{
+				value = ((Double) Double.parseDouble(elements[1])).toString();
+			}
+			catch ( NumberFormatException e){
+				throw  new IllegalArgumentException("The double value must be a double number.");
+			}
+		} else if( type.equals("int")) {
+			try{
+				value = ((Integer) Integer.parseInt(elements[1])).toString();
+			}
+			catch ( NumberFormatException e){
+				throw  new IllegalArgumentException("The integer value must be an integer number.");
+			}
+		} else if( type.equals("boolean")) {
+			value = elements[1].toLowerCase();
+			if( value != "true" && value != "false")
+				throw new IllegalArgumentException("Invalid value. Boolean value must be either true or false."); 
+		} else if( type.equals("string")) {
+			value = elements[1].toLowerCase();
+		} else {
+			throw new IllegalArgumentException("Invalid threshold type. The threshold type can only be double, integer, boolean or string.");
+		} 
+
+		return type + ":" + value;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private ChoreographerSessionStepStartCondition handleStartCondition(final ChoreographerSessionStepStartCondition startCondition) {
+		logger.debug("handleStartCondition started...");
+
+		return startCondition;
+	}
+	//-------------------------------------------------------------------------------------------------
+	private String handlePath(final String path) {
+		logger.debug("handlePath started...");
+		if(path== null)
+			return null;
+		
+		String elements[] = path.split("/");
+		for (int i = 0; i < elements.length - 1; i += 2) {
+			if ( elements[i].equals("array")) {
+				try {
+					 Integer.parseInt( elements[i + 1]);
+				} catch (Exception e) {
+					throw  new IllegalArgumentException("The path of a json array must have an integer as index. ");
+				}
+			} else if ( !elements[i].equals("map") && !elements[i].equals("value")) {
+				throw new IllegalArgumentException("The type of path element must be \"array\", \"map\" or \"value\".");
+			}
+		}
+
+		return path;
+
+	}
 	//-------------------------------------------------------------------------------------------------
 	private ChoreographerActionRequestDTO validateAndNormalizeAction(final ChoreographerActionRequestDTO action) {
 		logger.debug("validateAndNormalizeAction started...");

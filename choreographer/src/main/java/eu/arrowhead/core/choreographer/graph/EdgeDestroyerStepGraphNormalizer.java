@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.Assert;
+import eu.arrowhead.core.choreographer.graph.Node;
 
 public class EdgeDestroyerStepGraphNormalizer implements StepGraphNormalizer {
 
@@ -104,7 +105,8 @@ public class EdgeDestroyerStepGraphNormalizer implements StepGraphNormalizer {
 				final List<Pair<Node,Node>> routeRemovables = new ArrayList<>();
 				for (int i = 0; i < route.size() - 1; i++) {
 					final int idxInLongest = longest.indexOf(route.get(i));
-					if (!longest.get(idxInLongest + 1).equals(route.get(i + 1))) {
+					final Node lastNode = route.get(i);
+					if ((!longest.get(idxInLongest + 1).equals(route.get(i + 1))) && lastNode.getIsStartConditionAND() ) {
 						routeRemovables.add(Pair.of(route.get(i + 1), route.get(i))); //Because route is backward, so the result will Pair(from,to)
 					}
 				}
