@@ -32,11 +32,14 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import eu.arrowhead.common.CoreDefaults;
+import eu.arrowhead.common.dto.internal.ChoreographerSessionStepStartCondition;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "actionId"}))
@@ -57,6 +60,8 @@ public class ChoreographerStep {
     private ChoreographerAction action;
     
     private boolean firstStep = false;
+    
+    private boolean isWaiting = true;
     
     @Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
     private String serviceDefinition;
@@ -82,6 +87,16 @@ public class ChoreographerStep {
     @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private ZonedDateTime updatedAt;
 
+    @Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
+    @Enumerated(EnumType.STRING)
+    private ChoreographerSessionStepStartCondition startCondition;
+
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String threshold;
+
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String path;
+    
     @OneToMany (mappedBy = "from", fetch = FetchType.EAGER, orphanRemoval = true)
     @OnDelete (action = OnDeleteAction.CASCADE)
     private Set<ChoreographerStepNextStepConnection> nextStepConnections = new HashSet<>();
@@ -106,6 +121,24 @@ public class ChoreographerStep {
         this.srTemplate = srTemplate;
         this.staticParameters = staticParameters;
         this.quantity = quantity;
+        this.startCondition = ChoreographerSessionStepStartCondition.AND;
+        this.threshold = null;
+        this.path = null;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public ChoreographerStep(final String name, final ChoreographerAction action, final String serviceDefinition, final Integer minVersion, final Integer maxVersion, final String srTemplate, final String staticParameters, final int quantity, final ChoreographerSessionStepStartCondition startCondition, final String threshold, final String path) {
+        this.name = name;
+        this.action = action;
+        this.serviceDefinition = serviceDefinition;
+        this.minVersion = minVersion;
+        this.maxVersion = maxVersion;
+        this.srTemplate = srTemplate;
+        this.staticParameters = staticParameters;
+        this.quantity = quantity;
+        this.startCondition = startCondition;
+        this.threshold = threshold;
+        this.path = path;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -123,6 +156,12 @@ public class ChoreographerStep {
     public ZonedDateTime getUpdatedAt() { return updatedAt; }
     public Set<ChoreographerStepNextStepConnection> getNextStepConnections() { return nextStepConnections; }
     public Set<ChoreographerStepNextStepConnection> getPreviousStepConnections() { return previousStepConnections; }
+    public ChoreographerSessionStepStartCondition getStartCondition() {
+    	return startCondition;
+    }
+    public String getThreshold() {return this.threshold;}
+    public String getPath() {return this.path;}
+    public boolean getIsWaiting() { return this.isWaiting;}
     
     //-------------------------------------------------------------------------------------------------
 	public Set<ChoreographerStep> getNextSteps() {
@@ -149,6 +188,10 @@ public class ChoreographerStep {
     public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
     public void setNextStepConnections(final Set<ChoreographerStepNextStepConnection> nextStepConnections) { this.nextStepConnections = nextStepConnections; }
     public void setPreviousStepConnections(final Set<ChoreographerStepNextStepConnection> previousStepConnections) { this.previousStepConnections = previousStepConnections; }
+    public void setStartCondition(final ChoreographerSessionStepStartCondition startCondition) {this.startCondition = startCondition;}
+    public void setThreshold(final String threshold) { this.threshold = threshold;}
+    public void setPath(final String path) { this.path = path;}
+    public void setIsWaiting(boolean state) {this.isWaiting = state;}
 
 	//-------------------------------------------------------------------------------------------------
 	@PrePersist

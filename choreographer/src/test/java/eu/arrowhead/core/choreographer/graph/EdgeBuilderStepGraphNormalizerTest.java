@@ -24,7 +24,7 @@ public class EdgeBuilderStepGraphNormalizerTest {
 		for (int i = 0; i < normalizables.size(); ++i) {
 			final Pair<StepGraph,StepGraph> graphPair = normalizables.get(i);
 			final StepGraph result = normalizer.normalizeStepGraph(graphPair.getLeft());
-			Assert.assertEquals(graphPair.getRight(), result);
+			Assert.assertEquals(graphPair.getRight().toString(), result.toString());
 		}
 	}
 }

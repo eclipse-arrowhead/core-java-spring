@@ -414,6 +414,9 @@ CREATE TABLE IF NOT EXISTS `choreographer_step` (
   `quantity` int(20) NOT NULL DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `startCondition` varchar(15) NOT NULL DEFAULT 'AND',
+  `threshold` mediumtext,
+  `path` mediumtext,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_action_id_unique_key` (`name`, `action_id`),
   CONSTRAINT `action` FOREIGN KEY (`action_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE
