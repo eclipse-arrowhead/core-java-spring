@@ -283,7 +283,7 @@ create_sysop_keystore() {
   fi
 
   if [[ "${CREATE_KEYSTORE_OR_PUB_FILE}" == "1" ]]; then
-    create_system_keystore "$1" "$2" "$3" "$4" "$5" "$6" "dns:localost,ip:127.0.0.1"
+    create_system_keystore "$1" "$2" "$3" "$4" "$5" "$6" "dns:localhost,ip:127.0.0.1"
   fi
 
   if [ ! -f "${SYSOP_CA_FILE}" ]; then
